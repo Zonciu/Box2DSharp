@@ -4,13 +4,13 @@ namespace Box2DSharp.Collision.Collider
 {
     /// Contact ids to facilitate warm starting.
     [StructLayout(LayoutKind.Explicit, Size = 4)]
-    public struct ContactID
+    public struct ContactId
     {
         [FieldOffset(0)]
-        public ContactFeature cf;
+        public ContactFeature ContactFeature;
 
         /// Used to quickly compare contact ids.
         [FieldOffset(0)]
-        public uint key;
+        public uint Key;
     };
 }

@@ -8,35 +8,35 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 孤岛
         /// </summary>
-        Island = 0x0001,
+        Island = 1 << 0,
 
         /// <summary>
         /// 醒着的
         /// </summary>
-        IsAwake = 0x0002,
+        IsAwake = 1 << 1,
 
         /// <summary>
         /// 自动休眠
         /// </summary>
-        AutoSleep = 0x0004,
+        AutoSleep = 1 << 2,
 
         /// <summary>
         /// 子弹
         /// </summary>
-        IsBullet = 0x0008,
+        IsBullet = 1 << 3,
 
         /// <summary>
         /// </summary>
-        FixedRotation = 0x0010,
+        FixedRotation = 1 << 4,
 
         /// <summary>
         /// 活跃
         /// </summary>
-        IsActive = 0x0020,
+        IsActive = 1 << 5,
 
         /// <summary>
         /// 碰撞时间
         /// </summary>
-        Toi = 0x0040
+        Toi = 1 << 6
     }
 }

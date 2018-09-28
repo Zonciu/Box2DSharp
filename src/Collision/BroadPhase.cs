@@ -8,7 +8,7 @@ namespace Box2DSharp.Collision
 {
     public class BroadPhase
     {
-        public static int NullProxy = -1;
+        public const int NullProxy = -1;
 
         #region Public Method
 

@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
@@ -9,21 +8,7 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class ChainAndCircleContact : Contact
     {
-        public static Contact Create(
-            Fixture fixtureA,
-            int       indexA,
-            Fixture fixtureB,
-            int       indexB)
-        {
-            return new ChainAndCircleContact(fixtureA, indexA, fixtureB, indexB);
-        }
-
-        public static void Destroy(Contact contact)
-        {
-            // Todo return to pool
-        }
-
-        public ChainAndCircleContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB) : base(
+        private ChainAndCircleContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB) : base(
             fixtureA,
             indexA,
             fixtureB,
@@ -31,6 +16,20 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Debug.Assert(FixtureA.GetShapeType() == ShapeType.Chain);
             Debug.Assert(FixtureB.GetShapeType() == ShapeType.Circle);
+        }
+
+        public static Contact Create(
+            Fixture fixtureA,
+            int     indexA,
+            Fixture fixtureB,
+            int     indexB)
+        {
+            return new ChainAndCircleContact(fixtureA, indexA, fixtureB, indexB);
+        }
+
+        public static void Destroy(Contact contact)
+        {
+            // Todo return to pool
         }
 
         /// <inheritdoc />
@@ -46,5 +45,5 @@ namespace Box2DSharp.Dynamics.Contacts
                 (CircleShape) FixtureB.GetShape(),
                 xfB);
         }
-    };
+    }
 }

@@ -8,29 +8,50 @@ namespace Box2DSharp.Dynamics.Joints
     /// two dynamic body anchor points, and a pulley ratio.
     public class PulleyJointDef : JointDef
     {
+        /// The first ground anchor in world coordinates. This point never moves.
+        public Vector2 GroundAnchorA;
+
+        /// The second ground anchor in world coordinates. This point never moves.
+        public Vector2 GroundAnchorB;
+
+        /// The a reference length for the segment attached to bodyA.
+        public float LengthA;
+
+        /// The a reference length for the segment attached to bodyB.
+        public float LengthB;
+
+        /// The local anchor point relative to bodyA's origin.
+        public Vector2 LocalAnchorA;
+
+        /// The local anchor point relative to bodyB's origin.
+        public Vector2 LocalAnchorB;
+
+        /// The pulley ratio, used to simulate a block-and-tackle.
+        public float Ratio;
+
         public PulleyJointDef()
         {
             JointType = JointType.PulleyJoint;
 
-            groundAnchorA.Set(-1.0f, 1.0f);
+            GroundAnchorA.Set(-1.0f, 1.0f);
 
-            groundAnchorB.Set(1.0f, 1.0f);
+            GroundAnchorB.Set(1.0f, 1.0f);
 
-            localAnchorA.Set(-1.0f, 0.0f);
+            LocalAnchorA.Set(-1.0f, 0.0f);
 
-            localAnchorB.Set(1.0f, 0.0f);
+            LocalAnchorB.Set(1.0f, 0.0f);
 
-            lengthA = 0.0f;
+            LengthA = 0.0f;
 
-            lengthB = 0.0f;
+            LengthB = 0.0f;
 
-            ratio = 1.0f;
+            Ratio = 1.0f;
 
             CollideConnected = true;
         }
 
         /// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
-        void Initialize(
+        private void Initialize(
             Body       bA,
             Body       bB,
             in Vector2 groundA,
@@ -41,37 +62,16 @@ namespace Box2DSharp.Dynamics.Joints
         {
             BodyA         = bA;
             BodyB         = bB;
-            groundAnchorA = groundA;
-            groundAnchorB = groundB;
-            localAnchorA  = BodyA.GetLocalPoint(anchorA);
-            localAnchorB  = BodyB.GetLocalPoint(anchorB);
+            GroundAnchorA = groundA;
+            GroundAnchorB = groundB;
+            LocalAnchorA  = BodyA.GetLocalPoint(anchorA);
+            LocalAnchorB  = BodyB.GetLocalPoint(anchorB);
             var dA = anchorA - groundA;
-            lengthA = dA.Length();
+            LengthA = dA.Length();
             var dB = anchorB - groundB;
-            lengthB = dB.Length();
-            ratio   = r;
-            Debug.Assert(ratio > Settings.Epsilon);
+            LengthB = dB.Length();
+            Ratio   = r;
+            Debug.Assert(Ratio > Settings.Epsilon);
         }
-
-        /// The first ground anchor in world coordinates. This point never moves.
-        public Vector2 groundAnchorA;
-
-        /// The second ground anchor in world coordinates. This point never moves.
-        public Vector2 groundAnchorB;
-
-        /// The local anchor point relative to bodyA's origin.
-        public Vector2 localAnchorA;
-
-        /// The local anchor point relative to bodyB's origin.
-        public Vector2 localAnchorB;
-
-        /// The a reference length for the segment attached to bodyA.
-        public float lengthA;
-
-        /// The a reference length for the segment attached to bodyB.
-        public float lengthB;
-
-        /// The pulley ratio, used to simulate a block-and-tackle.
-        public float ratio;
-    };
+    }
 }

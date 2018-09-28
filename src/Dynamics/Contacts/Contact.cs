@@ -7,6 +7,7 @@ using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Listeners;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -85,8 +86,7 @@ namespace Box2DSharp.Dynamics.Contacts
             IndexA = indexA;
             IndexB = indexB;
 
-            Manifold            = Manifold.Create();
-            Manifold.PointCount = 0;
+            Manifold = new Manifold();
 
             NodeA = new ContactEdge();
             NodeB = new ContactEdge();
@@ -170,9 +170,9 @@ namespace Box2DSharp.Dynamics.Contacts
 
         /// Get the contact manifold. Do not modify the manifold unless you understand the
         /// internals of Box2D.
-        public ref Manifold GetManifold()
+        public Manifold GetManifold()
         {
-            return ref Manifold;
+            return Manifold;
         }
 
         /// Get the world manifold.
@@ -316,10 +316,10 @@ namespace Box2DSharp.Dynamics.Contacts
             var sensorB = FixtureB.IsSensor;
             var sensor  = sensorA || sensorB;
 
-            var              bodyA = FixtureA.GetBody();
-            var              bodyB = FixtureB.GetBody();
-            ref readonly var xfA   = ref bodyA.GetTransform();
-            ref readonly var xfB   = ref bodyB.GetTransform();
+            var bodyA = FixtureA.GetBody();
+            var bodyB = FixtureB.GetBody();
+            var xfA   = bodyA.GetTransform();
+            var xfB   = bodyB.GetTransform();
 
             // Is this contact a sensor?
             if (sensor)
@@ -341,18 +341,18 @@ namespace Box2DSharp.Dynamics.Contacts
                 for (var i = 0; i < Manifold.PointCount; ++i)
                 {
                     var mp2 = Manifold.Points[i];
-                    mp2.normalImpulse  = 0.0f;
-                    mp2.tangentImpulse = 0.0f;
-                    var id2 = mp2.id;
+                    mp2.NormalImpulse  = 0.0f;
+                    mp2.TangentImpulse = 0.0f;
+                    var id2 = mp2.Id;
 
                     for (var j = 0; j < oldManifold.PointCount; ++j)
                     {
                         var mp1 = oldManifold.Points[j];
 
-                        if (mp1.id.key == id2.key)
+                        if (mp1.Id.Key == id2.Key)
                         {
-                            mp2.normalImpulse  = mp1.normalImpulse;
-                            mp2.tangentImpulse = mp1.tangentImpulse;
+                            mp2.NormalImpulse  = mp1.NormalImpulse;
+                            mp2.TangentImpulse = mp1.TangentImpulse;
                             break;
                         }
                     }

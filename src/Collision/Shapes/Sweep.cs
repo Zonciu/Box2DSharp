@@ -22,51 +22,51 @@ namespace Box2DSharp.Collision.Shapes
         {
             xf = new Transform();
 
-            xf.Position = (1.0f - beta) * c0 + beta * c;
-            var angle = (1.0f - beta) * a0 + beta * a;
+            xf.Position = (1.0f - beta) * C0 + beta * C;
+            var angle = (1.0f - beta) * A0 + beta * A;
             xf.Rotation.Set(angle);
 
             // Shift to origin
-            xf.Position -= MathUtils.Mul(xf.Rotation, localCenter);
+            xf.Position -= MathUtils.Mul(xf.Rotation, LocalCenter);
         }
 
         /// Advance the sweep forward, yielding a new initial state.
         /// @param alpha the new initial time.
         public void Advance(float alpha)
         {
-            Debug.Assert(alpha0 < 1.0f);
-            var beta = (alpha - alpha0) / (1.0f - alpha0);
-            c0     += beta * (c - c0);
-            a0     += beta * (a - a0);
-            alpha0 =  alpha;
+            Debug.Assert(Alpha0 < 1.0f);
+            var beta = (alpha - Alpha0) / (1.0f - Alpha0);
+            C0     += beta * (C - C0);
+            A0     += beta * (A - A0);
+            Alpha0 =  alpha;
         }
 
         /// Normalize the angles.
         public void Normalize()
         {
             var twoPi = 2.0f * Settings.Pi;
-            var d     = twoPi * (float) Math.Floor(a0 / twoPi);
-            a0 -= d;
-            a  -= d;
+            var d     = twoPi * (float) Math.Floor(A0 / twoPi);
+            A0 -= d;
+            A  -= d;
         }
 
         /// <summary>
         /// local center of mass position
         /// </summary>
-        public Vector2 localCenter;
+        public Vector2 LocalCenter;
 
         /// <summary>
         /// center world positions
         /// </summary>
-        public Vector2 c0, c;
+        public Vector2 C0, C;
 
         /// <summary>
         /// world angles
         /// </summary>
-        public float a0, a;
+        public float A0, A;
 
         /// Fraction of the current time step in the range [0,1]
         /// c0 and a0 are the positions at alpha0.
-        public float alpha0;
-    };
+        public float Alpha0;
+    }
 }

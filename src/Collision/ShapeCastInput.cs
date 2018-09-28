@@ -8,16 +8,14 @@ namespace Box2DSharp.Collision
     /// Input parameters for b2ShapeCast
     public struct ShapeCastInput
     {
-        public DistanceProxy proxyA;
+        public DistanceProxy ProxyA;
 
-        public DistanceProxy proxyB;
+        public DistanceProxy ProxyB;
 
-        public Transform transformA;
+        public Transform TransformA;
 
-        public Transform transformB;
+        public Transform TransformB;
 
-        public Vector2 translationB;
-
-      
+        public Vector2 TranslationB;
     };
 }

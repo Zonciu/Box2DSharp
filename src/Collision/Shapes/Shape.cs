@@ -10,12 +10,21 @@ namespace Box2DSharp.Collision.Shapes
     /// is created. Shapes may encapsulate a one or more child shapes.
     public abstract class Shape
     {
+        /// Radius of a shape. For polygonal shapes this must be b2_polygonRadius. There is no support for
+        /// making rounded polygons.
+        public float Radius;
+
+        public ShapeType ShapeType;
+
         /// Clone the concrete shape using the provided allocator.
         public abstract Shape Clone();
 
         /// Get the type of this shape. You can use this to down cast to the concrete shape.
         /// @return the shape type.
-        public ShapeType GetShapeType() => ShapeType;
+        public ShapeType GetShapeType()
+        {
+            return ShapeType;
+        }
 
         /// Get the number of child primitives.
         public abstract int GetChildCount();
@@ -47,11 +56,5 @@ namespace Box2DSharp.Collision.Shapes
         /// @param massData returns the mass data for this shape.
         /// @param density the density in kilograms per meter squared.
         public abstract void ComputeMass(out MassData massData, float density);
-
-        public ShapeType ShapeType;
-
-        /// Radius of a shape. For polygonal shapes this must be b2_polygonRadius. There is no support for
-        /// making rounded polygons.
-        public float Radius;
-    };
+    }
 }

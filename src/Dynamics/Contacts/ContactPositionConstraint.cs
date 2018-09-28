@@ -6,26 +6,26 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class ContactPositionConstraint
     {
-        public Vector2[] localPoints = new Vector2[Settings.MaxManifoldPoints];
+        public readonly Vector2[] LocalPoints = new Vector2[Settings.MaxManifoldPoints];
 
-        public Vector2 localNormal;
+        public Vector2 LocalNormal;
 
-        public Vector2 localPoint;
+        public Vector2 LocalPoint;
 
-        public int indexA;
+        public int IndexA;
 
-        public int indexB;
+        public int IndexB;
 
-        public float invMassA, invMassB;
+        public float InvMassA, InvMassB;
 
-        public Vector2 localCenterA, localCenterB;
+        public Vector2 LocalCenterA, LocalCenterB;
 
-        public float invIA, invIB;
+        public float InvIa, InvIb;
 
-        public ManifoldType type;
+        public ManifoldType Type;
 
-        public float radiusA, radiusB;
+        public float RadiusA, RadiusB;
 
-        public int pointCount;
+        public int PointCount;
     };
 }

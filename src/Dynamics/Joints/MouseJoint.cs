@@ -13,77 +13,131 @@ namespace Box2DSharp.Dynamics.Joints
     /// use the mouse joint, look at the testbed.
     public class MouseJoint : Joint
     {
+        private readonly Vector2 _localAnchorB;
+
+        private float _beta;
+
+        private Vector2 _C;
+
+        private float _dampingRatio;
+
+        private float _frequencyHz;
+
+        private float _gamma;
+
+        // Solver shared
+        private Vector2 _impulse;
+
+        // Solver temp
+        private int _indexA;
+
+        private int _indexB;
+
+        private float _invIb;
+
+        private float _invMassB;
+
+        private Vector2 _localCenterB;
+
+        private Matrix2x2 _mass;
+
+        private float _maxForce;
+
+        private Vector2 _rB;
+
+        private Vector2 _targetA;
+
+        internal MouseJoint(MouseJointDef def) : base(def)
+        {
+            Debug.Assert(def.Target.IsValid());
+            Debug.Assert(def.MaxForce.IsValid() && def.MaxForce >= 0.0f);
+            Debug.Assert(def.FrequencyHz.IsValid() && def.FrequencyHz >= 0.0f);
+            Debug.Assert(def.DampingRatio.IsValid() && def.DampingRatio >= 0.0f);
+
+            _targetA      = def.Target;
+            _localAnchorB = MathUtils.MulT(BodyB.GetTransform(), _targetA);
+
+            _maxForce = def.MaxForce;
+            _impulse.SetZero();
+
+            _frequencyHz  = def.FrequencyHz;
+            _dampingRatio = def.DampingRatio;
+
+            _beta  = 0.0f;
+            _gamma = 0.0f;
+        }
+
         /// Implements b2Joint.
         /// Use this to update the target point.
-        void SetTarget(in Vector2 target)
+        private void SetTarget(in Vector2 target)
         {
-            if (target != m_targetA)
+            if (target != _targetA)
             {
                 BodyB.IsAwake = true;
-                m_targetA       = target;
+                _targetA      = target;
             }
         }
 
-        ref readonly Vector2 GetTarget()
+        private ref readonly Vector2 GetTarget()
         {
-            return ref m_targetA;
+            return ref _targetA;
         }
 
         /// Set/get the maximum force in Newtons.
-        void SetMaxForce(float force)
+        private void SetMaxForce(float force)
         {
-            m_maxForce = force;
+            _maxForce = force;
         }
 
-        float GetMaxForce()
+        private float GetMaxForce()
         {
-            return m_maxForce;
+            return _maxForce;
         }
 
         /// Set/get the frequency in Hertz.
-        void SetFrequency(float hz)
+        private void SetFrequency(float hz)
         {
-            m_frequencyHz = hz;
+            _frequencyHz = hz;
         }
 
-        float GetFrequency()
+        private float GetFrequency()
         {
-            return m_frequencyHz;
+            return _frequencyHz;
         }
 
         /// Set/get the damping ratio (dimensionless).
-        void SetDampingRatio(float ratio)
+        private void SetDampingRatio(float ratio)
         {
-            m_dampingRatio = ratio;
+            _dampingRatio = ratio;
         }
 
-        float GetDampingRatio()
+        private float GetDampingRatio()
         {
-            return m_dampingRatio;
+            return _dampingRatio;
         }
 
         /// <inheritdoc />
         public override void ShiftOrigin(in Vector2 newOrigin)
         {
-            m_targetA -= newOrigin;
+            _targetA -= newOrigin;
         }
 
         /// <inheritdoc />
         public override Vector2 GetAnchorA()
         {
-            return m_targetA;
+            return _targetA;
         }
 
         /// <inheritdoc />
         public override Vector2 GetAnchorB()
         {
-            return BodyB.GetWorldPoint(m_localAnchorB);
+            return BodyB.GetWorldPoint(_localAnchorB);
         }
 
         /// <inheritdoc />
         public override Vector2 GetReactionForce(float inv_dt)
         {
-            return inv_dt * m_impulse;
+            return inv_dt * _impulse;
         }
 
         /// <inheritdoc />
@@ -101,102 +155,102 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(SolverData data)
         {
-            m_indexB       = BodyB._islandIndex;
-            m_localCenterB = BodyB._sweep.localCenter;
-            m_invMassB     = BodyB._invMass;
-            m_invIB        = BodyB._inverseInertia;
+            _indexB       = BodyB.IslandIndex;
+            _localCenterB = BodyB.Sweep.LocalCenter;
+            _invMassB     = BodyB.InvMass;
+            _invIb        = BodyB.InverseInertia;
 
-            Vector2 cB = data.Positions[m_indexB].Center;
-            float   aB = data.Positions[m_indexB].Angle;
-            Vector2 vB = data.Velocities[m_indexB].v;
-            float   wB = data.Velocities[m_indexB].w;
+            var cB = data.Positions[_indexB].Center;
+            var aB = data.Positions[_indexB].Angle;
+            var vB = data.Velocities[_indexB].V;
+            var wB = data.Velocities[_indexB].W;
 
             var qB = new Rotation(aB);
 
-            float mass = BodyB.Mass;
+            var mass = BodyB.Mass;
 
             // Frequency
-            float omega = 2.0f * Settings.Pi * m_frequencyHz;
+            var omega = 2.0f * Settings.Pi * _frequencyHz;
 
             // Damping coefficient
-            float d = 2.0f * mass * m_dampingRatio * omega;
+            var d = 2.0f * mass * _dampingRatio * omega;
 
             // Spring stiffness
-            float k = mass * (omega * omega);
+            var k = mass * (omega * omega);
 
             // magic formulas
             // gamma has units of inverse mass.
             // beta has units of inverse time.
-            float h = data.Step.dt;
+            var h = data.Step.Dt;
             Debug.Assert(d + h * k > Settings.Epsilon);
-            m_gamma = h * (d + h * k);
-            if (m_gamma != 0.0f)
+            _gamma = h * (d + h * k);
+            if (!_gamma.Equals(0.0f))
             {
-                m_gamma = 1.0f / m_gamma;
+                _gamma = 1.0f / _gamma;
             }
 
-            m_beta = h * k * m_gamma;
+            _beta = h * k * _gamma;
 
             // Compute the effective mass matrix.
-            m_rB = MathUtils.Mul(qB, m_localAnchorB - m_localCenterB);
+            _rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
 
             // K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
             //      = [1/m1+1/m2     0    ] + invI1 * [r1.Y*r1.Y -r1.X*r1.Y] + invI2 * [r1.Y*r1.Y -r1.X*r1.Y]
             //        [    0     1/m1+1/m2]           [-r1.X*r1.Y r1.X*r1.X]           [-r1.X*r1.Y r1.X*r1.X]
-            Matrix2x2 K = new Matrix2x2();
-            K.ex.X = m_invMassB + m_invIB * m_rB.Y * m_rB.Y + m_gamma;
-            K.ex.Y = -m_invIB * m_rB.X * m_rB.Y;
-            K.ey.X = K.ex.Y;
-            K.ey.Y = m_invMassB + m_invIB * m_rB.X * m_rB.X + m_gamma;
+            var K = new Matrix2x2();
+            K.Ex.X = _invMassB + _invIb * _rB.Y * _rB.Y + _gamma;
+            K.Ex.Y = -_invIb * _rB.X * _rB.Y;
+            K.Ey.X = K.Ex.Y;
+            K.Ey.Y = _invMassB + _invIb * _rB.X * _rB.X + _gamma;
 
-            m_mass = K.GetInverse();
+            _mass = K.GetInverse();
 
-            m_C =  cB + m_rB - m_targetA;
-            m_C *= m_beta;
+            _C =  cB + _rB - _targetA;
+            _C *= _beta;
 
             // Cheat with some damping
             wB *= 0.98f;
 
-            if (data.Step.warmStarting)
+            if (data.Step.WarmStarting)
             {
-                m_impulse *= data.Step.dtRatio;
-                vB        += m_invMassB * m_impulse;
-                wB        += m_invIB * MathUtils.Cross(m_rB, m_impulse);
+                _impulse *= data.Step.DtRatio;
+                vB       += _invMassB * _impulse;
+                wB       += _invIb * MathUtils.Cross(_rB, _impulse);
             }
             else
             {
-                m_impulse.SetZero();
+                _impulse.SetZero();
             }
 
-            data.Velocities[m_indexB].v = vB;
-            data.Velocities[m_indexB].w = wB;
+            data.Velocities[_indexB].V = vB;
+            data.Velocities[_indexB].W = wB;
         }
 
         /// <inheritdoc />
         internal override void SolveVelocityConstraints(SolverData data)
         {
-            Vector2 vB = data.Velocities[m_indexB].v;
-            float   wB = data.Velocities[m_indexB].w;
+            var vB = data.Velocities[_indexB].V;
+            var wB = data.Velocities[_indexB].W;
 
             // Cdot = v + cross(w, r)
-            Vector2 Cdot    = vB + MathUtils.Cross(wB, m_rB);
-            Vector2 impulse = MathUtils.Mul(m_mass, -(Cdot + m_C + m_gamma * m_impulse));
+            var cdot    = vB + MathUtils.Cross(wB, _rB);
+            var impulse = MathUtils.Mul(_mass, -(cdot + _C + _gamma * _impulse));
 
-            Vector2 oldImpulse = m_impulse;
-            m_impulse += impulse;
-            float maxImpulse = data.Step.dt * m_maxForce;
-            if (m_impulse.LengthSquared() > maxImpulse * maxImpulse)
+            var oldImpulse = _impulse;
+            _impulse += impulse;
+            var maxImpulse = data.Step.Dt * _maxForce;
+            if (_impulse.LengthSquared() > maxImpulse * maxImpulse)
             {
-                m_impulse *= maxImpulse / m_impulse.Length();
+                _impulse *= maxImpulse / _impulse.Length();
             }
 
-            impulse = m_impulse - oldImpulse;
+            impulse = _impulse - oldImpulse;
 
-            vB += m_invMassB * impulse;
-            wB += m_invIB * MathUtils.Cross(m_rB, impulse);
+            vB += _invMassB * impulse;
+            wB += _invIb * MathUtils.Cross(_rB, impulse);
 
-            data.Velocities[m_indexB].v = vB;
-            data.Velocities[m_indexB].w = wB;
+            data.Velocities[_indexB].V = vB;
+            data.Velocities[_indexB].W = wB;
         }
 
         /// <inheritdoc />
@@ -204,59 +258,5 @@ namespace Box2DSharp.Dynamics.Joints
         {
             return true;
         }
-
-        internal MouseJoint(MouseJointDef def) : base(def)
-        {
-            Debug.Assert(def.target.IsValid());
-            Debug.Assert(def.maxForce.IsValid() && def.maxForce >= 0.0f);
-            Debug.Assert(def.frequencyHz.IsValid() && def.frequencyHz >= 0.0f);
-            Debug.Assert(def.dampingRatio.IsValid() && def.dampingRatio >= 0.0f);
-
-            m_targetA      = def.target;
-            m_localAnchorB = MathUtils.MulT(BodyB.GetTransform(), m_targetA);
-
-            m_maxForce = def.maxForce;
-            m_impulse.SetZero();
-
-            m_frequencyHz  = def.frequencyHz;
-            m_dampingRatio = def.dampingRatio;
-
-            m_beta  = 0.0f;
-            m_gamma = 0.0f;
-        }
-
-        Vector2 m_localAnchorB;
-
-        Vector2 m_targetA;
-
-        float m_frequencyHz;
-
-        float m_dampingRatio;
-
-        float m_beta;
-
-        // Solver shared
-        Vector2 m_impulse;
-
-        float m_maxForce;
-
-        float m_gamma;
-
-        // Solver temp
-        int m_indexA;
-
-        int m_indexB;
-
-        Vector2 m_rB;
-
-        Vector2 m_localCenterB;
-
-        float m_invMassB;
-
-        float m_invIB;
-
-        Matrix2x2 m_mass;
-
-        Vector2 m_C;
-    };
+    }
 }

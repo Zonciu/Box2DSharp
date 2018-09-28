@@ -11,21 +11,21 @@ namespace Box2DSharp.Collision.Shapes
         /// The vertex count.
         public int Count;
 
-        public bool m_hasPrevVertex, m_hasNextVertex;
+        public bool HasPrevVertex, HasNextVertex;
 
-        public Vector2 m_prevVertex, m_nextVertex;
+        public Vector2 PrevVertex, NextVertex;
 
         /// The vertices. Owned by this class.
         public Vector2[] Vertices;
 
         public ChainShape()
         {
-            ShapeType       = ShapeType.Chain;
-            Radius          = Settings.PolygonRadius;
-            Vertices        = null;
-            Count           = 0;
-            m_hasPrevVertex = false;
-            m_hasNextVertex = false;
+            ShapeType     = ShapeType.Chain;
+            Radius        = Settings.PolygonRadius;
+            Vertices      = null;
+            Count         = 0;
+            HasPrevVertex = false;
+            HasNextVertex = false;
         }
 
         /// <summary>
@@ -63,10 +63,10 @@ namespace Box2DSharp.Collision.Shapes
             Vertices = new Vector2[Count];
             Array.Copy(vertices, Vertices, count);
             Vertices[count] = Vertices[0];
-            m_prevVertex    = Vertices[Count - 2];
-            m_nextVertex    = Vertices[1];
-            m_hasPrevVertex = true;
-            m_hasNextVertex = true;
+            PrevVertex      = Vertices[Count - 2];
+            NextVertex      = Vertices[1];
+            HasPrevVertex   = true;
+            HasNextVertex   = true;
         }
 
         /// Create a chain with isolated end vertices.
@@ -89,27 +89,27 @@ namespace Box2DSharp.Collision.Shapes
             Vertices = new Vector2[count];
             Array.Copy(vertices, Vertices, count);
 
-            m_hasPrevVertex = false;
-            m_hasNextVertex = false;
+            HasPrevVertex = false;
+            HasNextVertex = false;
 
-            m_prevVertex.SetZero();
-            m_nextVertex.SetZero();
+            PrevVertex.SetZero();
+            NextVertex.SetZero();
         }
 
         /// Establish connectivity to a vertex that precedes the first vertex.
         /// Don't call this for loops.
         public void SetPrevVertex(in Vector2 prevVertex)
         {
-            m_prevVertex    = prevVertex;
-            m_hasPrevVertex = true;
+            PrevVertex    = prevVertex;
+            HasPrevVertex = true;
         }
 
         /// Establish connectivity to a vertex that follows the last vertex.
         /// Don't call this for loops.
         public void SetNextVertex(in Vector2 nextVertex)
         {
-            m_nextVertex    = nextVertex;
-            m_hasNextVertex = true;
+            NextVertex    = nextVertex;
+            HasNextVertex = true;
         }
 
         /// Implement b2Shape. Vertices are cloned using b2Alloc.
@@ -117,10 +117,10 @@ namespace Box2DSharp.Collision.Shapes
         {
             var clone = new ChainShape();
             clone.CreateChain(Vertices);
-            clone.m_prevVertex    = m_prevVertex;
-            clone.m_nextVertex    = m_nextVertex;
-            clone.m_hasPrevVertex = m_hasPrevVertex;
-            clone.m_hasNextVertex = m_hasNextVertex;
+            clone.PrevVertex    = PrevVertex;
+            clone.NextVertex    = NextVertex;
+            clone.HasPrevVertex = HasPrevVertex;
+            clone.HasNextVertex = HasNextVertex;
             return clone;
         }
 
@@ -149,8 +149,8 @@ namespace Box2DSharp.Collision.Shapes
             }
             else
             {
-                edge.Vertex0    = m_prevVertex;
-                edge.HasVertex0 = m_hasPrevVertex;
+                edge.Vertex0    = PrevVertex;
+                edge.HasVertex0 = HasPrevVertex;
             }
 
             if (index < Count - 2)
@@ -160,8 +160,8 @@ namespace Box2DSharp.Collision.Shapes
             }
             else
             {
-                edge.Vertex3    = m_nextVertex;
-                edge.HasVertex3 = m_hasNextVertex;
+                edge.Vertex3    = NextVertex;
+                edge.HasVertex3 = HasNextVertex;
             }
         }
 

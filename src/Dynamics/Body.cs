@@ -108,94 +108,160 @@ namespace Box2DSharp.Dynamics
     public class Body : IDisposable
     {
         /// <summary>
+        /// Get/Set the angular damping of the body.
         /// 角阻尼
         /// </summary>
-        internal float _angularDamping;
+        private float _angularDamping;
+
+        public float AngularDamping
+        {
+            get => _angularDamping;
+            set => _angularDamping = value;
+        }
 
         /// <summary>
+        /// Get/Set the angular velocity.
+        /// the new angular velocity in radians/second.
         /// 角速度
         /// </summary>
-        internal float _angularVelocity;
+        private float _angularVelocity;
+
+        public float AngularVelocity
+        {
+            get => _angularVelocity;
+            set
+            {
+                if (_type == BodyType.StaticBody) // 静态物体无角速度
+                {
+                    return;
+                }
+
+                if (value * value > 0.0f)
+                {
+                    IsAwake = true;
+                }
+
+                _angularVelocity = value;
+            }
+        }
 
         /// <summary>
         /// 接触边缘列表
         /// </summary>
-        internal LinkedList<ContactEdge> _contactList;
+        internal readonly LinkedList<ContactEdge> ContactList;
 
         /// <summary>
         /// 夹具列表
         /// </summary>
-        internal List<Fixture> _fixtureList;
+        internal readonly List<Fixture> FixtureList;
 
         /// <summary>
         /// 受力
         /// </summary>
-        internal Vector2 _force;
+        internal Vector2 Force;
 
         /// <summary>
         /// 重力系数
         /// </summary>
-        internal float _gravityScale;
+        internal float GravityScale;
 
         /// <summary>
         /// 质心的转动惯量
         /// </summary>
         private float _inertia;
 
+        /// Get the rotational inertia of the body about the local origin.
+        /// @return the rotational inertia, usually in kg-m^2.
+        public float Inertia => _inertia + _mass * MathUtils.Dot(Sweep.LocalCenter, Sweep.LocalCenter);
+
         /// <summary>
         /// 质心的转动惯量倒数
         /// </summary>
-        internal float _inverseInertia;
+        internal float InverseInertia;
 
         /// <summary>
         /// 质量倒数
         /// </summary>
-        internal float _invMass;
+        internal float InvMass;
 
         /// <summary>
-        /// 孤岛id
+        /// 岛屿索引
         /// </summary>
-        internal int _islandIndex;
+        internal int IslandIndex;
 
         /// <summary>
         /// 关节边缘列表
         /// </summary>
-        internal LinkedList<JointEdge> _jointList;
+        internal readonly LinkedList<JointEdge> JointList;
 
         /// <summary>
         /// 线性阻尼
         /// </summary>
-        internal float _linearDamping;
+        private float _linearDamping;
+
+        /// Get/Set the linear damping of the body.
+        public float LinearDamping
+        {
+            get => _linearDamping;
+            set => _linearDamping = value;
+        }
 
         /// <summary>
         /// 线速度
         /// </summary>
-        internal Vector2 _linearVelocity;
+        private Vector2 _linearVelocity;
+
+        /// Set the linear velocity of the center of mass.
+        /// @param v the new linear velocity of the center of mass.
+        /// Get the linear velocity of the center of mass.
+        /// @return the linear velocity of the center of mass.
+        public Vector2 LinearVelocity
+        {
+            get => _linearVelocity;
+            set
+            {
+                if (_type == BodyType.StaticBody) // 静态物体无加速度
+                {
+                    return;
+                }
+
+                if (MathUtils.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
+                {
+                    IsAwake = true;
+                }
+
+                _linearVelocity = value;
+            }
+        }
 
         /// <summary>
+        /// Get the total mass of the body.
+        /// @return the mass, usually in kilograms (kg).
         /// 质量
         /// </summary>
-        internal float _mass;
+        private float _mass;
+
+        public float Mass => _mass;
 
         /// <summary>
         /// 休眠时间
         /// </summary>
-        internal float _sleepTime;
+        internal float SleepTime;
 
         /// <summary>
         /// 扫描
         /// </summary>
-        internal Sweep _sweep; // the swept motion for CCD
+        internal Sweep Sweep; // the swept motion for CCD
 
         /// <summary>
         /// 扭矩
         /// </summary>
-        internal float _torque;
+        internal float Torque;
 
         /// <summary>
         /// 物体位置
         /// </summary>
-        internal Transform _transform; // the body origin transform
+        internal Transform Transform; // the body origin transform
 
         /// <summary>
         /// 物体类型
@@ -255,124 +321,53 @@ namespace Box2DSharp.Dynamics
 
             _world = world;
 
-            _transform.Position = def.Position;
-            _transform.Rotation.Set(def.Angle);
+            Transform.Position = def.Position;
+            Transform.Rotation.Set(def.Angle);
 
-            _sweep = new Sweep
+            Sweep = new Sweep
             {
-                localCenter = Vector2.Zero,
-                c0          = _transform.Position,
-                c           = _transform.Position,
-                a0          = def.Angle,
-                a           = def.Angle,
-                alpha0      = 0.0f
+                LocalCenter = Vector2.Zero,
+                C0          = Transform.Position,
+                C           = Transform.Position,
+                A0          = def.Angle,
+                A           = def.Angle,
+                Alpha0      = 0.0f
             };
 
-            _jointList   = new LinkedList<JointEdge>();
-            _contactList = new LinkedList<ContactEdge>();
-            _fixtureList = new List<Fixture>();
-            Node         = null;
+            JointList   = new LinkedList<JointEdge>();
+            ContactList = new LinkedList<ContactEdge>();
+            FixtureList = new List<Fixture>();
+            Node        = null;
 
             _linearVelocity  = def.LinearVelocity;
             _angularVelocity = def.AngularVelocity;
 
-            _linearDamping  = def.LinearDamping;
-            _angularDamping = def.AngularDamping;
-            _gravityScale   = def.GravityScale;
+            _linearDamping = def.LinearDamping;
+            AngularDamping = def.AngularDamping;
+            GravityScale   = def.GravityScale;
 
-            _force.SetZero();
-            _torque = 0.0f;
+            Force.SetZero();
+            Torque = 0.0f;
 
-            _sleepTime = 0.0f;
+            SleepTime = 0.0f;
 
             _type = def.BodyType;
 
             if (_type == BodyType.DynamicBody)
             {
-                _mass    = 1.0f;
-                _invMass = 1.0f;
+                _mass   = 1.0f;
+                InvMass = 1.0f;
             }
             else
             {
-                _mass    = 0.0f;
-                _invMass = 0.0f;
+                _mass   = 0.0f;
+                InvMass = 0.0f;
             }
 
-            _inertia        = 0.0f;
-            _inverseInertia = 0.0f;
+            _inertia       = 0.0f;
+            InverseInertia = 0.0f;
 
             UserData = def.UserData;
-        }
-
-        /// Set the linear velocity of the center of mass.
-        /// @param v the new linear velocity of the center of mass.
-        /// Get the linear velocity of the center of mass.
-        /// @return the linear velocity of the center of mass.
-        public Vector2 LinearVelocity
-        {
-            get => _linearVelocity;
-            set
-            {
-                if (_type == BodyType.StaticBody) // 静态物体无加速度
-                {
-                    return;
-                }
-
-                if (MathUtils.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
-                {
-                    IsAwake = true;
-                }
-
-                _linearVelocity = value;
-            }
-        }
-
-        /// <summary>
-        /// Get/Set the angular velocity.
-        /// the new angular velocity in radians/second.
-        /// </summary>
-        public float AngularVelocity
-        {
-            get => _angularVelocity;
-            set
-            {
-                if (_type == BodyType.StaticBody) // 静态物体无角速度
-                {
-                    return;
-                }
-
-                if (value * value > 0.0f)
-                {
-                    IsAwake = true;
-                }
-
-                _angularVelocity = value;
-            }
-        }
-
-        /// Get the total mass of the body.
-        /// @return the mass, usually in kilograms (kg).
-        public float Mass => _mass;
-
-        /// Get/Set the linear damping of the body.
-        public float LinearDamping
-        {
-            get => _linearDamping;
-            set => _linearDamping = value;
-        }
-
-        /// Get/Set the angular damping of the body.
-        public float AngularDamping
-        {
-            get => _angularDamping;
-            set => _angularDamping = value;
-        }
-
-        /// Get/Set the gravity scale of the body.
-        public float GravityScale
-        {
-            get => _gravityScale;
-            set => _gravityScale = value;
         }
 
         /// Set the type of this body. This may alter the mass and velocity.
@@ -400,29 +395,29 @@ namespace Box2DSharp.Dynamics
                 {
                     _linearVelocity.SetZero();
                     _angularVelocity = 0.0f;
-                    _sweep.a0        = _sweep.a;
-                    _sweep.c0        = _sweep.c;
+                    Sweep.A0         = Sweep.A;
+                    Sweep.C0         = Sweep.C;
                     SynchronizeFixtures();
                 }
 
                 IsAwake = true;
 
-                _force.SetZero();
-                _torque = 0.0f;
+                Force.SetZero();
+                Torque = 0.0f;
 
                 // Delete the attached contacts.
                 // 删除所有接触点
 
-                foreach (var ce in _contactList)
+                foreach (var ce in ContactList)
                 {
                     _world.ContactManager.Destroy(ce.Contact);
                 }
 
-                _contactList.Clear(); // Todo ???
+                ContactList.Clear(); // Todo ???
 
                 // Touch the proxies so that new contacts will be created (when appropriate)
                 var broadPhase = _world.ContactManager.BroadPhase;
-                foreach (var f in _fixtureList)
+                foreach (var f in FixtureList)
                 {
                     var proxyCount = f.ProxyCount;
                     for (var i = 0; i < proxyCount; ++i)
@@ -485,17 +480,17 @@ namespace Box2DSharp.Dynamics
             {
                 if (value)
                 {
-                    Flags      |= BodyFlags.IsAwake;
-                    _sleepTime =  0.0f;
+                    Flags     |= BodyFlags.IsAwake;
+                    SleepTime =  0.0f;
                 }
                 else
                 {
-                    Flags      &= ~BodyFlags.IsAwake;
-                    _sleepTime =  0.0f;
+                    Flags     &= ~BodyFlags.IsAwake;
+                    SleepTime =  0.0f;
                     _linearVelocity.SetZero();
                     _angularVelocity = 0.0f;
-                    _force.SetZero();
-                    _torque = 0.0f;
+                    Force.SetZero();
+                    Torque = 0.0f;
                 }
             }
         }
@@ -536,9 +531,9 @@ namespace Box2DSharp.Dynamics
                     // Create all proxies.
                     // 激活时创建粗检测代理
                     var broadPhase = _world.ContactManager.BroadPhase;
-                    foreach (var f in _fixtureList)
+                    foreach (var f in FixtureList)
                     {
-                        f.CreateProxies(broadPhase, _transform);
+                        f.CreateProxies(broadPhase, Transform);
                     }
 
                     // Contacts are created the next time step.
@@ -550,19 +545,19 @@ namespace Box2DSharp.Dynamics
                     // Destroy all proxies.
                     // 休眠时销毁粗检测代理
                     var broadPhase = _world.ContactManager.BroadPhase;
-                    foreach (var f in _fixtureList)
+                    foreach (var f in FixtureList)
                     {
                         f.DestroyProxies(broadPhase);
                     }
 
                     // Destroy the attached contacts.
                     // 销毁接触点
-                    foreach (var ce in _contactList)
+                    foreach (var ce in ContactList)
                     {
                         _world.ContactManager.Destroy(ce.Contact);
                     }
 
-                    _contactList.Clear();
+                    ContactList.Clear();
                 }
             }
         }
@@ -595,17 +590,6 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        /// Get the list of all fixtures attached to this body.
-        public List<Fixture> FixtureList => _fixtureList;
-
-        /// Get the list of all joints attached to this body.
-        public LinkedList<JointEdge> JointList => _jointList;
-
-        /// Get the list of all contacts attached to this body.
-        /// @warning this list changes during the time step and you may
-        /// miss some collisions if you don't use b2ContactListener.
-        public LinkedList<ContactEdge> ContactList => _contactList;
-
         /// <summary>
         /// Get/Set the user data pointer that was provided in the body definition.
         /// 用户信息
@@ -618,9 +602,9 @@ namespace Box2DSharp.Dynamics
         /// <inheritdoc />
         public void Dispose()
         {
-            _contactList.Clear();
-            _jointList.Clear();
-            _fixtureList.Clear();
+            ContactList.Clear();
+            JointList.Clear();
+            FixtureList.Clear();
         }
 
         /// <summary>
@@ -648,11 +632,11 @@ namespace Box2DSharp.Dynamics
             if (Flags.HasFlag(BodyFlags.IsActive))
             {
                 var broadPhase = _world.ContactManager.BroadPhase;
-                fixture.CreateProxies(broadPhase, _transform);
+                fixture.CreateProxies(broadPhase, Transform);
             }
 
             fixture.Body = this;
-            _fixtureList.Add(fixture);
+            FixtureList.Add(fixture);
 
             // Adjust mass properties if needed.
             if (fixture.Density > 0.0f)
@@ -713,16 +697,16 @@ namespace Box2DSharp.Dynamics
             Debug.Assert(fixture.Body == this);
 
             // Remove the fixture from this body's singly linked list.
-            Debug.Assert(_fixtureList.Count > 0);
+            Debug.Assert(FixtureList.Count > 0);
 
             // You tried to remove a shape that is not attached to this body.
             // 确定该夹具存在于物体的夹具列表中
-            var found = _fixtureList.Any(e => e == fixture);
+            var found = FixtureList.Any(e => e == fixture);
             Debug.Assert(found);
 
             // Destroy any contacts associated with the fixture.
             // 销毁关联在夹具上的接触点
-            foreach (var edge in _contactList.Where(
+            foreach (var edge in ContactList.Where(
                 e => e.Contact.FixtureA == fixture || e.Contact.FixtureB == fixture))
             {
                 // This destroys the contact and removes it from
@@ -737,7 +721,7 @@ namespace Box2DSharp.Dynamics
                 fixture.DestroyProxies(broadPhase);
             }
 
-            _fixtureList.Remove(fixture);
+            FixtureList.Remove(fixture);
             fixture.Body = null;
             fixture.Destroy();
 
@@ -759,55 +743,56 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            _transform.Rotation.Set(angle);
-            _transform.Position = position;
+            Transform.Rotation.Set(angle);
+            Transform.Position = position;
 
-            _sweep.c = MathUtils.Mul(_transform, _sweep.localCenter);
-            _sweep.a = angle;
+            Sweep.C = MathUtils.Mul(Transform, Sweep.LocalCenter);
+            Sweep.A = angle;
 
-            _sweep.c0 = _sweep.c;
-            _sweep.a0 = angle;
+            Sweep.C0 = Sweep.C;
+            Sweep.A0 = angle;
 
             var broadPhase = _world.ContactManager.BroadPhase;
-            foreach (var f in _fixtureList)
+            foreach (var f in FixtureList)
             {
-                f.Synchronize(broadPhase, _transform, _transform);
+                f.Synchronize(broadPhase, Transform, Transform);
             }
         }
 
         /// Get the body transform for the body's origin.
         /// @return the world transform of the body's origin.
-        public ref readonly Transform GetTransform()
+        public Transform GetTransform()
         {
-            return ref _transform;
+            return Transform;
         }
 
         /// Get the world body origin position.
         /// @return the world position of the body's origin.
-        public ref readonly Vector2 GetPosition()
+        public Vector2 GetPosition()
         {
-            return ref _transform.Position;
+            return Transform.Position;
         }
 
         /// Get the angle in radians.
         /// @return the current world rotation angle in radians.
         public float GetAngle()
         {
-            return _sweep.a;
+            return Sweep.A;
         }
 
         /// Get the world position of the center of mass.
-        public ref readonly Vector2 GetWorldCenter()
+        public Vector2 GetWorldCenter()
         {
-            return ref _sweep.c;
+            return Sweep.C;
         }
 
         /// Get the local position of the center of mass.
-        public ref readonly Vector2 GetLocalCenter()
+        public Vector2 GetLocalCenter()
         {
-            return ref _sweep.localCenter;
+            return Sweep.LocalCenter;
         }
 
+        /// <summary>
         /// Apply a force at a world point. If the force is not
         /// applied at the center of mass, it will generate a torque and
         /// affect the angular velocity. This wakes up the body.
@@ -815,6 +800,10 @@ namespace Box2DSharp.Dynamics
         /// @param point the world position of the point of application.
         /// @param wake also wake up the body
         /// 在指定位置施加作用力
+        /// </summary>
+        /// <param name="force"></param>
+        /// <param name="point"></param>
+        /// <param name="wake"></param>
         public void ApplyForce(in Vector2 force, in Vector2 point, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -830,15 +819,19 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate a force if the body is sleeping.
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _force  += force;
-                _torque += MathUtils.Cross(point - _sweep.c, force);
+                Force  += force;
+                Torque += MathUtils.Cross(point - Sweep.C, force);
             }
         }
 
+        /// <summary>
         /// Apply a force to the center of mass. This wakes up the body.
         /// @param force the world force vector, usually in Newtons (N).
         /// @param wake also wake up the body
         /// 在质心施加作用力
+        /// </summary>
+        /// <param name="force"></param>
+        /// <param name="wake"></param>
         public void ApplyForceToCenter(in Vector2 force, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -854,15 +847,19 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate a force if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _force += force;
+                Force += force;
             }
         }
 
+        /// <summary>
         /// Apply a torque. This affects the angular velocity
         /// without affecting the linear velocity of the center of mass.
         /// @param torque about the z-axis (out of the screen), usually in N-m.
         /// @param wake also wake up the body
         /// 施加扭矩
+        /// </summary>
+        /// <param name="torque"></param>
+        /// <param name="wake"></param>
         public void ApplyTorque(float torque, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -878,17 +875,22 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate a force if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _torque += torque;
+                Torque += torque;
             }
         }
 
+        /// <summary>
         /// Apply an impulse at a point. This immediately modifies the velocity.
         /// It also modifies the angular velocity if the point of application
         /// is not at the center of mass. This wakes up the body.
         /// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
         /// @param point the world position of the point of application.
         /// @param wake also wake up the body
-        /// 施加线性冲量
+        /// 在物体指定位置施加线性冲量
+        /// </summary>
+        /// <param name="impulse"></param>
+        /// <param name="point"></param>
+        /// <param name="wake"></param>
         public void ApplyLinearImpulse(in Vector2 impulse, in Vector2 point, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -904,15 +906,19 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _linearVelocity  += _invMass * impulse;
-                _angularVelocity += _inverseInertia * MathUtils.Cross(point - _sweep.c, impulse);
+                _linearVelocity  += InvMass * impulse;
+                _angularVelocity += InverseInertia * MathUtils.Cross(point - Sweep.C, impulse);
             }
         }
 
+        /// <summary>
         /// Apply an impulse to the center of mass. This immediately modifies the velocity.
         /// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
         /// @param wake also wake up the body
         /// 在质心施加线性冲量
+        /// </summary>
+        /// <param name="impulse"></param>
+        /// <param name="wake"></param>
         private void ApplyLinearImpulseToCenter(in Vector2 impulse, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -928,13 +934,18 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _linearVelocity += _invMass * impulse;
+                _linearVelocity += InvMass * impulse;
             }
         }
 
+        /// <summary>
         /// Apply an angular impulse.
         /// @param impulse the angular impulse in units of kg*m*m/s
         /// @param wake also wake up the body
+        /// 施加角冲量
+        /// </summary>
+        /// <param name="impulse"></param>
+        /// <param name="wake"></param>
         public void ApplyAngularImpulse(float impulse, bool wake)
         {
             if (_type != BodyType.DynamicBody)
@@ -950,24 +961,20 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if ((Flags & BodyFlags.IsAwake) != 0)
             {
-                _angularVelocity += _inverseInertia * impulse;
+                _angularVelocity += InverseInertia * impulse;
             }
-        }
-
-        /// Get the rotational inertia of the body about the local origin.
-        /// @return the rotational inertia, usually in kg-m^2.
-        public float GetInertia()
-        {
-            return _inertia + _mass * MathUtils.Dot(_sweep.localCenter, _sweep.localCenter);
         }
 
         /// Get the mass data of the body.
         /// @return a struct containing the mass, inertia and center of the body.
-        public void GetMassData(ref MassData data)
+        public void GetMassData(out MassData data)
         {
-            data.Mass            = _mass;
-            data.RotationInertia = _inertia + _mass * MathUtils.Dot(_sweep.localCenter, _sweep.localCenter);
-            data.Center          = _sweep.localCenter;
+            data = new MassData
+            {
+                Mass            = _mass,
+                RotationInertia = _inertia + _mass * MathUtils.Dot(Sweep.LocalCenter, Sweep.LocalCenter),
+                Center          = Sweep.LocalCenter
+            };
         }
 
         /// Set the mass properties to override the mass properties of the fixtures.
@@ -988,9 +995,9 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            _invMass        = 0.0f;
-            _inertia        = 0.0f;
-            _inverseInertia = 0.0f;
+            InvMass        = 0.0f;
+            _inertia       = 0.0f;
+            InverseInertia = 0.0f;
 
             _mass = massData.Mass;
             if (_mass <= 0.0f)
@@ -998,44 +1005,44 @@ namespace Box2DSharp.Dynamics
                 _mass = 1.0f;
             }
 
-            _invMass = 1.0f / _mass;
+            InvMass = 1.0f / _mass;
 
             if (massData.RotationInertia > 0.0f && !Flags.HasFlag(BodyFlags.FixedRotation)) // 存在转动惯量且物体可旋转
             {
                 _inertia = massData.RotationInertia - _mass * MathUtils.Dot(massData.Center, massData.Center);
                 Debug.Assert(_inertia > 0.0f);
-                _inverseInertia = 1.0f / _inertia;
+                InverseInertia = 1.0f / _inertia;
             }
 
             // Move center of mass.
-            var oldCenter = _sweep.c;
-            _sweep.localCenter = massData.Center;
-            _sweep.c0          = _sweep.c = MathUtils.Mul(_transform, _sweep.localCenter);
+            var oldCenter = Sweep.C;
+            Sweep.LocalCenter = massData.Center;
+            Sweep.C0          = Sweep.C = MathUtils.Mul(Transform, Sweep.LocalCenter);
 
             // Update center of mass velocity.
-            _linearVelocity += MathUtils.Cross(_angularVelocity, _sweep.c - oldCenter);
+            _linearVelocity += MathUtils.Cross(_angularVelocity, Sweep.C - oldCenter);
         }
 
         /// This resets the mass properties to the sum of the mass properties of the fixtures.
         /// This normally does not need to be called unless you called SetMassData to override
         /// the mass and you later want to reset the mass.
         /// 重置质量数据
-        public void ResetMassData()
+        private void ResetMassData()
         {
             // Compute mass data from shapes. Each shape has its own density.
             // 从所有形状计算质量数据,每个形状都有各自的密度
-            _mass           = 0.0f;
-            _invMass        = 0.0f;
-            _inertia        = 0.0f;
-            _inverseInertia = 0.0f;
-            _sweep.localCenter.SetZero();
+            _mass          = 0.0f;
+            InvMass        = 0.0f;
+            _inertia       = 0.0f;
+            InverseInertia = 0.0f;
+            Sweep.LocalCenter.SetZero();
 
             // Static and kinematic bodies have zero mass.
             if (_type == BodyType.StaticBody || _type == BodyType.KinematicBody)
             {
-                _sweep.c0 = _transform.Position;
-                _sweep.c  = _transform.Position;
-                _sweep.a0 = _sweep.a;
+                Sweep.C0 = Transform.Position;
+                Sweep.C  = Transform.Position;
+                Sweep.A0 = Sweep.A;
                 return;
             }
 
@@ -1043,7 +1050,7 @@ namespace Box2DSharp.Dynamics
 
             // Accumulate mass over all fixtures.
             var localCenter = Vector2.Zero;
-            foreach (var f in _fixtureList)
+            foreach (var f in FixtureList)
             {
                 if (f.Density.Equals(0.0f))
                 {
@@ -1059,14 +1066,14 @@ namespace Box2DSharp.Dynamics
             // Compute center of mass.
             if (_mass > 0.0f)
             {
-                _invMass    =  1.0f / _mass;
-                localCenter *= _invMass;
+                InvMass     =  1.0f / _mass;
+                localCenter *= InvMass;
             }
             else
             {
                 // Force all dynamic bodies to have a positive mass.
-                _mass    = 1.0f;
-                _invMass = 1.0f;
+                _mass   = 1.0f;
+                InvMass = 1.0f;
             }
 
             if (_inertia > 0.0f && !Flags.HasFlag(BodyFlags.FixedRotation)) // 存在转动惯量且物体可旋转
@@ -1074,21 +1081,21 @@ namespace Box2DSharp.Dynamics
                 // Center the inertia about the center of mass.
                 _inertia -= _mass * MathUtils.Dot(localCenter, localCenter);
                 Debug.Assert(_inertia > 0.0f);
-                _inverseInertia = 1.0f / _inertia;
+                InverseInertia = 1.0f / _inertia;
             }
             else
             {
-                _inertia        = 0.0f;
-                _inverseInertia = 0.0f;
+                _inertia       = 0.0f;
+                InverseInertia = 0.0f;
             }
 
             // Move center of mass.
-            var oldCenter = _sweep.c;
-            _sweep.localCenter = localCenter;
-            _sweep.c0          = _sweep.c = MathUtils.Mul(_transform, _sweep.localCenter);
+            var oldCenter = Sweep.C;
+            Sweep.LocalCenter = localCenter;
+            Sweep.C0          = Sweep.C = MathUtils.Mul(Transform, Sweep.LocalCenter);
 
             // Update center of mass velocity.
-            _linearVelocity += MathUtils.Cross(_angularVelocity, _sweep.c - oldCenter);
+            _linearVelocity += MathUtils.Cross(_angularVelocity, Sweep.C - oldCenter);
         }
 
         /// Get the world coordinates of a point given the local coordinates.
@@ -1096,7 +1103,7 @@ namespace Box2DSharp.Dynamics
         /// @return the same point expressed in world coordinates.
         public Vector2 GetWorldPoint(in Vector2 localPoint)
         {
-            return MathUtils.Mul(_transform, localPoint);
+            return MathUtils.Mul(Transform, localPoint);
         }
 
         /// Get the world coordinates of a vector given the local coordinates.
@@ -1104,7 +1111,7 @@ namespace Box2DSharp.Dynamics
         /// @return the same vector expressed in world coordinates.
         public Vector2 GetWorldVector(in Vector2 localVector)
         {
-            return MathUtils.Mul(_transform.Rotation, localVector);
+            return MathUtils.Mul(Transform.Rotation, localVector);
         }
 
         /// Gets a local point relative to the body's origin given a world point.
@@ -1112,7 +1119,7 @@ namespace Box2DSharp.Dynamics
         /// @return the corresponding local point relative to the body's origin.
         public Vector2 GetLocalPoint(in Vector2 worldPoint)
         {
-            return MathUtils.MulT(_transform, worldPoint);
+            return MathUtils.MulT(Transform, worldPoint);
         }
 
         /// Gets a local vector given a world vector.
@@ -1120,7 +1127,7 @@ namespace Box2DSharp.Dynamics
         /// @return the corresponding local vector.
         public Vector2 GetLocalVector(in Vector2 worldVector)
         {
-            return MathUtils.MulT(_transform.Rotation, worldVector);
+            return MathUtils.MulT(Transform.Rotation, worldVector);
         }
 
         /// Get the world linear velocity of a world point attached to this body.
@@ -1128,7 +1135,7 @@ namespace Box2DSharp.Dynamics
         /// @return the world velocity of a point.
         public Vector2 GetLinearVelocityFromWorldPoint(in Vector2 worldPoint)
         {
-            return _linearVelocity + MathUtils.Cross(_angularVelocity, worldPoint - _sweep.c);
+            return _linearVelocity + MathUtils.Cross(_angularVelocity, worldPoint - Sweep.C);
         }
 
         /// Get the world velocity of a local point.
@@ -1142,13 +1149,13 @@ namespace Box2DSharp.Dynamics
         /// Dump this body to a log file
         public void Dump()
         {
-            var bodyIndex = _islandIndex;
+            var bodyIndex = IslandIndex;
 
             Logger.Log("{");
             Logger.Log("  b2BodyDef bd;");
             Logger.Log($"  bd.type = b2BodyType({_type});");
-            Logger.Log($"  bd.position.Set({_transform.Position.X}, {_transform.Position.Y});");
-            Logger.Log($"  bd.angle = {_sweep.a};");
+            Logger.Log($"  bd.position.Set({Transform.Position.X}, {Transform.Position.Y});");
+            Logger.Log($"  bd.angle = {Sweep.A};");
             Logger.Log($"  bd.linearVelocity.Set({_linearVelocity.X}, {_linearVelocity.Y});");
             Logger.Log($"  bd.angularVelocity = {_angularVelocity};");
             Logger.Log($"  bd.linearDamping = {_linearDamping};");
@@ -1158,9 +1165,9 @@ namespace Box2DSharp.Dynamics
             Logger.Log($"  bd.fixedRotation = bool({Flags.HasFlag(BodyFlags.FixedRotation)});");
             Logger.Log($"  bd.bullet = bool({Flags.HasFlag(BodyFlags.IsBullet)});");
             Logger.Log($"  bd.active = bool({Flags.HasFlag(BodyFlags.IsActive)});");
-            Logger.Log($"  bd.gravityScale = {_gravityScale};");
-            Logger.Log($"  bodies[{_islandIndex}] = m_world.CreateBody(&bd);");
-            foreach (var f in _fixtureList)
+            Logger.Log($"  bd.gravityScale = {GravityScale};");
+            Logger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
+            foreach (var f in FixtureList)
             {
                 Logger.Log("  {");
                 f.Dump(bodyIndex);
@@ -1176,13 +1183,13 @@ namespace Box2DSharp.Dynamics
         internal void SynchronizeFixtures()
         {
             var xf1 = new Transform();
-            xf1.Rotation.Set(_sweep.a0);
-            xf1.Position = _sweep.c0 - MathUtils.Mul(xf1.Rotation, _sweep.localCenter);
+            xf1.Rotation.Set(Sweep.A0);
+            xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
 
             var broadPhase = _world.ContactManager.BroadPhase;
-            foreach (var b2Fixture in _fixtureList)
+            foreach (var b2Fixture in FixtureList)
             {
-                b2Fixture.Synchronize(broadPhase, xf1, _transform);
+                b2Fixture.Synchronize(broadPhase, xf1, Transform);
             }
         }
 
@@ -1191,12 +1198,17 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         internal void SynchronizeTransform()
         {
-            _transform.Rotation.Set(_sweep.a);
-            _transform.Position = _sweep.c - MathUtils.Mul(_transform.Rotation, _sweep.localCenter);
+            Transform.Rotation.Set(Sweep.A);
+            Transform.Position = Sweep.C - MathUtils.Mul(Transform.Rotation, Sweep.LocalCenter);
         }
 
-        // This is used to prevent connected bodies from colliding.
-        // It may lie, depending on the collideConnected flag.
+        /// <summary>
+        /// This is used to prevent connected bodies from colliding.
+        /// It may lie, depending on the collideConnected flag.
+        /// 判断物体之间是否应该检测碰撞
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         internal bool ShouldCollide(Body other)
         {
             // At least one body should be dynamic.
@@ -1206,7 +1218,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // Does a joint prevent collision?
-            foreach (var joint in _jointList)
+            foreach (var joint in JointList)
             {
                 if (joint.Other == other)
                 {
@@ -1220,14 +1232,18 @@ namespace Box2DSharp.Dynamics
             return true;
         }
 
+        /// <summary>
+        /// 在安全时间段内快进,此时不同步粗检测
+        /// </summary>
+        /// <param name="alpha"></param>
         internal void Advance(float alpha)
         {
             // Advance to the new safe time. This doesn't sync the broad-phase.
-            _sweep.Advance(alpha);
-            _sweep.c = _sweep.c0;
-            _sweep.a = _sweep.a0;
-            _transform.Rotation.Set(_sweep.a);
-            _transform.Position = _sweep.c - MathUtils.Mul(_transform.Rotation, _sweep.localCenter);
+            Sweep.Advance(alpha);
+            Sweep.C = Sweep.C0;
+            Sweep.A = Sweep.A0;
+            Transform.Rotation.Set(Sweep.A);
+            Transform.Position = Sweep.C - MathUtils.Mul(Transform.Rotation, Sweep.LocalCenter);
         }
 
         public bool HasFlag(BodyFlags flag)

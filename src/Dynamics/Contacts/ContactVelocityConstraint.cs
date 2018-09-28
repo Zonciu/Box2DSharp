@@ -5,34 +5,34 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class ContactVelocityConstraint
     {
-        public VelocityConstraintPoint[] points = new VelocityConstraintPoint[Settings.MaxManifoldPoints]
+        public readonly VelocityConstraintPoint[] Points = new VelocityConstraintPoint[Settings.MaxManifoldPoints]
         {
             new VelocityConstraintPoint(),
             new VelocityConstraintPoint()
         };
 
-        public Vector2 normal;
+        public int ContactIndex;
 
-        public Matrix2x2 normalMass;
+        public float Friction;
+
+        public int IndexA;
+
+        public int IndexB;
+
+        public float InvIa, InvIb;
+
+        public float InvMassA, InvMassB;
 
         public Matrix2x2 K;
 
-        public int indexA;
+        public Vector2 Normal;
 
-        public int indexB;
+        public Matrix2x2 NormalMass;
 
-        public float invMassA, invMassB;
+        public int PointCount;
 
-        public float invIA, invIB;
+        public float Restitution;
 
-        public float friction;
-
-        public float restitution;
-
-        public float tangentSpeed;
-
-        public int pointCount;
-
-        public int contactIndex;
-    };
+        public float TangentSpeed;
+    }
 }

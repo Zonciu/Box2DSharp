@@ -19,11 +19,11 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public static Contact Create(
             Fixture fixtureA,
-            int       indexA,
+            int     indexA,
             Fixture fixtureB,
-            int       indexB)
+            int     indexB)
         {
-            return new CircleContact(fixtureA, fixtureB);
+            return new EdgeAndCircleContact(fixtureA, fixtureB);
         }
 
         internal static void Destroy(Contact contact)

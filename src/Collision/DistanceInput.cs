@@ -7,14 +7,14 @@ namespace Box2DSharp.Collision
     /// in the computation. Even 
     public struct DistanceInput
     {
-        public DistanceProxy proxyA;
+        public DistanceProxy ProxyA;
 
-        public DistanceProxy proxyB;
+        public DistanceProxy ProxyB;
 
-        public Transform transformA;
+        public Transform TransformA;
 
-        public Transform transformB;
+        public Transform TransformB;
 
-        public bool useRadii;
+        public bool UseRadii;
     };
 }

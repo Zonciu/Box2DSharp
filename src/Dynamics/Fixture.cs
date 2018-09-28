@@ -158,7 +158,7 @@ namespace Box2DSharp.Dynamics
 
             // Flag associated contacts for filtering.
 
-            foreach (var edge in Body._contactList)
+            foreach (var edge in Body.ContactList)
             {
                 var contact = edge.Contact;
                 if (contact.FixtureA == this || contact.FixtureB == this)
@@ -330,10 +330,10 @@ namespace Box2DSharp.Dynamics
                 }
 
                 Logger.Log($"    shape.CreateChain(vs, {s.Count});");
-                Logger.Log($"    shape.m_prevVertex.Set({s.m_prevVertex.X}, {s.m_prevVertex.Y});");
-                Logger.Log($"    shape.m_nextVertex.Set({s.m_nextVertex.X}, {s.m_nextVertex.Y});");
-                Logger.Log($"    shape.m_hasPrevVertex = bool({s.m_hasPrevVertex});");
-                Logger.Log($"    shape.m_hasNextVertex = bool({s.m_hasNextVertex});");
+                Logger.Log($"    shape.m_prevVertex.Set({s.PrevVertex.X}, {s.PrevVertex.Y});");
+                Logger.Log($"    shape.m_nextVertex.Set({s.NextVertex.X}, {s.NextVertex.Y});");
+                Logger.Log($"    shape.m_hasPrevVertex = bool({s.HasPrevVertex});");
+                Logger.Log($"    shape.m_hasNextVertex = bool({s.HasNextVertex});");
             }
                 break;
 

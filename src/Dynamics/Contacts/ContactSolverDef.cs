@@ -2,14 +2,14 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class ContactSolverDef
     {
-        public TimeStep step;
+        public TimeStep Step;
 
-        public Contact[] contacts;
+        public Contact[] Contacts;
 
-        public int count;
+        public int Count;
 
-        public Position[] positions;
+        public Position[] Positions;
 
-        public Velocity[] velocities;
+        public Velocity[] Velocities;
     };
 }

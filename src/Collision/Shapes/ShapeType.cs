@@ -10,6 +10,6 @@ namespace Box2DSharp.Collision.Shapes
 
         Chain = 3,
 
-        TypeCount = 4,
-    };
+        TypeCount = 4
+    }
 }

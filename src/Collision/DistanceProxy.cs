@@ -155,11 +155,11 @@ namespace Box2DSharp.Collision
         {
             ++b2_gjkCalls;
             output = new DistanceOutput();
-            ref readonly var proxyA = ref input.proxyA;
-            ref readonly var proxyB = ref input.proxyB;
+            ref readonly var proxyA = ref input.ProxyA;
+            ref readonly var proxyB = ref input.ProxyB;
 
-            var transformA = input.transformA;
-            var transformB = input.transformB;
+            var transformA = input.TransformA;
+            var transformB = input.TransformB;
 
             // Initialize the simplex.
             var simplex = new Simplex();
@@ -188,8 +188,8 @@ namespace Box2DSharp.Collision
                 saveCount = simplex.Count;
                 for (var i = 0; i < saveCount; ++i)
                 {
-                    saveA[i] = vertices[i].indexA;
-                    saveB[i] = vertices[i].indexB;
+                    saveA[i] = vertices[i].IndexA;
+                    saveB[i] = vertices[i].IndexB;
                 }
 
                 switch (simplex.Count)
@@ -232,12 +232,12 @@ namespace Box2DSharp.Collision
 
                 // Compute a tentative new simplex vertex using support points.
                 ref var vertex = ref vertices[simplex.Count];
-                vertex.indexA = proxyA.GetSupport(MathUtils.MulT(transformA.Rotation, -d));
-                vertex.wA     = MathUtils.Mul(transformA, proxyA.GetVertex(vertex.indexA));
+                vertex.IndexA = proxyA.GetSupport(MathUtils.MulT(transformA.Rotation, -d));
+                vertex.Wa     = MathUtils.Mul(transformA, proxyA.GetVertex(vertex.IndexA));
 
-                vertex.indexB = proxyB.GetSupport(MathUtils.MulT(transformB.Rotation, d));
-                vertex.wB     = MathUtils.Mul(transformB, proxyB.GetVertex(vertex.indexB));
-                vertex.w      = vertex.wB - vertex.wA;
+                vertex.IndexB = proxyB.GetSupport(MathUtils.MulT(transformB.Rotation, d));
+                vertex.Wb     = MathUtils.Mul(transformB, proxyB.GetVertex(vertex.IndexB));
+                vertex.W      = vertex.Wb - vertex.Wa;
 
                 // Iteration count is equated to the number of support point calls.
                 ++iter;
@@ -247,7 +247,7 @@ namespace Box2DSharp.Collision
                 var duplicate = false;
                 for (var i = 0; i < saveCount; ++i)
                 {
-                    if (vertex.indexA == saveA[i] && vertex.indexB == saveB[i])
+                    if (vertex.IndexA == saveA[i] && vertex.IndexB == saveB[i])
                     {
                         duplicate = true;
                         break;
@@ -275,7 +275,7 @@ namespace Box2DSharp.Collision
             simplex.WriteCache(ref cache);
 
             // Apply radii if requested.
-            if (input.useRadii)
+            if (input.UseRadii)
             {
                 var rA = proxyA.Radius;
                 var rB = proxyB.Radius;
@@ -304,22 +304,22 @@ namespace Box2DSharp.Collision
 
         public static bool ShapeCast(ref ShapeCastOutput output, in ShapeCastInput input)
         {
-            output.iterations = 0;
-            output.lambda     = 1.0f;
-            output.normal.SetZero();
-            output.point.SetZero();
+            output.Iterations = 0;
+            output.Lambda     = 1.0f;
+            output.Normal.SetZero();
+            output.Point.SetZero();
 
-            ref readonly var proxyA = ref input.proxyA;
-            ref readonly var proxyB = ref input.proxyB;
+            ref readonly var proxyA = ref input.ProxyA;
+            ref readonly var proxyB = ref input.ProxyB;
 
             var radiusA = Math.Max(proxyA.Radius, Settings.PolygonRadius);
             var radiusB = Math.Max(proxyB.Radius, Settings.PolygonRadius);
             var radius  = radiusA + radiusB;
 
-            var xfA = input.transformA;
-            var xfB = input.transformB;
+            var xfA = input.TransformA;
+            var xfB = input.TransformB;
 
-            var r      = input.translationB;
+            var r      = input.TranslationB;
             var n      = new Vector2(0.0f, 0.0f);
             var lambda = 0.0f;
 
@@ -348,7 +348,7 @@ namespace Box2DSharp.Collision
             {
                 Debug.Assert(simplex.Count < 3);
 
-                output.iterations += 1;
+                output.Iterations += 1;
 
                 // Support in direction -v (A - B)
                 indexA = proxyA.GetSupport(MathUtils.MulT(xfA.Rotation, -v));
@@ -385,12 +385,12 @@ namespace Box2DSharp.Collision
                 // Note that the support point p is not shifted because we want the plane equation
                 // to be formed in unshifted space.
                 ref var vertex = ref vertices[simplex.Count];
-                vertex.indexA =  indexB;
-                vertex.wA     =  wB + lambda * r;
-                vertex.indexB =  indexA;
-                vertex.wB     =  wA;
-                vertex.w      =  vertex.wB - vertex.wA;
-                vertex.a      =  1.0f;
+                vertex.IndexA =  indexB;
+                vertex.Wa     =  wB + lambda * r;
+                vertex.IndexB =  indexA;
+                vertex.Wb     =  wA;
+                vertex.W      =  vertex.Wb - vertex.Wa;
+                vertex.A      =  1.0f;
                 simplex.Count += 1;
 
                 switch (simplex.Count)
@@ -435,10 +435,10 @@ namespace Box2DSharp.Collision
                 n.Normalize();
             }
 
-            output.point      = pointA + radiusA * n;
-            output.normal     = n;
-            output.lambda     = lambda;
-            output.iterations = iter;
+            output.Point      = pointA + radiusA * n;
+            output.Normal     = n;
+            output.Lambda     = lambda;
+            output.Iterations = iter;
             return true;
         }
     }

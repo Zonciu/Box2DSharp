@@ -15,15 +15,15 @@ namespace Box2DSharp.Collision.Collider
     public struct ManifoldPoint
     {
         /// usage depends on manifold type
-        public Vector2 localPoint;
+        public Vector2 LocalPoint;
 
         /// the non-penetration impulse
-        public float normalImpulse;
+        public float NormalImpulse;
 
         /// /// the friction impulse
-        public float tangentImpulse;
+        public float TangentImpulse;
 
         /// uniquely identifies a contact point between two shapes
-        public ContactID id;
+        public ContactId Id;
     };
 }

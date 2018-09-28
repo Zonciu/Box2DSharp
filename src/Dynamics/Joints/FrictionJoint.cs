@@ -8,62 +8,112 @@ namespace Box2DSharp.Dynamics.Joints
     /// It provides 2D translational friction and angular friction.
     public class FrictionJoint : Joint
     {
-        /// The local anchor point relative to bodyA's origin.
-        public ref Vector2 GetLocalAnchorA()
-        {
-            return ref m_localAnchorA;
-        }
+        private float _angularImpulse;
 
-        /// The local anchor point relative to bodyB's origin.
-        public ref Vector2 GetLocalAnchorB()
+        private float _angularMass;
+
+        // Solver temp
+        private int _indexA;
+
+        private int _indexB;
+
+        private float _invIa;
+
+        private float _invIb;
+
+        private float _invMassA;
+
+        private float _invMassB;
+
+        // Solver shared
+        private Vector2 _linearImpulse;
+
+        private Matrix2x2 _linearMass;
+
+        private Vector2 _localAnchorA;
+
+        private Vector2 _localAnchorB;
+
+        private Vector2 _localCenterA;
+
+        private Vector2 _localCenterB;
+
+        private float _maxForce;
+
+        private float _maxTorque;
+
+        private Vector2 _rA;
+
+        private Vector2 _rB;
+
+        internal FrictionJoint(FrictionJointDef def) : base(def)
         {
-            return ref m_localAnchorB;
+            _localAnchorA = def.LocalAnchorA;
+            _localAnchorB = def.LocalAnchorB;
+
+            _linearImpulse.SetZero();
+            _angularImpulse = 0.0f;
+
+            _maxForce  = def.MaxForce;
+            _maxTorque = def.MaxTorque;
         }
 
         /// Get/Set the maximum friction force in N.
 
         public float MaxForce
         {
-            get => m_maxForce;
+            get => _maxForce;
             set
             {
                 Debug.Assert(value.IsValid() && value >= 0.0f);
-                m_maxForce = value;
+                _maxForce = value;
             }
         }
 
         public float MaxTorque
         {
-            get => m_maxTorque;
+            get => _maxTorque;
             set
             {
                 Debug.Assert(value.IsValid() && value >= 0.0f);
-                m_maxTorque = value;
+                _maxTorque = value;
             }
+        }
+
+        /// The local anchor point relative to bodyA's origin.
+        public ref Vector2 GetLocalAnchorA()
+        {
+            return ref _localAnchorA;
+        }
+
+        /// The local anchor point relative to bodyB's origin.
+        public ref Vector2 GetLocalAnchorB()
+        {
+            return ref _localAnchorB;
         }
 
         /// <inheritdoc />
         public override Vector2 GetAnchorA()
         {
-            return BodyA.GetWorldPoint(m_localAnchorA);
+            return BodyA.GetWorldPoint(_localAnchorA);
         }
 
         /// <inheritdoc />
         public override Vector2 GetAnchorB()
         {
-            return BodyB.GetWorldPoint(m_localAnchorB);
+            return BodyB.GetWorldPoint(_localAnchorB);
         }
 
         /// <inheritdoc />
         public override Vector2 GetReactionForce(float inv_dt)
         {
-            return inv_dt * m_linearImpulse;
+            return inv_dt * _linearImpulse;
         }
 
         /// <inheritdoc />
         public override float GetReactionTorque(float inv_dt)
         {
-            return inv_dt * m_angularImpulse;
+            return inv_dt * _angularImpulse;
         }
 
         /// Dump joint to dmLog
@@ -73,29 +123,29 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(SolverData data)
         {
-            m_indexA       = BodyA._islandIndex;
-            m_indexB       = BodyB._islandIndex;
-            m_localCenterA = BodyA._sweep.localCenter;
-            m_localCenterB = BodyB._sweep.localCenter;
-            m_invMassA     = BodyA._invMass;
-            m_invMassB     = BodyB._invMass;
-            m_invIA        = BodyA._inverseInertia;
-            m_invIB        = BodyB._inverseInertia;
+            _indexA       = BodyA.IslandIndex;
+            _indexB       = BodyB.IslandIndex;
+            _localCenterA = BodyA.Sweep.LocalCenter;
+            _localCenterB = BodyB.Sweep.LocalCenter;
+            _invMassA     = BodyA.InvMass;
+            _invMassB     = BodyB.InvMass;
+            _invIa        = BodyA.InverseInertia;
+            _invIb        = BodyB.InverseInertia;
 
-            float   aA = data.Positions[m_indexA].Angle;
-            Vector2 vA = data.Velocities[m_indexA].v;
-            float   wA = data.Velocities[m_indexA].w;
+            var aA = data.Positions[_indexA].Angle;
+            var vA = data.Velocities[_indexA].V;
+            var wA = data.Velocities[_indexA].W;
 
-            float   aB = data.Positions[m_indexB].Angle;
-            Vector2 vB = data.Velocities[m_indexB].v;
-            float   wB = data.Velocities[m_indexB].w;
+            var aB = data.Positions[_indexB].Angle;
+            var vB = data.Velocities[_indexB].V;
+            var wB = data.Velocities[_indexB].W;
 
             var qA = new Rotation(aA);
             var qB = new Rotation(aB);
 
             // Compute the effective mass matrix.
-            m_rA = MathUtils.Mul(qA, m_localAnchorA - m_localCenterA);
-            m_rB = MathUtils.Mul(qB, m_localAnchorB - m_localCenterB);
+            _rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
+            _rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
 
             // J = [-I -r1_skew I r2_skew]
             //     [ 0       -1 0       1]
@@ -106,69 +156,69 @@ namespace Box2DSharp.Dynamics.Joints
             //     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
             //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-            float mA = m_invMassA, mB = m_invMassB;
-            float iA = m_invIA,    iB = m_invIB;
+            float mA = _invMassA, mB = _invMassB;
+            float iA = _invIa,    iB = _invIb;
 
             var K = new Matrix2x2();
-            K.ex.X = mA + mB + iA * m_rA.Y * m_rA.Y + iB * m_rB.Y * m_rB.Y;
-            K.ex.Y = -iA * m_rA.X * m_rA.Y - iB * m_rB.X * m_rB.Y;
-            K.ey.X = K.ex.Y;
-            K.ey.Y = mA + mB + iA * m_rA.X * m_rA.X + iB * m_rB.X * m_rB.X;
+            K.Ex.X = mA + mB + iA * _rA.Y * _rA.Y + iB * _rB.Y * _rB.Y;
+            K.Ex.Y = -iA * _rA.X * _rA.Y - iB * _rB.X * _rB.Y;
+            K.Ey.X = K.Ex.Y;
+            K.Ey.Y = mA + mB + iA * _rA.X * _rA.X + iB * _rB.X * _rB.X;
 
-            m_linearMass = K.GetInverse();
+            _linearMass = K.GetInverse();
 
-            m_angularMass = iA + iB;
-            if (m_angularMass > 0.0f)
+            _angularMass = iA + iB;
+            if (_angularMass > 0.0f)
             {
-                m_angularMass = 1.0f / m_angularMass;
+                _angularMass = 1.0f / _angularMass;
             }
 
-            if (data.Step.warmStarting)
+            if (data.Step.WarmStarting)
             {
                 // Scale impulses to support a variable time step.
-                m_linearImpulse  *= data.Step.dtRatio;
-                m_angularImpulse *= data.Step.dtRatio;
+                _linearImpulse  *= data.Step.DtRatio;
+                _angularImpulse *= data.Step.DtRatio;
 
-                var P = new Vector2(m_linearImpulse.X, m_linearImpulse.Y);
+                var P = new Vector2(_linearImpulse.X, _linearImpulse.Y);
                 vA -= mA * P;
-                wA -= iA * (MathUtils.Cross(m_rA, P) + m_angularImpulse);
+                wA -= iA * (MathUtils.Cross(_rA, P) + _angularImpulse);
                 vB += mB * P;
-                wB += iB * (MathUtils.Cross(m_rB, P) + m_angularImpulse);
+                wB += iB * (MathUtils.Cross(_rB, P) + _angularImpulse);
             }
             else
             {
-                m_linearImpulse.SetZero();
-                m_angularImpulse = 0.0f;
+                _linearImpulse.SetZero();
+                _angularImpulse = 0.0f;
             }
 
-            data.Velocities[m_indexA].v = vA;
-            data.Velocities[m_indexA].w = wA;
-            data.Velocities[m_indexB].v = vB;
-            data.Velocities[m_indexB].w = wB;
+            data.Velocities[_indexA].V = vA;
+            data.Velocities[_indexA].W = wA;
+            data.Velocities[_indexB].V = vB;
+            data.Velocities[_indexB].W = wB;
         }
 
         /// <inheritdoc />
         internal override void SolveVelocityConstraints(SolverData data)
         {
-            Vector2 vA = data.Velocities[m_indexA].v;
-            float   wA = data.Velocities[m_indexA].w;
-            Vector2 vB = data.Velocities[m_indexB].v;
-            float   wB = data.Velocities[m_indexB].w;
+            var vA = data.Velocities[_indexA].V;
+            var wA = data.Velocities[_indexA].W;
+            var vB = data.Velocities[_indexB].V;
+            var wB = data.Velocities[_indexB].W;
 
-            float mA = m_invMassA, mB = m_invMassB;
-            float iA = m_invIA,    iB = m_invIB;
+            float mA = _invMassA, mB = _invMassB;
+            float iA = _invIa,    iB = _invIb;
 
-            float h = data.Step.dt;
+            var h = data.Step.Dt;
 
             // Solve angular friction
             {
-                float Cdot    = wB - wA;
-                float impulse = -m_angularMass * Cdot;
+                var Cdot    = wB - wA;
+                var impulse = -_angularMass * Cdot;
 
-                float oldImpulse = m_angularImpulse;
-                float maxImpulse = h * m_maxTorque;
-                m_angularImpulse = MathUtils.Clamp(m_angularImpulse + impulse, -maxImpulse, maxImpulse);
-                impulse          = m_angularImpulse - oldImpulse;
+                var oldImpulse = _angularImpulse;
+                var maxImpulse = h * _maxTorque;
+                _angularImpulse = MathUtils.Clamp(_angularImpulse + impulse, -maxImpulse, maxImpulse);
+                impulse         = _angularImpulse - oldImpulse;
 
                 wA -= iA * impulse;
                 wB += iB * impulse;
@@ -176,33 +226,33 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve linear friction
             {
-                Vector2 Cdot = vB + MathUtils.Cross(wB, m_rB) - vA - MathUtils.Cross(wA, m_rA);
+                var Cdot = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
 
-                Vector2 impulse    = -MathUtils.Mul(m_linearMass, Cdot);
-                Vector2 oldImpulse = m_linearImpulse;
-                m_linearImpulse += impulse;
+                var impulse    = -MathUtils.Mul(_linearMass, Cdot);
+                var oldImpulse = _linearImpulse;
+                _linearImpulse += impulse;
 
-                float maxImpulse = h * m_maxForce;
+                var maxImpulse = h * _maxForce;
 
-                if (m_linearImpulse.LengthSquared() > maxImpulse * maxImpulse)
+                if (_linearImpulse.LengthSquared() > maxImpulse * maxImpulse)
                 {
-                    m_linearImpulse.Normalize();
-                    m_linearImpulse *= maxImpulse;
+                    _linearImpulse.Normalize();
+                    _linearImpulse *= maxImpulse;
                 }
 
-                impulse = m_linearImpulse - oldImpulse;
+                impulse = _linearImpulse - oldImpulse;
 
                 vA -= mA * impulse;
-                wA -= iA * MathUtils.Cross(m_rA, impulse);
+                wA -= iA * MathUtils.Cross(_rA, impulse);
 
                 vB += mB * impulse;
-                wB += iB * MathUtils.Cross(m_rB, impulse);
+                wB += iB * MathUtils.Cross(_rB, impulse);
             }
 
-            data.Velocities[m_indexA].v = vA;
-            data.Velocities[m_indexA].w = wA;
-            data.Velocities[m_indexB].v = vB;
-            data.Velocities[m_indexB].w = wB;
+            data.Velocities[_indexA].V = vA;
+            data.Velocities[_indexA].W = wA;
+            data.Velocities[_indexB].V = vB;
+            data.Velocities[_indexB].W = wB;
         }
 
         /// <inheritdoc />
@@ -210,55 +260,5 @@ namespace Box2DSharp.Dynamics.Joints
         {
             return true;
         }
-
-        internal FrictionJoint(FrictionJointDef def) : base(def)
-        {
-            m_localAnchorA = def.localAnchorA;
-            m_localAnchorB = def.localAnchorB;
-
-            m_linearImpulse.SetZero();
-            m_angularImpulse = 0.0f;
-
-            m_maxForce  = def.maxForce;
-            m_maxTorque = def.maxTorque;
-        }
-
-        Vector2 m_localAnchorA;
-
-        Vector2 m_localAnchorB;
-
-        // Solver shared
-        Vector2 m_linearImpulse;
-
-        float m_angularImpulse;
-
-        float m_maxForce;
-
-        float m_maxTorque;
-
-        // Solver temp
-        int m_indexA;
-
-        int m_indexB;
-
-        Vector2 m_rA;
-
-        Vector2 m_rB;
-
-        Vector2 m_localCenterA;
-
-        Vector2 m_localCenterB;
-
-        float m_invMassA;
-
-        float m_invMassB;
-
-        float m_invIA;
-
-        float m_invIB;
-
-        Matrix2x2 m_linearMass;
-
-        float m_angularMass;
-    };
+    }
 }

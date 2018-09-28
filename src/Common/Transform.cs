@@ -5,6 +5,10 @@ namespace Box2DSharp.Common
 {
     public struct Transform : IFormattable
     {
+        public Vector2 Position;
+
+        public Rotation Rotation;
+
         /// Initialize using a position vector and a rotation.
         public Transform(in Vector2 position, in Rotation rotation)
         {
@@ -31,10 +35,6 @@ namespace Box2DSharp.Common
             Position = position;
             Rotation.Set(angle);
         }
-
-        public Vector2 Position;
-
-        public Rotation Rotation;
 
         /// <inheritdoc />
         public string ToString(string format, IFormatProvider formatProvider)

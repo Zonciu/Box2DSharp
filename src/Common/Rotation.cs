@@ -1,11 +1,17 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Box2DSharp.Common
 {
     /// Rotation
     public struct Rotation
     {
+        /// Sine and cosine
+        public float Sin;
+
+        public float Cos;
+
         /// Initialize from an angle in radians
         public Rotation(float angle)
         {
@@ -15,6 +21,7 @@ namespace Box2DSharp.Common
         }
 
         /// Set using an angle in radians.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(float angle)
         {
             // TODO_ERIN optimize
@@ -23,6 +30,7 @@ namespace Box2DSharp.Common
         }
 
         /// Set to the identity rotation
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetIdentity()
         {
             Sin = 0.0f;
@@ -30,17 +38,18 @@ namespace Box2DSharp.Common
         }
 
         /// Get the angle in radians
-        public float GetAngle => (float) Math.Atan2(Sin, Cos);
+        public float Angle => (float) Math.Atan2(Sin, Cos);
 
         /// Get the x-axis
-        public Vector2 GetXAxis() => new Vector2(Cos, Sin);
+        public Vector2 GetXAxis()
+        {
+            return new Vector2(Cos, Sin);
+        }
 
         /// Get the u-axis
-        public Vector2 GetYAxis() => new Vector2(-Sin, Cos);
-
-        /// Sine and cosine
-        public float Sin;
-
-        public float Cos;
-    };
+        public Vector2 GetYAxis()
+        {
+            return new Vector2(-Sin, Cos);
+        }
+    }
 }

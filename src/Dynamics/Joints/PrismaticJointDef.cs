@@ -11,19 +11,49 @@ namespace Box2DSharp.Dynamics.Joints
     /// anchors and a local axis helps when saving and loading a game.
     public class PrismaticJointDef : JointDef
     {
-        PrismaticJointDef()
+        /// Enable/disable the joint limit.
+        public bool EnableLimit;
+
+        /// Enable/disable the joint motor.
+        public bool EnableMotor;
+
+        /// The local anchor point relative to bodyA's origin.
+        public Vector2 LocalAnchorA;
+
+        /// The local anchor point relative to bodyB's origin.
+        public Vector2 LocalAnchorB;
+
+        /// The local translation unit axis in bodyA.
+        public Vector2 LocalAxisA;
+
+        /// The lower translation limit, usually in meters.
+        public float LowerTranslation;
+
+        /// The maximum motor torque, usually in N-m.
+        public float MaxMotorForce;
+
+        /// The desired motor speed in radians per second.
+        public float MotorSpeed;
+
+        /// The constrained angle between the bodies: bodyB_angle - bodyA_angle.
+        public float ReferenceAngle;
+
+        /// The upper translation limit, usually in meters.
+        public float UpperTranslation;
+
+        private PrismaticJointDef()
         {
             JointType = JointType.PrismaticJoint;
-            localAnchorA.SetZero();
-            localAnchorB.SetZero();
-            localAxisA.Set(1.0f, 0.0f);
-            referenceAngle   = 0.0f;
-            enableLimit      = false;
-            lowerTranslation = 0.0f;
-            upperTranslation = 0.0f;
-            enableMotor      = false;
-            maxMotorForce    = 0.0f;
-            motorSpeed       = 0.0f;
+            LocalAnchorA.SetZero();
+            LocalAnchorB.SetZero();
+            LocalAxisA.Set(1.0f, 0.0f);
+            ReferenceAngle   = 0.0f;
+            EnableLimit      = false;
+            LowerTranslation = 0.0f;
+            UpperTranslation = 0.0f;
+            EnableMotor      = false;
+            MaxMotorForce    = 0.0f;
+            MotorSpeed       = 0.0f;
         }
 
         /// Initialize the bodies, anchors, axis, and reference angle using the world
@@ -32,40 +62,10 @@ namespace Box2DSharp.Dynamics.Joints
         {
             BodyA          = bA;
             BodyB          = bB;
-            localAnchorA   = BodyA.GetLocalPoint(anchor);
-            localAnchorB   = BodyB.GetLocalPoint(anchor);
-            localAxisA     = BodyA.GetLocalVector(axis);
-            referenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
+            LocalAnchorA   = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB   = BodyB.GetLocalPoint(anchor);
+            LocalAxisA     = BodyA.GetLocalVector(axis);
+            ReferenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
         }
-
-        /// The local anchor point relative to bodyA's origin.
-        public Vector2 localAnchorA;
-
-        /// The local anchor point relative to bodyB's origin.
-        public Vector2 localAnchorB;
-
-        /// The local translation unit axis in bodyA.
-        public Vector2 localAxisA;
-
-        /// The constrained angle between the bodies: bodyB_angle - bodyA_angle.
-        public float referenceAngle;
-
-        /// Enable/disable the joint limit.
-        public bool enableLimit;
-
-        /// The lower translation limit, usually in meters.
-        public float lowerTranslation;
-
-        /// The upper translation limit, usually in meters.
-        public float upperTranslation;
-
-        /// Enable/disable the joint motor.
-        public bool enableMotor;
-
-        /// The maximum motor torque, usually in N-m.
-        public float maxMotorForce;
-
-        /// The desired motor speed in radians per second.
-        public float motorSpeed;
-    };
+    }
 }

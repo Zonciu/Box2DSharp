@@ -16,18 +16,46 @@ namespace Box2DSharp.Dynamics.Joints
     ///    the joints will be broken.
     public class RevoluteJointDef : JointDef
     {
+        /// A flag to enable joint limits.
+        public bool EnableLimit;
+
+        /// A flag to enable the joint motor.
+        public bool EnableMotor;
+
+        /// The local anchor point relative to bodyA's origin.
+        public Vector2 LocalAnchorA;
+
+        /// The local anchor point relative to bodyB's origin.
+        public Vector2 LocalAnchorB;
+
+        /// The lower angle for the joint limit (radians).
+        public float LowerAngle;
+
+        /// The maximum motor torque used to achieve the desired motor speed.
+        /// Usually in N-m.
+        public float MaxMotorTorque;
+
+        /// The desired motor speed. Usually in radians per second.
+        public float MotorSpeed;
+
+        /// The bodyB angle minus bodyA angle in the reference state (radians).
+        public float ReferenceAngle;
+
+        /// The upper angle for the joint limit (radians).
+        public float UpperAngle;
+
         public RevoluteJointDef()
         {
             JointType = JointType.RevoluteJoint;
-            localAnchorA.Set(0.0f, 0.0f);
-            localAnchorB.Set(0.0f, 0.0f);
-            referenceAngle = 0.0f;
-            lowerAngle     = 0.0f;
-            upperAngle     = 0.0f;
-            maxMotorTorque = 0.0f;
-            motorSpeed     = 0.0f;
-            enableLimit    = false;
-            enableMotor    = false;
+            LocalAnchorA.Set(0.0f, 0.0f);
+            LocalAnchorB.Set(0.0f, 0.0f);
+            ReferenceAngle = 0.0f;
+            LowerAngle     = 0.0f;
+            UpperAngle     = 0.0f;
+            MaxMotorTorque = 0.0f;
+            MotorSpeed     = 0.0f;
+            EnableLimit    = false;
+            EnableMotor    = false;
         }
 
         /// Initialize the bodies, anchors, and reference angle using a world
@@ -36,37 +64,9 @@ namespace Box2DSharp.Dynamics.Joints
         {
             BodyA          = bA;
             BodyB          = bB;
-            localAnchorA   = BodyA.GetLocalPoint(anchor);
-            localAnchorB   = BodyB.GetLocalPoint(anchor);
-            referenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
+            LocalAnchorA   = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB   = BodyB.GetLocalPoint(anchor);
+            ReferenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
         }
-
-        /// The local anchor point relative to bodyA's origin.
-        public Vector2 localAnchorA;
-
-        /// The local anchor point relative to bodyB's origin.
-        public Vector2 localAnchorB;
-
-        /// The bodyB angle minus bodyA angle in the reference state (radians).
-        public float referenceAngle;
-
-        /// A flag to enable joint limits.
-        public bool enableLimit;
-
-        /// The lower angle for the joint limit (radians).
-        public float lowerAngle;
-
-        /// The upper angle for the joint limit (radians).
-        public float upperAngle;
-
-        /// A flag to enable the joint motor.
-        public bool enableMotor;
-
-        /// The desired motor speed. Usually in radians per second.
-        public float motorSpeed;
-
-        /// The maximum motor torque used to achieve the desired motor speed.
-        /// Usually in N-m.
-        public float maxMotorTorque;
-    };
+    }
 }

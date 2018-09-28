@@ -7,6 +7,9 @@ namespace Box2DSharp.Collision.Shapes
 {
     public class CircleShape : Shape
     {
+        /// Position
+        public Vector2 Position;
+
         public CircleShape()
         {
             ShapeType = ShapeType.Circle;
@@ -105,8 +108,5 @@ namespace Box2DSharp.Collision.Shapes
             // inertia about the local origin
             massData.RotationInertia = massData.Mass * (0.5f * Radius * Radius + MathUtils.Dot(Position, Position));
         }
-
-        /// Position
-        public Vector2 Position;
     }
 }

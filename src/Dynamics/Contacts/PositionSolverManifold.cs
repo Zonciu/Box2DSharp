@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
@@ -7,54 +8,56 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class PositionSolverManifold
     {
+        public Vector2 Normal;
+
+        public Vector2 Point;
+
+        public float Separation;
+
         public void Initialize(in ContactPositionConstraint pc, in Transform xfA, in Transform xfB, int index)
         {
-            Debug.Assert(pc.pointCount > 0);
+            Debug.Assert(pc.PointCount > 0);
 
-            switch (pc.type)
+            switch (pc.Type)
             {
             case ManifoldType.Circles:
             {
-                Vector2 pointA = MathUtils.Mul(xfA, pc.localPoint);
-                Vector2 pointB = MathUtils.Mul(xfB, pc.localPoints[0]);
-                normal = pointB - pointA;
-                normal.Normalize();
-                point      = 0.5f * (pointA + pointB);
-                separation = MathUtils.Dot(pointB - pointA, normal) - pc.radiusA - pc.radiusB;
+                var pointA = MathUtils.Mul(xfA, pc.LocalPoint);
+                var pointB = MathUtils.Mul(xfB, pc.LocalPoints[0]);
+                Normal = pointB - pointA;
+                Normal.Normalize();
+                Point      = 0.5f * (pointA + pointB);
+                Separation = MathUtils.Dot(pointB - pointA, Normal) - pc.RadiusA - pc.RadiusB;
             }
                 break;
 
             case ManifoldType.FaceA:
             {
-                normal = MathUtils.Mul(xfA.Rotation, pc.localNormal);
-                Vector2 planePoint = MathUtils.Mul(xfA, pc.localPoint);
+                Normal = MathUtils.Mul(xfA.Rotation, pc.LocalNormal);
+                var planePoint = MathUtils.Mul(xfA, pc.LocalPoint);
 
-                Vector2 clipPoint = MathUtils.Mul(xfB, pc.localPoints[index]);
-                separation = MathUtils.Dot(clipPoint - planePoint, normal) - pc.radiusA - pc.radiusB;
-                point      = clipPoint;
+                var clipPoint = MathUtils.Mul(xfB, pc.LocalPoints[index]);
+                Separation = MathUtils.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
+                Point      = clipPoint;
             }
                 break;
 
             case ManifoldType.FaceB:
             {
-                normal = MathUtils.Mul(xfB.Rotation, pc.localNormal);
-                Vector2 planePoint = MathUtils.Mul(xfB, pc.localPoint);
+                Normal = MathUtils.Mul(xfB.Rotation, pc.LocalNormal);
+                var planePoint = MathUtils.Mul(xfB, pc.LocalPoint);
 
-                Vector2 clipPoint = MathUtils.Mul(xfA, pc.localPoints[index]);
-                separation = MathUtils.Dot(clipPoint - planePoint, normal) - pc.radiusA - pc.radiusB;
-                point      = clipPoint;
+                var clipPoint = MathUtils.Mul(xfA, pc.LocalPoints[index]);
+                Separation = MathUtils.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
+                Point      = clipPoint;
 
                 // Ensure normal points from A to B
-                normal = -normal;
+                Normal = -Normal;
             }
                 break;
+            default:
+                throw new InvalidEnumArgumentException($"Invalid ManifoldType: {pc.Type}");
             }
         }
-
-        public Vector2 normal;
-
-        public Vector2 point;
-
-        public float separation;
-    };
+    }
 }

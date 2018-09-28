@@ -5,12 +5,12 @@ namespace Box2DSharp.Collision
     /// Output results for b2ShapeCast
     public struct ShapeCastOutput
     {
-        public Vector2 point;
+        public Vector2 Point;
 
-        public Vector2 normal;
+        public Vector2 Normal;
 
-        public float lambda;
+        public float Lambda;
 
-        public int iterations;
+        public int Iterations;
     };
 }

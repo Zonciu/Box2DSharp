@@ -80,9 +80,9 @@ namespace Box2DSharp.Collision
                 manifold.Type       = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint           = P;
-                manifold.Points[0].id.key     = 0;
-                manifold.Points[0].id.cf      = cf;
-                manifold.Points[0].localPoint = circleB.Position;
+                manifold.Points[0].Id.Key     = 0;
+                manifold.Points[0].Id.ContactFeature      = cf;
+                manifold.Points[0].LocalPoint = circleB.Position;
                 return;
             }
 
@@ -118,9 +118,9 @@ namespace Box2DSharp.Collision
                 manifold.Type       = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint           = P;
-                manifold.Points[0].id.key     = 0;
-                manifold.Points[0].id.cf      = cf;
-                manifold.Points[0].localPoint = circleB.Position;
+                manifold.Points[0].Id.Key     = 0;
+                manifold.Points[0].Id.ContactFeature      = cf;
+                manifold.Points[0].LocalPoint = circleB.Position;
                 return;
             }
 
@@ -150,9 +150,9 @@ namespace Box2DSharp.Collision
                 manifold.Type                 = ManifoldType.FaceA;
                 manifold.LocalNormal          = n;
                 manifold.LocalPoint           = A;
-                manifold.Points[0].id.key     = 0;
-                manifold.Points[0].id.cf      = cf;
-                manifold.Points[0].localPoint = circleB.Position;
+                manifold.Points[0].Id.Key     = 0;
+                manifold.Points[0].Id.ContactFeature      = cf;
+                manifold.Points[0].LocalPoint = circleB.Position;
             }
         }
 
@@ -539,17 +539,17 @@ namespace Box2DSharp.Collision
                     var i1 = bestIndex;
                     var i2 = i1 + 1 < PolygonB.Count ? i1 + 1 : 0;
 
-                    ie[0].v            = PolygonB.Vertices[i1];
-                    ie[0].id.cf.IndexA = 0;
-                    ie[0].id.cf.IndexB = (byte) i1;
-                    ie[0].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Face;
-                    ie[0].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[0].Vector            = PolygonB.Vertices[i1];
+                    ie[0].Id.ContactFeature.IndexA = 0;
+                    ie[0].Id.ContactFeature.IndexB = (byte) i1;
+                    ie[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
+                    ie[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
 
-                    ie[1].v            = PolygonB.Vertices[i2];
-                    ie[1].id.cf.IndexA = 0;
-                    ie[1].id.cf.IndexB = (byte) i2;
-                    ie[1].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Face;
-                    ie[1].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[1].Vector            = PolygonB.Vertices[i2];
+                    ie[1].Id.ContactFeature.IndexA = 0;
+                    ie[1].Id.ContactFeature.IndexB = (byte) i2;
+                    ie[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
+                    ie[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
 
                     if (Front)
                     {
@@ -572,17 +572,17 @@ namespace Box2DSharp.Collision
                 {
                     manifold.Type = ManifoldType.FaceB;
 
-                    ie[0].v            = V1;
-                    ie[0].id.cf.IndexA = 0;
-                    ie[0].id.cf.IndexB = (byte) primaryAxis.Index;
-                    ie[0].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                    ie[0].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                    ie[0].Vector            = V1;
+                    ie[0].Id.ContactFeature.IndexA = 0;
+                    ie[0].Id.ContactFeature.IndexB = (byte) primaryAxis.Index;
+                    ie[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
 
-                    ie[1].v            = V2;
-                    ie[1].id.cf.IndexA = 0;
-                    ie[1].id.cf.IndexB = (byte) primaryAxis.Index;
-                    ie[1].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                    ie[1].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                    ie[1].Vector            = V2;
+                    ie[1].Id.ContactFeature.IndexA = 0;
+                    ie[1].Id.ContactFeature.IndexB = (byte) primaryAxis.Index;
+                    ie[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
 
                     rf.i1     = primaryAxis.Index;
                     rf.i2     = rf.i1 + 1 < PolygonB.Count ? rf.i1 + 1 : 0;
@@ -642,7 +642,7 @@ namespace Box2DSharp.Collision
                 var pointCount = 0;
                 for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
                 {
-                    var separation = MathUtils.Dot(rf.normal, clipPoints2[i].v - rf.v1);
+                    var separation = MathUtils.Dot(rf.normal, clipPoints2[i].Vector - rf.v1);
 
                     if (separation <= Radius)
                     {
@@ -650,16 +650,16 @@ namespace Box2DSharp.Collision
 
                         if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                         {
-                            cp.localPoint = MathUtils.MulT(Transform, clipPoints2[i].v);
-                            cp.id         = clipPoints2[i].id;
+                            cp.LocalPoint = MathUtils.MulT(Transform, clipPoints2[i].Vector);
+                            cp.Id         = clipPoints2[i].Id;
                         }
                         else
                         {
-                            cp.localPoint   = clipPoints2[i].v;
-                            cp.id.cf.TypeA  = clipPoints2[i].id.cf.TypeB;
-                            cp.id.cf.TypeB  = clipPoints2[i].id.cf.TypeA;
-                            cp.id.cf.IndexA = clipPoints2[i].id.cf.IndexB;
-                            cp.id.cf.IndexB = clipPoints2[i].id.cf.IndexA;
+                            cp.LocalPoint   = clipPoints2[i].Vector;
+                            cp.Id.ContactFeature.TypeA  = clipPoints2[i].Id.ContactFeature.TypeB;
+                            cp.Id.ContactFeature.TypeB  = clipPoints2[i].Id.ContactFeature.TypeA;
+                            cp.Id.ContactFeature.IndexA = clipPoints2[i].Id.ContactFeature.IndexB;
+                            cp.Id.ContactFeature.IndexB = clipPoints2[i].Id.ContactFeature.IndexA;
                         }
 
                         ++pointCount;

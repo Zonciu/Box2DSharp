@@ -43,7 +43,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Mul(in Matrix2x2 m, in Vector2 v)
         {
-            return new Vector2(m.ex.X * v.X + m.ey.X * v.Y, m.ex.Y * v.X + m.ey.Y * v.Y);
+            return new Vector2(m.Ex.X * v.X + m.Ey.X * v.Y, m.Ex.Y * v.X + m.Ey.Y * v.Y);
         }
 
         /// Multiply a matrix transpose times a vector. If a rotation matrix is provided,
@@ -51,7 +51,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 MulT(in Matrix2x2 m, in Vector2 v)
         {
-            return new Vector2(Dot(v, m.ex), Dot(v, m.ey));
+            return new Vector2(Dot(v, m.Ex), Dot(v, m.Ey));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,16 +86,16 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix2x2 Mul(in Matrix2x2 a, in Matrix2x2 b)
         {
-            return new Matrix2x2(Mul(a, b.ex), Mul(a, b.ey));
+            return new Matrix2x2(Mul(a, b.Ex), Mul(a, b.Ey));
         }
 
         // A^T * B
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix2x2 MulT(in Matrix2x2 a, in Matrix2x2 b)
         {
-            var c1 = new Vector2(Dot(a.ex, b.ex), Dot(a.ey, b.ex));
+            var c1 = new Vector2(Dot(a.Ex, b.Ex), Dot(a.Ey, b.Ex));
 
-            var c2 = new Vector2(Dot(a.ex, b.ey), Dot(a.ey, b.ey));
+            var c2 = new Vector2(Dot(a.Ex, b.Ey), Dot(a.Ey, b.Ey));
             return new Matrix2x2(c1, c2);
         }
 
@@ -103,14 +103,14 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Mul(in Matrix3x3 m, in Vector3 v)
         {
-            return v.X * m.ex + v.Y * m.ey + v.Z * m.ez;
+            return v.X * m.Ex + v.Y * m.Ey + v.Z * m.Ez;
         }
 
         /// Multiply a matrix times a vector.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Mul22(in Matrix3x3 m, in Vector2 v)
         {
-            return new Vector2(m.ex.X * v.X + m.ey.X * v.Y, m.ex.Y * v.X + m.ey.Y * v.Y);
+            return new Vector2(m.Ex.X * v.X + m.Ey.X * v.Y, m.Ex.Y * v.X + m.Ey.Y * v.Y);
         }
 
         /// Multiply two rotations: q * r
@@ -159,18 +159,18 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Mul(in Transform T, in Vector2 v)
         {
-            float x = (T.Rotation.Cos * v.X - T.Rotation.Sin * v.Y) + T.Position.X;
-            float y = (T.Rotation.Sin * v.X + T.Rotation.Cos * v.Y) + T.Position.Y;
+            var x = T.Rotation.Cos * v.X - T.Rotation.Sin * v.Y + T.Position.X;
+            var y = T.Rotation.Sin * v.X + T.Rotation.Cos * v.Y + T.Position.Y;
             return new Vector2(x, y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 MulT(in Transform T, in Vector2 v)
         {
-            float px = v.X - T.Position.X;
-            float py = v.Y - T.Position.Y;
-            float x  = (T.Rotation.Cos * px + T.Rotation.Sin * py);
-            float y  = (-T.Rotation.Sin * px + T.Rotation.Cos * py);
+            var px = v.X - T.Position.X;
+            var py = v.Y - T.Position.Y;
+            var x  = T.Rotation.Cos * px + T.Rotation.Sin * py;
+            var y  = -T.Rotation.Sin * px + T.Rotation.Cos * py;
             return new Vector2(x, y);
         }
 
@@ -224,18 +224,18 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint NextPowerOfTwo(uint x)
         {
-            x |= (x >> 1);
-            x |= (x >> 2);
-            x |= (x >> 4);
-            x |= (x >> 8);
-            x |= (x >> 16);
+            x |= x >> 1;
+            x |= x >> 2;
+            x |= x >> 4;
+            x |= x >> 8;
+            x |= x >> 16;
             return x + 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPowerOfTwo(uint x)
         {
-            bool result = x > 0 && (x & (x - 1)) == 0;
+            var result = x > 0 && (x & (x - 1)) == 0;
             return result;
         }
     }

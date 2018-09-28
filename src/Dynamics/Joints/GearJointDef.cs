@@ -5,21 +5,21 @@ namespace Box2DSharp.Dynamics.Joints
     public class GearJointDef : JointDef
     {
         /// The first revolute/prismatic joint attached to the gear joint.
-        public Joint joint1;
+        public Joint Joint1;
 
         /// The second revolute/prismatic joint attached to the gear joint.
-        public Joint joint2;
+        public Joint Joint2;
 
         /// The gear ratio.
         /// @see b2GearJoint for explanation.
-        public float ratio;
+        public float Ratio;
 
         private GearJointDef()
         {
             JointType = JointType.GearJoint;
-            joint1    = null;
-            joint2    = null;
-            ratio     = 1.0f;
+            Joint1    = null;
+            Joint2    = null;
+            Ratio     = 1.0f;
         }
     }
 }

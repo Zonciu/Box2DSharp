@@ -7,20 +7,20 @@ namespace Box2DSharp.Dynamics.Listeners
     /// match up one-to-one with the contact points in b2Manifold.
     public struct ContactImpulse
     {
-        public float[] normalImpulses;
+        public float[] NormalImpulses;
 
-        public float[] tangentImpulses;
+        public float[] TangentImpulses;
 
-        public int count;
+        public int Count;
 
         public static ContactImpulse Create()
         {
             return new ContactImpulse
             {
-                count           = 0,
-                normalImpulses  = new float[Settings.MaxManifoldPoints],
-                tangentImpulses = new float[Settings.MaxManifoldPoints]
+                Count           = 0,
+                NormalImpulses  = new float[Settings.MaxManifoldPoints],
+                TangentImpulses = new float[Settings.MaxManifoldPoints]
             };
         }
-    };
+    }
 }

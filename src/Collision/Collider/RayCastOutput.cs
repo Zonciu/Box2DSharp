@@ -9,6 +9,6 @@ namespace Box2DSharp.Collision.Collider
     {
         public Vector2 Normal;
 
-        public Single Fraction;
+        public float Fraction;
     };
 }

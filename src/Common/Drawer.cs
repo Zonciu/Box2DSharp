@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 
@@ -31,25 +29,4 @@ namespace Box2DSharp.Common
         /// Draw a point.
         void DrawPoint(in Vector2 p, float size, in Color color);
     }
-
-    [Flags]
-    public enum DrawFlag
-    {
-        /// draw shapes
-        DrawShape,
-
-        /// draw joint connections
-        DrawJoint,
-
-        /// draw axis aligned bounding boxes
-        DrawAABB,
-
-        /// draw broad-phase pairs
-        DrawPair,
-
-        /// draw center of mass frame
-        DrawCenterOfMass,
-
-        DrawContactPoint
-    };
 }

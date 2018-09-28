@@ -20,5 +20,5 @@ namespace Box2DSharp.Dynamics.Listeners
                        && (filterA.categoryBits & filterB.maskBits) != 0;
             return collide;
         }
-    };
+    }
 }

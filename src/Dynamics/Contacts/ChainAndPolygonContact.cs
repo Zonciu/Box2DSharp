@@ -20,7 +20,7 @@ namespace Box2DSharp.Dynamics.Contacts
         internal static void Destroy(Contact contact)
         { }
 
-        ChainAndPolygonContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB) : base(
+        private ChainAndPolygonContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB) : base(
             fixtureA,
             indexA,
             fixtureB,

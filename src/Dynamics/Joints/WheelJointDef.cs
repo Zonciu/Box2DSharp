@@ -11,17 +11,41 @@ namespace Box2DSharp.Dynamics.Joints
     /// anchors and a local axis helps when saving and loading a game.
     public class WheelJointDef : JointDef
     {
+        /// Suspension damping ratio, one indicates critical damping
+        public float DampingRatio;
+
+        /// Enable/disable the joint motor.
+        public bool EnableMotor;
+
+        /// Suspension frequency, zero indicates no suspension
+        public float FrequencyHz;
+
+        /// The local anchor point relative to bodyA's origin.
+        public Vector2 LocalAnchorA;
+
+        /// The local anchor point relative to bodyB's origin.
+        public Vector2 LocalAnchorB;
+
+        /// The local translation axis in bodyA.
+        public Vector2 LocalAxisA;
+
+        /// The maximum motor torque, usually in N-m.
+        public float MaxMotorTorque;
+
+        /// The desired motor speed in radians per second.
+        public float MotorSpeed;
+
         public WheelJointDef()
         {
             JointType = JointType.WheelJoint;
-            localAnchorA.SetZero();
-            localAnchorB.SetZero();
-            localAxisA.Set(1.0f, 0.0f);
-            enableMotor    = false;
-            maxMotorTorque = 0.0f;
-            motorSpeed     = 0.0f;
-            frequencyHz    = 2.0f;
-            dampingRatio   = 0.7f;
+            LocalAnchorA.SetZero();
+            LocalAnchorB.SetZero();
+            LocalAxisA.Set(1.0f, 0.0f);
+            EnableMotor    = false;
+            MaxMotorTorque = 0.0f;
+            MotorSpeed     = 0.0f;
+            FrequencyHz    = 2.0f;
+            DampingRatio   = 0.7f;
         }
 
         /// Initialize the bodies, anchors, axis, and reference angle using the world
@@ -30,33 +54,9 @@ namespace Box2DSharp.Dynamics.Joints
         {
             BodyA        = bA;
             BodyB        = bB;
-            localAnchorA = BodyA.GetLocalPoint(anchor);
-            localAnchorB = BodyB.GetLocalPoint(anchor);
-            localAxisA   = BodyA.GetLocalVector(axis);
+            LocalAnchorA = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB = BodyB.GetLocalPoint(anchor);
+            LocalAxisA   = BodyA.GetLocalVector(axis);
         }
-
-        /// The local anchor point relative to bodyA's origin.
-        public Vector2 localAnchorA;
-
-        /// The local anchor point relative to bodyB's origin.
-        public Vector2 localAnchorB;
-
-        /// The local translation axis in bodyA.
-        public Vector2 localAxisA;
-
-        /// Enable/disable the joint motor.
-        public bool enableMotor;
-
-        /// The maximum motor torque, usually in N-m.
-        public float maxMotorTorque;
-
-        /// The desired motor speed in radians per second.
-        public float motorSpeed;
-
-        /// Suspension frequency, zero indicates no suspension
-        public float frequencyHz;
-
-        /// Suspension damping ratio, one indicates critical damping
-        public float dampingRatio;
-    };
+    }
 }

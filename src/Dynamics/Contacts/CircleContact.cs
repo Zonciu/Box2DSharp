@@ -19,7 +19,7 @@ namespace Box2DSharp.Dynamics.Contacts
         internal static void Destroy(Contact contact)
         { }
 
-        internal CircleContact(Fixture fixtureA, Fixture fixtureB) : base(fixtureA, 0, fixtureB, 0)
+        private CircleContact(Fixture fixtureA, Fixture fixtureB) : base(fixtureA, 0, fixtureB, 0)
         {
             Debug.Assert(FixtureA.GetShapeType() == ShapeType.Circle);
             Debug.Assert(FixtureB.GetShapeType() == ShapeType.Circle);

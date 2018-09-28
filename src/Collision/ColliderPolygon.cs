@@ -90,17 +90,17 @@ namespace Box2DSharp.Collision
             // Build the clip vertices for the incident edge.
             var i1 = index;
             var i2 = i1 + 1 < count2 ? i1 + 1 : 0;
-            c[0].v            = MathUtils.Mul(xf2, vertices2[i1]);
-            c[0].id.cf.IndexA = (byte) edge1;
-            c[0].id.cf.IndexB = (byte) i1;
-            c[0].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Face;
-            c[0].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+            c[0].Vector            = MathUtils.Mul(xf2, vertices2[i1]);
+            c[0].Id.ContactFeature.IndexA = (byte) edge1;
+            c[0].Id.ContactFeature.IndexB = (byte) i1;
+            c[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
+            c[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
 
-            c[1].v            = MathUtils.Mul(xf2, vertices2[i2]);
-            c[1].id.cf.IndexA = (byte) edge1;
-            c[1].id.cf.IndexB = (byte) i2;
-            c[1].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Face;
-            c[1].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+            c[1].Vector            = MathUtils.Mul(xf2, vertices2[i2]);
+            c[1].Id.ContactFeature.IndexA = (byte) edge1;
+            c[1].Id.ContactFeature.IndexB = (byte) i2;
+            c[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
+            c[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
         }
 
         // Find edge normal of max separation on A - return if separating axis is found
@@ -239,21 +239,21 @@ namespace Box2DSharp.Collision
             var pointCount = 0;
             for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
             {
-                var separation = MathUtils.Dot(normal, clipPoints2[i].v) - frontOffset;
+                var separation = MathUtils.Dot(normal, clipPoints2[i].Vector) - frontOffset;
 
                 if (separation <= totalRadius)
                 {
                     ref var cp = ref manifold.Points[pointCount];
-                    cp.localPoint = MathUtils.MulT(xf2, clipPoints2[i].v);
-                    cp.id         = clipPoints2[i].id;
+                    cp.LocalPoint = MathUtils.MulT(xf2, clipPoints2[i].Vector);
+                    cp.Id         = clipPoints2[i].Id;
                     if (flip != default)
                     {
                         // Swap features
-                        var cf = cp.id.cf;
-                        cp.id.cf.IndexA = cf.IndexB;
-                        cp.id.cf.IndexB = cf.IndexA;
-                        cp.id.cf.TypeA  = cf.TypeB;
-                        cp.id.cf.TypeB  = cf.TypeA;
+                        var cf = cp.Id.ContactFeature;
+                        cp.Id.ContactFeature.IndexA = cf.IndexB;
+                        cp.Id.ContactFeature.IndexB = cf.IndexA;
+                        cp.Id.ContactFeature.TypeA  = cf.TypeB;
+                        cp.Id.ContactFeature.TypeB  = cf.TypeA;
                     }
 
                     ++pointCount;

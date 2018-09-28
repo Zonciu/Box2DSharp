@@ -8,14 +8,30 @@ namespace Box2DSharp.Dynamics.Joints
     /// of the anchor points is important for computing the reaction torque.
     public class WeldJointDef : JointDef
     {
+        /// The damping ratio. 0 = no damping, 1 = critical damping.
+        public float DampingRatio;
+
+        /// The mass-spring-damper frequency in Hertz. Rotation only.
+        /// Disable softness with a value of 0.
+        public float FrequencyHz;
+
+        /// The local anchor point relative to bodyA's origin.
+        public Vector2 LocalAnchorA;
+
+        /// The local anchor point relative to bodyB's origin.
+        public Vector2 LocalAnchorB;
+
+        /// The bodyB angle minus bodyA angle in the reference state (radians).
+        public float ReferenceAngle;
+
         public WeldJointDef()
         {
             JointType = JointType.WeldJoint;
-            localAnchorA.Set(0.0f, 0.0f);
-            localAnchorB.Set(0.0f, 0.0f);
-            referenceAngle = 0.0f;
-            frequencyHz    = 0.0f;
-            dampingRatio   = 0.0f;
+            LocalAnchorA.Set(0.0f, 0.0f);
+            LocalAnchorB.Set(0.0f, 0.0f);
+            ReferenceAngle = 0.0f;
+            FrequencyHz    = 0.0f;
+            DampingRatio   = 0.0f;
         }
 
         /// Initialize the bodies, anchors, and reference angle using a world
@@ -24,25 +40,9 @@ namespace Box2DSharp.Dynamics.Joints
         {
             BodyA          = bA;
             BodyB          = bB;
-            localAnchorA   = BodyA.GetLocalPoint(anchor);
-            localAnchorB   = BodyB.GetLocalPoint(anchor);
-            referenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
+            LocalAnchorA   = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB   = BodyB.GetLocalPoint(anchor);
+            ReferenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
         }
-
-        /// The local anchor point relative to bodyA's origin.
-        public Vector2 localAnchorA;
-
-        /// The local anchor point relative to bodyB's origin.
-        public Vector2 localAnchorB;
-
-        /// The bodyB angle minus bodyA angle in the reference state (radians).
-        public float referenceAngle;
-
-        /// The mass-spring-damper frequency in Hertz. Rotation only.
-        /// Disable softness with a value of 0.
-        public float frequencyHz;
-
-        /// The damping ratio. 0 = no damping, 1 = critical damping.
-        public float dampingRatio;
-    };
+    }
 }

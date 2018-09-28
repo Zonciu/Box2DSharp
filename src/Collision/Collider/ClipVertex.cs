@@ -5,8 +5,8 @@ namespace Box2DSharp.Collision.Collider
     /// Used for computing contact manifolds.
     public struct ClipVertex
     {
-        public Vector2 v;
+        public Vector2 Vector;
 
-        public ContactID id;
+        public ContactId Id;
     };
 }

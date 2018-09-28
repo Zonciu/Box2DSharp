@@ -1,5 +1,4 @@
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
@@ -20,8 +19,8 @@ namespace Box2DSharp.Collision
             var numOut = 0;
 
             // Calculate the distance of end points to the line
-            var distance0 = MathUtils.Dot(normal, vIn[0].v) - offset;
-            var distance1 = MathUtils.Dot(normal, vIn[1].v) - offset;
+            var distance0 = MathUtils.Dot(normal, vIn[0].Vector) - offset;
+            var distance1 = MathUtils.Dot(normal, vIn[1].Vector) - offset;
 
             // If the points are behind the plane
             if (distance0 <= 0.0f)
@@ -39,13 +38,13 @@ namespace Box2DSharp.Collision
             {
                 // Find intersection point of edge and plane
                 var interp = distance0 / (distance0 - distance1);
-                vOut[numOut].v = vIn[0].v + interp * (vIn[1].v - vIn[0].v);
+                vOut[numOut].Vector = vIn[0].Vector + interp * (vIn[1].Vector - vIn[0].Vector);
 
                 // VertexA is hitting edgeB.
-                vOut[numOut].id.cf.IndexA = (byte) vertexIndexA;
-                vOut[numOut].id.cf.IndexB = vIn[0].id.cf.IndexB;
-                vOut[numOut].id.cf.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                vOut[numOut].id.cf.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                vOut[numOut].Id.ContactFeature.IndexA = (byte) vertexIndexA;
+                vOut[numOut].Id.ContactFeature.IndexB = vIn[0].Id.ContactFeature.IndexB;
+                vOut[numOut].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
+                vOut[numOut].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
                 ++numOut;
             }
 
@@ -62,11 +61,11 @@ namespace Box2DSharp.Collision
             in Transform xfB)
         {
             var input = new DistanceInput();
-            input.proxyA.Set(shapeA, indexA);
-            input.proxyB.Set(shapeB, indexB);
-            input.transformA = xfA;
-            input.transformB = xfB;
-            input.useRadii   = true;
+            input.ProxyA.Set(shapeA, indexA);
+            input.ProxyB.Set(shapeB, indexB);
+            input.TransformA = xfA;
+            input.TransformB = xfB;
+            input.UseRadii   = true;
 
             var cache = SimplexCache.Create();
 

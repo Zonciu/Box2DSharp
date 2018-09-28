@@ -7,9 +7,8 @@ namespace Box2DSharp.Collision
 {
     public struct Simplex
     {
-        public SimplexVertex[] Vertices; //20
-
-        //m_v1, m_v2, m_v3;
+        // m_v1, m_v2, m_v3;
+        public SimplexVertex[] Vertices;
 
         public int Count;
 
@@ -30,14 +29,14 @@ namespace Box2DSharp.Collision
             for (var i = 0; i < Count; ++i)
             {
                 ref var v = ref Vertices[i];
-                v.indexA = cache.IndexA[i];
-                v.indexB = cache.IndexB[i];
-                var wALocal = proxyA.GetVertex(v.indexA);
-                var wBLocal = proxyB.GetVertex(v.indexB);
-                v.wA = MathUtils.Mul(transformA, wALocal);
-                v.wB = MathUtils.Mul(transformB, wBLocal);
-                v.w  = v.wB - v.wA;
-                v.a  = 0.0f;
+                v.IndexA = cache.IndexA[i];
+                v.IndexB = cache.IndexB[i];
+                var wALocal = proxyA.GetVertex(v.IndexA);
+                var wBLocal = proxyB.GetVertex(v.IndexB);
+                v.Wa = MathUtils.Mul(transformA, wALocal);
+                v.Wb = MathUtils.Mul(transformB, wBLocal);
+                v.W  = v.Wb - v.Wa;
+                v.A  = 0.0f;
             }
 
             // Compute the new simplex metric, if it is substantially different than
@@ -57,14 +56,14 @@ namespace Box2DSharp.Collision
             if (Count == 0)
             {
                 ref var v = ref Vertices[0];
-                v.indexA = 0;
-                v.indexB = 0;
+                v.IndexA = 0;
+                v.IndexB = 0;
                 var wALocal = proxyA.GetVertex(0);
                 var wBLocal = proxyB.GetVertex(0);
-                v.wA  = MathUtils.Mul(transformA, wALocal);
-                v.wB  = MathUtils.Mul(transformB, wBLocal);
-                v.w   = v.wB - v.wA;
-                v.a   = 1.0f;
+                v.Wa  = MathUtils.Mul(transformA, wALocal);
+                v.Wb  = MathUtils.Mul(transformB, wBLocal);
+                v.W   = v.Wb - v.Wa;
+                v.A   = 1.0f;
                 Count = 1;
             }
         }
@@ -75,8 +74,8 @@ namespace Box2DSharp.Collision
             cache.Count  = (ushort) Count;
             for (var i = 0; i < Count; ++i)
             {
-                cache.IndexA[i] = (byte) Vertices[i].indexA;
-                cache.IndexB[i] = (byte) Vertices[i].indexB;
+                cache.IndexA[i] = (byte) Vertices[i].IndexA;
+                cache.IndexB[i] = (byte) Vertices[i].IndexB;
             }
         }
 
@@ -85,12 +84,12 @@ namespace Box2DSharp.Collision
             switch (Count)
             {
             case 1:
-                return -Vertices[0].w;
+                return -Vertices[0].W;
 
             case 2:
             {
-                var e12 = Vertices[1].w - Vertices[0].w;
-                var sgn = MathUtils.Cross(e12, -Vertices[0].w);
+                var e12 = Vertices[1].W - Vertices[0].W;
+                var sgn = MathUtils.Cross(e12, -Vertices[0].W);
                 if (sgn > 0.0f)
                 {
                     // Origin is left of e12.
@@ -111,10 +110,10 @@ namespace Box2DSharp.Collision
             switch (Count)
             {
             case 1:
-                return Vertices[0].w;
+                return Vertices[0].W;
 
             case 2:
-                return Vertices[0].a * Vertices[0].w + Vertices[1].a * Vertices[1].w;
+                return Vertices[0].A * Vertices[0].W + Vertices[1].A * Vertices[1].W;
 
             case 3:
                 return Vector2.Zero;
@@ -129,17 +128,17 @@ namespace Box2DSharp.Collision
             switch (Count)
             {
             case 1:
-                pA = Vertices[0].wA;
-                pB = Vertices[0].wB;
+                pA = Vertices[0].Wa;
+                pB = Vertices[0].Wb;
                 break;
 
             case 2:
-                pA = Vertices[0].a * Vertices[0].wA + Vertices[1].a * Vertices[1].wA;
-                pB = Vertices[0].a * Vertices[0].wB + Vertices[1].a * Vertices[1].wB;
+                pA = Vertices[0].A * Vertices[0].Wa + Vertices[1].A * Vertices[1].Wa;
+                pB = Vertices[0].A * Vertices[0].Wb + Vertices[1].A * Vertices[1].Wb;
                 break;
 
             case 3:
-                pA = Vertices[0].a * Vertices[0].wA + Vertices[1].a * Vertices[1].wA + Vertices[2].a * Vertices[2].wA;
+                pA = Vertices[0].A * Vertices[0].Wa + Vertices[1].A * Vertices[1].Wa + Vertices[2].A * Vertices[2].Wa;
                 pB = pA;
                 break;
 
@@ -160,10 +159,10 @@ namespace Box2DSharp.Collision
                 return 0.0f;
 
             case 2:
-                return MathUtils.Distance(Vertices[0].w, Vertices[1].w);
+                return MathUtils.Distance(Vertices[0].W, Vertices[1].W);
 
             case 3:
-                return MathUtils.Cross(Vertices[1].w - Vertices[0].w, Vertices[2].w - Vertices[0].w);
+                return MathUtils.Cross(Vertices[1].W - Vertices[0].W, Vertices[2].W - Vertices[0].W);
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(Count));
@@ -195,8 +194,8 @@ namespace Box2DSharp.Collision
         // a2 = d12_2 / d12
         public void Solve2()
         {
-            var w1  = Vertices[0].w;
-            var w2  = Vertices[1].w;
+            var w1  = Vertices[0].W;
+            var w2  = Vertices[1].W;
             var e12 = w2 - w1;
 
             // w1 region
@@ -204,7 +203,7 @@ namespace Box2DSharp.Collision
             if (d12_2 <= 0.0f)
             {
                 // a2 <= 0, so we clamp it to 0
-                Vertices[0].a = 1.0f;
+                Vertices[0].A = 1.0f;
                 Count         = 1;
                 return;
             }
@@ -214,7 +213,7 @@ namespace Box2DSharp.Collision
             if (d12_1 <= 0.0f)
             {
                 // a1 <= 0, so we clamp it to 0
-                Vertices[1].a = 1.0f;
+                Vertices[1].A = 1.0f;
                 Count         = 1;
                 Vertices[0]   = Vertices[1];
                 return;
@@ -222,8 +221,8 @@ namespace Box2DSharp.Collision
 
             // Must be in e12 region.
             var inv_d12 = 1.0f / (d12_1 + d12_2);
-            Vertices[0].a = d12_1 * inv_d12;
-            Vertices[1].a = d12_2 * inv_d12;
+            Vertices[0].A = d12_1 * inv_d12;
+            Vertices[1].A = d12_2 * inv_d12;
             Count         = 2;
         }
 
@@ -234,9 +233,9 @@ namespace Box2DSharp.Collision
         // - inside the triangle
         public void Solve3()
         {
-            var w1 = Vertices[0].w;
-            var w2 = Vertices[1].w;
-            var w3 = Vertices[2].w;
+            var w1 = Vertices[0].W;
+            var w2 = Vertices[1].W;
+            var w3 = Vertices[2].W;
 
             // Edge12
             // [1      1     ][a1] = [1]
@@ -278,7 +277,7 @@ namespace Box2DSharp.Collision
             // w1 region
             if (d12_2 <= 0.0f && d13_2 <= 0.0f)
             {
-                Vertices[0].a = 1.0f;
+                Vertices[0].A = 1.0f;
                 Count         = 1;
                 return;
             }
@@ -287,8 +286,8 @@ namespace Box2DSharp.Collision
             if (d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f)
             {
                 var inv_d12 = 1.0f / (d12_1 + d12_2);
-                Vertices[0].a = d12_1 * inv_d12;
-                Vertices[1].a = d12_2 * inv_d12;
+                Vertices[0].A = d12_1 * inv_d12;
+                Vertices[1].A = d12_2 * inv_d12;
                 Count         = 2;
                 return;
             }
@@ -297,8 +296,8 @@ namespace Box2DSharp.Collision
             if (d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f)
             {
                 var inv_d13 = 1.0f / (d13_1 + d13_2);
-                Vertices[0].a = d13_1 * inv_d13;
-                Vertices[2].a = d13_2 * inv_d13;
+                Vertices[0].A = d13_1 * inv_d13;
+                Vertices[2].A = d13_2 * inv_d13;
                 Count         = 2;
                 Vertices[1]   = Vertices[2];
                 return;
@@ -307,7 +306,7 @@ namespace Box2DSharp.Collision
             // w2 region
             if (d12_1 <= 0.0f && d23_2 <= 0.0f)
             {
-                Vertices[1].a = 1.0f;
+                Vertices[1].A = 1.0f;
                 Count         = 1;
                 Vertices[0]   = Vertices[1];
                 return;
@@ -316,7 +315,7 @@ namespace Box2DSharp.Collision
             // w3 region
             if (d13_1 <= 0.0f && d23_1 <= 0.0f)
             {
-                Vertices[2].a = 1.0f;
+                Vertices[2].A = 1.0f;
                 Count         = 1;
                 Vertices[0]   = Vertices[2];
                 return;
@@ -326,8 +325,8 @@ namespace Box2DSharp.Collision
             if (d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f)
             {
                 var inv_d23 = 1.0f / (d23_1 + d23_2);
-                Vertices[1].a = d23_1 * inv_d23;
-                Vertices[2].a = d23_2 * inv_d23;
+                Vertices[1].A = d23_1 * inv_d23;
+                Vertices[2].A = d23_2 * inv_d23;
                 Count         = 2;
                 Vertices[0]   = Vertices[2];
                 return;
@@ -335,9 +334,9 @@ namespace Box2DSharp.Collision
 
             // Must be in triangle123
             var inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
-            Vertices[0].a = d123_1 * inv_d123;
-            Vertices[1].a = d123_2 * inv_d123;
-            Vertices[2].a = d123_3 * inv_d123;
+            Vertices[0].A = d123_1 * inv_d123;
+            Vertices[1].A = d123_2 * inv_d123;
+            Vertices[2].A = d123_3 * inv_d123;
             Count         = 3;
         }
     }

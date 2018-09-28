@@ -17,7 +17,7 @@ namespace Box2DSharp.Collision
 
         public Sweep SweepB;
 
-        public float TMax; // defines sweep interval [0, tMax]
+        public float Tmax; // defines sweep interval [0, tMax]
     }
 
     /// Output parameters for b2TimeOfImpact.
@@ -71,7 +71,7 @@ namespace Box2DSharp.Collision
             ++ToiCalls;
 
             output.State = ToiOutput.ToiState.Unknown;
-            output.Time  = input.TMax;
+            output.Time  = input.Tmax;
 
             ref readonly var proxyA = ref input.ProxyA;
             ref readonly var proxyB = ref input.ProxyB;
@@ -84,7 +84,7 @@ namespace Box2DSharp.Collision
             sweepA.Normalize();
             sweepB.Normalize();
 
-            var tMax = input.TMax;
+            var tMax = input.Tmax;
 
             var totalRadius = proxyA.Radius + proxyB.Radius;
             var target      = Math.Max(Settings.LinearSlop, totalRadius - 3.0f * Settings.LinearSlop);
@@ -98,9 +98,9 @@ namespace Box2DSharp.Collision
             // Prepare input for distance query.
             var           cache = SimplexCache.Create();
             DistanceInput distanceInput;
-            distanceInput.proxyA   = input.ProxyA;
-            distanceInput.proxyB   = input.ProxyB;
-            distanceInput.useRadii = false;
+            distanceInput.ProxyA   = input.ProxyA;
+            distanceInput.ProxyB   = input.ProxyB;
+            distanceInput.UseRadii = false;
 
             // The outer loop progressively attempts to compute new separating axes.
             // This loop terminates when an axis is repeated (no progress is made).
@@ -111,8 +111,8 @@ namespace Box2DSharp.Collision
 
                 // Get the distance between shapes. We can also use the results
                 // to get a separating axis.
-                distanceInput.transformA = xfA;
-                distanceInput.transformB = xfB;
+                distanceInput.TransformA = xfA;
+                distanceInput.TransformB = xfB;
 
                 DistanceAlgorithm.Distance(out var distanceOutput, ref cache, distanceInput);
 
