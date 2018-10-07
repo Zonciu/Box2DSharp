@@ -124,25 +124,21 @@ namespace Box2DSharp.Dynamics
         /// the new angular velocity in radians/second.
         /// 角速度
         /// </summary>
-        private float _angularVelocity;
+        public float AngularVelocity { get; internal set; }
 
-        public float AngularVelocity
+        public void SetAngularVelocity(float value)
         {
-            get => _angularVelocity;
-            set
+            if (_type == BodyType.StaticBody) // 静态物体无角速度
             {
-                if (_type == BodyType.StaticBody) // 静态物体无角速度
-                {
-                    return;
-                }
-
-                if (value * value > 0.0f)
-                {
-                    IsAwake = true;
-                }
-
-                _angularVelocity = value;
+                return;
             }
+
+            if (value * value > 0.0f)
+            {
+                IsAwake = true;
+            }
+
+            AngularVelocity = value;
         }
 
         /// <summary>
@@ -209,29 +205,25 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 线速度
         /// </summary>
-        private Vector2 _linearVelocity;
-
         /// Set the linear velocity of the center of mass.
         /// @param v the new linear velocity of the center of mass.
         /// Get the linear velocity of the center of mass.
         /// @return the linear velocity of the center of mass.
-        public Vector2 LinearVelocity
+        public Vector2 LinearVelocity { get; internal set; }
+
+        public void SetLinearVelocity(in Vector2 value)
         {
-            get => _linearVelocity;
-            set
+            if (_type == BodyType.StaticBody) // 静态物体无加速度
             {
-                if (_type == BodyType.StaticBody) // 静态物体无加速度
-                {
-                    return;
-                }
-
-                if (MathUtils.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
-                {
-                    IsAwake = true;
-                }
-
-                _linearVelocity = value;
+                return;
             }
+
+            if (MathUtils.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
+            {
+                IsAwake = true;
+            }
+
+            LinearVelocity = value;
         }
 
         /// <summary>
@@ -246,7 +238,13 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 休眠时间
         /// </summary>
-        internal float SleepTime;
+        internal float SleepTime
+        {
+            get => _sleepTime;
+            set => _sleepTime = value;
+        }
+
+        private float _sleepTime;
 
         /// <summary>
         /// 扫描
@@ -266,7 +264,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 物体类型
         /// </summary>
-        internal BodyType _type;
+        private BodyType _type;
 
         /// <summary>
         /// 所属世界
@@ -339,8 +337,8 @@ namespace Box2DSharp.Dynamics
             FixtureList = new List<Fixture>();
             Node        = null;
 
-            _linearVelocity  = def.LinearVelocity;
-            _angularVelocity = def.AngularVelocity;
+            LinearVelocity  = def.LinearVelocity;
+            AngularVelocity = def.AngularVelocity;
 
             _linearDamping = def.LinearDamping;
             AngularDamping = def.AngularDamping;
@@ -393,10 +391,10 @@ namespace Box2DSharp.Dynamics
 
                 if (_type == BodyType.StaticBody)
                 {
-                    _linearVelocity.SetZero();
-                    _angularVelocity = 0.0f;
-                    Sweep.A0         = Sweep.A;
-                    Sweep.C0         = Sweep.C;
+                    LinearVelocity  = Vector2.Zero;
+                    AngularVelocity = 0.0f;
+                    Sweep.A0        = Sweep.A;
+                    Sweep.C0        = Sweep.C;
                     SynchronizeFixtures();
                 }
 
@@ -485,10 +483,10 @@ namespace Box2DSharp.Dynamics
                 }
                 else
                 {
-                    Flags     &= ~BodyFlags.IsAwake;
-                    SleepTime =  0.0f;
-                    _linearVelocity.SetZero();
-                    _angularVelocity = 0.0f;
+                    Flags           &= ~BodyFlags.IsAwake;
+                    SleepTime       =  0.0f;
+                    LinearVelocity  =  Vector2.Zero;
+                    AngularVelocity =  0.0f;
                     Force.SetZero();
                     Torque = 0.0f;
                 }
@@ -584,7 +582,7 @@ namespace Box2DSharp.Dynamics
                     Flags &= ~BodyFlags.FixedRotation;
                 }
 
-                _angularVelocity = 0.0f;
+                AngularVelocity = 0.0f;
 
                 ResetMassData();
             }
@@ -906,8 +904,8 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _linearVelocity  += InvMass * impulse;
-                _angularVelocity += InverseInertia * MathUtils.Cross(point - Sweep.C, impulse);
+                LinearVelocity  += InvMass * impulse;
+                AngularVelocity += InverseInertia * MathUtils.Cross(point - Sweep.C, impulse);
             }
         }
 
@@ -934,7 +932,7 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if (Flags.HasFlag(BodyFlags.IsAwake))
             {
-                _linearVelocity += InvMass * impulse;
+                LinearVelocity += InvMass * impulse;
             }
         }
 
@@ -961,7 +959,7 @@ namespace Box2DSharp.Dynamics
             // Don't accumulate velocity if the body is sleeping
             if ((Flags & BodyFlags.IsAwake) != 0)
             {
-                _angularVelocity += InverseInertia * impulse;
+                AngularVelocity += InverseInertia * impulse;
             }
         }
 
@@ -1020,7 +1018,7 @@ namespace Box2DSharp.Dynamics
             Sweep.C0          = Sweep.C = MathUtils.Mul(Transform, Sweep.LocalCenter);
 
             // Update center of mass velocity.
-            _linearVelocity += MathUtils.Cross(_angularVelocity, Sweep.C - oldCenter);
+            LinearVelocity += MathUtils.Cross(AngularVelocity, Sweep.C - oldCenter);
         }
 
         /// This resets the mass properties to the sum of the mass properties of the fixtures.
@@ -1095,7 +1093,7 @@ namespace Box2DSharp.Dynamics
             Sweep.C0          = Sweep.C = MathUtils.Mul(Transform, Sweep.LocalCenter);
 
             // Update center of mass velocity.
-            _linearVelocity += MathUtils.Cross(_angularVelocity, Sweep.C - oldCenter);
+            LinearVelocity += MathUtils.Cross(AngularVelocity, Sweep.C - oldCenter);
         }
 
         /// Get the world coordinates of a point given the local coordinates.
@@ -1135,7 +1133,7 @@ namespace Box2DSharp.Dynamics
         /// @return the world velocity of a point.
         public Vector2 GetLinearVelocityFromWorldPoint(in Vector2 worldPoint)
         {
-            return _linearVelocity + MathUtils.Cross(_angularVelocity, worldPoint - Sweep.C);
+            return LinearVelocity + MathUtils.Cross(AngularVelocity, worldPoint - Sweep.C);
         }
 
         /// Get the world velocity of a local point.
@@ -1156,8 +1154,8 @@ namespace Box2DSharp.Dynamics
             Logger.Log($"  bd.type = b2BodyType({_type});");
             Logger.Log($"  bd.position.Set({Transform.Position.X}, {Transform.Position.Y});");
             Logger.Log($"  bd.angle = {Sweep.A};");
-            Logger.Log($"  bd.linearVelocity.Set({_linearVelocity.X}, {_linearVelocity.Y});");
-            Logger.Log($"  bd.angularVelocity = {_angularVelocity};");
+            Logger.Log($"  bd.linearVelocity.Set({LinearVelocity.X}, {LinearVelocity.Y});");
+            Logger.Log($"  bd.angularVelocity = {AngularVelocity};");
             Logger.Log($"  bd.linearDamping = {_linearDamping};");
             Logger.Log($"  bd.angularDamping = {_angularDamping};");
             Logger.Log($"  bd.allowSleep = bool({Flags.HasFlag(BodyFlags.AutoSleep)});");
