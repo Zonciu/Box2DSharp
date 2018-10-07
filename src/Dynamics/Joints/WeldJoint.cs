@@ -212,13 +212,13 @@ namespace Box2DSharp.Dynamics.Joints
                 // magic formulas
                 var h = data.Step.Dt;
                 _gamma = h * (d + h * k);
-                _gamma = _gamma != 0.0f ? 1.0f / _gamma : 0.0f;
+                _gamma = !_gamma.Equals(0.0f) ? 1.0f / _gamma : 0.0f;
                 _bias  = C * h * k * _gamma;
 
                 invM       += _gamma;
-                _mass.Ez.Z =  invM != 0.0f ? 1.0f / invM : 0.0f;
+                _mass.Ez.Z =  !invM .Equals(0.0f) ? 1.0f / invM : 0.0f;
             }
-            else if (K.Ez.Z == 0.0f)
+            else if (K.Ez.Z.Equals(0.0f))
             {
                 K.GetInverse22(ref _mass);
                 _gamma = 0.0f;
@@ -292,11 +292,11 @@ namespace Box2DSharp.Dynamics.Joints
             }
             else
             {
-                var Cdot1 = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
-                var Cdot2 = wB - wA;
-                var Cdot  = new Vector3(Cdot1.X, Cdot1.Y, Cdot2);
+                var cdot1 = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
+                var cdot2 = wB - wA;
+                var cdot  = new Vector3(cdot1.X, cdot1.Y, cdot2);
 
-                var impulse = -MathUtils.Mul(_mass, Cdot);
+                var impulse = -MathUtils.Mul(_mass, cdot);
                 _impulse += impulse;
 
                 var P = new Vector2(impulse.X, impulse.Y);

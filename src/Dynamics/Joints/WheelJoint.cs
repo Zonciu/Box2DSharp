@@ -522,7 +522,7 @@ namespace Box2DSharp.Dynamics.Joints
             var k = _invMassA + _invMassB + _invIa * _sAy * _sAy + _invIb * _sBy * _sBy;
 
             float impulse;
-            if (k != 0.0f)
+            if (!k.Equals(0.0f))
             {
                 impulse = -C / k;
             }

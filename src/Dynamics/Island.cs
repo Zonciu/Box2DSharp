@@ -30,36 +30,36 @@ namespace Box2DSharp.Dynamics
         internal IContactListener ContactListener;
 
         public Island(
-            int              bodyCapacity,
-            int              contactCapacity,
-            int              jointCapacity,
+            int bodyCapacity,
+            int contactCapacity,
+            int jointCapacity,
             IContactListener contactListener)
         {
-            BodyCount    = 0;
+            BodyCount = 0;
             ContactCount = 0;
-            JointCount   = 0;
+            JointCount = 0;
 
             ContactListener = contactListener;
 
-            Bodies   = new Body[bodyCapacity];
+            Bodies = new Body[bodyCapacity];
             Contacts = new Contact[contactCapacity];
-            Joints   = new Joint[jointCapacity];
+            Joints = new Joint[jointCapacity];
 
             Velocities = new Velocity[bodyCapacity];
-            Positions  = new Position[bodyCapacity];
+            Positions = new Position[bodyCapacity];
         }
 
         internal void Clear()
         {
-            BodyCount    = 0;
+            BodyCount = 0;
             ContactCount = 0;
-            JointCount   = 0;
+            JointCount = 0;
         }
 
         internal Profile Solve(in TimeStep step, in Vector2 gravity, bool allowSleep)
         {
             var profile = new Profile();
-            var timer   = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             var h = step.Dt;
 
@@ -77,7 +77,7 @@ namespace Box2DSharp.Dynamics
                 b.Sweep.C0 = b.Sweep.C;
                 b.Sweep.A0 = b.Sweep.A;
 
-                if (b._type == BodyType.DynamicBody)
+                if (b.BodyType == BodyType.DynamicBody)
                 {
                     // Integrate velocities.
                     v += h * (b.GravityScale * gravity + b.InvMass * b.Force);
@@ -95,9 +95,9 @@ namespace Box2DSharp.Dynamics
                 }
 
                 Positions[i].Center = c;
-                Positions[i].Angle  = a;
-                Velocities[i].V     = v;
-                Velocities[i].W     = w;
+                Positions[i].Angle = a;
+                Velocities[i].V = v;
+                Velocities[i].W = w;
             }
 
             timer.Reset();
@@ -105,18 +105,18 @@ namespace Box2DSharp.Dynamics
             // Solver data
             var solverData = new SolverData
             {
-                Step       = step,
-                Positions  = Positions,
+                Step = step,
+                Positions = Positions,
                 Velocities = Velocities
             };
 
             // Initialize velocity constraints.
             var contactSolverDef = new ContactSolverDef
             {
-                Step       = step,
-                Contacts   = Contacts,
-                Count      = ContactCount,
-                Positions  = Positions,
+                Step = step,
+                Contacts = Contacts,
+                Count = ContactCount,
+                Positions = Positions,
                 Velocities = Velocities
             };
 
@@ -179,9 +179,9 @@ namespace Box2DSharp.Dynamics
                 a += h * w;
 
                 Positions[i].Center = c;
-                Positions[i].Angle  = a;
-                Velocities[i].V     = v;
-                Velocities[i].W     = w;
+                Positions[i].Angle = a;
+                Velocities[i].V = v;
+                Velocities[i].W = w;
             }
 
             // Solve position constraints
@@ -210,9 +210,9 @@ namespace Box2DSharp.Dynamics
             for (var i = 0; i < BodyCount; ++i)
             {
                 var body = Bodies[i];
-                body.Sweep.C         = Positions[i].Center;
-                body.Sweep.A         = Positions[i].Angle;
-                body.LinearVelocity  = Velocities[i].V;
+                body.Sweep.C = Positions[i].Center;
+                body.Sweep.A = Positions[i].Angle;
+                body.LinearVelocity = Velocities[i].V;
                 body.AngularVelocity = Velocities[i].W;
                 body.SynchronizeTransform();
             }
@@ -225,20 +225,23 @@ namespace Box2DSharp.Dynamics
             {
                 var minSleepTime = Settings.MaxFloat;
 
+                // 线速度最小值平方
                 const float linTolSqr = Settings.LinearSleepTolerance * Settings.LinearSleepTolerance;
+
+                // 角速度最小值平方
                 const float angTolSqr = Settings.AngularSleepTolerance * Settings.AngularSleepTolerance;
 
                 for (var i = 0; i < BodyCount; ++i)
                 {
                     var b = Bodies[i];
-                    if (b.BodyType == BodyType.StaticBody)
+                    if (b.BodyType == BodyType.StaticBody) // 静态物体没有休眠
                     {
                         continue;
                     }
 
-                    if (!b.HasFlag(BodyFlags.AutoSleep)
-                     || b.AngularVelocity * b.AngularVelocity > angTolSqr
-                     || MathUtils.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr)
+                    if (!b.HasFlag(BodyFlags.AutoSleep)                                // 不允许休眠
+                     || b.AngularVelocity * b.AngularVelocity > angTolSqr              // 或 角速度大于最小值
+                     || MathUtils.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr) // 或 线速度大于最小值
                     {
                         b.SleepTime = 0.0f;
                         minSleepTime = 0.0f;
@@ -246,7 +249,7 @@ namespace Box2DSharp.Dynamics
                     else
                     {
                         b.SleepTime += h;
-                        minSleepTime =  Math.Min(minSleepTime, b.SleepTime);
+                        minSleepTime = Math.Min(minSleepTime, b.SleepTime);
                     }
                 }
 
@@ -273,17 +276,17 @@ namespace Box2DSharp.Dynamics
             {
                 var b = Bodies[i];
                 Positions[i].Center = b.Sweep.C;
-                Positions[i].Angle  = b.Sweep.A;
-                Velocities[i].V     = b.LinearVelocity;
-                Velocities[i].W     = b.AngularVelocity;
+                Positions[i].Angle = b.Sweep.A;
+                Velocities[i].V = b.LinearVelocity;
+                Velocities[i].W = b.AngularVelocity;
             }
 
             var contactSolverDef = new ContactSolverDef
             {
-                Contacts   = Contacts,
-                Count      = ContactCount,
-                Step       = subStep,
-                Positions  = Positions,
+                Contacts = Contacts,
+                Count = ContactCount,
+                Step = subStep,
+                Positions = Positions,
                 Velocities = Velocities
             };
             var contactSolver = new ContactSolver(contactSolverDef);
@@ -380,15 +383,15 @@ namespace Box2DSharp.Dynamics
                 a += h * w;
 
                 Positions[i].Center = c;
-                Positions[i].Angle  = a;
-                Velocities[i].V     = v;
-                Velocities[i].W     = w;
+                Positions[i].Angle = a;
+                Velocities[i].V = v;
+                Velocities[i].W = w;
 
                 // Sync bodies
                 var body = Bodies[i];
-                body.Sweep.C         = c;
-                body.Sweep.A         = a;
-                body.LinearVelocity  = v;
+                body.Sweep.C = c;
+                body.Sweep.A = a;
+                body.LinearVelocity = v;
                 body.AngularVelocity = w;
                 body.SynchronizeTransform();
             }
@@ -433,7 +436,7 @@ namespace Box2DSharp.Dynamics
                 impulse.Count = vc.PointCount;
                 for (var j = 0; j < vc.PointCount; ++j)
                 {
-                    impulse.NormalImpulses[j]  = vc.Points[j].NormalImpulse;
+                    impulse.NormalImpulses[j] = vc.Points[j].NormalImpulse;
                     impulse.TangentImpulses[j] = vc.Points[j].TangentImpulse;
                 }
 

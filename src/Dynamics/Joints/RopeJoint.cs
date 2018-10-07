@@ -192,7 +192,7 @@ namespace Box2DSharp.Dynamics.Joints
             var crB     = MathUtils.Cross(_rB, _u);
             var invMass = _invMassA + _invIa * crA * crA + _invMassB + _invIb * crB * crB;
 
-            _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
+            _mass = !invMass.Equals(0.0f) ? 1.0f / invMass : 0.0f;
 
             if (data.Step.WarmStarting)
             {
@@ -228,15 +228,15 @@ namespace Box2DSharp.Dynamics.Joints
             var vpA  = vA + MathUtils.Cross(wA, _rA);
             var vpB  = vB + MathUtils.Cross(wB, _rB);
             var C    = _length - _maxLength;
-            var Cdot = MathUtils.Dot(_u, vpB - vpA);
+            var cdot = MathUtils.Dot(_u, vpB - vpA);
 
             // Predictive constraint.
             if (C < 0.0f)
             {
-                Cdot += data.Step.InvDt * C;
+                cdot += data.Step.InvDt * C;
             }
 
-            var impulse    = -_mass * Cdot;
+            var impulse    = -_mass * cdot;
             var oldImpulse = _impulse;
             _impulse = Math.Min(0.0f, _impulse + impulse);
             impulse  = _impulse - oldImpulse;

@@ -167,7 +167,7 @@ namespace Box2DSharp.Dynamics.Joints
             var invMass = _invMassA + _invIa * crAu * crAu + _invMassB + _invIb * crBu * crBu;
 
             // Compute the effective mass matrix.
-            _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
+            _mass = !invMass.Equals(0.0f) ? 1.0f / invMass : 0.0f;
 
             if (FrequencyHz > 0.0f)
             {

@@ -398,7 +398,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var k12 = iA * _s1 + iB * _s2;
                 var k13 = iA * _s1 * _a1 + iB * _s2 * _a2;
                 var k22 = iA + iB;
-                if (k22 == 0.0f)
+                if (k22.Equals(0.0f))
                 {
                     // For bodies with fixed rotation.
                     k22 = 1.0f;
@@ -662,7 +662,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var k12 = iA * s1 + iB * s2;
                 var k13 = iA * s1 * a1 + iB * s2 * a2;
                 var k22 = iA + iB;
-                if (k22 == 0.0f)
+                if (k22.Equals(0.0f))
                 {
                     // For fixed rotation
                     k22 = 1.0f;
@@ -688,7 +688,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var k11 = mA + mB + iA * s1 * s1 + iB * s2 * s2;
                 var k12 = iA * s1 + iB * s2;
                 var k22 = iA + iB;
-                if (k22 == 0.0f)
+                if (k22.Equals(0.0f))
                 {
                     k22 = 1.0f;
                 }

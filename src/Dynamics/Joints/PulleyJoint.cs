@@ -71,7 +71,7 @@ namespace Box2DSharp.Dynamics.Joints
             _lengthA = def.LengthA;
             _lengthB = def.LengthB;
 
-            Debug.Assert(def.Ratio != 0.0f);
+            Debug.Assert(!def.Ratio.Equals(0.0f));
             _ratio = def.Ratio;
 
             _constant = def.LengthA + _ratio * def.LengthB;

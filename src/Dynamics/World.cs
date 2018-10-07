@@ -868,8 +868,8 @@ namespace Box2DSharp.Dynamics
                         var bA = fA.GetBody();
                         var bB = fB.GetBody();
 
-                        var typeA = bA._type;
-                        var typeB = bB._type;
+                        var typeA = bA.BodyType;
+                        var typeB = bB.BodyType;
                         Debug.Assert(typeA == BodyType.DynamicBody || typeB == BodyType.DynamicBody);
 
                         var activeA = bA.IsAwake && typeA != BodyType.StaticBody;
@@ -1001,7 +1001,7 @@ namespace Box2DSharp.Dynamics
                 for (var i = 0; i < 2; ++i)
                 {
                     var body = bodies[i];
-                    if (body._type == BodyType.DynamicBody)
+                    if (body.BodyType == BodyType.DynamicBody)
                     {
                         foreach (var ce in body.ContactList)
                         {
@@ -1025,7 +1025,7 @@ namespace Box2DSharp.Dynamics
 
                             // Only add static, kinematic, or bullet bodies.
                             var other = ce.Other;
-                            if (other._type == BodyType.DynamicBody
+                            if (other.BodyType == BodyType.DynamicBody
                              && body.IsBullet == false
                              && other.IsBullet == false)
                             {
@@ -1079,7 +1079,7 @@ namespace Box2DSharp.Dynamics
                             // Add the other body to the island.
                             other.SetFlag(BodyFlags.Island);
 
-                            if (other._type != BodyType.StaticBody)
+                            if (other.BodyType != BodyType.StaticBody)
                             {
                                 other.IsAwake = true;
                             }
@@ -1108,7 +1108,7 @@ namespace Box2DSharp.Dynamics
                     var body = island.Bodies[i];
                     body.UnsetFlag(BodyFlags.Island);
 
-                    if (body._type != BodyType.DynamicBody)
+                    if (body.BodyType != BodyType.DynamicBody)
                     {
                         continue;
                     }
