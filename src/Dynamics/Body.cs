@@ -917,7 +917,7 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         /// <param name="impulse"></param>
         /// <param name="wake"></param>
-        private void ApplyLinearImpulseToCenter(in Vector2 impulse, bool wake)
+        public void ApplyLinearImpulseToCenter(in Vector2 impulse, bool wake)
         {
             if (_type != BodyType.DynamicBody)
             {
