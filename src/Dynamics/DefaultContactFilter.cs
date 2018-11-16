@@ -1,4 +1,4 @@
-namespace Box2DSharp.Dynamics.Listeners
+namespace Box2DSharp.Dynamics
 {
     /// Implement this class to provide collision filtering. In other words, you can implement
     /// this class if you want finer control over contact creation.

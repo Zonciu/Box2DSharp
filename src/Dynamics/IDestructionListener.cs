@@ -1,6 +1,6 @@
 using Box2DSharp.Dynamics.Joints;
 
-namespace Box2DSharp.Dynamics.Listeners
+namespace Box2DSharp.Dynamics
 {
     public interface IDestructionListener
     {

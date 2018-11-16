@@ -54,64 +54,64 @@ namespace Box2DSharp.Dynamics.Joints
             Debug.Assert(def.FrequencyHz.IsValid() && def.FrequencyHz >= 0.0f);
             Debug.Assert(def.DampingRatio.IsValid() && def.DampingRatio >= 0.0f);
 
-            _targetA      = def.Target;
+            _targetA = def.Target;
             _localAnchorB = MathUtils.MulT(BodyB.GetTransform(), _targetA);
 
             _maxForce = def.MaxForce;
             _impulse.SetZero();
 
-            _frequencyHz  = def.FrequencyHz;
+            _frequencyHz = def.FrequencyHz;
             _dampingRatio = def.DampingRatio;
 
-            _beta  = 0.0f;
+            _beta = 0.0f;
             _gamma = 0.0f;
         }
 
         /// Implements b2Joint.
         /// Use this to update the target point.
-        private void SetTarget(in Vector2 target)
+        public void SetTarget(in Vector2 target)
         {
             if (target != _targetA)
             {
                 BodyB.IsAwake = true;
-                _targetA      = target;
+                _targetA = target;
             }
         }
 
-        private ref readonly Vector2 GetTarget()
+        public ref readonly Vector2 GetTarget()
         {
             return ref _targetA;
         }
 
         /// Set/get the maximum force in Newtons.
-        private void SetMaxForce(float force)
+        public void SetMaxForce(float force)
         {
             _maxForce = force;
         }
 
-        private float GetMaxForce()
+        public float GetMaxForce()
         {
             return _maxForce;
         }
 
         /// Set/get the frequency in Hertz.
-        private void SetFrequency(float hz)
+        public void SetFrequency(float hz)
         {
             _frequencyHz = hz;
         }
 
-        private float GetFrequency()
+        public float GetFrequency()
         {
             return _frequencyHz;
         }
 
         /// Set/get the damping ratio (dimensionless).
-        private void SetDampingRatio(float ratio)
+        public void SetDampingRatio(float ratio)
         {
             _dampingRatio = ratio;
         }
 
-        private float GetDampingRatio()
+        public float GetDampingRatio()
         {
             return _dampingRatio;
         }
@@ -155,10 +155,10 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(SolverData data)
         {
-            _indexB       = BodyB.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassB     = BodyB.InvMass;
-            _invIb        = BodyB.InverseInertia;
+            _invMassB = BodyB.InvMass;
+            _invIb = BodyB.InverseInertia;
 
             var cB = data.Positions[_indexB].Center;
             var aB = data.Positions[_indexB].Angle;
@@ -205,7 +205,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             _mass = K.GetInverse();
 
-            _C =  cB + _rB - _targetA;
+            _C = cB + _rB - _targetA;
             _C *= _beta;
 
             // Cheat with some damping
@@ -214,8 +214,8 @@ namespace Box2DSharp.Dynamics.Joints
             if (data.Step.WarmStarting)
             {
                 _impulse *= data.Step.DtRatio;
-                vB       += _invMassB * _impulse;
-                wB       += _invIb * MathUtils.Cross(_rB, _impulse);
+                vB += _invMassB * _impulse;
+                wB += _invIb * MathUtils.Cross(_rB, _impulse);
             }
             else
             {
@@ -233,7 +233,7 @@ namespace Box2DSharp.Dynamics.Joints
             var wB = data.Velocities[_indexB].W;
 
             // Cdot = v + cross(w, r)
-            var cdot    = vB + MathUtils.Cross(wB, _rB);
+            var cdot = vB + MathUtils.Cross(wB, _rB);
             var impulse = MathUtils.Mul(_mass, -(cdot + _C + _gamma * _impulse));
 
             var oldImpulse = _impulse;

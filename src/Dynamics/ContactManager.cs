@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Box2DSharp.Collision;
 using Box2DSharp.Dynamics.Contacts;
-using Box2DSharp.Dynamics.Listeners;
 
 namespace Box2DSharp.Dynamics
 {

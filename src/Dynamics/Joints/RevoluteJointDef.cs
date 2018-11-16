@@ -60,7 +60,7 @@ namespace Box2DSharp.Dynamics.Joints
 
         /// Initialize the bodies, anchors, and reference angle using a world
         /// anchor point.
-        internal void Initialize(Body bA, Body bB, Vector2 anchor)
+        public void Initialize(Body bA, Body bB, Vector2 anchor)
         {
             BodyA          = bA;
             BodyB          = bB;

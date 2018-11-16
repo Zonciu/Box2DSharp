@@ -1,8 +1,10 @@
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
 
-namespace Box2DSharp.Dynamics.Listeners
+namespace Box2DSharp.Dynamics
 {
+    public delegate bool QueryCallback(Fixture fixture);
+
     /// Callback for ray casts.
     /// See b2World::RayCast
     /// Called for each fixture found in the query. You control how the ray cast
@@ -16,5 +18,14 @@ namespace Box2DSharp.Dynamics.Listeners
     /// @param normal the normal vector at the point of intersection
     /// @return -1 to filter, 0 to terminate, fraction to clip the ray for
     /// closest hit, 1 to continue
-    public delegate float RayCastCallback(in RayCastInput input, int proxyId);
+    public delegate float RayCastCallback(Fixture fixture, Vector2 point, Vector2 normal, float fraction);
+}
+
+namespace Box2DSharp.Dynamics.Internal
+{
+    public delegate void AddPairCallback(FixtureProxy proxyA, FixtureProxy proxyB);
+
+    public delegate bool InternalQueryCallback(int proxyId);
+
+    public delegate float InternalRayCastCallback(in RayCastInput input, int proxyId);
 }

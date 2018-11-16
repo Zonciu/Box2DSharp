@@ -1,6 +1,6 @@
 using Box2DSharp.Common;
 
-namespace Box2DSharp.Dynamics.Listeners
+namespace Box2DSharp.Dynamics.Contacts
 {
     /// Contact impulses for reporting. Impulses are used instead of forces because
     /// sub-step forces may approach infinity for rigid body collisions. These

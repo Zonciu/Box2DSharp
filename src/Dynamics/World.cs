@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
@@ -9,7 +10,6 @@ using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
-using Box2DSharp.Dynamics.Listeners;
 
 namespace Box2DSharp.Dynamics
 {
@@ -111,15 +111,33 @@ namespace Box2DSharp.Dynamics
         {
             _gravity = gravity;
 
-            _warmStarting     = true;
+            _warmStarting = true;
             ContinuousPhysics = true;
-            _subStepping      = false;
+            _subStepping = false;
 
             _stepComplete = true;
 
-            AllowSleep        = true;
+            AllowSleep = true;
             IsAutoClearForces = true;
-            _invDt0           = 0.0f;
+            _invDt0 = 0.0f;
+        }
+
+        ~World()
+        {
+            // Some shapes allocate using b2Alloc.
+            var b = BodyList.First;
+            while (b != null)
+            {
+                var bNext = b.Next;
+
+                foreach (var t in b.Value.FixtureList)
+                {
+                    t.ProxyCount = 0;
+                    t.Destroy();
+                }
+
+                b = bNext;
+            }
         }
 
         /// <summary>
@@ -293,11 +311,11 @@ namespace Box2DSharp.Dynamics
             // 连接到物体的双向链表中
             j.EdgeA.Joint = j;
             j.EdgeA.Other = j.BodyB;
-            j.EdgeA.Node  = j.BodyA.JointList.AddFirst(j.EdgeA);
+            j.EdgeA.Node = j.BodyA.JointList.AddFirst(j.EdgeA);
 
             j.EdgeB.Joint = j;
             j.EdgeB.Other = j.BodyA;
-            j.EdgeB.Node  = j.BodyB.JointList.AddFirst(j.EdgeB);
+            j.EdgeB.Node = j.BodyB.JointList.AddFirst(j.EdgeB);
 
             var bodyA = def.BodyA;
             var bodyB = def.BodyB;
@@ -368,8 +386,8 @@ namespace Box2DSharp.Dynamics
         /// @param positionIterations for the position constraint solver.
         public void Step(
             float dt,
-            int   velocityIterations,
-            int   positionIterations)
+            int velocityIterations,
+            int positionIterations)
         {
             // profile 计时
             var stepTimer = Stopwatch.StartNew();
@@ -391,7 +409,7 @@ namespace Box2DSharp.Dynamics
             // 时间间隔与迭代次数
             var step = new TimeStep
             {
-                Dt                 = dt,
+                Dt = dt,
                 VelocityIterations = velocityIterations,
                 PositionIterations = positionIterations
             };
@@ -476,7 +494,7 @@ namespace Box2DSharp.Dynamics
         /// provided AABB.
         /// @param callback a user implemented callback class.
         /// @param aabb the query box.
-        public void QueryAABB(Func<Fixture, bool> callback, in AABB aabb)
+        public void QueryAABB(QueryCallback callback, in AABB aabb)
         {
             ContactManager.BroadPhase.Query(
                 proxyId =>
@@ -494,31 +512,29 @@ namespace Box2DSharp.Dynamics
         /// @param callback a user implemented callback class.
         /// @param point1 the ray starting point
         /// @param point2 the ray ending point
-        public void RayCast(
-            Func<Fixture, Vector2, Vector2, float, float> callback,
-            in Vector2                                    point1,
-            in Vector2                                    point2)
+        public void RayCast(RayCastCallback callback, in Vector2 point1, in Vector2 point2)
         {
             var input = new RayCastInput
             {
                 MaxFraction = 1.0f,
-                P1          = point1,
-                P2          = point2
+                P1 = point1,
+                P2 = point2
             };
+
             ContactManager.BroadPhase.RayCast(
                 (in RayCastInput subInput, int proxyId) =>
                 {
                     var userData = ContactManager.BroadPhase.GetUserData(proxyId);
-                    var proxy    = (FixtureProxy) userData;
-                    var fixture  = proxy.Fixture;
-                    var index    = proxy.ChildIndex;
+                    var proxy = (FixtureProxy) userData;
+                    var fixture = proxy.Fixture;
+                    var index = proxy.ChildIndex;
 
                     var hit = fixture.RayCast(out var output, input, index);
 
                     if (hit)
                     {
                         var fraction = output.Fraction;
-                        var point    = (1.0f - fraction) * input.P1 + fraction * input.P2;
+                        var point = (1.0f - fraction) * input.P1 + fraction * input.P2;
                         return callback(fixture, point, output.Normal, fraction);
                     }
 
@@ -575,8 +591,8 @@ namespace Box2DSharp.Dynamics
             foreach (var b in BodyList)
             {
                 b.Transform.Position -= newOrigin;
-                b.Sweep.C0           -= newOrigin;
-                b.Sweep.C            -= newOrigin;
+                b.Sweep.C0 -= newOrigin;
+                b.Sweep.C -= newOrigin;
             }
 
             foreach (var j in JointList)
@@ -594,7 +610,7 @@ namespace Box2DSharp.Dynamics
         /// <param name="step"></param>
         private void Solve(in TimeStep step)
         {
-            Profile.SolveInit     = 0.0f;
+            Profile.SolveInit = 0.0f;
             Profile.SolveVelocity = 0.0f;
             Profile.SolvePosition = 0.0f;
 
@@ -625,7 +641,7 @@ namespace Box2DSharp.Dynamics
 
             // Build and simulate all awake islands.
             var stackSize = BodyList.Count;
-            var stack     = new Stack<Body>(stackSize);
+            var stack = new Stack<Body>(stackSize);
             foreach (var body in BodyList)
             {
                 if (body.HasFlag(BodyFlags.Island)) // 已经分配到岛屿则跳过
@@ -752,7 +768,7 @@ namespace Box2DSharp.Dynamics
 
                 // 岛屿碰撞求解
                 var profile = island.Solve(step, _gravity, AllowSleep);
-                Profile.SolveInit     += profile.SolveInit;
+                Profile.SolveInit += profile.SolveInit;
                 Profile.SolveVelocity += profile.SolveVelocity;
                 Profile.SolvePosition += profile.SolvePosition;
 
@@ -820,9 +836,9 @@ namespace Box2DSharp.Dynamics
                 foreach (var c in ContactManager.ContactList)
                 {
                     // Invalidate TOI
-                    c.Flags    &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
-                    c.ToiCount =  0;
-                    c.Toi      =  1.0f;
+                    c.Flags &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
+                    c.ToiCount = 0;
+                    c.Toi = 1.0f;
                 }
             }
 
@@ -831,7 +847,7 @@ namespace Box2DSharp.Dynamics
             {
                 // Find the first TOI.
                 Contact minContact = null;
-                var     minAlpha   = 1.0f;
+                var minAlpha = 1.0f;
 
                 foreach (var c in ContactManager.ContactList)
                 {
@@ -916,7 +932,7 @@ namespace Box2DSharp.Dynamics
                         input.ProxyB.Set(fB.GetShape(), indexB);
                         input.SweepA = bA.Sweep;
                         input.SweepB = bB.Sweep;
-                        input.Tmax   = 1.0f;
+                        input.Tmax = 1.0f;
 
                         TimeOfImpact.ComputeTimeOfImpact(out var output, input);
 
@@ -931,7 +947,7 @@ namespace Box2DSharp.Dynamics
                             alpha = 1.0f;
                         }
 
-                        c.Toi   =  alpha;
+                        c.Toi = alpha;
                         c.Flags |= Contact.ContactFlag.ToiFlag;
                     }
 
@@ -939,7 +955,7 @@ namespace Box2DSharp.Dynamics
                     {
                         // This is the minimum TOI found so far.
                         minContact = c;
-                        minAlpha   = alpha;
+                        minAlpha = alpha;
                     }
                 }
 
@@ -953,8 +969,8 @@ namespace Box2DSharp.Dynamics
                 // Advance the bodies to the TOI.
                 var fixtureA = minContact.GetFixtureA();
                 var fixtureB = minContact.GetFixtureB();
-                var bodyA    = fixtureA.GetBody();
-                var bodyB    = fixtureB.GetBody();
+                var bodyA = fixtureA.GetBody();
+                var bodyB = fixtureB.GetBody();
 
                 var backup1 = bodyA.Sweep;
                 var backup2 = bodyB.Sweep;
@@ -1092,12 +1108,12 @@ namespace Box2DSharp.Dynamics
                 var dt = (1.0f - minAlpha) * step.Dt;
                 var subStep = new TimeStep
                 {
-                    Dt                 = dt,
-                    InvDt              = 1.0f / dt,
-                    DtRatio            = 1.0f,
+                    Dt = dt,
+                    InvDt = 1.0f / dt,
+                    DtRatio = 1.0f,
                     PositionIterations = 20,
                     VelocityIterations = step.VelocityIterations,
-                    WarmStarting       = false
+                    WarmStarting = false
                 };
 
                 island.SolveTOI(subStep, bodyA.IslandIndex, bodyB.IslandIndex);
@@ -1211,20 +1227,20 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            var inactiveColor      = Color.FromArgb(128, 128, 77);
-            var staticBodyColor    = Color.FromArgb(127, 230, 127);
+            var inactiveColor = Color.FromArgb(128, 128, 77);
+            var staticBodyColor = Color.FromArgb(127, 230, 127);
             var kinematicBodyColor = Color.FromArgb(127, 127, 230);
-            var sleepColor         = Color.FromArgb(153, 153, 153);
-            var lastColor          = Color.FromArgb(230, 179, 179);
-            var flags              = _drawer.Flags;
+            var sleepColor = Color.FromArgb(153, 153, 153);
+            var lastColor = Color.FromArgb(230, 179, 179);
+            var flags = _drawer.Flags;
 
             if (flags.HasFlag(DrawFlag.DrawShape))
             {
                 foreach (var b in BodyList)
                 {
-                    var xf       = b.GetTransform();
+                    var xf = b.GetTransform();
                     var isActive = b.IsActive;
-                    var isAwake  = b.IsAwake;
+                    var isAwake = b.IsAwake;
                     foreach (var f in b.FixtureList)
                     {
                         if (isActive == false)
@@ -1277,7 +1293,7 @@ namespace Box2DSharp.Dynamics
             if (flags.HasFlag(DrawFlag.DrawAABB))
             {
                 var color = Color.FromArgb(230, 77, 230);
-                var bp    = ContactManager.BroadPhase;
+                var bp = ContactManager.BroadPhase;
 
                 foreach (var b in BodyList)
                 {
@@ -1291,7 +1307,7 @@ namespace Box2DSharp.Dynamics
                         foreach (var proxy in f.Proxies)
                         {
                             var aabb = bp.GetFatAABB(proxy.ProxyId);
-                            var vs   = new Vector2 [4];
+                            var vs = new Vector2 [4];
                             vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
                             vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
                             vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
@@ -1317,7 +1333,7 @@ namespace Box2DSharp.Dynamics
             {
                 foreach (var contact in ContactManager.ContactList)
                 {
-                    var manifold      = contact.GetManifold();
+                    var manifold = contact.GetManifold();
                     var worldManifold = contact.GetWorldManifold();
                     for (var i = 0; i < manifold.PointCount; i++)
                     {
@@ -1335,12 +1351,12 @@ namespace Box2DSharp.Dynamics
         {
             var bodyA = joint.BodyA;
             var bodyB = joint.BodyB;
-            var xf1   = bodyA.GetTransform();
-            var xf2   = bodyB.GetTransform();
-            var x1    = xf1.Position;
-            var x2    = xf2.Position;
-            var p1    = joint.GetAnchorA();
-            var p2    = joint.GetAnchorB();
+            var xf1 = bodyA.GetTransform();
+            var xf2 = bodyB.GetTransform();
+            var x1 = xf1.Position;
+            var x2 = xf2.Position;
+            var p1 = joint.GetAnchorA();
+            var p2 = joint.GetAnchorB();
 
             var color = Color.FromArgb(127, 204, 204);
 
@@ -1353,8 +1369,8 @@ namespace Box2DSharp.Dynamics
             case JointType.PulleyJoint:
             {
                 var pulley = (PulleyJoint) joint;
-                var s1     = pulley.GetGroundAnchorA();
-                var s2     = pulley.GetGroundAnchorB();
+                var s1 = pulley.GetGroundAnchorA();
+                var s2 = pulley.GetGroundAnchorB();
                 _drawer.DrawSegment(s1, p1, color);
                 _drawer.DrawSegment(s2, p2, color);
                 _drawer.DrawSegment(s1, s2, color);
@@ -1394,7 +1410,7 @@ namespace Box2DSharp.Dynamics
             {
                 var center = MathUtils.Mul(xf, circle.Position);
                 var radius = circle.Radius;
-                var axis   = MathUtils.Mul(xf.Rotation, new Vector2(1.0f, 0.0f));
+                var axis = MathUtils.Mul(xf.Rotation, new Vector2(1.0f, 0.0f));
 
                 _drawer.DrawSolidCircle(center, radius, axis, color);
             }
@@ -1410,7 +1426,7 @@ namespace Box2DSharp.Dynamics
 
             case ChainShape chain:
             {
-                var count    = chain.Count;
+                var count = chain.Count;
                 var vertices = chain.Vertices;
 
                 var ghostColor = Color.FromArgb(

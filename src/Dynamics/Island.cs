@@ -4,7 +4,6 @@ using System.Numerics;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
-using Box2DSharp.Dynamics.Listeners;
 
 namespace Box2DSharp.Dynamics
 {

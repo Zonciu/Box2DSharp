@@ -5,7 +5,7 @@ using System.Numerics;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
-using Box2DSharp.Dynamics.Listeners;
+using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Collision
 {
@@ -196,7 +196,7 @@ namespace Box2DSharp.Collision
 
         /// Query an AABB for overlapping proxies. The callback class
         /// is called for each proxy that overlaps the supplied AABB.
-        public void Query(Func<int, bool> callback, in AABB aabb)
+        public void Query(InternalQueryCallback callback, in AABB aabb)
         {
             var stack = new Stack<int>(256);
             stack.Push(_root);
@@ -237,7 +237,7 @@ namespace Box2DSharp.Collision
         /// number of proxies in the tree.
         /// @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
         /// @param callback a callback class that is called for each proxy that is hit by the ray.
-        public void RayCast(RayCastCallback callback, in RayCastInput input)
+        public void RayCast(InternalRayCastCallback callback, in RayCastInput input)
         {
             var p1 = input.P1;
             var p2 = input.P2;

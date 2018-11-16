@@ -10,9 +10,4 @@
       <ProjectReference Include="..\..\src\Box2DSharp.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="OpenGL.Net" Version="0.7.1" />
-      <PackageReference Include="OpenGL.Net.CoreUI" Version="0.7.1" />
-    </ItemGroup>
-
 </Project>

@@ -1,7 +1,7 @@
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Dynamics.Contacts;
 
-namespace Box2DSharp.Dynamics.Listeners
+namespace Box2DSharp.Dynamics
 {
     /// Implement this class to get contact information. You can use these results for
     /// things like sounds and game logic. You can also get contact results by
@@ -12,13 +12,15 @@ namespace Box2DSharp.Dynamics.Listeners
     /// You should strive to make your callbacks efficient because there may be
     /// many callbacks per time step.
     /// @warning You cannot create/destroy Box2D entities inside these callbacks.
-    public interface IContactListener
+    public sealed class NullContactListener : IContactListener
     {
         /// Called when two fixtures begin to touch.
-        void BeginContact(Contact contact);
+        public void BeginContact(Contact contact)
+        { }
 
         /// Called when two fixtures cease to touch.
-        void EndContact(Contact contact);
+        public void EndContact(Contact contact)
+        { }
 
         /// This is called after a contact is updated. This allows you to inspect a
         /// contact before it goes to the solver. If you are careful, you can modify the
@@ -30,7 +32,8 @@ namespace Box2DSharp.Dynamics.Listeners
         /// Note: if you set the number of contact points to zero, you will not
         /// get an EndContact callback. However, you may get a BeginContact callback
         /// the next step.
-        void PreSolve(Contact contact, in Manifold oldManifold);
+        public void PreSolve(Contact contact, in Manifold oldManifold)
+        { }
 
         /// This lets you inspect a contact after the solver is finished. This is useful
         /// for inspecting impulses.
@@ -38,6 +41,7 @@ namespace Box2DSharp.Dynamics.Listeners
         /// arbitrarily large if the sub-step is small. Hence the impulse is provided explicitly
         /// in a separate data structure.
         /// Note: this is only called for contacts that are touching, solid, and awake.
-        void PostSolve(Contact contact, in ContactImpulse impulse);
+        public void PostSolve(Contact contact, in ContactImpulse impulse)
+        { }
     };
 }

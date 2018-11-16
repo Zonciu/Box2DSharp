@@ -6,8 +6,6 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
-using Box2DSharp.Dynamics.Listeners;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -93,7 +91,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
             ToiCount = 0;
 
-            Friction    = MixFriction(FixtureA.Friction, FixtureB.Friction);
+            Friction = MixFriction(FixtureA.Friction, FixtureB.Friction);
             Restitution = MixRestitution(FixtureA.Restitution, FixtureB.Restitution);
 
             TangentSpeed = 0.0f;
@@ -101,9 +99,9 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal static Contact CreateContact(
             Fixture fixtureA,
-            int     indexA,
+            int indexA,
             Fixture fixtureB,
-            int     indexB)
+            int indexB)
         {
             if (Initialized == false)
             {
@@ -178,10 +176,10 @@ namespace Box2DSharp.Dynamics.Contacts
         /// Get the world manifold.
         public WorldManifold GetWorldManifold()
         {
-            var bodyA         = FixtureA.GetBody();
-            var bodyB         = FixtureB.GetBody();
-            var shapeA        = FixtureA.GetShape();
-            var shapeB        = FixtureB.GetShape();
+            var bodyA = FixtureA.GetBody();
+            var bodyB = FixtureB.GetBody();
+            var shapeA = FixtureA.GetShape();
+            var shapeB = FixtureB.GetShape();
             var worldManifold = WorldManifold.Create();
             worldManifold.Initialize(
                 Manifold,
@@ -309,17 +307,17 @@ namespace Box2DSharp.Dynamics.Contacts
             // Re-enable this contact.
             Flags |= ContactFlag.EnabledFlag;
 
-            var touching    = false;
+            var touching = false;
             var wasTouching = Flags.HasFlag(ContactFlag.TouchingFlag);
 
             var sensorA = FixtureA.IsSensor;
             var sensorB = FixtureB.IsSensor;
-            var sensor  = sensorA || sensorB;
+            var sensor = sensorA || sensorB;
 
             var bodyA = FixtureA.GetBody();
             var bodyB = FixtureB.GetBody();
-            var xfA   = bodyA.GetTransform();
-            var xfB   = bodyB.GetTransform();
+            var xfA = bodyA.GetTransform();
+            var xfB = bodyB.GetTransform();
 
             // Is this contact a sensor?
             if (sensor)
@@ -341,7 +339,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 for (var i = 0; i < Manifold.PointCount; ++i)
                 {
                     var mp2 = Manifold.Points[i];
-                    mp2.NormalImpulse  = 0.0f;
+                    mp2.NormalImpulse = 0.0f;
                     mp2.TangentImpulse = 0.0f;
                     var id2 = mp2.Id;
 
@@ -351,7 +349,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
                         if (mp1.Id.Key == id2.Key)
                         {
-                            mp2.NormalImpulse  = mp1.NormalImpulse;
+                            mp2.NormalImpulse = mp1.NormalImpulse;
                             mp2.TangentImpulse = mp1.TangentImpulse;
                             break;
                         }
@@ -427,8 +425,8 @@ namespace Box2DSharp.Dynamics.Contacts
             /// <inheritdoc />
             public ContactRegister(CreateContact fcn, DestroyContact destroyFunc, bool primary)
             {
-                CreateFunc   = fcn;
-                DestroyFunc  = destroyFunc;
+                CreateFunc = fcn;
+                DestroyFunc = destroyFunc;
                 this.primary = primary;
             }
         }
