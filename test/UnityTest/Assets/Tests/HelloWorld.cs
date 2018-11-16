@@ -10,14 +10,6 @@ namespace Box2DSharp.Tests
 {
     public class HelloWorld : TestBase
     {
-        public double X;
-
-        public double Y;
-
-        public double Angle;
-
-        public bool IsAwake;
-
         private Body _body;
 
         private void Start()
@@ -43,8 +35,8 @@ namespace Box2DSharp.Tests
             // Define the dynamic body fixture.
             var fixtureDef = new FixtureDef
             {
-                shape    = dynamicBox,
-                density  = 1.0f,
+                shape = dynamicBox,
+                density = 1.0f,
                 friction = 0.3f
             };
 
@@ -56,30 +48,14 @@ namespace Box2DSharp.Tests
             var body = World.CreateBody(bodyDef);
             body.CreateFixture(fixtureDef);
 
-            Debug.Log("World initialized");
             _body = body;
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 100; i++)
             {
-                bodyDef.Position = new Vector2(UnityEngine.Random.Range(0, 500), UnityEngine.Random.Range(0, 500));
-                bodyDef.Angle    = UnityEngine.Random.Range(0, 360);
+                bodyDef.Position = new Vector2(UnityEngine.Random.Range(-50, 50), UnityEngine.Random.Range(0, 500));
+                bodyDef.Angle = UnityEngine.Random.Range(0, 360);
                 World.CreateBody(bodyDef).CreateFixture(fixtureDef);
             }
-        }
-
-        private void FixedUpdate()
-        {
-            var t = _body.GetTransform();
-            X     = t.Position.X;
-            Y     = t.Position.Y;
-            Angle = t.Rotation.Angle;
-            var v  = _body.LinearVelocity;
-            var vd = _body.LinearDamping;
-            var a  = _body.AngularVelocity;
-            var ad = _body.AngularDamping;
-            IsAwake = _body.IsAwake;
-
-            //Debug.Log($"{v},{vd} ; {a},{ad} ; {IsAwake}");
         }
     }
 }

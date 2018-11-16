@@ -26,6 +26,7 @@ packages/
 *.sdf
 /CSharp/CSharp.sln.ide
 /test/UnityTest/Library
+/test/UnityTest/Temp
 /.vs
 .idea/
 .DS_Store

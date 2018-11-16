@@ -55,14 +55,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\BoxDrawer.cs" />
+    <Compile Include="Assets\FrameManager.cs" />
     <Compile Include="Assets\Inspection\BoundBase.cs" />
     <Compile Include="Assets\Inspection\BoundCircle.cs" />
     <Compile Include="Assets\Inspection\BoundRect.cs" />
     <Compile Include="Assets\Inspection\DebugDrawer.cs" />
     <Compile Include="Assets\Inspection\FpsDisplay.cs" />
     <Compile Include="Assets\Inspection\Utils.cs" />
+    <Compile Include="Assets\TestBase.cs" />
+    <Compile Include="Assets\TestController.cs" />
+    <Compile Include="Assets\Tests\Chain.cs" />
     <Compile Include="Assets\Tests\HelloWorld.cs" />
-    <Compile Include="Assets\Tests\TestBase.cs" />
     <Compile Include="Assets\UnityLogger.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
