@@ -340,31 +340,4 @@ namespace Box2DSharp.Collision
             Count         = 3;
         }
     }
-
-    /// Used to warm start b2Distance.
-    /// Set count to zero on first call.
-    public struct SimplexCache
-    {
-        /// length or area
-        public float Metric;
-
-        public ushort Count;
-
-        /// vertices on shape A
-        public byte[] IndexA;
-
-        /// vertices on shape B
-        public byte[] IndexB;
-
-        public static SimplexCache Create()
-        {
-            return new SimplexCache
-            {
-                Metric = 0,
-                Count  = 0,
-                IndexA = new byte[3],
-                IndexB = new byte[3]
-            };
-        }
-    }
 }
