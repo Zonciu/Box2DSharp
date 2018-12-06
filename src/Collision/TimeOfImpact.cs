@@ -306,28 +306,30 @@ namespace Box2DSharp.Collision
     }
 
     //
-    public class SeparationFunction
+    public struct SeparationFunction
     {
         public enum FunctionType
         {
-            e_points,
+            Points,
 
-            e_faceA,
+            FaceA,
 
-            e_faceB
+            FaceB
         }
 
-        public Vector2 m_axis;
+        public Vector2 Axis;
 
-        public Vector2 m_localPoint;
+        public Vector2 LocalPoint;
 
-        public DistanceProxy m_proxyA;
+        public DistanceProxy ProxyA;
 
-        public DistanceProxy m_proxyB;
+        public DistanceProxy ProxyB;
 
-        public Sweep m_sweepA, m_sweepB;
+        public Sweep SweepA;
 
-        public FunctionType m_type;
+        public Sweep SweepB;
+
+        public FunctionType Type;
 
         // TODO_ERIN might not need to return the separation
 
@@ -339,42 +341,42 @@ namespace Box2DSharp.Collision
             in Sweep         sweepB,
             float            t1)
         {
-            m_proxyA = proxyA;
-            m_proxyB = proxyB;
+            ProxyA = proxyA;
+            ProxyB = proxyB;
             int count = cache.Count;
             Debug.Assert(0 < count && count < 3);
 
-            m_sweepA = sweepA;
-            m_sweepB = sweepB;
+            SweepA = sweepA;
+            this.SweepB = sweepB;
 
-            m_sweepA.GetTransform(out var xfA, t1);
-            m_sweepB.GetTransform(out var xfB, t1);
+            SweepA.GetTransform(out var xfA, t1);
+            this.SweepB.GetTransform(out var xfB, t1);
 
             if (count == 1)
             {
-                m_type = FunctionType.e_points;
-                var localPointA = m_proxyA.GetVertex(cache.IndexA.Value0);
-                var localPointB = m_proxyB.GetVertex(cache.IndexB.Value0);
+                Type = FunctionType.Points;
+                var localPointA = ProxyA.GetVertex(cache.IndexA.Value0);
+                var localPointB = ProxyB.GetVertex(cache.IndexB.Value0);
                 var pointA      = MathUtils.Mul(xfA, localPointA);
                 var pointB      = MathUtils.Mul(xfB, localPointB);
-                m_axis = pointB - pointA;
-                var s = m_axis.Normalize();
+                Axis = pointB - pointA;
+                var s = Axis.Normalize();
                 return s;
             }
 
             if (cache.IndexA.Value0 == cache.IndexA.Value1)
             {
                 // Two points on B and one on A.
-                m_type = FunctionType.e_faceB;
+                Type = FunctionType.FaceB;
                 var localPointB1 = proxyB.GetVertex(cache.IndexB.Value0);
                 var localPointB2 = proxyB.GetVertex(cache.IndexB.Value1);
 
-                m_axis = MathUtils.Cross(localPointB2 - localPointB1, 1.0f);
-                m_axis.Normalize();
-                var normal = MathUtils.Mul(xfB.Rotation, m_axis);
+                Axis = MathUtils.Cross(localPointB2 - localPointB1, 1.0f);
+                Axis.Normalize();
+                var normal = MathUtils.Mul(xfB.Rotation, Axis);
 
-                m_localPoint = 0.5f * (localPointB1 + localPointB2);
-                var pointB = MathUtils.Mul(xfB, m_localPoint);
+                LocalPoint = 0.5f * (localPointB1 + localPointB2);
+                var pointB = MathUtils.Mul(xfB, LocalPoint);
 
                 var localPointA = proxyA.GetVertex(cache.IndexA.Value0);
                 var pointA      = MathUtils.Mul(xfA, localPointA);
@@ -382,7 +384,7 @@ namespace Box2DSharp.Collision
                 var s = MathUtils.Dot(pointA - pointB, normal);
                 if (s < 0.0f)
                 {
-                    m_axis = -m_axis;
+                    Axis = -Axis;
                     s      = -s;
                 }
 
@@ -391,24 +393,24 @@ namespace Box2DSharp.Collision
             else
             {
                 // Two points on A and one or two points on B.
-                m_type = FunctionType.e_faceA;
-                var localPointA1 = m_proxyA.GetVertex(cache.IndexA.Value0);
-                var localPointA2 = m_proxyA.GetVertex(cache.IndexA.Value1);
+                Type = FunctionType.FaceA;
+                var localPointA1 = ProxyA.GetVertex(cache.IndexA.Value0);
+                var localPointA2 = ProxyA.GetVertex(cache.IndexA.Value1);
 
-                m_axis = MathUtils.Cross(localPointA2 - localPointA1, 1.0f);
-                m_axis.Normalize();
-                var normal = MathUtils.Mul(xfA.Rotation, m_axis);
+                Axis = MathUtils.Cross(localPointA2 - localPointA1, 1.0f);
+                Axis.Normalize();
+                var normal = MathUtils.Mul(xfA.Rotation, Axis);
 
-                m_localPoint = 0.5f * (localPointA1 + localPointA2);
-                var pointA = MathUtils.Mul(xfA, m_localPoint);
+                LocalPoint = 0.5f * (localPointA1 + localPointA2);
+                var pointA = MathUtils.Mul(xfA, LocalPoint);
 
-                var localPointB = m_proxyB.GetVertex(cache.IndexB.Value0);
+                var localPointB = ProxyB.GetVertex(cache.IndexB.Value0);
                 var pointB      = MathUtils.Mul(xfB, localPointB);
 
                 var s = MathUtils.Dot(pointB - pointA, normal);
                 if (s < 0.0f)
                 {
-                    m_axis = -m_axis;
+                    Axis = -Axis;
                     s      = -s;
                 }
 
@@ -419,57 +421,57 @@ namespace Box2DSharp.Collision
         //
         public float FindMinSeparation(out int indexA, out int indexB, float t)
         {
-            m_sweepA.GetTransform(out var xfA, t);
-            m_sweepB.GetTransform(out var xfB, t);
+            SweepA.GetTransform(out var xfA, t);
+            SweepB.GetTransform(out var xfB, t);
 
-            switch (m_type)
+            switch (Type)
             {
-            case FunctionType.e_points:
+            case FunctionType.Points:
             {
-                var axisA = MathUtils.MulT(xfA.Rotation, m_axis);
-                var axisB = MathUtils.MulT(xfB.Rotation, -m_axis);
+                var axisA = MathUtils.MulT(xfA.Rotation, Axis);
+                var axisB = MathUtils.MulT(xfB.Rotation, -Axis);
 
-                indexA = m_proxyA.GetSupport(axisA);
-                indexB = m_proxyB.GetSupport(axisB);
+                indexA = ProxyA.GetSupport(axisA);
+                indexB = ProxyB.GetSupport(axisB);
 
-                var localPointA = m_proxyA.GetVertex(indexA);
-                var localPointB = m_proxyB.GetVertex(indexB);
+                var localPointA = ProxyA.GetVertex(indexA);
+                var localPointB = ProxyB.GetVertex(indexB);
 
                 var pointA = MathUtils.Mul(xfA, localPointA);
                 var pointB = MathUtils.Mul(xfB, localPointB);
 
-                var separation = MathUtils.Dot(pointB - pointA, m_axis);
+                var separation = MathUtils.Dot(pointB - pointA, Axis);
                 return separation;
             }
 
-            case FunctionType.e_faceA:
+            case FunctionType.FaceA:
             {
-                var normal = MathUtils.Mul(xfA.Rotation, m_axis);
-                var pointA = MathUtils.Mul(xfA, m_localPoint);
+                var normal = MathUtils.Mul(xfA.Rotation, Axis);
+                var pointA = MathUtils.Mul(xfA, LocalPoint);
 
                 var axisB = MathUtils.MulT(xfB.Rotation, -normal);
 
                 indexA = -1;
-                indexB = m_proxyB.GetSupport(axisB);
+                indexB = ProxyB.GetSupport(axisB);
 
-                var localPointB = m_proxyB.GetVertex(indexB);
+                var localPointB = ProxyB.GetVertex(indexB);
                 var pointB      = MathUtils.Mul(xfB, localPointB);
 
                 var separation = MathUtils.Dot(pointB - pointA, normal);
                 return separation;
             }
 
-            case FunctionType.e_faceB:
+            case FunctionType.FaceB:
             {
-                var normal = MathUtils.Mul(xfB.Rotation, m_axis);
-                var pointB = MathUtils.Mul(xfB, m_localPoint);
+                var normal = MathUtils.Mul(xfB.Rotation, Axis);
+                var pointB = MathUtils.Mul(xfB, LocalPoint);
 
                 var axisA = MathUtils.MulT(xfA.Rotation, -normal);
 
                 indexB = -1;
-                indexA = m_proxyA.GetSupport(axisA);
+                indexA = ProxyA.GetSupport(axisA);
 
-                var localPointA = m_proxyA.GetVertex(indexA);
+                var localPointA = ProxyA.GetVertex(indexA);
                 var pointA      = MathUtils.Mul(xfA, localPointA);
 
                 var separation = MathUtils.Dot(pointA - pointB, normal);
@@ -487,41 +489,41 @@ namespace Box2DSharp.Collision
         //
         public float Evaluate(int indexA, int indexB, float t)
         {
-            m_sweepA.GetTransform(out var xfA, t);
-            m_sweepB.GetTransform(out var xfB, t);
+            SweepA.GetTransform(out var xfA, t);
+            SweepB.GetTransform(out var xfB, t);
 
-            switch (m_type)
+            switch (Type)
             {
-            case FunctionType.e_points:
+            case FunctionType.Points:
             {
-                var localPointA = m_proxyA.GetVertex(indexA);
-                var localPointB = m_proxyB.GetVertex(indexB);
+                var localPointA = ProxyA.GetVertex(indexA);
+                var localPointB = ProxyB.GetVertex(indexB);
 
                 var pointA     = MathUtils.Mul(xfA, localPointA);
                 var pointB     = MathUtils.Mul(xfB, localPointB);
-                var separation = MathUtils.Dot(pointB - pointA, m_axis);
+                var separation = MathUtils.Dot(pointB - pointA, Axis);
 
                 return separation;
             }
 
-            case FunctionType.e_faceA:
+            case FunctionType.FaceA:
             {
-                var normal = MathUtils.Mul(xfA.Rotation, m_axis);
-                var pointA = MathUtils.Mul(xfA, m_localPoint);
+                var normal = MathUtils.Mul(xfA.Rotation, Axis);
+                var pointA = MathUtils.Mul(xfA, LocalPoint);
 
-                var localPointB = m_proxyB.GetVertex(indexB);
+                var localPointB = ProxyB.GetVertex(indexB);
                 var pointB      = MathUtils.Mul(xfB, localPointB);
 
                 var separation = MathUtils.Dot(pointB - pointA, normal);
                 return separation;
             }
 
-            case FunctionType.e_faceB:
+            case FunctionType.FaceB:
             {
-                var normal = MathUtils.Mul(xfB.Rotation, m_axis);
-                var pointB = MathUtils.Mul(xfB, m_localPoint);
+                var normal = MathUtils.Mul(xfB.Rotation, Axis);
+                var pointB = MathUtils.Mul(xfB, LocalPoint);
 
-                var localPointA = m_proxyA.GetVertex(indexA);
+                var localPointA = ProxyA.GetVertex(indexA);
                 var pointA      = MathUtils.Mul(xfA, localPointA);
 
                 var separation = MathUtils.Dot(pointA - pointB, normal);
