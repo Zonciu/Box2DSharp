@@ -243,7 +243,7 @@ namespace Box2DSharp.Collision
 
                 if (separation <= totalRadius)
                 {
-                    ref var cp = ref manifold.Points[pointCount];
+                    ref var cp = ref manifold.Points.GetRef(pointCount);
                     cp.LocalPoint = MathUtils.MulT(xf2, clipPoints2[i].Vector);
                     cp.Id         = clipPoints2[i].Id;
                     if (flip != default)

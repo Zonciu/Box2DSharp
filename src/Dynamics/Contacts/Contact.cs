@@ -168,9 +168,9 @@ namespace Box2DSharp.Dynamics.Contacts
 
         /// Get the contact manifold. Do not modify the manifold unless you understand the
         /// internals of Box2D.
-        public Manifold GetManifold()
+        public ref readonly Manifold GetManifold()
         {
-            return Manifold;
+            return ref Manifold;
         }
 
         /// Get the world manifold.

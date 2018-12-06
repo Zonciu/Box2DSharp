@@ -21,8 +21,11 @@ namespace Box2DSharp.Collision.Collider
     /// This structure is stored across time steps, so we keep it small.
     public class Manifold
     {
-        /// the points of contact
-        public readonly ManifoldPoint[] Points = new ManifoldPoint[Settings.MaxManifoldPoints];
+        
+        /// <summary>
+        /// the points of contact, size Settings.MaxManifoldPoints
+        /// </summary>
+        public FixedArray2<ManifoldPoint> Points;
 
         /// not use for Type::e_points
         public Vector2 LocalNormal = Vector2.Zero;

@@ -80,9 +80,9 @@ namespace Box2DSharp.Collision
                 manifold.Type       = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint           = P;
-                manifold.Points[0].Id.Key     = 0;
-                manifold.Points[0].Id.ContactFeature      = cf;
-                manifold.Points[0].LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key     = 0;
+                manifold.Points.Value0.Id.ContactFeature      = cf;
+                manifold.Points.Value0.LocalPoint = circleB.Position;
                 return;
             }
 
@@ -118,9 +118,9 @@ namespace Box2DSharp.Collision
                 manifold.Type       = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint           = P;
-                manifold.Points[0].Id.Key     = 0;
-                manifold.Points[0].Id.ContactFeature      = cf;
-                manifold.Points[0].LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key     = 0;
+                manifold.Points.Value0.Id.ContactFeature      = cf;
+                manifold.Points.Value0.LocalPoint = circleB.Position;
                 return;
             }
 
@@ -150,9 +150,9 @@ namespace Box2DSharp.Collision
                 manifold.Type                 = ManifoldType.FaceA;
                 manifold.LocalNormal          = n;
                 manifold.LocalPoint           = A;
-                manifold.Points[0].Id.Key     = 0;
-                manifold.Points[0].Id.ContactFeature      = cf;
-                manifold.Points[0].LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key     = 0;
+                manifold.Points.Value0.Id.ContactFeature      = cf;
+                manifold.Points.Value0.LocalPoint = circleB.Position;
             }
         }
 
@@ -646,7 +646,7 @@ namespace Box2DSharp.Collision
 
                     if (separation <= Radius)
                     {
-                        ref var cp = ref manifold.Points[pointCount];
+                        ref var cp = ref manifold.Points.GetRef(pointCount);
 
                         if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                         {

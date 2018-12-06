@@ -588,12 +588,13 @@ namespace Box2DSharp.Dynamics.Contacts
             for (var i = 0; i < _count; ++i)
             {
                 var vc       = VelocityConstraints[i];
-                var manifold = _contacts[vc.ContactIndex].GetManifold();
+                ref readonly var manifold = ref _contacts[vc.ContactIndex].GetManifold();
 
                 for (var j = 0; j < vc.PointCount; ++j)
                 {
-                    manifold.Points[j].NormalImpulse  = vc.Points[j].NormalImpulse;
-                    manifold.Points[j].TangentImpulse = vc.Points[j].TangentImpulse;
+                    ref var point =ref manifold.Points.GetRef(j);
+                    point.NormalImpulse  = vc.Points[j].NormalImpulse;
+                    point.TangentImpulse = vc.Points[j].TangentImpulse;
                 }
             }
         }
