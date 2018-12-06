@@ -188,8 +188,8 @@ namespace Box2DSharp.Collision
                 saveCount = simplex.Count;
                 for (var i = 0; i < saveCount; ++i)
                 {
-                    saveA[i] = vertices[i].IndexA;
-                    saveB[i] = vertices[i].IndexB;
+                    saveA[i] = vertices.GetRef(i).IndexA;
+                    saveB[i] = vertices.GetRef(i).IndexB;
                 }
 
                 switch (simplex.Count)
@@ -231,7 +231,7 @@ namespace Box2DSharp.Collision
                 }
 
                 // Compute a tentative new simplex vertex using support points.
-                ref var vertex = ref vertices[simplex.Count];
+                ref var vertex = ref vertices.GetRef(simplex.Count);
                 vertex.IndexA = proxyA.GetSupport(MathUtils.MulT(transformA.Rotation, -d));
                 vertex.Wa     = MathUtils.Mul(transformA, proxyA.GetVertex(vertex.IndexA));
 
@@ -327,7 +327,7 @@ namespace Box2DSharp.Collision
             var simplex = new Simplex {Count = 0};
 
             // Get simplex vertices as an array.
-            ref readonly var vertices = ref simplex.Vertices;
+            // ref var vertices = ref simplex.Vertices;
 
             // Get support point in -r direction
             var indexA = proxyA.GetSupport(MathUtils.MulT(xfA.Rotation, -r));
@@ -384,7 +384,7 @@ namespace Box2DSharp.Collision
                 // Shift by lambda * r because we want the closest point to the current clip point.
                 // Note that the support point p is not shifted because we want the plane equation
                 // to be formed in unshifted space.
-                ref var vertex = ref vertices[simplex.Count];
+                ref var vertex = ref simplex.Vertices.GetRef(simplex.Count);
                 vertex.IndexA =  indexB;
                 vertex.Wa     =  wB + lambda * r;
                 vertex.IndexB =  indexA;
