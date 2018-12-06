@@ -174,20 +174,19 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Get the world manifold.
-        public WorldManifold GetWorldManifold()
+        public void GetWorldManifold(out WorldManifold worldManifold)
         {
             var bodyA = FixtureA.GetBody();
             var bodyB = FixtureB.GetBody();
             var shapeA = FixtureA.GetShape();
             var shapeB = FixtureB.GetShape();
-            var worldManifold = WorldManifold.Create();
+            worldManifold = new WorldManifold();
             worldManifold.Initialize(
                 Manifold,
                 bodyA.GetTransform(),
                 shapeA.Radius,
                 bodyB.GetTransform(),
                 shapeB.Radius);
-            return worldManifold;
         }
 
         /// Is this contact touching?

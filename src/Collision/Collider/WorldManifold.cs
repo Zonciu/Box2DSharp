@@ -4,17 +4,8 @@ using Box2DSharp.Common;
 namespace Box2DSharp.Collision.Collider
 {
     /// This is used to compute the current state of a contact manifold.
-    public class WorldManifold
+    public struct WorldManifold
     {
-        public static WorldManifold Create()
-        {
-            return new WorldManifold()
-            {
-                points      = new Vector2[Settings.MaxManifoldPoints],
-                separations = new float[Settings.MaxManifoldPoints]
-            };
-        }
-
         /// Evaluate the manifold with supplied transforms. This assumes
         /// modest motion from the original state. This does not change the
         /// point count, impulses, etc. The radii must come from the shapes
@@ -35,66 +26,70 @@ namespace Box2DSharp.Collision.Collider
             {
             case ManifoldType.Circles:
             {
-                normal.Set(1.0f, 0.0f);
+                Normal.Set(1.0f, 0.0f);
                 var pointA = MathUtils.Mul(xfA, manifold.LocalPoint);
                 var pointB = MathUtils.Mul(xfB, manifold.Points[0].LocalPoint);
                 if (MathUtils.DistanceSquared(pointA, pointB) > Settings.Epsilon * Settings.Epsilon)
                 {
-                    normal = pointB - pointA;
-                    normal.Normalize();
+                    Normal = pointB - pointA;
+                    Normal.Normalize();
                 }
 
-                var cA = pointA + radiusA * normal;
-                var cB = pointB - radiusB * normal;
-                points[0]      = 0.5f * (cA + cB);
-                separations[0] = MathUtils.Dot(cB - cA, normal);
+                var cA = pointA + radiusA * Normal;
+                var cB = pointB - radiusB * Normal;
+                Points[0]      = 0.5f * (cA + cB);
+                Separations[0] = MathUtils.Dot(cB - cA, Normal);
             }
                 break;
 
             case ManifoldType.FaceA:
             {
-                normal = MathUtils.Mul(xfA.Rotation, manifold.LocalNormal);
+                Normal = MathUtils.Mul(xfA.Rotation, manifold.LocalNormal);
                 var planePoint = MathUtils.Mul(xfA, manifold.LocalPoint);
 
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfB, manifold.Points[i].LocalPoint);
-                    var cA        = clipPoint + (radiusA - MathUtils.Dot(clipPoint - planePoint, normal)) * normal;
-                    var cB        = clipPoint - radiusB * normal;
-                    points[i]      = 0.5f * (cA + cB);
-                    separations[i] = MathUtils.Dot(cB - cA, normal);
+                    var cA        = clipPoint + (radiusA - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cB        = clipPoint - radiusB * Normal;
+                    Points[i]      = 0.5f * (cA + cB);
+                    Separations[i] = MathUtils.Dot(cB - cA, Normal);
                 }
             }
                 break;
 
             case ManifoldType.FaceB:
             {
-                normal = MathUtils.Mul(xfB.Rotation, manifold.LocalNormal);
+                Normal = MathUtils.Mul(xfB.Rotation, manifold.LocalNormal);
                 var planePoint = MathUtils.Mul(xfB, manifold.LocalPoint);
 
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfA, manifold.Points[i].LocalPoint);
-                    var cB        = clipPoint + (radiusB - MathUtils.Dot(clipPoint - planePoint, normal)) * normal;
-                    var cA        = clipPoint - radiusA * normal;
-                    points[i]      = 0.5f * (cA + cB);
-                    separations[i] = MathUtils.Dot(cA - cB, normal);
+                    var cB        = clipPoint + (radiusB - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cA        = clipPoint - radiusA * Normal;
+                    Points[i]      = 0.5f * (cA + cB);
+                    Separations[i] = MathUtils.Dot(cA - cB, Normal);
                 }
 
                 // Ensure normal points from A to B.
-                normal = -normal;
+                Normal = -Normal;
             }
                 break;
             }
         }
 
         /// world vector pointing from A to B
-        public Vector2 normal;
+        public Vector2 Normal;
 
-        /// world contact point (point of intersection)
-        public Vector2[] points;
+        /// <summary>
+        /// world contact point (point of intersection), size Settings.MaxManifoldPoints
+        /// </summary>
+        public FixedArray2<Vector2> Points;
 
-        /// a negative value indicates overlap, in meters
-        public float[] separations;
+        /// <summary>
+        /// a negative value indicates overlap, in meters, size Settings.MaxManifoldPoints
+        /// </summary>
+        public FixedArray2<float> Separations;
     };
 }

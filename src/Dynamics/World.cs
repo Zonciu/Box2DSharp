@@ -1334,10 +1334,10 @@ namespace Box2DSharp.Dynamics
                 foreach (var contact in ContactManager.ContactList)
                 {
                     var manifold = contact.GetManifold();
-                    var worldManifold = contact.GetWorldManifold();
+                    contact.GetWorldManifold(out var worldManifold);
                     for (var i = 0; i < manifold.PointCount; i++)
                     {
-                        _drawer.DrawPoint(worldManifold.points[i], 0.1f, Color.Blue);
+                        _drawer.DrawPoint(worldManifold.Points[i], 0.1f, Color.Blue);
                     }
                 }
             }

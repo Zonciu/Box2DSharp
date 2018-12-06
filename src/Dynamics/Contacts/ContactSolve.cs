@@ -154,7 +154,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 xfA.Position = cA - MathUtils.Mul(xfA.Rotation, localCenterA);
                 xfB.Position = cB - MathUtils.Mul(xfB.Rotation, localCenterB);
 
-                var worldManifold = WorldManifold.Create();
+                var worldManifold = new WorldManifold();
                 worldManifold.Initialize(
                     manifold,
                     xfA,
@@ -162,15 +162,15 @@ namespace Box2DSharp.Dynamics.Contacts
                     xfB,
                     radiusB);
 
-                vc.Normal = worldManifold.normal;
+                vc.Normal = worldManifold.Normal;
 
                 var pointCount = vc.PointCount;
                 for (var j = 0; j < pointCount; ++j)
                 {
                     var vcp = vc.Points[j];
 
-                    vcp.Ra = worldManifold.points[j] - cA;
-                    vcp.Rb = worldManifold.points[j] - cB;
+                    vcp.Ra = worldManifold.Points[j] - cA;
+                    vcp.Rb = worldManifold.Points[j] - cB;
 
                     var rnA = MathUtils.Cross(vcp.Ra, vc.Normal);
                     var rnB = MathUtils.Cross(vcp.Rb, vc.Normal);
