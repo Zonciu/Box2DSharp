@@ -3,6 +3,7 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -11,23 +12,36 @@ namespace Box2DSharp.Dynamics.Contacts
     /// </summary>
     public class EdgeAndCircleContact : Contact
     {
-        private EdgeAndCircleContact(Fixture fixtureA, Fixture fixtureB) : base(fixtureA, 0, fixtureB, 0)
+        private static readonly ObjectPool<EdgeAndCircleContact> _pool =
+            new DefaultObjectPool<EdgeAndCircleContact>(new PoolPolicy());
+
+        private class PoolPolicy : IPooledObjectPolicy<EdgeAndCircleContact>
         {
-            Debug.Assert(FixtureA.GetShapeType() == ShapeType.Edge);
-            Debug.Assert(FixtureB.GetShapeType() == ShapeType.Circle);
+            public EdgeAndCircleContact Create()
+            {
+                return new EdgeAndCircleContact();
+            }
+
+            public bool Return(EdgeAndCircleContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
 
-        public static Contact Create(
-            Fixture fixtureA,
-            int     indexA,
-            Fixture fixtureB,
-            int     indexB)
+        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            return new EdgeAndCircleContact(fixtureA, fixtureB);
+            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Edge);
+            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Circle);
+            var contact = _pool.Get();
+            contact.Initialize(fixtureA, 0, fixtureB, 0);
+            return contact;
         }
 
-        internal static void Destroy(Contact contact)
-        { }
+        public static void Destroy(Contact contact)
+        {
+            _pool.Return((EdgeAndCircleContact) contact);
+        }
 
         /// <inheritdoc />
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)

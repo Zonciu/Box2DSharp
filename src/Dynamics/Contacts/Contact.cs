@@ -14,8 +14,6 @@ namespace Box2DSharp.Dynamics.Contacts
         private static readonly Dictionary<(ShapeType, ShapeType), ContactRegister> _contactRegisters =
             new Dictionary<(ShapeType, ShapeType), ContactRegister>();
 
-        internal static bool Initialized;
-
         internal Fixture FixtureA;
 
         internal Fixture FixtureB;
@@ -74,7 +72,7 @@ namespace Box2DSharp.Dynamics.Contacts
             }
         }
 
-        internal Contact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
+        internal void Initialize(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Flags = ContactFlag.EnabledFlag;
 
@@ -103,12 +101,6 @@ namespace Box2DSharp.Dynamics.Contacts
             Fixture fixtureB,
             int indexB)
         {
-            if (Initialized == false)
-            {
-                //InitializeRegisters();
-                Initialized = true;
-            }
-
             var type1 = fixtureA.GetShapeType();
             var type2 = fixtureB.GetShapeType();
 
@@ -130,8 +122,6 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal static void DestroyContact(Contact contact)
         {
-            Debug.Assert(Initialized);
-
             var fixtureA = contact.FixtureA;
             var fixtureB = contact.FixtureB;
 
@@ -154,6 +144,24 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 throw new DirectoryNotFoundException($"{typeA}:{typeB} contact not registered");
             }
+        }
+
+        protected virtual void Reset()
+        {
+            FixtureA = default;
+            FixtureB = default;
+            Flags = default;
+            Friction = default;
+            IndexA = default;
+            IndexB = default;
+            Manifold = default;
+            Node = default;
+            NodeA = default;
+            NodeB = default;
+            Restitution = default;
+            TangentSpeed = default;
+            Toi = default;
+            ToiCount = default;
         }
 
         private static float MixFriction(float friction1, float friction2)

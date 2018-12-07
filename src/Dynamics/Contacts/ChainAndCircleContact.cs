@@ -3,36 +3,43 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
     public class ChainAndCircleContact : Contact
     {
-        private ChainAndCircleContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB) : base(
-            fixtureA,
-            indexA,
-            fixtureB,
-            indexB)
+        private static readonly ObjectPool<ChainAndCircleContact> _pool =
+            new DefaultObjectPool<ChainAndCircleContact>(new PoolPolicy());
+
+        private class PoolPolicy : IPooledObjectPolicy<ChainAndCircleContact>
         {
-            Debug.Assert(FixtureA.GetShapeType() == ShapeType.Chain);
-            Debug.Assert(FixtureB.GetShapeType() == ShapeType.Circle);
+            public ChainAndCircleContact Create()
+            {
+                return new ChainAndCircleContact();
+            }
+
+            public bool Return(ChainAndCircleContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
 
-        public static Contact Create(
-            Fixture fixtureA,
-            int     indexA,
-            Fixture fixtureB,
-            int     indexB)
+        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            return new ChainAndCircleContact(fixtureA, indexA, fixtureB, indexB);
+            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Chain);
+            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Circle);
+            var contact = _pool.Get();
+            contact.Initialize(fixtureA, indexA, fixtureB, indexB);
+            return contact;
         }
 
         public static void Destroy(Contact contact)
         {
-            // Todo return to pool
+            _pool.Return((ChainAndCircleContact) contact);
         }
 
-        /// <inheritdoc />
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
             var chain = (ChainShape) FixtureA.GetShape();

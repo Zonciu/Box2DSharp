@@ -3,6 +3,7 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -11,23 +12,36 @@ namespace Box2DSharp.Dynamics.Contacts
     /// </summary>
     public class EdgeAndPolygonContact : Contact
     {
-        private EdgeAndPolygonContact(Fixture fixtureA, Fixture fixtureB) : base(fixtureA, 0, fixtureB, 0)
+        private static readonly ObjectPool<EdgeAndPolygonContact> _pool =
+            new DefaultObjectPool<EdgeAndPolygonContact>(new PoolPolicy());
+
+        private class PoolPolicy : IPooledObjectPolicy<EdgeAndPolygonContact>
         {
-            Debug.Assert(FixtureA.GetShapeType() == ShapeType.Edge);
-            Debug.Assert(FixtureB.GetShapeType() == ShapeType.Polygon);
+            public EdgeAndPolygonContact Create()
+            {
+                return new EdgeAndPolygonContact();
+            }
+
+            public bool Return(EdgeAndPolygonContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
 
-        internal static Contact Create(
-            Fixture fixtureA,
-            int       indexA,
-            Fixture fixtureB,
-            int       indexB)
+        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            return new EdgeAndPolygonContact(fixtureA, fixtureB);
+            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Edge);
+            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Polygon);
+            var contact = _pool.Get();
+            contact.Initialize(fixtureA, 0, fixtureB, 0);
+            return contact;
         }
 
-        internal static void Destroy(Contact contact)
-        { }
+        public static void Destroy(Contact contact)
+        {
+            _pool.Return((EdgeAndPolygonContact) contact);
+        }
 
         /// <inheritdoc />
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)

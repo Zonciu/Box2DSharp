@@ -2,30 +2,43 @@ using System.Diagnostics;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
     internal class CircleContact : Contact
     {
-        internal static Contact Create(
-            Fixture fixtureA,
-            int     indexA,
-            Fixture fixtureB,
-            int     indexB)
+        private static readonly ObjectPool<CircleContact> _pool =
+            new DefaultObjectPool<CircleContact>(new PoolPolicy());
+
+        private class PoolPolicy : IPooledObjectPolicy<CircleContact>
         {
-            return new CircleContact(fixtureA, fixtureB);
+            public CircleContact Create()
+            {
+                return new CircleContact();
+            }
+
+            public bool Return(CircleContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
 
-        internal static void Destroy(Contact contact)
-        { }
-
-        private CircleContact(Fixture fixtureA, Fixture fixtureB) : base(fixtureA, 0, fixtureB, 0)
+        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            Debug.Assert(FixtureA.GetShapeType() == ShapeType.Circle);
-            Debug.Assert(FixtureB.GetShapeType() == ShapeType.Circle);
+            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Circle);
+            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Circle);
+            var contact = _pool.Get();
+            contact.Initialize(fixtureA, 0, fixtureB, 0);
+            return contact;
         }
 
-        /// <inheritdoc />
+        public static void Destroy(Contact contact)
+        {
+            _pool.Return((CircleContact) contact);
+        }
+
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
             Collision.CollisionUtils.CollideCircles(
