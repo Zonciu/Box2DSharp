@@ -11,8 +11,8 @@ namespace Box2DSharp.Collision
         public static void GetPointStates(
             PointState[] state1,
             PointState[] state2,
-            ref Manifold manifold1,
-            ref Manifold manifold2)
+            in Manifold manifold1,
+            in Manifold manifold2)
         {
             for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
             {
