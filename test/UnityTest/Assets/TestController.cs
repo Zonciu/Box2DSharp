@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Reflection;
+using Box2DSharp.Inspection;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +9,8 @@ namespace Box2DSharp
 {
     public class TestController : MonoBehaviour
     {
+        public TestSettings Settings;
+
         public Dropdown Dropdown;
 
         public Button RestartButton;
@@ -30,13 +34,29 @@ namespace Box2DSharp
             }
 
             _testTypes = typeof(TestBase).Assembly.GetTypes().Where(e => e.BaseType == typeof(TestBase)).ToArray();
-            Debug.Log(_testTypes.Length);
+
+            Settings = gameObject.GetComponent<TestSettings>() ?? gameObject.AddComponent<TestSettings>();
+            Settings.DebugDrawer = DebugDrawer.GetDrawer();
+            Settings.WorldDrawer = new BoxDrawer {Drawer = Settings.DebugDrawer};
 
             Dropdown.ClearOptions();
             Dropdown.AddOptions(_testTypes.Select(e => e.Name).ToList());
             Dropdown.onValueChanged.AddListener(OnTestSelect);
 
             RestartButton.onClick.AddListener(Restart);
+
+            foreach (var toggleField in typeof(TestSettings)
+                                       .GetFields()
+                                       .Where(f => f.GetCustomAttribute<ToggleAttribute>() != null))
+            {
+                var toggleName = $"Canvas/{toggleField.Name}";
+                var toggleObject = GameObject.Find(toggleName)
+                                ?? throw new NullReferenceException($"{toggleName} not found");
+                var toggle = toggleObject.GetComponent<Toggle>();
+                toggle.isOn = (bool) toggleField.GetValue(Settings);
+                toggle.onValueChanged.AddListener(
+                    value => { toggleField.SetValue(Settings, value); });
+            }
         }
 
         private void Start()

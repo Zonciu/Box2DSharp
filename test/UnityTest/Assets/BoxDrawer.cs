@@ -131,7 +131,7 @@ namespace Box2DSharp
         /// <inheritdoc />
         public void DrawPoint(in Vector2 p, float size, in Color color)
         {
-            Drawer.PostPoint((p.ToUnityVector3(), 0.1f, color.ToUnityColor()));
+            Drawer.PostPoint((p.ToUnityVector3(), size / 100, color.ToUnityColor()));
         }
     }
 }

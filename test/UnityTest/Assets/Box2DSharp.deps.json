@@ -1,29 +1,20 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v2.0/",
-    "signature": "4b53663665e255c6b3ebaf45e2e793e1b290ed43"
+    "signature": "79b082c6eb53f7f0bbb4c4b1f3458f3c5491929d"
   },
   "compilationOptions": {},
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "Box2DSharp/0.0.1-alpha181029": {
+      "Box2DSharp/0.0.2": {
         "dependencies": {
-          "Microsoft.Extensions.ObjectPool": "2.1.1",
           "NETStandard.Library": "2.0.3",
           "System.Memory": "4.5.1",
           "System.Numerics.Vectors": "4.5.0"
         },
         "runtime": {
           "Box2DSharp.dll": {}
-        }
-      },
-      "Microsoft.Extensions.ObjectPool/2.1.1": {
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Extensions.ObjectPool.dll": {
-            "assemblyVersion": "2.1.1.0",
-            "fileVersion": "2.1.1.18157"
-          }
         }
       },
       "Microsoft.NETCore.Platforms/1.1.0": {},
@@ -72,17 +63,10 @@
     }
   },
   "libraries": {
-    "Box2DSharp/0.0.1-alpha181029": {
+    "Box2DSharp/0.0.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
-    },
-    "Microsoft.Extensions.ObjectPool/2.1.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-FE4JmV6FEZdmqSKqvld5TRnvHfJfrw9QzvvZlAiTn+FCiq/1ZaQDpcYBRH7dMHFWIsYD6Z2UTsufdbCGznox8g==",
-      "path": "microsoft.extensions.objectpool/2.1.1",
-      "hashPath": "microsoft.extensions.objectpool.2.1.1.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",

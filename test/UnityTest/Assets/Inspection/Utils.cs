@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Box2DSharp.Inspection
@@ -49,4 +50,34 @@ namespace Box2DSharp.Inspection
             return new System.Numerics.Vector3(vector3.x, vector3.y, 0);
         }
     }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true)]
+    public class ShowOnlyAttribute : PropertyAttribute
+    { }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true)]
+    public class ShowVectorAttribute : PropertyAttribute
+    { }
+#if UNITY_EDITOR
+    [UnityEditor.CustomPropertyDrawer(typeof(ShowOnlyAttribute))]
+    public class ShowOnlyAttributeDrawer : UnityEditor.PropertyDrawer
+    {
+        public override void OnGUI(Rect rect, UnityEditor.SerializedProperty prop, GUIContent label)
+        {
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = false;
+            UnityEditor.EditorGUI.PropertyField(rect, prop);
+            GUI.enabled = wasEnabled;
+        }
+    }
+
+    [UnityEditor.CustomPropertyDrawer(typeof(ShowVectorAttribute))]
+    public class ShowVectorAttributeDrawer : UnityEditor.PropertyDrawer
+    {
+        public override void OnGUI(Rect rect, UnityEditor.SerializedProperty prop, GUIContent label)
+        {
+            UnityEditor.EditorGUI.PropertyField(rect, prop);
+        }
+    }
+#endif
 }
