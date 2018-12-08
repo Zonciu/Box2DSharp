@@ -1,1 +1,1 @@
-dotnet build src -o ..\test\UnityTest\Assets
+dotnet build src -o ..\test\UnityTest\Assets -c Release
