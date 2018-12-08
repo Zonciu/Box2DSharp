@@ -38,7 +38,9 @@ namespace Box2DSharp.Collision
                 var si = Settings.MaxFloat;
                 for (var j = 0; j < count2; ++j)
                 {
-                    var sij = MathUtils.Dot(n, v2s[j] - v1);
+                    //var sij = MathUtils.Dot(n, v2s[j] - v1);
+                    ref readonly var v2sj = ref v2s[j];
+                    var sij = n.X * (v2sj.X - v1.X) + n.Y * (v2sj.Y - v1.Y);
                     if (sij < si)
                     {
                         si = sij;

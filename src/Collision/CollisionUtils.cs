@@ -125,15 +125,15 @@ namespace Box2DSharp.Collision
 
         public static bool TestOverlap(in AABB a, AABB b)
         {
-            var d1 = b.LowerBound - a.UpperBound;
-            var d2 = a.LowerBound - b.UpperBound;
+            //var d1 = b.LowerBound - a.UpperBound;
 
-            if (d1.X > 0.0f || d1.Y > 0.0f)
+            if (b.LowerBound.X - a.UpperBound.X > 0.0f || b.LowerBound.Y - a.UpperBound.Y > 0.0f)
             {
                 return false;
             }
 
-            if (d2.X > 0.0f || d2.Y > 0.0f)
+            //var d2 = a.LowerBound - b.UpperBound;
+            if (a.LowerBound.X - b.UpperBound.X > 0.0f || a.LowerBound.Y - b.UpperBound.Y > 0.0f)
             {
                 return false;
             }
