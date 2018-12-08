@@ -1,9 +1,6 @@
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
-using Box2DSharp.Inspection;
-using UnityEngine;
-using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
