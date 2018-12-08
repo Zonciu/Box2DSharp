@@ -86,6 +86,8 @@ namespace Box2DSharp.Tests
 
         protected override void PreStep()
         {
+            DrawString($"create time = {CreateTime} ms, fixture count = {FixtureCount}");
+            DrawString($"dynamic tree height = {DynamicTreeHeight}, min = {MinHeight}");
             var cm = World.ContactManager;
             var height = cm.BroadPhase.GetTreeHeight();
             var leafCount = cm.BroadPhase.GetProxyCount();

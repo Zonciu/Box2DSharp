@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
@@ -61,8 +63,9 @@ namespace Box2DSharp
             Logger.SetLogger(new UnityLogger());
 
             // DrawString
-            _line = 0f;
-            _lineHeight = Screen.height * 2 / 100f;
+            //_line = 0f;
+            //_lineHeight = Screen.height * 2 / 100f;
+            _rect = new Rect(0, 0, Screen.width, Screen.height * 2f / 100f);
             _style = new GUIStyle
             {
                 alignment = TextAnchor.UpperLeft,
@@ -79,6 +82,19 @@ namespace Box2DSharp
 
         private void Update()
         {
+            // FPS
+            {
+                var msec = _deltaTime * 1000.0f;
+                var fps = 1.0f / _deltaTime;
+                var text = $"{msec:0.0} ms ({fps:0.} fps)";
+                DrawString(text);
+            }
+
+            // Frame
+            {
+                DrawString($"{FrameManager.FrameCount} Frames");
+            }
+
             FrameManager.Tick();
 
             // Mouse left drag
@@ -155,6 +171,75 @@ namespace Box2DSharp
 
             TestSettings.WorldDrawer.Flags = flags;
             DrawWorld();
+
+            // Statistics
+            if (TestSettings.Statistics)
+            {
+                DrawString(
+                    $"bodies/contacts/joints = {World.BodyCount}/{World.ContactCount}/{World.JointCount}");
+                DrawString(
+                    $"proxies:{World.ProxyCount}/ height:{World.TreeHeight}/ balance: {World.TreeBalance} /quality: {World.TreeQuality}");
+            }
+
+            // Profile
+            if (TestSettings.Profile)
+            {
+                var p = World.Profile;
+
+                // Track maximum profile times
+                _maxProfile.Step = Math.Max(_maxProfile.Step, p.Step);
+                _maxProfile.Collide = Math.Max(_maxProfile.Collide, p.Collide);
+                _maxProfile.Solve = Math.Max(_maxProfile.Solve, p.Solve);
+                _maxProfile.SolveInit = Math.Max(_maxProfile.SolveInit, p.SolveInit);
+                _maxProfile.SolveVelocity = Math.Max(_maxProfile.SolveVelocity, p.SolveVelocity);
+                _maxProfile.SolvePosition = Math.Max(_maxProfile.SolvePosition, p.SolvePosition);
+                _maxProfile.SolveTOI = Math.Max(_maxProfile.SolveTOI, p.SolveTOI);
+                _maxProfile.Broadphase = Math.Max(_maxProfile.Broadphase, p.Broadphase);
+
+                _totalProfile.Step += p.Step;
+                _totalProfile.Collide += p.Collide;
+                _totalProfile.Solve += p.Solve;
+                _totalProfile.SolveInit += p.SolveInit;
+                _totalProfile.SolveVelocity += p.SolveVelocity;
+                _totalProfile.SolvePosition += p.SolvePosition;
+                _totalProfile.SolveTOI += p.SolveTOI;
+                _totalProfile.Broadphase += p.Broadphase;
+
+                var aveProfile = new Profile();
+                if (FrameManager.FrameCount > 0)
+                {
+                    var scale = 1.0f / FrameManager.FrameCount;
+                    aveProfile.Step = scale * _totalProfile.Step;
+                    aveProfile.Collide = scale * _totalProfile.Collide;
+                    aveProfile.Solve = scale * _totalProfile.Solve;
+                    aveProfile.SolveInit = scale * _totalProfile.SolveInit;
+                    aveProfile.SolveVelocity = scale * _totalProfile.SolveVelocity;
+                    aveProfile.SolvePosition = scale * _totalProfile.SolvePosition;
+                    aveProfile.SolveTOI = scale * _totalProfile.SolveTOI;
+                    aveProfile.Broadphase = scale * _totalProfile.Broadphase;
+                }
+
+                DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({_maxProfile.Step})");
+                DrawString(
+                    $"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({_maxProfile.Collide})");
+                DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({_maxProfile.Solve})");
+                DrawString(
+                    $"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({_maxProfile.SolveInit})");
+                DrawString(
+                    $"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({_maxProfile.SolveVelocity})");
+                DrawString(
+                    $"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({_maxProfile.SolvePosition})");
+                DrawString(
+                    $"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({_maxProfile.SolveTOI})");
+                DrawString(
+                    $"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({_maxProfile.Broadphase})");
+            }
+
+            if (_stringBuilder.Length > 0)
+            {
+                _text = _stringBuilder.ToString();
+                _stringBuilder.Clear();
+            }
         }
 
         private readonly Color _c1 = Color.FromArgb(77, 242, 77);
@@ -291,10 +376,6 @@ namespace Box2DSharp
 
         private Rect _rect;
 
-        private float _line;
-
-        private float _lineHeight;
-
         private GUIStyle _style;
 
         /// <summary>
@@ -302,96 +383,24 @@ namespace Box2DSharp
         /// </summary>
         private void OnGUI()
         {
-            _line = 0;
-            var drawer = TestSettings.DebugDrawer;
+            DrawString();
+        }
 
-            // FPS
-            {
-                var msec = _deltaTime * 1000.0f;
-                var fps = 1.0f / _deltaTime;
-                var text = $"{msec:0.0} ms ({fps:0.} fps)";
-                DrawString(text);
-            }
+        //private List<string> _text = new List<string>(20);
+        private readonly StringBuilder _stringBuilder = new StringBuilder();
 
-            // Frame
-            {
-                DrawString($"{FrameManager.FrameCount} Frames");
-            }
+        private string _text;
 
-            // Statistics
-            if (TestSettings.Statistics)
-            {
-                DrawString(
-                    $"bodies/contacts/joints = {World.BodyCount}/{World.ContactCount}/{World.JointCount}");
-                DrawString(
-                    $"proxies:{World.ProxyCount}/ height:{World.TreeHeight}/ balance: {World.TreeBalance} /quality: {World.TreeQuality}");
-            }
+        private void DrawString()
+        {
+            GUI.Label(_rect, _text, _style);
 
-            // Profile
-            {
-                // Track maximum profile times
-                {
-                    var p = World.Profile;
-                    _maxProfile.Step = Math.Max(_maxProfile.Step, p.Step);
-                    _maxProfile.Collide = Math.Max(_maxProfile.Collide, p.Collide);
-                    _maxProfile.Solve = Math.Max(_maxProfile.Solve, p.Solve);
-                    _maxProfile.SolveInit = Math.Max(_maxProfile.SolveInit, p.SolveInit);
-                    _maxProfile.SolveVelocity = Math.Max(_maxProfile.SolveVelocity, p.SolveVelocity);
-                    _maxProfile.SolvePosition = Math.Max(_maxProfile.SolvePosition, p.SolvePosition);
-                    _maxProfile.SolveTOI = Math.Max(_maxProfile.SolveTOI, p.SolveTOI);
-                    _maxProfile.Broadphase = Math.Max(_maxProfile.Broadphase, p.Broadphase);
-
-                    _totalProfile.Step += p.Step;
-                    _totalProfile.Collide += p.Collide;
-                    _totalProfile.Solve += p.Solve;
-                    _totalProfile.SolveInit += p.SolveInit;
-                    _totalProfile.SolveVelocity += p.SolveVelocity;
-                    _totalProfile.SolvePosition += p.SolvePosition;
-                    _totalProfile.SolveTOI += p.SolveTOI;
-                    _totalProfile.Broadphase += p.Broadphase;
-                }
-
-                if (TestSettings.Profile)
-                {
-                    var p = World.Profile;
-
-                    var aveProfile = new Profile();
-                    if (FrameManager.FrameCount > 0)
-                    {
-                        var scale = 1.0f / FrameManager.FrameCount;
-                        aveProfile.Step = scale * _totalProfile.Step;
-                        aveProfile.Collide = scale * _totalProfile.Collide;
-                        aveProfile.Solve = scale * _totalProfile.Solve;
-                        aveProfile.SolveInit = scale * _totalProfile.SolveInit;
-                        aveProfile.SolveVelocity = scale * _totalProfile.SolveVelocity;
-                        aveProfile.SolvePosition = scale * _totalProfile.SolvePosition;
-                        aveProfile.SolveTOI = scale * _totalProfile.SolveTOI;
-                        aveProfile.Broadphase = scale * _totalProfile.Broadphase;
-                    }
-
-                    DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({_maxProfile.Step})");
-                    DrawString(
-                        $"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({_maxProfile.Collide})");
-                    DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({_maxProfile.Solve})");
-                    DrawString(
-                        $"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({_maxProfile.SolveInit})");
-                    DrawString(
-                        $"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({_maxProfile.SolveVelocity})");
-                    DrawString(
-                        $"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({_maxProfile.SolvePosition})");
-                    DrawString(
-                        $"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({_maxProfile.SolveTOI})");
-                    DrawString(
-                        $"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({_maxProfile.Broadphase})");
-                }
-            }
+            //_line += _lineHeight;
         }
 
         public void DrawString(string text)
         {
-            var rect = new Rect(0, _line, Screen.width, Screen.height * 2f / 100f);
-            GUI.Label(rect, text, _style);
-            _line += _lineHeight;
+            _stringBuilder.AppendLine(text);
         }
 
         private readonly ContactPoint[] _points = new ContactPoint[2048];
