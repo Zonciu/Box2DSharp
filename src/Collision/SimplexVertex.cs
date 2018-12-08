@@ -15,5 +15,5 @@ namespace Box2DSharp.Collision
         public int IndexA; // wA index
 
         public int IndexB; // wB index
-    };
+    }
 }

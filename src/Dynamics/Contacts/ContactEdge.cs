@@ -23,5 +23,5 @@ namespace Box2DSharp.Dynamics.Contacts
         //
         // /// the next contact edge in the body's contact list
         // public b2ContactEdge next;
-    };
+    }
 }

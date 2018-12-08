@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
@@ -10,20 +11,6 @@ namespace Box2DSharp.Dynamics.Contacts
     {
         private static readonly ObjectPool<CircleContact> _pool =
             new DefaultObjectPool<CircleContact>(new PoolPolicy());
-
-        private class PoolPolicy : IPooledObjectPolicy<CircleContact>
-        {
-            public CircleContact Create()
-            {
-                return new CircleContact();
-            }
-
-            public bool Return(CircleContact obj)
-            {
-                obj.Reset();
-                return true;
-            }
-        }
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
@@ -41,12 +28,26 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
-            Collision.CollisionUtils.CollideCircles(
+            CollisionUtils.CollideCircles(
                 ref manifold,
                 (CircleShape) FixtureA.Shape,
                 xfA,
                 (CircleShape) FixtureB.Shape,
                 xfB);
+        }
+
+        private class PoolPolicy : IPooledObjectPolicy<CircleContact>
+        {
+            public CircleContact Create()
+            {
+                return new CircleContact();
+            }
+
+            public bool Return(CircleContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
     }
 }

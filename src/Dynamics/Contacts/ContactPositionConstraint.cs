@@ -8,24 +8,24 @@ namespace Box2DSharp.Dynamics.Contacts
     {
         public readonly Vector2[] LocalPoints = new Vector2[Settings.MaxManifoldPoints];
 
-        public Vector2 LocalNormal;
-
-        public Vector2 LocalPoint;
-
         public int IndexA;
 
         public int IndexB;
+
+        public float InvIa, InvIb;
 
         public float InvMassA, InvMassB;
 
         public Vector2 LocalCenterA, LocalCenterB;
 
-        public float InvIa, InvIb;
+        public Vector2 LocalNormal;
 
-        public ManifoldType Type;
+        public Vector2 LocalPoint;
+
+        public int PointCount;
 
         public float RadiusA, RadiusB;
 
-        public int PointCount;
-    };
+        public ManifoldType Type;
+    }
 }

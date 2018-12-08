@@ -14,5 +14,5 @@ namespace Box2DSharp.Collision.Collider
 
         /// point was removed in the update
         RemoveState
-    };
+    }
 }

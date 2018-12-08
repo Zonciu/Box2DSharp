@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
@@ -7,17 +6,10 @@ namespace Box2DSharp.Collision.Shapes
 {
     public class EdgeShape : Shape
     {
-        public EdgeShape()
-        {
-            ShapeType  = ShapeType.Edge;
-            Radius     = Settings.PolygonRadius;
-            Vertex0.X  = 0.0f;
-            Vertex0.Y  = 0.0f;
-            Vertex3.X  = 0.0f;
-            Vertex3.Y  = 0.0f;
-            HasVertex0 = false;
-            HasVertex3 = false;
-        }
+        public bool HasVertex0, HasVertex3;
+
+        /// Optional adjacent vertices. These are used for smooth collision.
+        public Vector2 Vertex0;
 
         /// These are the edge vertices
         public Vector2 Vertex1;
@@ -26,17 +18,24 @@ namespace Box2DSharp.Collision.Shapes
         public Vector2 Vertex2;
 
         /// Optional adjacent vertices. These are used for smooth collision.
-        public Vector2 Vertex0;
-
-        /// Optional adjacent vertices. These are used for smooth collision.
         public Vector2 Vertex3;
 
-        public bool HasVertex0, HasVertex3;
+        public EdgeShape()
+        {
+            ShapeType = ShapeType.Edge;
+            Radius = Settings.PolygonRadius;
+            Vertex0.X = 0.0f;
+            Vertex0.Y = 0.0f;
+            Vertex3.X = 0.0f;
+            Vertex3.Y = 0.0f;
+            HasVertex0 = false;
+            HasVertex3 = false;
+        }
 
         public void Set(in Vector2 v1, in Vector2 v2)
         {
-            Vertex1    = v1;
-            Vertex2    = v2;
+            Vertex1 = v1;
+            Vertex2 = v2;
             HasVertex0 = false;
             HasVertex3 = false;
         }
@@ -46,8 +45,8 @@ namespace Box2DSharp.Collision.Shapes
         {
             var clone = new EdgeShape
             {
-                Vertex1    = Vertex1,
-                Vertex2    = Vertex2,
+                Vertex1 = Vertex1,
+                Vertex2 = Vertex2,
                 HasVertex0 = HasVertex0,
                 HasVertex3 = HasVertex3
             };
@@ -69,27 +68,27 @@ namespace Box2DSharp.Collision.Shapes
         /// <inheritdoc />
         public override bool RayCast(
             out RayCastOutput output,
-            in  RayCastInput  input,
-            in  Transform     transform,
-            int               childIndex)
+            in RayCastInput input,
+            in Transform transform,
+            int childIndex)
         {
             output = default;
 
             // Put the ray into the edge's frame of reference.
             var p1 = MathUtils.MulT(transform.Rotation, input.P1 - transform.Position);
             var p2 = MathUtils.MulT(transform.Rotation, input.P2 - transform.Position);
-            var d  = p2 - p1;
+            var d = p2 - p1;
 
-            var v1     = Vertex1;
-            var v2     = Vertex2;
-            var e      = v2 - v1;
+            var v1 = Vertex1;
+            var v2 = Vertex2;
+            var e = v2 - v1;
             var normal = new Vector2(e.Y, -e.X);
             normal.Normalize();
 
             // q = p1 + t * d
             // dot(normal, q - v1) = 0
             // dot(normal, p1 - v1) + t * dot(normal, d) = 0
-            var numerator   = MathUtils.Dot(normal, v1 - p1);
+            var numerator = MathUtils.Dot(normal, v1 - p1);
             var denominator = MathUtils.Dot(normal, d);
 
             if (denominator.Equals(0.0f))
@@ -107,7 +106,7 @@ namespace Box2DSharp.Collision.Shapes
 
             // q = v1 + s * r
             // s = dot(q - v1, r) / dot(r, r)
-            var r  = v2 - v1;
+            var r = v2 - v1;
             var rr = MathUtils.Dot(r, r);
             if (rr.Equals(0.0f))
             {
@@ -147,10 +146,10 @@ namespace Box2DSharp.Collision.Shapes
         /// <inheritdoc />
         public override void ComputeMass(out MassData massData, float density)
         {
-            massData = new MassData()
+            massData = new MassData
             {
-                Mass            = 0,
-                Center          = 0.5f * (Vertex1 + Vertex2),
+                Mass = 0,
+                Center = 0.5f * (Vertex1 + Vertex2),
                 RotationInertia = 0
             };
         }

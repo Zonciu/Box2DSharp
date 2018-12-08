@@ -37,12 +37,12 @@ namespace Box2DSharp.Common
 
         /// A small angle used as a collision and constraint tolerance. Usually it is
         /// chosen to be numerically significant, but visually insignificant.
-        public const float AngularSlop = (2.0f / 180.0f * Pi);
+        public const float AngularSlop = 2.0f / 180.0f * Pi;
 
         /// The radius of the polygon/edge shape skin. This should not be modified. Making
         /// this smaller means polygons will have an insufficient buffer for continuous collision.
         /// Making it larger may create artifacts for vertex collision.
-        public const float PolygonRadius = (2.0f * LinearSlop);
+        public const float PolygonRadius = 2.0f * LinearSlop;
 
         /// Maximum number of sub-steps per contact in continuous physics simulation.
         public const int MaxSubSteps = 8;
@@ -62,19 +62,19 @@ namespace Box2DSharp.Common
 
         /// The maximum angular position correction used when solving constraints. This helps to
         /// prevent overshoot.
-        public const float MaxAngularCorrection = (8.0f / 180.0f * Pi);
+        public const float MaxAngularCorrection = 8.0f / 180.0f * Pi;
 
         /// The maximum linear velocity of a body. This limit is very large and is used
         /// to prevent numerical problems. You shouldn't need to adjust this.
         public const float MaxTranslation = 2.0f;
 
-        public const float MaxTranslationSquared = (MaxTranslation * MaxTranslation);
+        public const float MaxTranslationSquared = MaxTranslation * MaxTranslation;
 
         /// The maximum angular velocity of a body. This limit is very large and is used
         /// to prevent numerical problems. You shouldn't need to adjust this.
-        public const float MaxRotation = (0.5f * Pi);
+        public const float MaxRotation = 0.5f * Pi;
 
-        public const float MaxRotationSquared = (MaxRotation * MaxRotation);
+        public const float MaxRotationSquared = MaxRotation * MaxRotation;
 
         /// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
         /// that overlap is removed in one time step. However using values close to 1 often lead
@@ -92,6 +92,6 @@ namespace Box2DSharp.Common
         public const float LinearSleepTolerance = 0.01f;
 
         /// A body cannot sleep if its angular velocity is above this tolerance.
-        public const float AngularSleepTolerance = (2.0f / 180.0f * Pi);
+        public const float AngularSleepTolerance = 2.0f / 180.0f * Pi;
     }
 }

@@ -12,7 +12,7 @@ namespace Box2DSharp.Collision
     {
         // Find the max separation between poly1 and poly2 using edge normals from poly1.
         public static float FindMaxSeparation(
-            out int      edgeIndex,
+            out int edgeIndex,
             PolygonShape poly1,
             in Transform xf1,
             PolygonShape poly2,
@@ -24,14 +24,14 @@ namespace Box2DSharp.Collision
             var n1s = poly1.Normals;
             var v1s = poly1.Vertices;
             var v2s = poly2.Vertices;
-            var xf  = MathUtils.MulT(xf2, xf1);
+            var xf = MathUtils.MulT(xf2, xf1);
 
-            var bestIndex     = 0;
+            var bestIndex = 0;
             var maxSeparation = -Settings.MaxFloat;
             for (var i = 0; i < count1; ++i)
             {
                 // Get poly1 normal in frame2.
-                var n  = MathUtils.Mul(xf.Rotation, n1s[i]);
+                var n = MathUtils.Mul(xf.Rotation, n1s[i]);
                 var v1 = MathUtils.Mul(xf, v1s[i]);
 
                 // Find deepest point for normal i.
@@ -50,7 +50,7 @@ namespace Box2DSharp.Collision
                 if (si > maxSeparation)
                 {
                     maxSeparation = si;
-                    bestIndex     = i;
+                    bestIndex = i;
                 }
             }
 
@@ -60,16 +60,16 @@ namespace Box2DSharp.Collision
 
         public static void FindIncidentEdge(
             ref ClipVertex[] c,
-            PolygonShape     poly1,
-            in Transform     xf1,
-            int              edge1,
-            PolygonShape     poly2,
-            in Transform     xf2)
+            PolygonShape poly1,
+            in Transform xf1,
+            int edge1,
+            PolygonShape poly2,
+            in Transform xf2)
         {
-            var normals1  = poly1.Normals;
-            var count2    = poly2.Count;
+            var normals1 = poly1.Normals;
+            var count2 = poly2.Count;
             var vertices2 = poly2.Vertices;
-            var normals2  = poly2.Normals;
+            var normals2 = poly2.Normals;
 
             Debug.Assert(0 <= edge1 && edge1 < poly1.Count);
 
@@ -77,7 +77,7 @@ namespace Box2DSharp.Collision
             var normal1 = MathUtils.MulT(xf2.Rotation, MathUtils.Mul(xf1.Rotation, normals1[edge1]));
 
             // Find the incident edge on poly2.
-            var index  = 0;
+            var index = 0;
             var minDot = Settings.MaxFloat;
             for (var i = 0; i < count2; ++i)
             {
@@ -85,24 +85,24 @@ namespace Box2DSharp.Collision
                 if (dot < minDot)
                 {
                     minDot = dot;
-                    index  = i;
+                    index = i;
                 }
             }
 
             // Build the clip vertices for the incident edge.
             var i1 = index;
             var i2 = i1 + 1 < count2 ? i1 + 1 : 0;
-            c[0].Vector            = MathUtils.Mul(xf2, vertices2[i1]);
+            c[0].Vector = MathUtils.Mul(xf2, vertices2[i1]);
             c[0].Id.ContactFeature.IndexA = (byte) edge1;
             c[0].Id.ContactFeature.IndexB = (byte) i1;
-            c[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
-            c[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+            c[0].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
+            c[0].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
 
-            c[1].Vector            = MathUtils.Mul(xf2, vertices2[i2]);
+            c[1].Vector = MathUtils.Mul(xf2, vertices2[i2]);
             c[1].Id.ContactFeature.IndexA = (byte) edge1;
             c[1].Id.ContactFeature.IndexB = (byte) i2;
-            c[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
-            c[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+            c[1].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
+            c[1].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
         }
 
         // Find edge normal of max separation on A - return if separating axis is found
@@ -147,36 +147,36 @@ namespace Box2DSharp.Collision
 
             PolygonShape poly1; // reference polygon 
             PolygonShape poly2; // incident polygon 
-            Transform    xf1, xf2;
-            int          edge1; // reference edge
-            byte         flip;
-            const float  k_tol = 0.1f * Settings.LinearSlop;
+            Transform xf1, xf2;
+            int edge1; // reference edge
+            byte flip;
+            const float k_tol = 0.1f * Settings.LinearSlop;
 
             if (separationB > separationA + k_tol)
             {
-                poly1         = polyB;
-                poly2         = polyA;
-                xf1           = xfB;
-                xf2           = xfA;
-                edge1         = edgeB;
+                poly1 = polyB;
+                poly2 = polyA;
+                xf1 = xfB;
+                xf2 = xfA;
+                edge1 = edgeB;
                 manifold.Type = ManifoldType.FaceB;
-                flip          = 1;
+                flip = 1;
             }
             else
             {
-                poly1         = polyA;
-                poly2         = polyB;
-                xf1           = xfA;
-                xf2           = xfB;
-                edge1         = edgeA;
+                poly1 = polyA;
+                poly2 = polyB;
+                xf1 = xfA;
+                xf2 = xfB;
+                edge1 = edgeA;
                 manifold.Type = ManifoldType.FaceA;
-                flip          = 0;
+                flip = 0;
             }
 
             var incidentEdge = new ClipVertex[2];
             FindIncidentEdge(ref incidentEdge, poly1, xf1, edge1, poly2, xf2);
 
-            var count1    = poly1.Count;
+            var count1 = poly1.Count;
             var vertices1 = poly1.Vertices;
 
             var iv1 = edge1;
@@ -189,10 +189,10 @@ namespace Box2DSharp.Collision
             localTangent.Normalize();
 
             var localNormal = MathUtils.Cross(localTangent, 1.0f);
-            var planePoint  = 0.5f * (v11 + v12);
+            var planePoint = 0.5f * (v11 + v12);
 
             var tangent = MathUtils.Mul(xf1.Rotation, localTangent);
-            var normal  = MathUtils.Cross(tangent, 1.0f);
+            var normal = MathUtils.Cross(tangent, 1.0f);
 
             v11 = MathUtils.Mul(xf1, v11);
             v12 = MathUtils.Mul(xf1, v12);
@@ -236,7 +236,7 @@ namespace Box2DSharp.Collision
 
             // Now clipPoints2 contains the clipped points.
             manifold.LocalNormal = localNormal;
-            manifold.LocalPoint  = planePoint;
+            manifold.LocalPoint = planePoint;
 
             var pointCount = 0;
             for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
@@ -247,15 +247,15 @@ namespace Box2DSharp.Collision
                 {
                     ref var cp = ref manifold.Points.GetRef(pointCount);
                     cp.LocalPoint = MathUtils.MulT(xf2, clipPoints2[i].Vector);
-                    cp.Id         = clipPoints2[i].Id;
+                    cp.Id = clipPoints2[i].Id;
                     if (flip != default)
                     {
                         // Swap features
                         var cf = cp.Id.ContactFeature;
                         cp.Id.ContactFeature.IndexA = cf.IndexB;
                         cp.Id.ContactFeature.IndexB = cf.IndexA;
-                        cp.Id.ContactFeature.TypeA  = cf.TypeB;
-                        cp.Id.ContactFeature.TypeB  = cf.TypeA;
+                        cp.Id.ContactFeature.TypeA = cf.TypeB;
+                        cp.Id.ContactFeature.TypeB = cf.TypeA;
                     }
 
                     ++pointCount;

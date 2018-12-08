@@ -29,8 +29,6 @@ namespace Box2DSharp.Dynamics.Joints
         private Vector2 _impulse;
 
         // Solver temp
-        private int _indexA;
-
         private int _indexB;
 
         private float _invIb;

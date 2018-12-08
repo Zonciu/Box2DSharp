@@ -21,7 +21,6 @@ namespace Box2DSharp.Collision.Collider
     /// This structure is stored across time steps, so we keep it small.
     public struct Manifold
     {
-        
         /// <summary>
         /// the points of contact, size Settings.MaxManifoldPoints
         /// </summary>

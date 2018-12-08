@@ -14,6 +14,11 @@ namespace Box2DSharp.Dynamics.Joints
     /// control length.
     public class RopeJoint : Joint
     {
+        // Solver shared
+        private readonly Vector2 _localAnchorA;
+
+        private readonly Vector2 _localAnchorB;
+
         private float _impulse;
 
         // Solver temp
@@ -30,11 +35,6 @@ namespace Box2DSharp.Dynamics.Joints
         private float _invMassB;
 
         private float _length;
-
-        // Solver shared
-        private readonly Vector2 _localAnchorA;
-
-        private readonly Vector2 _localAnchorB;
 
         private Vector2 _localCenterA;
 
@@ -59,10 +59,10 @@ namespace Box2DSharp.Dynamics.Joints
 
             _maxLength = def.MaxLength;
 
-            _mass    = 0.0f;
+            _mass = 0.0f;
             _impulse = 0.0f;
-            _state   = LimitState.InactiveLimit;
-            _length  = 0.0f;
+            _state = LimitState.InactiveLimit;
+            _length = 0.0f;
         }
 
         /// The local anchor point relative to bodyA's origin.
@@ -137,14 +137,14 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
@@ -161,7 +161,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             _rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
             _rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
-            _u  = cB + _rB - cA - _rA;
+            _u = cB + _rB - cA - _rA;
 
             _length = _u.Length();
 
@@ -182,14 +182,14 @@ namespace Box2DSharp.Dynamics.Joints
             else
             {
                 _u.SetZero();
-                _mass    = 0.0f;
+                _mass = 0.0f;
                 _impulse = 0.0f;
                 return;
             }
 
             // Compute effective mass.
-            var crA     = MathUtils.Cross(_rA, _u);
-            var crB     = MathUtils.Cross(_rB, _u);
+            var crA = MathUtils.Cross(_rA, _u);
+            var crB = MathUtils.Cross(_rB, _u);
             var invMass = _invMassA + _invIa * crA * crA + _invMassB + _invIb * crB * crB;
 
             _mass = !invMass.Equals(0.0f) ? 1.0f / invMass : 0.0f;
@@ -225,9 +225,9 @@ namespace Box2DSharp.Dynamics.Joints
             var wB = data.Velocities[_indexB].W;
 
             // Cdot = dot(u, v + cross(w, r))
-            var vpA  = vA + MathUtils.Cross(wA, _rA);
-            var vpB  = vB + MathUtils.Cross(wB, _rB);
-            var C    = _length - _maxLength;
+            var vpA = vA + MathUtils.Cross(wA, _rA);
+            var vpB = vB + MathUtils.Cross(wB, _rB);
+            var C = _length - _maxLength;
             var cdot = MathUtils.Dot(_u, vpB - vpA);
 
             // Predictive constraint.
@@ -236,10 +236,10 @@ namespace Box2DSharp.Dynamics.Joints
                 cdot += data.Step.InvDt * C;
             }
 
-            var impulse    = -_mass * cdot;
+            var impulse = -_mass * cdot;
             var oldImpulse = _impulse;
             _impulse = Math.Min(0.0f, _impulse + impulse);
-            impulse  = _impulse - oldImpulse;
+            impulse = _impulse - oldImpulse;
 
             var P = impulse * _u;
             vA -= _invMassA * P;
@@ -266,15 +266,15 @@ namespace Box2DSharp.Dynamics.Joints
 
             var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
-            var u  = cB + rB - cA - rA;
+            var u = cB + rB - cA - rA;
 
             var length = u.Normalize();
-            var C      = length - _maxLength;
+            var C = length - _maxLength;
 
             C = MathUtils.Clamp(C, 0.0f, Settings.MaxLinearCorrection);
 
             var impulse = -_mass * C;
-            var P       = impulse * u;
+            var P = impulse * u;
 
             cA -= _invMassA * P;
             aA -= _invIa * MathUtils.Cross(rA, P);
@@ -282,9 +282,9 @@ namespace Box2DSharp.Dynamics.Joints
             aB += _invIb * MathUtils.Cross(rB, P);
 
             data.Positions[_indexA].Center = cA;
-            data.Positions[_indexA].Angle  = aA;
+            data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
-            data.Positions[_indexB].Angle  = aB;
+            data.Positions[_indexB].Angle = aB;
 
             return length - _maxLength < Settings.LinearSlop;
         }

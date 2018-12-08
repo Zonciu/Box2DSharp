@@ -10,5 +10,5 @@ namespace Box2DSharp.Collision.Collider
         public Vector2 P2;
 
         public float MaxFraction;
-    };
+    }
 }

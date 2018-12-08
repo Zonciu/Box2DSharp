@@ -36,11 +36,7 @@ namespace Box2DSharp.Collision.Shapes
         /// Implement b2Shape.
         public override Shape Clone()
         {
-            var clone = new PolygonShape
-            {
-                Centroid = Centroid,
-                Count    = Count
-            };
+            var clone = new PolygonShape {Centroid = Centroid, Count = Count};
             Array.Copy(Vertices, clone.Vertices, Vertices.Length);
             Array.Copy(Normals, clone.Normals, Normals.Length);
             return clone;
@@ -121,8 +117,8 @@ namespace Box2DSharp.Collision.Shapes
             }
 
             var hull = new int[MaxPolygonVertices];
-            var m    = 0;
-            var ih   = i0;
+            var m = 0;
+            var ih = i0;
 
             for (;;)
             {
@@ -179,8 +175,8 @@ namespace Box2DSharp.Collision.Shapes
             // Compute normals. Ensure the edges have non-zero length.
             for (var i = 0; i < m; ++i)
             {
-                var i1   = i;
-                var i2   = i + 1 < m ? i + 1 : 0;
+                var i1 = i;
+                var i2 = i + 1 < m ? i + 1 : 0;
                 var edge = Vertices[i2] - Vertices[i1];
                 Debug.Assert(edge.LengthSquared() > Settings.Epsilon * Settings.Epsilon);
                 Normals[i] = MathUtils.Cross(edge, 1.0f);
@@ -222,7 +218,7 @@ namespace Box2DSharp.Collision.Shapes
             for (var i = 0; i < Count; ++i)
             {
                 Vertices[i] = MathUtils.Mul(transform, Vertices[i]);
-                Normals[i]  = MathUtils.Mul(transform.Rotation, Normals[i]);
+                Normals[i] = MathUtils.Mul(transform.Rotation, Normals[i]);
             }
         }
 
@@ -246,16 +242,16 @@ namespace Box2DSharp.Collision.Shapes
         /// Implement b2Shape.
         public override bool RayCast(
             out RayCastOutput output,
-            in  RayCastInput  input,
-            in  Transform     transform,
-            int               childIndex)
+            in RayCastInput input,
+            in Transform transform,
+            int childIndex)
         {
             output = default;
 
             // Put the ray into the polygon's frame of reference.
             var p1 = MathUtils.MulT(transform.Rotation, input.P1 - transform.Position);
             var p2 = MathUtils.MulT(transform.Rotation, input.P2 - transform.Position);
-            var d  = p2 - p1;
+            var d = p2 - p1;
 
             float lower = 0.0f, upper = input.MaxFraction;
 
@@ -266,7 +262,7 @@ namespace Box2DSharp.Collision.Shapes
                 // p = p1 + a * d
                 // dot(normal, p - v) = 0
                 // dot(normal, p1 - v) + a * dot(normal, d) = 0
-                var numerator   = MathUtils.Dot(Normals[i], Vertices[i] - p1);
+                var numerator = MathUtils.Dot(Normals[i], Vertices[i] - p1);
                 var denominator = MathUtils.Dot(Normals[i], d);
 
                 if (denominator.Equals(0.0f))
@@ -313,8 +309,7 @@ namespace Box2DSharp.Collision.Shapes
             {
                 output = new RayCastOutput
                 {
-                    Fraction = lower,
-                    Normal   = MathUtils.Mul(transform.Rotation, Normals[index])
+                    Fraction = lower, Normal = MathUtils.Mul(transform.Rotation, Normals[index])
                 };
                 return true;
             }
@@ -336,11 +331,7 @@ namespace Box2DSharp.Collision.Shapes
             }
 
             var r = new Vector2(Radius, Radius);
-            aabb = new AABB
-            {
-                LowerBound = lower - r,
-                UpperBound = upper + r
-            };
+            aabb = new AABB {LowerBound = lower - r, UpperBound = upper + r};
         }
 
         /// @see b2Shape::ComputeMass
@@ -373,8 +364,8 @@ namespace Box2DSharp.Collision.Shapes
             Debug.Assert(Count >= 3);
 
             var center = new Vector2(0.0f, 0.0f);
-            var area   = 0.0f;
-            var I      = 0.0f;
+            var area = 0.0f;
+            var I = 0.0f;
 
             // s is the reference point for forming triangles.
             // It's location doesn't change the result (except for rounding error).
@@ -418,8 +409,8 @@ namespace Box2DSharp.Collision.Shapes
 
             // Center of mass
             Debug.Assert(area > Settings.Epsilon);
-            center          *= 1.0f / area;
-            massData.Center =  center + s;
+            center *= 1.0f / area;
+            massData.Center = center + s;
 
             // Inertia tensor relative to the local origin (point s).
             massData.RotationInertia = density * I;
@@ -438,8 +429,8 @@ namespace Box2DSharp.Collision.Shapes
             {
                 var i1 = i;
                 var i2 = i < Count - 1 ? i1 + 1 : 0;
-                var p  = Vertices[i1];
-                var e  = Vertices[i2] - p;
+                var p = Vertices[i1];
+                var e = Vertices[i2] - p;
 
                 for (var j = 0; j < Count; ++j)
                 {
@@ -464,7 +455,7 @@ namespace Box2DSharp.Collision.Shapes
         {
             Debug.Assert(count >= 3);
 
-            var c    = new Vector2(0.0f, 0.0f);
+            var c = new Vector2(0.0f, 0.0f);
             var area = 0.0f;
 
             // pRef is the reference point for forming triangles.

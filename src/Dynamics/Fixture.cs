@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.InteropServices.ComTypes;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -16,6 +15,19 @@ namespace Box2DSharp.Dynamics
     /// @warning you cannot reuse fixtures.
     public class Fixture
     {
+        private static readonly ObjectPool<Fixture> _pool = new DefaultObjectPool<Fixture>(new FixturePoolPolicy());
+
+        private float _density;
+
+        private Filter _filter;
+
+        private bool _isSensor;
+
+        /// <summary>
+        /// the coefficient of restitution. This will _not_ change the restitution of existing contacts.
+        /// </summary>
+        public float Restitution;
+
         /// Get the parent body of this fixture. This is null if the fixture is not attached.
         /// @return the parent body.
         public Body Body { get; set; }
@@ -33,8 +45,6 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        private float _density;
-
         /// Get the child shape. You can modify the child shape, however you should not change the
         /// number of vertices because this will crash some collision caching mechanisms.
         /// Manipulating the shape may lead to non-physical behavior.
@@ -50,8 +60,6 @@ namespace Box2DSharp.Dynamics
                 Refilter();
             }
         }
-
-        private Filter _filter;
 
         /// <summary>
         /// the coefficient of friction. This will _not_ change the friction of existing contacts.
@@ -71,16 +79,9 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        private bool _isSensor;
-
         public FixtureProxy[] Proxies { get; private set; }
 
         public int ProxyCount { get; private set; }
-
-        /// <summary>
-        /// the coefficient of restitution. This will _not_ change the restitution of existing contacts.
-        /// </summary>
-        public float Restitution;
 
         public Shape Shape { get; private set; }
 
@@ -89,41 +90,9 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         public object UserData { get; set; }
 
-        private static readonly ObjectPool<Fixture> _pool = new DefaultObjectPool<Fixture>(new FixturePoolPolicy());
-
-        private class FixturePoolPolicy : IPooledObjectPolicy<Fixture>
-        {
-            /// <inheritdoc />
-            public Fixture Create()
-            {
-                return new Fixture();
-            }
-
-            /// <inheritdoc />
-            public bool Return(Fixture obj)
-            {
-                obj.Body = default;
-                obj.Density = default;
-                obj.Filter = default;
-                obj.Friction = default;
-                obj._isSensor = default;
-                var proxies = obj.Proxies;
-                obj.Proxies = default;
-                for (var i = 0; i < proxies.Length; i++)
-                {
-                    var proxy = proxies[i];
-                    proxies[i] = null;
-                    FixtureProxy.Return(proxy);
-                }
-
-                obj.ProxyCount = default;
-                obj.Restitution = default;
-                obj.Shape = default;
-                obj.UserData = default;
-
-                return true;
-            }
-        }
+        /// Get the type of the child shape. You can use this to down cast to the concrete shape.
+        /// @return the shape type.
+        public ShapeType ShapeType => Shape.ShapeType;
 
         /// We need separation create/destroy functions from the constructor/destructor because
         /// the destructor cannot access the allocator (no destructor arguments allowed by C++).
@@ -188,10 +157,6 @@ namespace Box2DSharp.Dynamics
 
             ProxyCount = 0;
         }
-
-        /// Get the type of the child shape. You can use this to down cast to the concrete shape.
-        /// @return the shape type.
-        public ShapeType ShapeType => Shape.ShapeType;
 
         /// Call this if you want to establish collision that was previously disabled by b2ContactFilter::ShouldCollide.
         public void Refilter()
@@ -361,6 +326,40 @@ namespace Box2DSharp.Dynamics
                 broadPhase.MoveProxy(proxy.ProxyId, proxy.AABB, displacement);
             }
         }
+
+        private class FixturePoolPolicy : IPooledObjectPolicy<Fixture>
+        {
+            /// <inheritdoc />
+            public Fixture Create()
+            {
+                return new Fixture();
+            }
+
+            /// <inheritdoc />
+            public bool Return(Fixture obj)
+            {
+                obj.Body = default;
+                obj.Density = default;
+                obj.Filter = default;
+                obj.Friction = default;
+                obj._isSensor = default;
+                var proxies = obj.Proxies;
+                obj.Proxies = default;
+                for (var i = 0; i < proxies.Length; i++)
+                {
+                    var proxy = proxies[i];
+                    proxies[i] = null;
+                    FixtureProxy.Return(proxy);
+                }
+
+                obj.ProxyCount = default;
+                obj.Restitution = default;
+                obj.Shape = default;
+                obj.UserData = default;
+
+                return true;
+            }
+        }
     }
 
     /// This holds contact filtering data.
@@ -435,6 +434,27 @@ namespace Box2DSharp.Dynamics
         private static readonly ObjectPool<FixtureProxy> _pool =
             new DefaultObjectPool<FixtureProxy>(new FixtureProxyPoolPolicy());
 
+        public AABB AABB;
+
+        public int ChildIndex;
+
+        public Fixture Fixture;
+
+        public int ProxyId = BroadPhase.NullProxy;
+
+        private FixtureProxy()
+        { }
+
+        public static FixtureProxy Get()
+        {
+            return _pool.Get();
+        }
+
+        public static void Return(FixtureProxy proxy)
+        {
+            _pool.Return(proxy);
+        }
+
         private class FixtureProxyPoolPolicy : IPooledObjectPolicy<FixtureProxy>
         {
             /// <inheritdoc />
@@ -453,20 +473,5 @@ namespace Box2DSharp.Dynamics
                 return true;
             }
         }
-
-        private FixtureProxy()
-        { }
-
-        public static FixtureProxy Get() => _pool.Get();
-
-        public static void Return(FixtureProxy proxy) => _pool.Return(proxy);
-
-        public AABB AABB;
-
-        public int ChildIndex;
-
-        public Fixture Fixture;
-
-        public int ProxyId = BroadPhase.NullProxy;
     }
 }

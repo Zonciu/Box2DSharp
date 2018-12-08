@@ -69,8 +69,8 @@ namespace Box2DSharp.Common
         /// Returns the zero matrix if singular.
         public void GetInverse22(ref Matrix3x3 matrix3x3)
         {
-            float a   = Ex.X, b = Ey.X, c = Ex.Y, d = Ey.Y;
-            var   det = a * d - b * c;
+            float a = Ex.X, b = Ey.X, c = Ex.Y, d = Ey.Y;
+            var det = a * d - b * c;
             if (!det.Equals(0.0f))
             {
                 det = 1.0f / det;
@@ -99,7 +99,7 @@ namespace Box2DSharp.Common
 
             float a11 = Ex.X, a12 = Ey.X, a13 = Ez.X;
             float a22 = Ey.Y, a23 = Ez.Y;
-            var   a33 = Ez.Z;
+            var a33 = Ez.Z;
 
             matrix3x3.Ex.X = det * (a22 * a33 - a23 * a23);
             matrix3x3.Ex.Y = det * (a13 * a23 - a12 * a33);

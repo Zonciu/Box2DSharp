@@ -54,7 +54,7 @@ namespace Box2DSharp.Dynamics.Joints
             _linearImpulse.SetZero();
             _angularImpulse = 0.0f;
 
-            _maxForce  = def.MaxForce;
+            _maxForce = def.MaxForce;
             _maxTorque = def.MaxTorque;
         }
 
@@ -123,14 +123,14 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             var aA = data.Positions[_indexA].Angle;
             var vA = data.Velocities[_indexA].V;
@@ -157,7 +157,7 @@ namespace Box2DSharp.Dynamics.Joints
             //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var K = new Matrix2x2();
             K.Ex.X = mA + mB + iA * _rA.Y * _rA.Y + iB * _rB.Y * _rB.Y;
@@ -176,7 +176,7 @@ namespace Box2DSharp.Dynamics.Joints
             if (data.Step.WarmStarting)
             {
                 // Scale impulses to support a variable time step.
-                _linearImpulse  *= data.Step.DtRatio;
+                _linearImpulse *= data.Step.DtRatio;
                 _angularImpulse *= data.Step.DtRatio;
 
                 var P = new Vector2(_linearImpulse.X, _linearImpulse.Y);
@@ -206,19 +206,19 @@ namespace Box2DSharp.Dynamics.Joints
             var wB = data.Velocities[_indexB].W;
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var h = data.Step.Dt;
 
             // Solve angular friction
             {
-                var Cdot    = wB - wA;
+                var Cdot = wB - wA;
                 var impulse = -_angularMass * Cdot;
 
                 var oldImpulse = _angularImpulse;
                 var maxImpulse = h * _maxTorque;
                 _angularImpulse = MathUtils.Clamp(_angularImpulse + impulse, -maxImpulse, maxImpulse);
-                impulse         = _angularImpulse - oldImpulse;
+                impulse = _angularImpulse - oldImpulse;
 
                 wA -= iA * impulse;
                 wB += iB * impulse;
@@ -228,7 +228,7 @@ namespace Box2DSharp.Dynamics.Joints
             {
                 var Cdot = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
 
-                var impulse    = -MathUtils.Mul(_linearMass, Cdot);
+                var impulse = -MathUtils.Mul(_linearMass, Cdot);
                 var oldImpulse = _linearImpulse;
                 _linearImpulse += impulse;
 

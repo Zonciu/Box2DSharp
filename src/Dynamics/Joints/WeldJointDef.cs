@@ -30,18 +30,18 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA.Set(0.0f, 0.0f);
             LocalAnchorB.Set(0.0f, 0.0f);
             ReferenceAngle = 0.0f;
-            FrequencyHz    = 0.0f;
-            DampingRatio   = 0.0f;
+            FrequencyHz = 0.0f;
+            DampingRatio = 0.0f;
         }
 
         /// Initialize the bodies, anchors, and reference angle using a world
         /// anchor point.
         internal void Initialize(Body bA, Body bB, in Vector2 anchor)
         {
-            BodyA          = bA;
-            BodyB          = bB;
-            LocalAnchorA   = BodyA.GetLocalPoint(anchor);
-            LocalAnchorB   = BodyB.GetLocalPoint(anchor);
+            BodyA = bA;
+            BodyB = bB;
+            LocalAnchorA = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB = BodyB.GetLocalPoint(anchor);
             ReferenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
         }
     }

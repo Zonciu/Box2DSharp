@@ -8,5 +8,5 @@ namespace Box2DSharp.Dynamics
         public Vector2 V;
 
         public float W;
-    };
+    }
 }

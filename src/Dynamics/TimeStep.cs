@@ -14,5 +14,5 @@ namespace Box2DSharp.Dynamics
         public int PositionIterations;
 
         public bool WarmStarting;
-    };
+    }
 }

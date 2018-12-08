@@ -21,9 +21,9 @@ namespace Box2DSharp.Collision
         /// <param name="xfB"></param>
         public static void CollideEdgeAndCircle(
             ref Manifold manifold,
-            EdgeShape    edgeA,
+            EdgeShape edgeA,
             in Transform xfA,
-            CircleShape  circleB,
+            CircleShape circleB,
             in Transform xfB)
         {
             manifold.PointCount = 0;
@@ -33,7 +33,7 @@ namespace Box2DSharp.Collision
             var Q = MathUtils.MulT(xfA, MathUtils.Mul(xfB, circleB.Position));
 
             Vector2 A = edgeA.Vertex1, B = edgeA.Vertex2;
-            var     e = B - A;
+            var e = B - A;
 
             // Barycentric coordinates
             // 质心坐标
@@ -42,17 +42,13 @@ namespace Box2DSharp.Collision
 
             var radius = edgeA.Radius + circleB.Radius;
 
-            var cf = new ContactFeature
-            {
-                IndexB = 0,
-                TypeB  = (byte) ContactFeature.FeatureType.Vertex
-            };
+            var cf = new ContactFeature {IndexB = 0, TypeB = (byte) ContactFeature.FeatureType.Vertex};
 
             // Region A
             if (v <= 0.0f)
             {
-                var P  = A;
-                var d  = Q - P;
+                var P = A;
+                var d = Q - P;
                 var dd = MathUtils.Dot(d, d);
                 if (dd > radius * radius)
                 {
@@ -74,14 +70,14 @@ namespace Box2DSharp.Collision
                     }
                 }
 
-                cf.IndexA           = 0;
-                cf.TypeA            = (byte) ContactFeature.FeatureType.Vertex;
+                cf.IndexA = 0;
+                cf.TypeA = (byte) ContactFeature.FeatureType.Vertex;
                 manifold.PointCount = 1;
-                manifold.Type       = ManifoldType.Circles;
+                manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
-                manifold.LocalPoint           = P;
-                manifold.Points.Value0.Id.Key     = 0;
-                manifold.Points.Value0.Id.ContactFeature      = cf;
+                manifold.LocalPoint = P;
+                manifold.Points.Value0.Id.Key = 0;
+                manifold.Points.Value0.Id.ContactFeature = cf;
                 manifold.Points.Value0.LocalPoint = circleB.Position;
                 return;
             }
@@ -89,8 +85,8 @@ namespace Box2DSharp.Collision
             // Region B
             if (u <= 0.0f)
             {
-                var P  = B;
-                var d  = Q - P;
+                var P = B;
+                var d = Q - P;
                 var dd = MathUtils.Dot(d, d);
                 if (dd > radius * radius)
                 {
@@ -112,14 +108,14 @@ namespace Box2DSharp.Collision
                     }
                 }
 
-                cf.IndexA           = 1;
-                cf.TypeA            = (byte) ContactFeature.FeatureType.Vertex;
+                cf.IndexA = 1;
+                cf.TypeA = (byte) ContactFeature.FeatureType.Vertex;
                 manifold.PointCount = 1;
-                manifold.Type       = ManifoldType.Circles;
+                manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
-                manifold.LocalPoint           = P;
-                manifold.Points.Value0.Id.Key     = 0;
-                manifold.Points.Value0.Id.ContactFeature      = cf;
+                manifold.LocalPoint = P;
+                manifold.Points.Value0.Id.Key = 0;
+                manifold.Points.Value0.Id.ContactFeature = cf;
                 manifold.Points.Value0.LocalPoint = circleB.Position;
                 return;
             }
@@ -128,8 +124,8 @@ namespace Box2DSharp.Collision
                 // Region AB
                 var den = MathUtils.Dot(e, e);
                 Debug.Assert(den > 0.0f);
-                var P  = 1.0f / den * (u * A + v * B);
-                var d  = Q - P;
+                var P = 1.0f / den * (u * A + v * B);
+                var d = Q - P;
                 var dd = MathUtils.Dot(d, d);
                 if (dd > radius * radius)
                 {
@@ -144,14 +140,14 @@ namespace Box2DSharp.Collision
 
                 n.Normalize();
 
-                cf.IndexA                     = 0;
-                cf.TypeA                      = (byte) ContactFeature.FeatureType.Face;
-                manifold.PointCount           = 1;
-                manifold.Type                 = ManifoldType.FaceA;
-                manifold.LocalNormal          = n;
-                manifold.LocalPoint           = A;
-                manifold.Points.Value0.Id.Key     = 0;
-                manifold.Points.Value0.Id.ContactFeature      = cf;
+                cf.IndexA = 0;
+                cf.TypeA = (byte) ContactFeature.FeatureType.Face;
+                manifold.PointCount = 1;
+                manifold.Type = ManifoldType.FaceA;
+                manifold.LocalNormal = n;
+                manifold.LocalPoint = A;
+                manifold.Points.Value0.Id.Key = 0;
+                manifold.Points.Value0.Id.ContactFeature = cf;
                 manifold.Points.Value0.LocalPoint = circleB.Position;
             }
         }
@@ -159,7 +155,7 @@ namespace Box2DSharp.Collision
         /// Compute the collision manifold between an edge and a circle.
         public static void CollideEdgeAndPolygon(
             ref Manifold manifold,
-            EdgeShape    edgeA,
+            EdgeShape edgeA,
             in Transform xfA,
             PolygonShape polygonB,
             in Transform xfB)
@@ -202,9 +198,9 @@ namespace Box2DSharp.Collision
 
             public TempPolygon(int count)
             {
-                Count    = count;
+                Count = count;
                 Vertices = new Vector2[Settings.MaxPolygonVertices];
-                Normals  = new Vector2[Settings.MaxPolygonVertices];
+                Normals = new Vector2[Settings.MaxPolygonVertices];
             }
         }
 
@@ -252,11 +248,11 @@ namespace Box2DSharp.Collision
 
             public float Radius;
 
+            public Transform Transform;
+
             public VertexType Type1, Type2;
 
             public Vector2 V0, V1, V2, V3;
-
-            public Transform Transform;
 
             // Algorithm:
             // 1. Classify v1 and v2
@@ -268,11 +264,11 @@ namespace Box2DSharp.Collision
             // 7. Return if _any_ axis indicates separation
             // 8. Clip
             public void Collide(
-                ref Manifold     manifold,
-                ref EdgeShape    edgeA,
-                in  Transform    xfA,
+                ref Manifold manifold,
+                ref EdgeShape edgeA,
+                in Transform xfA,
                 ref PolygonShape polygonB,
-                in  Transform    xfB)
+                in Transform xfB)
             {
                 Transform = MathUtils.MulT(xfA, xfB);
 
@@ -289,9 +285,9 @@ namespace Box2DSharp.Collision
                 var edge1 = V2 - V1;
                 edge1.Normalize();
                 Normal1.Set(edge1.Y, -edge1.X);
-                var   offset1 = MathUtils.Dot(Normal1, CentroidB - V1);
-                float offset0 = 0.0f,  offset2 = 0.0f;
-                bool  convex1 = false, convex2 = false;
+                var offset1 = MathUtils.Dot(Normal1, CentroidB - V1);
+                float offset0 = 0.0f, offset2 = 0.0f;
+                bool convex1 = false, convex2 = false;
 
                 // Is there a preceding edge?
                 if (hasVertex0)
@@ -321,13 +317,13 @@ namespace Box2DSharp.Collision
                         Front = offset0 >= 0.0f || offset1 >= 0.0f || offset2 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal0;
                             UpperLimit = Normal2;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal1;
                             UpperLimit = -Normal1;
                         }
@@ -337,13 +333,13 @@ namespace Box2DSharp.Collision
                         Front = offset0 >= 0.0f || offset1 >= 0.0f && offset2 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal0;
                             UpperLimit = Normal1;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal2;
                             UpperLimit = -Normal1;
                         }
@@ -353,13 +349,13 @@ namespace Box2DSharp.Collision
                         Front = offset2 >= 0.0f || offset0 >= 0.0f && offset1 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal1;
                             UpperLimit = Normal2;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal1;
                             UpperLimit = -Normal0;
                         }
@@ -369,13 +365,13 @@ namespace Box2DSharp.Collision
                         Front = offset0 >= 0.0f && offset1 >= 0.0f && offset2 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal1;
                             UpperLimit = Normal1;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal2;
                             UpperLimit = -Normal0;
                         }
@@ -388,13 +384,13 @@ namespace Box2DSharp.Collision
                         Front = offset0 >= 0.0f || offset1 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal0;
                             UpperLimit = -Normal1;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = Normal1;
                             UpperLimit = -Normal1;
                         }
@@ -404,13 +400,13 @@ namespace Box2DSharp.Collision
                         Front = offset0 >= 0.0f && offset1 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = Normal1;
                             UpperLimit = -Normal1;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = Normal1;
                             UpperLimit = -Normal0;
                         }
@@ -423,13 +419,13 @@ namespace Box2DSharp.Collision
                         Front = offset1 >= 0.0f || offset2 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = -Normal1;
                             UpperLimit = Normal2;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal1;
                             UpperLimit = Normal1;
                         }
@@ -439,13 +435,13 @@ namespace Box2DSharp.Collision
                         Front = offset1 >= 0.0f && offset2 >= 0.0f;
                         if (Front)
                         {
-                            Normal     = Normal1;
+                            Normal = Normal1;
                             LowerLimit = -Normal1;
                             UpperLimit = Normal1;
                         }
                         else
                         {
-                            Normal     = -Normal1;
+                            Normal = -Normal1;
                             LowerLimit = -Normal2;
                             UpperLimit = Normal1;
                         }
@@ -456,13 +452,13 @@ namespace Box2DSharp.Collision
                     Front = offset1 >= 0.0f;
                     if (Front)
                     {
-                        Normal     = Normal1;
+                        Normal = Normal1;
                         LowerLimit = -Normal1;
                         UpperLimit = -Normal1;
                     }
                     else
                     {
-                        Normal     = -Normal1;
+                        Normal = -Normal1;
                         LowerLimit = Normal1;
                         UpperLimit = Normal1;
                     }
@@ -473,7 +469,7 @@ namespace Box2DSharp.Collision
                 for (var i = 0; i < polygonB.Count; ++i)
                 {
                     PolygonB.Vertices[i] = MathUtils.Mul(Transform, polygonB.Vertices[i]);
-                    PolygonB.Normals[i]  = MathUtils.Mul(Transform.Rotation, polygonB.Vertices[i]);
+                    PolygonB.Normals[i] = MathUtils.Mul(Transform.Rotation, polygonB.Vertices[i]);
                 }
 
                 Radius = polygonB.Radius + edgeA.Radius;
@@ -539,32 +535,32 @@ namespace Box2DSharp.Collision
                     var i1 = bestIndex;
                     var i2 = i1 + 1 < PolygonB.Count ? i1 + 1 : 0;
 
-                    ie[0].Vector            = PolygonB.Vertices[i1];
+                    ie[0].Vector = PolygonB.Vertices[i1];
                     ie[0].Id.ContactFeature.IndexA = 0;
                     ie[0].Id.ContactFeature.IndexB = (byte) i1;
-                    ie[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
-                    ie[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[0].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
+                    ie[0].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
 
-                    ie[1].Vector            = PolygonB.Vertices[i2];
+                    ie[1].Vector = PolygonB.Vertices[i2];
                     ie[1].Id.ContactFeature.IndexA = 0;
                     ie[1].Id.ContactFeature.IndexB = (byte) i2;
-                    ie[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Face;
-                    ie[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[1].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
+                    ie[1].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
 
                     if (Front)
                     {
-                        rf.i1     = 0;
-                        rf.i2     = 1;
-                        rf.v1     = V1;
-                        rf.v2     = V2;
+                        rf.i1 = 0;
+                        rf.i2 = 1;
+                        rf.v1 = V1;
+                        rf.v2 = V2;
                         rf.normal = Normal1;
                     }
                     else
                     {
-                        rf.i1     = 1;
-                        rf.i2     = 0;
-                        rf.v1     = V2;
-                        rf.v2     = V1;
+                        rf.i1 = 1;
+                        rf.i2 = 0;
+                        rf.v1 = V2;
+                        rf.v2 = V1;
                         rf.normal = -Normal1;
                     }
                 }
@@ -572,22 +568,22 @@ namespace Box2DSharp.Collision
                 {
                     manifold.Type = ManifoldType.FaceB;
 
-                    ie[0].Vector            = V1;
+                    ie[0].Vector = V1;
                     ie[0].Id.ContactFeature.IndexA = 0;
                     ie[0].Id.ContactFeature.IndexB = (byte) primaryAxis.Index;
-                    ie[0].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                    ie[0].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                    ie[0].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[0].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
 
-                    ie[1].Vector            = V2;
+                    ie[1].Vector = V2;
                     ie[1].Id.ContactFeature.IndexA = 0;
                     ie[1].Id.ContactFeature.IndexB = (byte) primaryAxis.Index;
-                    ie[1].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                    ie[1].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                    ie[1].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
+                    ie[1].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
 
-                    rf.i1     = primaryAxis.Index;
-                    rf.i2     = rf.i1 + 1 < PolygonB.Count ? rf.i1 + 1 : 0;
-                    rf.v1     = PolygonB.Vertices[rf.i1];
-                    rf.v2     = PolygonB.Vertices[rf.i2];
+                    rf.i1 = primaryAxis.Index;
+                    rf.i2 = rf.i1 + 1 < PolygonB.Count ? rf.i1 + 1 : 0;
+                    rf.v1 = PolygonB.Vertices[rf.i1];
+                    rf.v2 = PolygonB.Vertices[rf.i2];
                     rf.normal = PolygonB.Normals[rf.i1];
                 }
 
@@ -631,12 +627,12 @@ namespace Box2DSharp.Collision
                 if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                 {
                     manifold.LocalNormal = rf.normal;
-                    manifold.LocalPoint  = rf.v1;
+                    manifold.LocalPoint = rf.v1;
                 }
                 else
                 {
                     manifold.LocalNormal = polygonB.Normals[rf.i1];
-                    manifold.LocalPoint  = polygonB.Vertices[rf.i1];
+                    manifold.LocalPoint = polygonB.Vertices[rf.i1];
                 }
 
                 var pointCount = 0;
@@ -651,13 +647,13 @@ namespace Box2DSharp.Collision
                         if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                         {
                             cp.LocalPoint = MathUtils.MulT(Transform, clipPoints2[i].Vector);
-                            cp.Id         = clipPoints2[i].Id;
+                            cp.Id = clipPoints2[i].Id;
                         }
                         else
                         {
-                            cp.LocalPoint   = clipPoints2[i].Vector;
-                            cp.Id.ContactFeature.TypeA  = clipPoints2[i].Id.ContactFeature.TypeB;
-                            cp.Id.ContactFeature.TypeB  = clipPoints2[i].Id.ContactFeature.TypeA;
+                            cp.LocalPoint = clipPoints2[i].Vector;
+                            cp.Id.ContactFeature.TypeA = clipPoints2[i].Id.ContactFeature.TypeB;
+                            cp.Id.ContactFeature.TypeB = clipPoints2[i].Id.ContactFeature.TypeA;
                             cp.Id.ContactFeature.IndexA = clipPoints2[i].Id.ContactFeature.IndexB;
                             cp.Id.ContactFeature.IndexB = clipPoints2[i].Id.ContactFeature.IndexA;
                         }
@@ -672,8 +668,8 @@ namespace Box2DSharp.Collision
             public EPAxis ComputeEdgeSeparation()
             {
                 EPAxis axis;
-                axis.Type       = EPAxis.EPAxisType.EdgeA;
-                axis.Index      = Front ? 0 : 1;
+                axis.Type = EPAxis.EPAxisType.EdgeA;
+                axis.Index = Front ? 0 : 1;
                 axis.Separation = float.MaxValue;
 
                 for (var i = 0; i < PolygonB.Count; ++i)
@@ -691,8 +687,8 @@ namespace Box2DSharp.Collision
             public EPAxis ComputePolygonSeparation()
             {
                 EPAxis axis;
-                axis.Type       = EPAxis.EPAxisType.Unknown;
-                axis.Index      = -1;
+                axis.Type = EPAxis.EPAxisType.Unknown;
+                axis.Index = -1;
                 axis.Separation = -float.MaxValue;
 
                 var perp = new Vector2(-Normal.Y, Normal.X);
@@ -703,13 +699,13 @@ namespace Box2DSharp.Collision
 
                     var s1 = MathUtils.Dot(n, PolygonB.Vertices[i] - V1);
                     var s2 = MathUtils.Dot(n, PolygonB.Vertices[i] - V2);
-                    var s  = Math.Min(s1, s2);
+                    var s = Math.Min(s1, s2);
 
                     if (s > Radius)
                     {
                         // No collision
-                        axis.Type       = EPAxis.EPAxisType.EdgeB;
-                        axis.Index      = i;
+                        axis.Type = EPAxis.EPAxisType.EdgeB;
+                        axis.Index = i;
                         axis.Separation = s;
                         return axis;
                     }
@@ -732,8 +728,8 @@ namespace Box2DSharp.Collision
 
                     if (s > axis.Separation)
                     {
-                        axis.Type       = EPAxis.EPAxisType.EdgeB;
-                        axis.Index      = i;
+                        axis.Type = EPAxis.EPAxisType.EdgeB;
+                        axis.Index = i;
                         axis.Separation = s;
                     }
                 }

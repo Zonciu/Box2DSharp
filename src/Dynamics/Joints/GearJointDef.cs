@@ -17,9 +17,9 @@ namespace Box2DSharp.Dynamics.Joints
         private GearJointDef()
         {
             JointType = JointType.GearJoint;
-            Joint1    = null;
-            Joint2    = null;
-            Ratio     = 1.0f;
+            Joint1 = null;
+            Joint2 = null;
+            Ratio = 1.0f;
         }
     }
 }

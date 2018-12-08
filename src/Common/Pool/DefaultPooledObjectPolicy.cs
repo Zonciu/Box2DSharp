@@ -3,7 +3,8 @@
 
 namespace Microsoft.Extensions.ObjectPool
 {
-    public class DefaultPooledObjectPolicy<T> : PooledObjectPolicy<T> where T : class, new()
+    public class DefaultPooledObjectPolicy<T> : PooledObjectPolicy<T>
+        where T : class, new()
     {
         public override T Create()
         {

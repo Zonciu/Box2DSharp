@@ -41,9 +41,9 @@ namespace Box2DSharp.Collision.Shapes
         /// @param childIndex the child shape index
         public abstract bool RayCast(
             out RayCastOutput output,
-            in  RayCastInput  input,
-            in  Transform     transform,
-            int               childIndex);
+            in RayCastInput input,
+            in Transform transform,
+            int childIndex);
 
         /// Given a transform, compute the associated axis aligned bounding box for a child shape.
         /// @param aabb returns the axis aligned box.

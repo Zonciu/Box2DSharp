@@ -20,10 +20,10 @@ namespace Box2DSharp.Collision.Shapes
 
         public ChainShape()
         {
-            ShapeType     = ShapeType.Chain;
-            Radius        = Settings.PolygonRadius;
-            Vertices      = null;
-            Count         = 0;
+            ShapeType = ShapeType.Chain;
+            Radius = Settings.PolygonRadius;
+            Vertices = null;
+            Count = 0;
             HasPrevVertex = false;
             HasNextVertex = false;
         }
@@ -34,7 +34,7 @@ namespace Box2DSharp.Collision.Shapes
         public void Clear()
         {
             Vertices = null;
-            Count    = 0;
+            Count = 0;
         }
 
         /// Create a loop. This automatically adjusts connectivity.
@@ -59,14 +59,14 @@ namespace Box2DSharp.Collision.Shapes
                 Debug.Assert(MathUtils.DistanceSquared(v1, v2) > Settings.LinearSlop * Settings.LinearSlop);
             }
 
-            Count    = count + 1;
+            Count = count + 1;
             Vertices = new Vector2[Count];
             Array.Copy(vertices, Vertices, count);
             Vertices[count] = Vertices[0];
-            PrevVertex      = Vertices[Count - 2];
-            NextVertex      = Vertices[1];
-            HasPrevVertex   = true;
-            HasNextVertex   = true;
+            PrevVertex = Vertices[Count - 2];
+            NextVertex = Vertices[1];
+            HasPrevVertex = true;
+            HasNextVertex = true;
         }
 
         /// Create a chain with isolated end vertices.
@@ -85,7 +85,7 @@ namespace Box2DSharp.Collision.Shapes
                   > Settings.LinearSlop * Settings.LinearSlop);
             }
 
-            Count    = count;
+            Count = count;
             Vertices = new Vector2[count];
             Array.Copy(vertices, Vertices, count);
 
@@ -100,7 +100,7 @@ namespace Box2DSharp.Collision.Shapes
         /// Don't call this for loops.
         public void SetPrevVertex(in Vector2 prevVertex)
         {
-            PrevVertex    = prevVertex;
+            PrevVertex = prevVertex;
             HasPrevVertex = true;
         }
 
@@ -108,7 +108,7 @@ namespace Box2DSharp.Collision.Shapes
         /// Don't call this for loops.
         public void SetNextVertex(in Vector2 nextVertex)
         {
-            NextVertex    = nextVertex;
+            NextVertex = nextVertex;
             HasNextVertex = true;
         }
 
@@ -117,8 +117,8 @@ namespace Box2DSharp.Collision.Shapes
         {
             var clone = new ChainShape();
             clone.CreateChain(Vertices);
-            clone.PrevVertex    = PrevVertex;
-            clone.NextVertex    = NextVertex;
+            clone.PrevVertex = PrevVertex;
+            clone.NextVertex = NextVertex;
             clone.HasPrevVertex = HasPrevVertex;
             clone.HasNextVertex = HasNextVertex;
             return clone;
@@ -137,30 +137,30 @@ namespace Box2DSharp.Collision.Shapes
             edge = new EdgeShape
             {
                 ShapeType = ShapeType.Edge,
-                Radius    = Radius,
-                Vertex1   = Vertices[index + 0],
-                Vertex2   = Vertices[index + 1]
+                Radius = Radius,
+                Vertex1 = Vertices[index + 0],
+                Vertex2 = Vertices[index + 1]
             };
 
             if (index > 0)
             {
-                edge.Vertex0    = Vertices[index - 1];
+                edge.Vertex0 = Vertices[index - 1];
                 edge.HasVertex0 = true;
             }
             else
             {
-                edge.Vertex0    = PrevVertex;
+                edge.Vertex0 = PrevVertex;
                 edge.HasVertex0 = HasPrevVertex;
             }
 
             if (index < Count - 2)
             {
-                edge.Vertex3    = Vertices[index + 2];
+                edge.Vertex3 = Vertices[index + 2];
                 edge.HasVertex3 = true;
             }
             else
             {
-                edge.Vertex3    = NextVertex;
+                edge.Vertex3 = NextVertex;
                 edge.HasVertex3 = HasNextVertex;
             }
         }
@@ -175,9 +175,9 @@ namespace Box2DSharp.Collision.Shapes
         /// Implement b2Shape.
         public override bool RayCast(
             out RayCastOutput output,
-            in  RayCastInput  input,
-            in  Transform     transform,
-            int               childIndex)
+            in RayCastInput input,
+            in Transform transform,
+            int childIndex)
         {
             Debug.Assert(childIndex < Count);
 
@@ -217,7 +217,7 @@ namespace Box2DSharp.Collision.Shapes
         /// @see b2Shape::ComputeMass
         public override void ComputeMass(out MassData massData, float density)
         {
-            massData      = new MassData();
+            massData = new MassData();
             massData.Mass = 0.0f;
             massData.Center.SetZero();
             massData.RotationInertia = 0.0f;

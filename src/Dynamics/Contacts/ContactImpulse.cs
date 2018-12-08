@@ -17,8 +17,8 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             return new ContactImpulse
             {
-                Count           = 0,
-                NormalImpulses  = new float[Settings.MaxManifoldPoints],
+                Count = 0,
+                NormalImpulses = new float[Settings.MaxManifoldPoints],
                 TangentImpulses = new float[Settings.MaxManifoldPoints]
             };
         }

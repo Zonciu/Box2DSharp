@@ -23,7 +23,7 @@ namespace Box2DSharp.Dynamics.Joints
             JointType = JointType.FrictionJoint;
             LocalAnchorA.SetZero();
             LocalAnchorB.SetZero();
-            MaxForce  = 0.0f;
+            MaxForce = 0.0f;
             MaxTorque = 0.0f;
         }
 
@@ -42,8 +42,8 @@ namespace Box2DSharp.Dynamics.Joints
         /// anchor and world axis.
         public void Initialize(Body bA, Body bB, in Vector2 anchor)
         {
-            BodyA        = bA;
-            BodyB        = bB;
+            BodyA = bA;
+            BodyB = bB;
             LocalAnchorA = BodyA.GetLocalPoint(anchor);
             LocalAnchorB = BodyB.GetLocalPoint(anchor);
         }

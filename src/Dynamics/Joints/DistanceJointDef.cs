@@ -32,21 +32,21 @@ namespace Box2DSharp.Dynamics.Joints
             JointType = JointType.DistanceJoint;
             LocalAnchorA.Set(0.0f, 0.0f);
             LocalAnchorB.Set(0.0f, 0.0f);
-            Length       = 1.0f;
-            FrequencyHz  = 0.0f;
+            Length = 1.0f;
+            FrequencyHz = 0.0f;
             DampingRatio = 0.0f;
         }
 
         /// Initialize the bodies, anchors, and length using the world
         /// anchors.
         public void Initialize(
-            Body       b1,
-            Body       b2,
+            Body b1,
+            Body b2,
             in Vector2 anchor1,
             in Vector2 anchor2)
         {
-            BodyA        = b1;
-            BodyB        = b2;
+            BodyA = b1;
+            BodyB = b2;
             LocalAnchorA = BodyA.GetLocalPoint(anchor1);
             LocalAnchorB = BodyB.GetLocalPoint(anchor2);
             var d = anchor2 - anchor1;

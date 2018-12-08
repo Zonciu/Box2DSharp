@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
@@ -15,20 +14,74 @@ namespace Box2DSharp.Dynamics
 {
     public class World
     {
+        private bool _allowSleep;
+
+        /// <summary>
+        /// 解构监听
+        /// </summary>
+        private IDestructionListener _destructionListener;
+
+        /// <summary>
+        /// 调试绘制
+        /// </summary>
+        private IDrawer _drawer;
+
+        /// <summary>
+        /// This is used to compute the time step ratio to
+        /// support a variable time step.
+        /// 时间步倍率
+        /// </summary>
+        private float _invDt0;
+
+        private Profile _profile;
+
+        /// <summary>
+        /// 时间步完成
+        /// </summary>
+        private bool _stepComplete;
+
+        /// <summary>
+        /// 是否启用连续碰撞
+        /// </summary>
+        public bool ContinuousPhysics;
+
+        /// <summary>
+        /// 重力常数
+        /// </summary>
+        public Vector2 Gravity;
+
         /// <summary>
         /// 新增夹具
         /// </summary>
         internal bool HasNewFixture;
 
         /// <summary>
+        /// 清除受力
+        /// </summary>
+        public bool IsAutoClearForces;
+
+        /// <summary>
         /// 锁定世界
         /// </summary>
         internal bool IsLocked;
 
-        /// <summary>
-        /// 清除受力
-        /// </summary>
-        public bool IsAutoClearForces;
+        public World() : this(new Vector2(0, -10))
+        { }
+
+        public World(in Vector2 gravity)
+        {
+            Gravity = gravity;
+
+            WarmStarting = true;
+            ContinuousPhysics = true;
+            SubStepping = false;
+
+            _stepComplete = true;
+
+            AllowSleep = true;
+            IsAutoClearForces = true;
+            _invDt0 = 0.0f;
+        }
 
         /// <summary>
         /// 世界是否允许休眠
@@ -54,40 +107,6 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        private bool _allowSleep;
-
-        /// <summary>
-        /// 是否启用连续碰撞
-        /// </summary>
-        public bool ContinuousPhysics;
-
-        /// <summary>
-        /// 解构监听
-        /// </summary>
-        private IDestructionListener _destructionListener;
-
-        /// <summary>
-        /// 调试绘制
-        /// </summary>
-        private IDrawer _drawer;
-
-        /// <summary>
-        /// 重力常数
-        /// </summary>
-        public Vector2 Gravity;
-
-        /// <summary>
-        /// This is used to compute the time step ratio to
-        /// support a variable time step.
-        /// 时间步倍率
-        /// </summary>
-        private float _invDt0;
-
-        /// <summary>
-        /// 时间步完成
-        /// </summary>
-        private bool _stepComplete;
-
         /// <summary>
         /// Enable/disable single stepped continuous physics. For testing. 
         /// 子步进
@@ -105,43 +124,6 @@ namespace Box2DSharp.Dynamics
         /// 性能统计
         /// </summary>
         public Profile Profile => _profile;
-
-        private Profile _profile = new Profile();
-
-        public World() : this(new Vector2(0, -10))
-        { }
-
-        public World(in Vector2 gravity)
-        {
-            Gravity = gravity;
-
-            WarmStarting = true;
-            ContinuousPhysics = true;
-            SubStepping = false;
-
-            _stepComplete = true;
-
-            AllowSleep = true;
-            IsAutoClearForces = true;
-            _invDt0 = 0.0f;
-        }
-
-        ~World()
-        {
-            // Some shapes allocate using b2Alloc.
-            var b = BodyList.First;
-            while (b != null)
-            {
-                var bNext = b.Next;
-
-                foreach (var t in b.Value.FixtureList)
-                {
-                    Fixture.Destroy(t);
-                }
-
-                b = bNext;
-            }
-        }
 
         /// <summary>
         /// 接触点管理器
@@ -179,6 +161,23 @@ namespace Box2DSharp.Dynamics
         /// Get the quality metric of the dynamic tree. The smaller the better.
         /// The minimum is 1.
         public float TreeQuality => ContactManager.BroadPhase.GetTreeQuality();
+
+        ~World()
+        {
+            // Some shapes allocate using b2Alloc.
+            var b = BodyList.First;
+            while (b != null)
+            {
+                var bNext = b.Next;
+
+                foreach (var t in b.Value.FixtureList)
+                {
+                    Fixture.Destroy(t);
+                }
+
+                b = bNext;
+            }
+        }
 
         /// <summary>
         /// Register a destruction listener. The listener is owned by you and must

@@ -12,20 +12,6 @@ namespace Box2DSharp.Dynamics.Contacts
         private static readonly ObjectPool<ChainAndCircleContact> _pool =
             new DefaultObjectPool<ChainAndCircleContact>(new PoolPolicy());
 
-        private class PoolPolicy : IPooledObjectPolicy<ChainAndCircleContact>
-        {
-            public ChainAndCircleContact Create()
-            {
-                return new ChainAndCircleContact();
-            }
-
-            public bool Return(ChainAndCircleContact obj)
-            {
-                obj.Reset();
-                return true;
-            }
-        }
-
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Debug.Assert(fixtureA.ShapeType == ShapeType.Chain);
@@ -51,6 +37,20 @@ namespace Box2DSharp.Dynamics.Contacts
                 xfA,
                 (CircleShape) FixtureB.Shape,
                 xfB);
+        }
+
+        private class PoolPolicy : IPooledObjectPolicy<ChainAndCircleContact>
+        {
+            public ChainAndCircleContact Create()
+            {
+                return new ChainAndCircleContact();
+            }
+
+            public bool Return(ChainAndCircleContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
     }
 }

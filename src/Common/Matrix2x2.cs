@@ -87,11 +87,7 @@ namespace Box2DSharp.Common
                 det = 1.0f / det;
             }
 
-            var x = new Vector2
-            {
-                X = det * (a22 * b.X - a12 * b.Y),
-                Y = det * (a11 * b.Y - a21 * b.X)
-            };
+            var x = new Vector2 {X = det * (a22 * b.X - a12 * b.Y), Y = det * (a11 * b.Y - a21 * b.X)};
             return x;
         }
 

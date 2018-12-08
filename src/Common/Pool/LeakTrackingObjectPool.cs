@@ -7,10 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Extensions.ObjectPool
 {
-    public class LeakTrackingObjectPool<T> : ObjectPool<T> where T : class
+    public class LeakTrackingObjectPool<T> : ObjectPool<T>
+        where T : class
     {
-        private readonly ConditionalWeakTable<T, Tracker> _trackers = new ConditionalWeakTable<T, Tracker>();
         private readonly ObjectPool<T> _inner;
+
+        private readonly ConditionalWeakTable<T, Tracker> _trackers = new ConditionalWeakTable<T, Tracker>();
 
         public LeakTrackingObjectPool(ObjectPool<T> inner)
         {
@@ -44,6 +46,7 @@ namespace Microsoft.Extensions.ObjectPool
         private class Tracker : IDisposable
         {
             private readonly string _stack;
+
             private bool _disposed;
 
             public Tracker()

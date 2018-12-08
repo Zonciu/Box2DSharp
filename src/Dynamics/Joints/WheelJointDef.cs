@@ -41,22 +41,22 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA.SetZero();
             LocalAnchorB.SetZero();
             LocalAxisA.Set(1.0f, 0.0f);
-            EnableMotor    = false;
+            EnableMotor = false;
             MaxMotorTorque = 0.0f;
-            MotorSpeed     = 0.0f;
-            FrequencyHz    = 2.0f;
-            DampingRatio   = 0.7f;
+            MotorSpeed = 0.0f;
+            FrequencyHz = 2.0f;
+            DampingRatio = 0.7f;
         }
 
         /// Initialize the bodies, anchors, axis, and reference angle using the world
         /// anchor and world axis.
         public void Initialize(Body bA, Body bB, in Vector2 anchor, in Vector2 axis)
         {
-            BodyA        = bA;
-            BodyB        = bB;
+            BodyA = bA;
+            BodyB = bB;
             LocalAnchorA = BodyA.GetLocalPoint(anchor);
             LocalAnchorB = BodyB.GetLocalPoint(anchor);
-            LocalAxisA   = BodyA.GetLocalVector(axis);
+            LocalAxisA = BodyA.GetLocalVector(axis);
         }
     }
 }

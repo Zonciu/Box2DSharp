@@ -17,6 +17,17 @@ namespace Box2DSharp.Dynamics.Joints
     {
         private readonly float _constant;
 
+        private readonly float _lengthA;
+
+        private readonly float _lengthB;
+
+        // Solver shared
+        private readonly Vector2 _localAnchorA;
+
+        private readonly Vector2 _localAnchorB;
+
+        private readonly float _ratio;
+
         private Vector2 _groundAnchorA;
 
         private Vector2 _groundAnchorB;
@@ -36,15 +47,6 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _invMassB;
 
-        private readonly float _lengthA;
-
-        private readonly float _lengthB;
-
-        // Solver shared
-        private readonly Vector2 _localAnchorA;
-
-        private readonly Vector2 _localAnchorB;
-
         private Vector2 _localCenterA;
 
         private Vector2 _localCenterB;
@@ -52,8 +54,6 @@ namespace Box2DSharp.Dynamics.Joints
         private float _mass;
 
         private Vector2 _rA;
-
-        private readonly float _ratio;
 
         private Vector2 _rB;
 
@@ -65,8 +65,8 @@ namespace Box2DSharp.Dynamics.Joints
         {
             _groundAnchorA = def.GroundAnchorA;
             _groundAnchorB = def.GroundAnchorB;
-            _localAnchorA  = def.LocalAnchorA;
-            _localAnchorB  = def.LocalAnchorB;
+            _localAnchorA = def.LocalAnchorA;
+            _localAnchorB = def.LocalAnchorB;
 
             _lengthA = def.LengthA;
             _lengthB = def.LengthB;
@@ -155,14 +155,14 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
@@ -255,7 +255,7 @@ namespace Box2DSharp.Dynamics.Joints
             var vpA = vA + MathUtils.Cross(wA, _rA);
             var vpB = vB + MathUtils.Cross(wB, _rB);
 
-            var Cdot    = -MathUtils.Dot(_uA, vpA) - _ratio * MathUtils.Dot(_uB, vpB);
+            var Cdot = -MathUtils.Dot(_uA, vpA) - _ratio * MathUtils.Dot(_uB, vpB);
             var impulse = -_mass * Cdot;
             _impulse += impulse;
 
@@ -325,7 +325,7 @@ namespace Box2DSharp.Dynamics.Joints
                 mass = 1.0f / mass;
             }
 
-            var C           = _constant - lengthA - _ratio * lengthB;
+            var C = _constant - lengthA - _ratio * lengthB;
             var linearError = Math.Abs(C);
 
             var impulse = -mass * C;
@@ -339,9 +339,9 @@ namespace Box2DSharp.Dynamics.Joints
             aB += _invIb * MathUtils.Cross(rB, PB);
 
             data.Positions[_indexA].Center = cA;
-            data.Positions[_indexA].Angle  = aA;
+            data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
-            data.Positions[_indexB].Angle  = aB;
+            data.Positions[_indexB].Angle = aB;
 
             return linearError < Settings.LinearSlop;
         }

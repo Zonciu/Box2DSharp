@@ -15,15 +15,15 @@ namespace Box2DSharp.Collision
         /// <inheritdoc />
         public BroadPhase()
         {
-            _proxyCount   = 0;
-            _tree         = new DynamicTree();
+            _proxyCount = 0;
+            _tree = new DynamicTree();
             _pairCapacity = 16;
-            _pairCount    = 0;
-            _pairBuffer   = new Pair[_pairCapacity];
+            _pairCount = 0;
+            _pairBuffer = new Pair[_pairCapacity];
 
             _moveCapacity = 16;
-            _moveCount    = 0;
-            _moveBuffer   = new int[_moveCapacity];
+            _moveCount = 0;
+            _moveBuffer = new int[_moveCapacity];
         }
 
         /// Create a proxy with an initial AABB. Pairs are not reported until
@@ -118,8 +118,8 @@ namespace Box2DSharp.Collision
             while (i < _pairCount)
             {
                 ref readonly var primaryPair = ref _pairBuffer[i];
-                var              userDataA   = _tree.GetUserData(primaryPair.ProxyIdA);
-                var              userDataB   = _tree.GetUserData(primaryPair.ProxyIdB);
+                var userDataA = _tree.GetUserData(primaryPair.ProxyIdA);
+                var userDataB = _tree.GetUserData(primaryPair.ProxyIdB);
 
                 callback(userDataA, userDataB);
                 ++i;
@@ -196,7 +196,7 @@ namespace Box2DSharp.Collision
             {
                 var oldBuffer = _moveBuffer;
                 _moveCapacity *= 2;
-                _moveBuffer   =  new int[_moveCapacity];
+                _moveBuffer = new int[_moveCapacity];
                 Array.Copy(oldBuffer, _moveBuffer, _moveCount);
             }
 
@@ -228,7 +228,7 @@ namespace Box2DSharp.Collision
             {
                 var oldBuffer = _pairBuffer;
                 _pairCapacity *= 2;
-                _pairBuffer   =  new Pair[_pairCapacity];
+                _pairBuffer = new Pair[_pairCapacity];
                 Array.Copy(oldBuffer, _pairBuffer, _pairCount);
             }
 

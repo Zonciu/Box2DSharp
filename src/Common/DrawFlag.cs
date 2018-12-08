@@ -34,5 +34,5 @@ namespace Box2DSharp.Common
         /// draw body contact point
         /// </summary>
         DrawContactPoint = 1 << 5
-    };
+    }
 }

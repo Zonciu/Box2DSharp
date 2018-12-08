@@ -25,9 +25,9 @@ namespace Box2DSharp.Dynamics.Joints
         {
             JointType = JointType.MotorJoint;
             LinearOffset.SetZero();
-            AngularOffset    = 0.0f;
-            MaxForce         = 1.0f;
-            MaxTorque        = 1.0f;
+            AngularOffset = 0.0f;
+            MaxForce = 1.0f;
+            MaxTorque = 1.0f;
             CorrectionFactor = 0.3f;
         }
 

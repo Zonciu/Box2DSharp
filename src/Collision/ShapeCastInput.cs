@@ -1,5 +1,3 @@
-using System;
-using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Common;
 
@@ -17,5 +15,5 @@ namespace Box2DSharp.Collision
         public Transform TransformB;
 
         public Vector2 TranslationB;
-    };
+    }
 }

@@ -14,19 +14,19 @@ namespace Box2DSharp.Dynamics
 
         internal int BodyCount;
 
-        internal Contact[] Contacts;
-
         internal int ContactCount;
 
-        internal Joint[] Joints;
+        internal IContactListener ContactListener;
+
+        internal Contact[] Contacts;
 
         internal int JointCount;
+
+        internal Joint[] Joints;
 
         internal Position[] Positions;
 
         internal Velocity[] Velocities;
-
-        internal IContactListener ContactListener;
 
         public Island(
             int bodyCapacity,

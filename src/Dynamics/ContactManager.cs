@@ -14,9 +14,9 @@ namespace Box2DSharp.Dynamics
 
         public BroadPhase BroadPhase = new BroadPhase();
 
-        public LinkedList<Contact> ContactList = new LinkedList<Contact>();
-
         public IContactFilter ContactFilter = DefaultContactFilter;
+
+        public LinkedList<Contact> ContactList = new LinkedList<Contact>();
 
         public IContactListener ContactListener = DefaultContactListener;
 
@@ -95,10 +95,10 @@ namespace Box2DSharp.Dynamics
             // Contact creation may swap fixtures.
             fixtureA = c.GetFixtureA();
             fixtureB = c.GetFixtureB();
-            indexA   = c.GetChildIndexA();
-            indexB   = c.GetChildIndexB();
-            bodyA    = fixtureA.Body;
-            bodyB    = fixtureB.Body;
+            indexA = c.GetChildIndexA();
+            indexB = c.GetChildIndexB();
+            bodyA = fixtureA.Body;
+            bodyB = fixtureB.Body;
 
             // Insert into the world.
             var node = ContactList.AddFirst(c);
@@ -108,13 +108,13 @@ namespace Box2DSharp.Dynamics
 
             // Connect to body A
             c.NodeA.Contact = c;
-            c.NodeA.Other   = bodyB;
+            c.NodeA.Other = bodyB;
             var nodeA = bodyA.ContactList.AddFirst(c.NodeA);
             c.NodeA.Node = nodeA;
 
             // Connect to body B
             c.NodeB.Contact = c;
-            c.NodeB.Other   = bodyA;
+            c.NodeB.Other = bodyA;
             var nodeB = bodyB.ContactList.AddFirst(c.NodeB);
             c.NodeB.Node = nodeB;
 
@@ -135,8 +135,8 @@ namespace Box2DSharp.Dynamics
         {
             var fixtureA = c.GetFixtureA();
             var fixtureB = c.GetFixtureB();
-            var bodyA    = fixtureA.Body;
-            var bodyB    = fixtureB.Body;
+            var bodyA = fixtureA.Body;
+            var bodyB = fixtureB.Body;
 
             if (c.IsTouching()) // 存在接触监听器且当前接触点接触,则触发结束接触
             {
@@ -167,10 +167,10 @@ namespace Box2DSharp.Dynamics
 
                 var fixtureA = c.GetFixtureA();
                 var fixtureB = c.GetFixtureB();
-                var indexA   = c.GetChildIndexA();
-                var indexB   = c.GetChildIndexB();
-                var bodyA    = fixtureA.Body;
-                var bodyB    = fixtureB.Body;
+                var indexA = c.GetChildIndexA();
+                var indexB = c.GetChildIndexB();
+                var bodyA = fixtureA.Body;
+                var bodyB = fixtureB.Body;
 
                 // Is this contact flagged for filtering?
                 if (c.Flags.HasFlag(Contact.ContactFlag.FilterFlag))
@@ -207,7 +207,7 @@ namespace Box2DSharp.Dynamics
 
                 var proxyIdA = fixtureA.Proxies[indexA].ProxyId;
                 var proxyIdB = fixtureB.Proxies[indexB].ProxyId;
-                var overlap  = BroadPhase.TestOverlap(proxyIdA, proxyIdB);
+                var overlap = BroadPhase.TestOverlap(proxyIdA, proxyIdB);
 
                 // Here we destroy contacts that cease to overlap in the broad-phase.
                 if (overlap == false)

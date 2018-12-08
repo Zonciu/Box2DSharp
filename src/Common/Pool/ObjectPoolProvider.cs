@@ -5,11 +5,13 @@ namespace Microsoft.Extensions.ObjectPool
 {
     public abstract class ObjectPoolProvider
     {
-        public ObjectPool<T> Create<T>() where T : class, new()
+        public ObjectPool<T> Create<T>()
+            where T : class, new()
         {
-            return Create<T>(new DefaultPooledObjectPolicy<T>());
+            return Create(new DefaultPooledObjectPolicy<T>());
         }
 
-        public abstract ObjectPool<T> Create<T>(IPooledObjectPolicy<T> policy) where T : class;
+        public abstract ObjectPool<T> Create<T>(IPooledObjectPolicy<T> policy)
+            where T : class;
     }
 }

@@ -12,5 +12,5 @@ namespace Box2DSharp.Collision.Shapes
 
         /// The rotational inertia of the shape about the local origin.
         public float RotationInertia;
-    };
+    }
 }

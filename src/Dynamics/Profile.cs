@@ -18,5 +18,5 @@ namespace Box2DSharp.Dynamics
         public float Broadphase;
 
         public float SolveTOI;
-    };
+    }
 }

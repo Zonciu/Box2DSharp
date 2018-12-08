@@ -8,20 +8,23 @@ using System.Threading;
 
 namespace Microsoft.Extensions.ObjectPool
 {
-    public class DefaultObjectPool<T> : ObjectPool<T> where T : class
+    public class DefaultObjectPool<T> : ObjectPool<T>
+        where T : class
     {
-        private readonly ObjectWrapper[] _items;
-        private readonly IPooledObjectPolicy<T> _policy;
-        private readonly bool _isDefaultPolicy;
-        private T _firstItem;
-
         // This class was introduced in 2.1 to avoid the interface call where possible
         private readonly PooledObjectPolicy<T> _fastPolicy;
 
+        private readonly bool _isDefaultPolicy;
+
+        private readonly ObjectWrapper[] _items;
+
+        private readonly IPooledObjectPolicy<T> _policy;
+
+        private T _firstItem;
+
         public DefaultObjectPool(IPooledObjectPolicy<T> policy)
             : this(policy, Environment.ProcessorCount * 2)
-        {
-        }
+        { }
 
         public DefaultObjectPool(IPooledObjectPolicy<T> policy, int maximumRetained)
         {
@@ -69,7 +72,10 @@ namespace Microsoft.Extensions.ObjectPool
 
         // Non-inline to improve its code quality as uncommon path
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private T Create() => _fastPolicy?.Create() ?? _policy.Create();
+        private T Create()
+        {
+            return _fastPolicy?.Create() ?? _policy.Create();
+        }
 
         public override void Return(T obj)
         {
@@ -86,9 +92,10 @@ namespace Microsoft.Extensions.ObjectPool
         private void ReturnViaScan(T obj)
         {
             var items = _items;
-            for (var i = 0; i < items.Length && Interlocked.CompareExchange(ref items[i].Element, obj, null) != null; ++i)
-            {
-            }
+            for (var i = 0;
+                 i < items.Length && Interlocked.CompareExchange(ref items[i].Element, obj, null) != null;
+                 ++i)
+            { }
         }
 
         // PERF: the struct wrapper avoids array-covariance-checks from the runtime when assigning to elements of the array.

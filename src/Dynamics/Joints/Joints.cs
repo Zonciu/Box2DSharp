@@ -127,15 +127,15 @@ namespace Box2DSharp.Dynamics.Joints
         {
             Debug.Assert(def.BodyA != def.BodyB);
 
-            JointType        = def.JointType;
-            BodyA            = def.BodyA;
-            BodyB            = def.BodyB;
-            Index            = 0;
+            JointType = def.JointType;
+            BodyA = def.BodyA;
+            BodyB = def.BodyB;
+            Index = 0;
             CollideConnected = def.CollideConnected;
-            IslandFlag       = false;
-            UserData         = def.UserData;
-            EdgeA            = new JointEdge();
-            EdgeB            = new JointEdge();
+            IslandFlag = false;
+            UserData = def.UserData;
+            EdgeA = new JointEdge();
+            EdgeB = new JointEdge();
         }
 
         /// Get the next joint the world joint list.

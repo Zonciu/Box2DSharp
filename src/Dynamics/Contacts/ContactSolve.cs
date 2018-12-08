@@ -8,13 +8,13 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public class ContactSolver
     {
-        private static bool BlockSolve = true;
-
-        private readonly ContactPositionConstraint[] _positionConstraints;
+        private static readonly bool BlockSolve = true;
 
         private readonly Contact[] _contacts;
 
         private readonly int _count;
+
+        private readonly ContactPositionConstraint[] _positionConstraints;
 
         private readonly Position[] _positions;
 
@@ -25,18 +25,18 @@ namespace Box2DSharp.Dynamics.Contacts
         public ContactSolver(ContactSolverDef def)
         {
             var step = def.Step;
-            _count               = def.Count;
+            _count = def.Count;
             _positionConstraints = new ContactPositionConstraint[_count];
-            VelocityConstraints  = new ContactVelocityConstraint[_count];
+            VelocityConstraints = new ContactVelocityConstraint[_count];
             for (var i = 0; i < _count; i++)
             {
                 _positionConstraints[i] = new ContactPositionConstraint();
-                VelocityConstraints[i]  = new ContactVelocityConstraint();
+                VelocityConstraints[i] = new ContactVelocityConstraint();
             }
 
-            _positions  = def.Positions;
+            _positions = def.Positions;
             _velocities = def.Velocities;
-            _contacts   = def.Contacts;
+            _contacts = def.Contacts;
 
             // Initialize position independent portions of the constraints.
             for (var i = 0; i < _count; ++i)
@@ -45,68 +45,68 @@ namespace Box2DSharp.Dynamics.Contacts
 
                 var fixtureA = contact.FixtureA;
                 var fixtureB = contact.FixtureB;
-                var shapeA   = fixtureA.Shape;
-                var shapeB   = fixtureB.Shape;
-                var radiusA  = shapeA.Radius;
-                var radiusB  = shapeB.Radius;
-                var bodyA    = fixtureA.Body;
-                var bodyB    = fixtureB.Body;
+                var shapeA = fixtureA.Shape;
+                var shapeB = fixtureB.Shape;
+                var radiusA = shapeA.Radius;
+                var radiusB = shapeB.Radius;
+                var bodyA = fixtureA.Body;
+                var bodyB = fixtureB.Body;
                 ref readonly var manifold = ref contact.GetManifold();
 
                 var pointCount = manifold.PointCount;
                 Debug.Assert(pointCount > 0);
 
                 var vc = VelocityConstraints[i];
-                vc.Friction     = contact.Friction;
-                vc.Restitution  = contact.Restitution;
+                vc.Friction = contact.Friction;
+                vc.Restitution = contact.Restitution;
                 vc.TangentSpeed = contact.TangentSpeed;
-                vc.IndexA       = bodyA.IslandIndex;
-                vc.IndexB       = bodyB.IslandIndex;
-                vc.InvMassA     = bodyA.InvMass;
-                vc.InvMassB     = bodyB.InvMass;
-                vc.InvIa        = bodyA.InverseInertia;
-                vc.InvIb        = bodyB.InverseInertia;
+                vc.IndexA = bodyA.IslandIndex;
+                vc.IndexB = bodyB.IslandIndex;
+                vc.InvMassA = bodyA.InvMass;
+                vc.InvMassB = bodyB.InvMass;
+                vc.InvIa = bodyA.InverseInertia;
+                vc.InvIb = bodyB.InverseInertia;
                 vc.ContactIndex = i;
-                vc.PointCount   = pointCount;
+                vc.PointCount = pointCount;
                 vc.K.SetZero();
                 vc.NormalMass.SetZero();
 
                 var pc = _positionConstraints[i];
-                pc.IndexA       = bodyA.IslandIndex;
-                pc.IndexB       = bodyB.IslandIndex;
-                pc.InvMassA     = bodyA.InvMass;
-                pc.InvMassB     = bodyB.InvMass;
+                pc.IndexA = bodyA.IslandIndex;
+                pc.IndexB = bodyB.IslandIndex;
+                pc.InvMassA = bodyA.InvMass;
+                pc.InvMassB = bodyB.InvMass;
                 pc.LocalCenterA = bodyA.Sweep.LocalCenter;
                 pc.LocalCenterB = bodyB.Sweep.LocalCenter;
-                pc.InvIa        = bodyA.InverseInertia;
-                pc.InvIb        = bodyB.InverseInertia;
-                pc.LocalNormal  = manifold.LocalNormal;
-                pc.LocalPoint   = manifold.LocalPoint;
-                pc.PointCount   = pointCount;
-                pc.RadiusA      = radiusA;
-                pc.RadiusB      = radiusB;
-                pc.Type         = manifold.Type;
+                pc.InvIa = bodyA.InverseInertia;
+                pc.InvIb = bodyB.InverseInertia;
+                pc.LocalNormal = manifold.LocalNormal;
+                pc.LocalPoint = manifold.LocalPoint;
+                pc.PointCount = pointCount;
+                pc.RadiusA = radiusA;
+                pc.RadiusB = radiusB;
+                pc.Type = manifold.Type;
 
                 for (var j = 0; j < pointCount; ++j)
                 {
-                    var cp  = manifold.Points[j];
+                    var cp = manifold.Points[j];
                     var vcp = vc.Points[j];
 
                     if (step.WarmStarting)
                     {
-                        vcp.NormalImpulse  = step.DtRatio * cp.NormalImpulse;
+                        vcp.NormalImpulse = step.DtRatio * cp.NormalImpulse;
                         vcp.TangentImpulse = step.DtRatio * cp.TangentImpulse;
                     }
                     else
                     {
-                        vcp.NormalImpulse  = 0.0f;
+                        vcp.NormalImpulse = 0.0f;
                         vcp.TangentImpulse = 0.0f;
                     }
 
                     vcp.Ra.SetZero();
                     vcp.Rb.SetZero();
-                    vcp.NormalMass   = 0.0f;
-                    vcp.TangentMass  = 0.0f;
+                    vcp.NormalMass = 0.0f;
+                    vcp.TangentMass = 0.0f;
                     vcp.VelocityBias = 0.0f;
 
                     pc.LocalPoints[j] = cp.LocalPoint;
@@ -121,17 +121,17 @@ namespace Box2DSharp.Dynamics.Contacts
                 var vc = VelocityConstraints[i];
                 var pc = _positionConstraints[i];
 
-                var radiusA  = pc.RadiusA;
-                var radiusB  = pc.RadiusB;
+                var radiusA = pc.RadiusA;
+                var radiusB = pc.RadiusB;
                 ref readonly var manifold = ref _contacts[vc.ContactIndex].GetManifold();
 
                 var indexA = vc.IndexA;
                 var indexB = vc.IndexB;
 
-                var mA           = vc.InvMassA;
-                var mB           = vc.InvMassB;
-                var iA           = vc.InvIa;
-                var iB           = vc.InvIb;
+                var mA = vc.InvMassA;
+                var mB = vc.InvMassB;
+                var iA = vc.InvIa;
+                var iB = vc.InvIb;
                 var localCenterA = pc.LocalCenterA;
                 var localCenterB = pc.LocalCenterB;
 
@@ -240,12 +240,12 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var vc = VelocityConstraints[i];
 
-                var indexA     = vc.IndexA;
-                var indexB     = vc.IndexB;
-                var mA         = vc.InvMassA;
-                var iA         = vc.InvIa;
-                var mB         = vc.InvMassB;
-                var iB         = vc.InvIb;
+                var indexA = vc.IndexA;
+                var indexB = vc.IndexB;
+                var mA = vc.InvMassA;
+                var iA = vc.InvIa;
+                var mB = vc.InvMassB;
+                var iB = vc.InvIb;
                 var pointCount = vc.PointCount;
 
                 var vA = _velocities[indexA].V;
@@ -253,13 +253,13 @@ namespace Box2DSharp.Dynamics.Contacts
                 var vB = _velocities[indexB].V;
                 var wB = _velocities[indexB].W;
 
-                var normal  = vc.Normal;
+                var normal = vc.Normal;
                 var tangent = MathUtils.Cross(normal, 1.0f);
 
                 for (var j = 0; j < pointCount; ++j)
                 {
                     var vcp = vc.Points[j];
-                    var P   = vcp.NormalImpulse * normal + vcp.TangentImpulse * tangent;
+                    var P = vcp.NormalImpulse * normal + vcp.TangentImpulse * tangent;
                     wA -= iA * MathUtils.Cross(vcp.Ra, P);
                     vA -= mA * P;
                     wB += iB * MathUtils.Cross(vcp.Rb, P);
@@ -279,12 +279,12 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var vc = VelocityConstraints[i];
 
-                var indexA     = vc.IndexA;
-                var indexB     = vc.IndexB;
-                var mA         = vc.InvMassA;
-                var iA         = vc.InvIa;
-                var mB         = vc.InvMassB;
-                var iB         = vc.InvIb;
+                var indexA = vc.IndexA;
+                var indexB = vc.IndexB;
+                var mA = vc.InvMassA;
+                var iA = vc.InvIa;
+                var mB = vc.InvMassB;
+                var iB = vc.InvIb;
                 var pointCount = vc.PointCount;
 
                 var vA = _velocities[indexA].V;
@@ -292,8 +292,8 @@ namespace Box2DSharp.Dynamics.Contacts
                 var vB = _velocities[indexB].V;
                 var wB = _velocities[indexB].W;
 
-                var normal   = vc.Normal;
-                var tangent  = MathUtils.Cross(normal, 1.0f);
+                var normal = vc.Normal;
+                var tangent = MathUtils.Cross(normal, 1.0f);
                 var friction = vc.Friction;
 
                 Debug.Assert(pointCount == 1 || pointCount == 2);
@@ -308,13 +308,13 @@ namespace Box2DSharp.Dynamics.Contacts
                     var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
 
                     // Compute tangent force
-                    var vt     = MathUtils.Dot(dv, tangent) - vc.TangentSpeed;
+                    var vt = MathUtils.Dot(dv, tangent) - vc.TangentSpeed;
                     var lambda = vcp.TangentMass * -vt;
 
                     // MathUtils.b2Clamp the accumulated force
                     var maxFriction = friction * vcp.NormalImpulse;
-                    var newImpulse  = MathUtils.Clamp(vcp.TangentImpulse + lambda, -maxFriction, maxFriction);
-                    lambda             = newImpulse - vcp.TangentImpulse;
+                    var newImpulse = MathUtils.Clamp(vcp.TangentImpulse + lambda, -maxFriction, maxFriction);
+                    lambda = newImpulse - vcp.TangentImpulse;
                     vcp.TangentImpulse = newImpulse;
 
                     // Apply contact impulse
@@ -338,12 +338,12 @@ namespace Box2DSharp.Dynamics.Contacts
                         var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
 
                         // Compute normal impulse
-                        var vn     = MathUtils.Dot(dv, normal);
+                        var vn = MathUtils.Dot(dv, normal);
                         var lambda = -vcp.NormalMass * (vn - vcp.VelocityBias);
 
                         // MathUtils.b2Clamp the accumulated impulse
                         var newImpulse = Math.Max(vcp.NormalImpulse + lambda, 0.0f);
-                        lambda            = newImpulse - vcp.NormalImpulse;
+                        lambda = newImpulse - vcp.NormalImpulse;
                         vcp.NormalImpulse = newImpulse;
 
                         // Apply contact impulse
@@ -587,13 +587,13 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             for (var i = 0; i < _count; ++i)
             {
-                var vc       = VelocityConstraints[i];
+                var vc = VelocityConstraints[i];
                 ref var manifold = ref _contacts[vc.ContactIndex].Manifold;
 
                 for (var j = 0; j < vc.PointCount; ++j)
                 {
                     ref var point = ref manifold.Points.GetRef(j);
-                    point.NormalImpulse  = vc.Points[j].NormalImpulse;
+                    point.NormalImpulse = vc.Points[j].NormalImpulse;
                     point.TangentImpulse = vc.Points[j].TangentImpulse;
                 }
             }
@@ -607,15 +607,15 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var pc = _positionConstraints[i];
 
-                var indexA       = pc.IndexA;
-                var indexB       = pc.IndexB;
+                var indexA = pc.IndexA;
+                var indexB = pc.IndexB;
                 var localCenterA = pc.LocalCenterA;
-                var mA           = pc.InvMassA;
-                var iA           = pc.InvIa;
+                var mA = pc.InvMassA;
+                var iA = pc.InvIa;
                 var localCenterB = pc.LocalCenterB;
-                var mB           = pc.InvMassB;
-                var iB           = pc.InvIb;
-                var pointCount   = pc.PointCount;
+                var mB = pc.InvMassB;
+                var iB = pc.InvIb;
+                var pointCount = pc.PointCount;
 
                 var cA = _positions[indexA].Center;
                 var aA = _positions[indexA].Angle;
@@ -637,7 +637,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     psm.Initialize(pc, xfA, xfB, j);
                     var normal = psm.Normal;
 
-                    var point      = psm.Point;
+                    var point = psm.Point;
                     var separation = psm.Separation;
 
                     var rA = point - cA;
@@ -655,7 +655,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     // Compute the effective mass.
                     var rnA = MathUtils.Cross(rA, normal);
                     var rnB = MathUtils.Cross(rB, normal);
-                    var K   = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
+                    var K = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
 
                     // Compute normal impulse
                     var impulse = K > 0.0f ? -C / K : 0.0f;
@@ -670,10 +670,10 @@ namespace Box2DSharp.Dynamics.Contacts
                 }
 
                 _positions[indexA].Center = cA;
-                _positions[indexA].Angle  = aA;
+                _positions[indexA].Angle = aA;
 
                 _positions[indexB].Center = cB;
-                _positions[indexB].Angle  = aB;
+                _positions[indexB].Angle = aB;
             }
 
             // We can't expect minSpeparation >= -b2_linearSlop because we don't
@@ -689,11 +689,11 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var pc = _positionConstraints[i];
 
-                var indexA       = pc.IndexA;
-                var indexB       = pc.IndexB;
+                var indexA = pc.IndexA;
+                var indexB = pc.IndexB;
                 var localCenterA = pc.LocalCenterA;
                 var localCenterB = pc.LocalCenterB;
-                var pointCount   = pc.PointCount;
+                var pointCount = pc.PointCount;
 
                 var mA = 0.0f;
                 var iA = 0.0f;
@@ -731,7 +731,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     psm.Initialize(pc, xfA, xfB, j);
                     var normal = psm.Normal;
 
-                    var point      = psm.Point;
+                    var point = psm.Point;
                     var separation = psm.Separation;
 
                     var rA = point - cA;
@@ -749,7 +749,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     // Compute the effective mass.
                     var rnA = MathUtils.Cross(rA, normal);
                     var rnB = MathUtils.Cross(rB, normal);
-                    var K   = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
+                    var K = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
 
                     // Compute normal impulse
                     var impulse = K > 0.0f ? -C / K : 0.0f;
@@ -764,10 +764,10 @@ namespace Box2DSharp.Dynamics.Contacts
                 }
 
                 _positions[indexA].Center = cA;
-                _positions[indexA].Angle  = aA;
+                _positions[indexA].Angle = aA;
 
                 _positions[indexB].Center = cB;
-                _positions[indexB].Angle  = aB;
+                _positions[indexB].Angle = aB;
             }
 
             // We can't expect minSpeparation >= -b2_linearSlop because we don't

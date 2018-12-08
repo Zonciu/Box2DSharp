@@ -7,5 +7,5 @@ namespace Box2DSharp.Collision.Collider
         FaceA,
 
         FaceB
-    };
+    }
 }

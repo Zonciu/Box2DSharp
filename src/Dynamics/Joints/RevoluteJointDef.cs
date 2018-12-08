@@ -50,22 +50,22 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA.Set(0.0f, 0.0f);
             LocalAnchorB.Set(0.0f, 0.0f);
             ReferenceAngle = 0.0f;
-            LowerAngle     = 0.0f;
-            UpperAngle     = 0.0f;
+            LowerAngle = 0.0f;
+            UpperAngle = 0.0f;
             MaxMotorTorque = 0.0f;
-            MotorSpeed     = 0.0f;
-            EnableLimit    = false;
-            EnableMotor    = false;
+            MotorSpeed = 0.0f;
+            EnableLimit = false;
+            EnableMotor = false;
         }
 
         /// Initialize the bodies, anchors, and reference angle using a world
         /// anchor point.
         public void Initialize(Body bA, Body bB, Vector2 anchor)
         {
-            BodyA          = bA;
-            BodyB          = bB;
-            LocalAnchorA   = BodyA.GetLocalPoint(anchor);
-            LocalAnchorB   = BodyB.GetLocalPoint(anchor);
+            BodyA = bA;
+            BodyB = bB;
+            LocalAnchorA = BodyA.GetLocalPoint(anchor);
+            LocalAnchorB = BodyB.GetLocalPoint(anchor);
             ReferenceAngle = BodyB.GetAngle() - BodyA.GetAngle();
         }
     }

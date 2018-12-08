@@ -25,5 +25,5 @@ namespace Box2DSharp.Collision.Collider
 
         /// uniquely identifies a contact point between two shapes
         public ContactId Id;
-    };
+    }
 }

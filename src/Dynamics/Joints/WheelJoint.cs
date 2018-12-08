@@ -10,6 +10,15 @@ namespace Box2DSharp.Dynamics.Joints
     /// This joint is designed for vehicle suspensions.
     internal class WheelJoint : Joint
     {
+        // Solver shared
+        private readonly Vector2 _localAnchorA;
+
+        private readonly Vector2 _localAnchorB;
+
+        private readonly Vector2 _localXAxisA;
+
+        private readonly Vector2 _localYAxisA;
+
         private Vector2 _ax, _ay;
 
         private float _bias;
@@ -37,18 +46,9 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _invMassB;
 
-        // Solver shared
-        private Vector2 _localAnchorA;
-
-        private Vector2 _localAnchorB;
-
         private Vector2 _localCenterA;
 
         private Vector2 _localCenterB;
-
-        private Vector2 _localXAxisA;
-
-        private readonly Vector2 _localYAxisA;
 
         private float _mass;
 
@@ -72,24 +72,24 @@ namespace Box2DSharp.Dynamics.Joints
         {
             _localAnchorA = def.LocalAnchorA;
             _localAnchorB = def.LocalAnchorB;
-            _localXAxisA  = def.LocalAxisA;
-            _localYAxisA  = MathUtils.Cross(1.0f, _localXAxisA);
+            _localXAxisA = def.LocalAxisA;
+            _localYAxisA = MathUtils.Cross(1.0f, _localXAxisA);
 
-            _mass          = 0.0f;
-            _impulse       = 0.0f;
-            _motorMass     = 0.0f;
-            _motorImpulse  = 0.0f;
-            _springMass    = 0.0f;
+            _mass = 0.0f;
+            _impulse = 0.0f;
+            _motorMass = 0.0f;
+            _motorImpulse = 0.0f;
+            _springMass = 0.0f;
             _springImpulse = 0.0f;
 
             _maxMotorTorque = def.MaxMotorTorque;
-            _motorSpeed     = def.MotorSpeed;
-            _enableMotor    = def.EnableMotor;
+            _motorSpeed = def.MotorSpeed;
+            _enableMotor = def.EnableMotor;
 
-            _frequencyHz  = def.FrequencyHz;
+            _frequencyHz = def.FrequencyHz;
             _dampingRatio = def.DampingRatio;
 
-            _bias  = 0.0f;
+            _bias = 0.0f;
             _gamma = 0.0f;
 
             _ax.SetZero();
@@ -120,9 +120,9 @@ namespace Box2DSharp.Dynamics.Joints
             var bA = BodyA;
             var bB = BodyB;
 
-            var pA   = bA.GetWorldPoint(_localAnchorA);
-            var pB   = bB.GetWorldPoint(_localAnchorB);
-            var d    = pB - pA;
+            var pA = bA.GetWorldPoint(_localAnchorA);
+            var pB = bB.GetWorldPoint(_localAnchorB);
+            var d = pB - pA;
             var axis = bA.GetWorldVector(_localXAxisA);
 
             var translation = MathUtils.Dot(d, axis);
@@ -135,11 +135,11 @@ namespace Box2DSharp.Dynamics.Joints
             var bA = BodyA;
             var bB = BodyB;
 
-            var rA   = MathUtils.Mul(bA.Transform.Rotation, _localAnchorA - bA.Sweep.LocalCenter);
-            var rB   = MathUtils.Mul(bB.Transform.Rotation, _localAnchorB - bB.Sweep.LocalCenter);
-            var p1   = bA.Sweep.C + rA;
-            var p2   = bB.Sweep.C + rB;
-            var d    = p2 - p1;
+            var rA = MathUtils.Mul(bA.Transform.Rotation, _localAnchorA - bA.Sweep.LocalCenter);
+            var rB = MathUtils.Mul(bB.Transform.Rotation, _localAnchorB - bB.Sweep.LocalCenter);
+            var p1 = bA.Sweep.C + rA;
+            var p2 = bB.Sweep.C + rB;
+            var d = p2 - p1;
             var axis = MathUtils.Mul(bA.Transform.Rotation, _localXAxisA);
 
             var vA = bA.LinearVelocity;
@@ -181,7 +181,7 @@ namespace Box2DSharp.Dynamics.Joints
             {
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
-                _enableMotor  = flag;
+                _enableMotor = flag;
             }
         }
 
@@ -192,7 +192,7 @@ namespace Box2DSharp.Dynamics.Joints
             {
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
-                _motorSpeed   = speed;
+                _motorSpeed = speed;
             }
         }
 
@@ -207,8 +207,8 @@ namespace Box2DSharp.Dynamics.Joints
         {
             if (torque != _maxMotorTorque)
             {
-                BodyA.IsAwake   = true;
-                BodyB.IsAwake   = true;
+                BodyA.IsAwake = true;
+                BodyB.IsAwake = true;
                 _maxMotorTorque = torque;
             }
         }
@@ -294,17 +294,17 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
@@ -322,11 +322,11 @@ namespace Box2DSharp.Dynamics.Joints
             // Compute the effective masses.
             var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
-            var d  = cB + rB - cA - rA;
+            var d = cB + rB - cA - rA;
 
             // Point to line constraint
             {
-                _ay  = MathUtils.Mul(qA, _localYAxisA);
+                _ay = MathUtils.Mul(qA, _localYAxisA);
                 _sAy = MathUtils.Cross(d + rA, _ay);
                 _sBy = MathUtils.Cross(rB, _ay);
 
@@ -340,11 +340,11 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Spring constraint
             _springMass = 0.0f;
-            _bias       = 0.0f;
-            _gamma      = 0.0f;
+            _bias = 0.0f;
+            _gamma = 0.0f;
             if (_frequencyHz > 0.0f)
             {
-                _ax  = MathUtils.Mul(qA, _localXAxisA);
+                _ax = MathUtils.Mul(qA, _localXAxisA);
                 _sAx = MathUtils.Cross(d + rA, _ax);
                 _sBx = MathUtils.Cross(rB, _ax);
 
@@ -398,18 +398,18 @@ namespace Box2DSharp.Dynamics.Joints
             }
             else
             {
-                _motorMass    = 0.0f;
+                _motorMass = 0.0f;
                 _motorImpulse = 0.0f;
             }
 
             if (data.Step.WarmStarting)
             {
                 // Account for variable time step.
-                _impulse       *= data.Step.DtRatio;
+                _impulse *= data.Step.DtRatio;
                 _springImpulse *= data.Step.DtRatio;
-                _motorImpulse  *= data.Step.DtRatio;
+                _motorImpulse *= data.Step.DtRatio;
 
-                var P  = _impulse * _ay + _springImpulse * _ax;
+                var P = _impulse * _ay + _springImpulse * _ax;
                 var LA = _impulse * _sAy + _springImpulse * _sAx + _motorImpulse;
                 var LB = _impulse * _sBy + _springImpulse * _sBx + _motorImpulse;
 
@@ -421,9 +421,9 @@ namespace Box2DSharp.Dynamics.Joints
             }
             else
             {
-                _impulse       = 0.0f;
+                _impulse = 0.0f;
                 _springImpulse = 0.0f;
-                _motorImpulse  = 0.0f;
+                _motorImpulse = 0.0f;
             }
 
             data.Velocities[_indexA].V = vA;
@@ -436,7 +436,7 @@ namespace Box2DSharp.Dynamics.Joints
         internal override void SolveVelocityConstraints(in SolverData data)
         {
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var vA = data.Velocities[_indexA].V;
             var wA = data.Velocities[_indexA].W;
@@ -445,11 +445,11 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve spring constraint
             {
-                var Cdot    = MathUtils.Dot(_ax, vB - vA) + _sBx * wB - _sAx * wA;
+                var Cdot = MathUtils.Dot(_ax, vB - vA) + _sBx * wB - _sAx * wA;
                 var impulse = -_springMass * (Cdot + _bias + _gamma * _springImpulse);
                 _springImpulse += impulse;
 
-                var P  = impulse * _ax;
+                var P = impulse * _ax;
                 var LA = impulse * _sAx;
                 var LB = impulse * _sBx;
 
@@ -462,13 +462,13 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve rotational motor constraint
             {
-                var Cdot    = wB - wA - _motorSpeed;
+                var Cdot = wB - wA - _motorSpeed;
                 var impulse = -_motorMass * Cdot;
 
                 var oldImpulse = _motorImpulse;
                 var maxImpulse = data.Step.Dt * _maxMotorTorque;
                 _motorImpulse = MathUtils.Clamp(_motorImpulse + impulse, -maxImpulse, maxImpulse);
-                impulse       = _motorImpulse - oldImpulse;
+                impulse = _motorImpulse - oldImpulse;
 
                 wA -= iA * impulse;
                 wB += iB * impulse;
@@ -476,11 +476,11 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve point to line constraint
             {
-                var Cdot    = MathUtils.Dot(_ay, vB - vA) + _sBy * wB - _sAy * wA;
+                var Cdot = MathUtils.Dot(_ay, vB - vA) + _sBy * wB - _sAy * wA;
                 var impulse = -_mass * Cdot;
                 _impulse += impulse;
 
-                var P  = impulse * _ay;
+                var P = impulse * _ay;
                 var LA = impulse * _sAy;
                 var LB = impulse * _sBy;
 
@@ -510,7 +510,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
-            var d  = cB - cA + rB - rA;
+            var d = cB - cA + rB - rA;
 
             var ay = MathUtils.Mul(qA, _localYAxisA);
 
@@ -531,7 +531,7 @@ namespace Box2DSharp.Dynamics.Joints
                 impulse = 0.0f;
             }
 
-            var P  = impulse * ay;
+            var P = impulse * ay;
             var LA = impulse * sAy;
             var LB = impulse * sBy;
 
@@ -541,9 +541,9 @@ namespace Box2DSharp.Dynamics.Joints
             aB += _invIb * LB;
 
             data.Positions[_indexA].Center = cA;
-            data.Positions[_indexA].Angle  = aA;
+            data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
-            data.Positions[_indexB].Angle  = aB;
+            data.Positions[_indexB].Angle = aB;
 
             return Math.Abs(C) <= Settings.LinearSlop;
         }

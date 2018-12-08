@@ -9,7 +9,7 @@ namespace Box2DSharp.Collision.Collider
             Vertex = 0,
 
             Face = 1
-        };
+        }
 
         /// Feature index on shapeA
         public byte IndexA;
@@ -22,5 +22,5 @@ namespace Box2DSharp.Collision.Collider
 
         /// The feature type on shapeB
         public byte TypeB;
-    };
+    }
 }

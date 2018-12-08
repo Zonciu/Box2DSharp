@@ -43,5 +43,5 @@ namespace Box2DSharp.Dynamics
         /// Note: this is only called for contacts that are touching, solid, and awake.
         public void PostSolve(Contact contact, in ContactImpulse impulse)
         { }
-    };
+    }
 }

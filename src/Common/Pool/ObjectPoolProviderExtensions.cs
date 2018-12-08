@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.ObjectPool
     {
         public static ObjectPool<StringBuilder> CreateStringBuilderPool(this ObjectPoolProvider provider)
         {
-            return provider.Create<StringBuilder>(new StringBuilderPooledObjectPolicy());
+            return provider.Create(new StringBuilderPooledObjectPolicy());
         }
 
         public static ObjectPool<StringBuilder> CreateStringBuilderPool(
@@ -17,13 +17,12 @@ namespace Microsoft.Extensions.ObjectPool
             int initialCapacity,
             int maximumRetainedCapacity)
         {
-            var policy = new StringBuilderPooledObjectPolicy()
+            var policy = new StringBuilderPooledObjectPolicy
             {
-                InitialCapacity = initialCapacity,
-                MaximumRetainedCapacity = maximumRetainedCapacity,
+                InitialCapacity = initialCapacity, MaximumRetainedCapacity = maximumRetainedCapacity
             };
 
-            return provider.Create<StringBuilder>(policy);
+            return provider.Create(policy);
         }
     }
 }

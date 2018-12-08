@@ -55,14 +55,14 @@ namespace Box2DSharp.Dynamics.Joints
 
         internal MotorJoint(MotorJointDef def) : base(def)
         {
-            _linearOffset  = def.LinearOffset;
+            _linearOffset = def.LinearOffset;
             _angularOffset = def.AngularOffset;
 
             _linearImpulse.SetZero();
             _angularImpulse = 0.0f;
 
-            _maxForce         = def.MaxForce;
-            _maxTorque        = def.MaxTorque;
+            _maxForce = def.MaxForce;
+            _maxTorque = def.MaxTorque;
             _correctionFactor = def.CorrectionFactor;
         }
 
@@ -87,8 +87,8 @@ namespace Box2DSharp.Dynamics.Joints
         {
             if (!angularOffset.Equals(_angularOffset))
             {
-                BodyA.IsAwake  = true;
-                BodyB.IsAwake  = true;
+                BodyA.IsAwake = true;
+                BodyB.IsAwake = true;
                 _angularOffset = angularOffset;
             }
         }
@@ -182,14 +182,14 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
@@ -217,7 +217,7 @@ namespace Box2DSharp.Dynamics.Joints
             //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             // Upper 2 by 2 of K for point to point
             var K = new Matrix2x2();
@@ -234,13 +234,13 @@ namespace Box2DSharp.Dynamics.Joints
                 _angularMass = 1.0f / _angularMass;
             }
 
-            _linearError  = cB + _rB - cA - _rA;
+            _linearError = cB + _rB - cA - _rA;
             _angularError = aB - aA - _angularOffset;
 
             if (data.Step.WarmStarting)
             {
                 // Scale impulses to support a variable time step.
-                _linearImpulse  *= data.Step.DtRatio;
+                _linearImpulse *= data.Step.DtRatio;
                 _angularImpulse *= data.Step.DtRatio;
 
                 var P = new Vector2(_linearImpulse.X, _linearImpulse.Y);
@@ -270,20 +270,20 @@ namespace Box2DSharp.Dynamics.Joints
             var wB = data.Velocities[_indexB].W;
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
-            var h     = data.Step.Dt;
+            var h = data.Step.Dt;
             var invH = data.Step.InvDt;
 
             // Solve angular friction
             {
-                var cdot    = wB - wA + invH * _correctionFactor * _angularError;
+                var cdot = wB - wA + invH * _correctionFactor * _angularError;
                 var impulse = -_angularMass * cdot;
 
                 var oldImpulse = _angularImpulse;
                 var maxImpulse = h * _maxTorque;
                 _angularImpulse = MathUtils.Clamp(_angularImpulse + impulse, -maxImpulse, maxImpulse);
-                impulse         = _angularImpulse - oldImpulse;
+                impulse = _angularImpulse - oldImpulse;
 
                 wA -= iA * impulse;
                 wB += iB * impulse;
@@ -297,7 +297,7 @@ namespace Box2DSharp.Dynamics.Joints
                          - MathUtils.Cross(wA, _rA)
                          + invH * _correctionFactor * _linearError;
 
-                var impulse    = -MathUtils.Mul(_linearMass, cdot);
+                var impulse = -MathUtils.Mul(_linearMass, cdot);
                 var oldImpulse = _linearImpulse;
                 _linearImpulse += impulse;
 

@@ -8,5 +8,5 @@ namespace Box2DSharp.Collision.Collider
         public Vector2 Vector;
 
         public ContactId Id;
-    };
+    }
 }

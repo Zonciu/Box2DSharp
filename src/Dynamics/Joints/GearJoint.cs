@@ -15,6 +15,14 @@ namespace Box2DSharp.Dynamics.Joints
     /// is destroyed.
     public class GearJoint : Joint
     {
+        // Body A is connected to body C
+        // Body B is connected to body D
+        private readonly Body _bodyC;
+
+        private readonly Body _bodyD;
+
+        private readonly float _constant;
+
         private readonly Joint _joint1;
 
         private readonly Joint _joint2;
@@ -39,14 +47,6 @@ namespace Box2DSharp.Dynamics.Joints
         private readonly JointType _typeA;
 
         private readonly JointType _typeB;
-
-        // Body A is connected to body C
-        // Body B is connected to body D
-        private readonly Body _bodyC;
-
-        private readonly Body _bodyD;
-
-        private readonly float _constant;
 
         private float _iA, _iB, _iC, _iD;
 
@@ -87,15 +87,15 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Get geometry of joint1
             var xfA = BodyA.Transform;
-            var aA  = BodyA.Sweep.A;
+            var aA = BodyA.Sweep.A;
             var xfC = _bodyC.Transform;
-            var aC  = _bodyC.Sweep.A;
+            var aC = _bodyC.Sweep.A;
 
             if (_typeA == JointType.RevoluteJoint)
             {
                 var revolute = (RevoluteJoint) def.Joint1;
-                _localAnchorC    = revolute.LocalAnchorA;
-                _localAnchorA    = revolute.LocalAnchorB;
+                _localAnchorC = revolute.LocalAnchorA;
+                _localAnchorA = revolute.LocalAnchorB;
                 _referenceAngleA = revolute.ReferenceAngle;
                 _localAxisC.SetZero();
 
@@ -104,10 +104,10 @@ namespace Box2DSharp.Dynamics.Joints
             else
             {
                 var prismatic = (PrismaticJoint) def.Joint1;
-                _localAnchorC    = prismatic.LocalAnchorA;
-                _localAnchorA    = prismatic.LocalAnchorB;
+                _localAnchorC = prismatic.LocalAnchorA;
+                _localAnchorA = prismatic.LocalAnchorB;
                 _referenceAngleA = prismatic.ReferenceAngle;
-                _localAxisC      = prismatic.LocalXAxisA;
+                _localAxisC = prismatic.LocalXAxisA;
 
                 var pC = _localAnchorC;
                 var pA = MathUtils.MulT(
@@ -121,15 +121,15 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Get geometry of joint2
             var xfB = BodyB.Transform;
-            var aB  = BodyB.Sweep.A;
+            var aB = BodyB.Sweep.A;
             var xfD = _bodyD.Transform;
-            var aD  = _bodyD.Sweep.A;
+            var aD = _bodyD.Sweep.A;
 
             if (_typeB == JointType.RevoluteJoint)
             {
                 var revolute = (RevoluteJoint) def.Joint2;
-                _localAnchorD    = revolute.LocalAnchorA;
-                _localAnchorB    = revolute.LocalAnchorB;
+                _localAnchorD = revolute.LocalAnchorA;
+                _localAnchorB = revolute.LocalAnchorB;
                 _referenceAngleB = revolute.ReferenceAngle;
                 _localAxisD.SetZero();
 
@@ -138,10 +138,10 @@ namespace Box2DSharp.Dynamics.Joints
             else
             {
                 var prismatic = (PrismaticJoint) def.Joint2;
-                _localAnchorD    = prismatic.LocalAnchorA;
-                _localAnchorB    = prismatic.LocalAnchorB;
+                _localAnchorD = prismatic.LocalAnchorA;
+                _localAnchorB = prismatic.LocalAnchorB;
                 _referenceAngleB = prismatic.ReferenceAngle;
-                _localAxisD      = prismatic.LocalXAxisA;
+                _localAxisD = prismatic.LocalXAxisA;
 
                 var pD = _localAnchorD;
                 var pB = MathUtils.MulT(
@@ -233,18 +233,18 @@ namespace Box2DSharp.Dynamics.Joints
             _indexB = BodyB.IslandIndex;
             _indexC = _bodyC.IslandIndex;
             _indexD = _bodyD.IslandIndex;
-            _lcA    = BodyA.Sweep.LocalCenter;
-            _lcB    = BodyB.Sweep.LocalCenter;
-            _lcC    = _bodyC.Sweep.LocalCenter;
-            _lcD    = _bodyD.Sweep.LocalCenter;
-            _mA     = BodyA.InvMass;
-            _mB     = BodyB.InvMass;
-            _mC     = _bodyC.InvMass;
-            _mD     = _bodyD.InvMass;
-            _iA     = BodyA.InverseInertia;
-            _iB     = BodyB.InverseInertia;
-            _iC     = _bodyC.InverseInertia;
-            _iD     = _bodyD.InverseInertia;
+            _lcA = BodyA.Sweep.LocalCenter;
+            _lcB = BodyB.Sweep.LocalCenter;
+            _lcC = _bodyC.Sweep.LocalCenter;
+            _lcD = _bodyD.Sweep.LocalCenter;
+            _mA = BodyA.InvMass;
+            _mB = BodyB.InvMass;
+            _mC = _bodyC.InvMass;
+            _mD = _bodyD.InvMass;
+            _iA = BodyA.InverseInertia;
+            _iB = BodyB.InverseInertia;
+            _iC = _bodyC.InverseInertia;
+            _iD = _bodyD.InverseInertia;
 
             var aA = data.Positions[_indexA].Angle;
             var vA = data.Velocities[_indexA].V;
@@ -269,36 +269,36 @@ namespace Box2DSharp.Dynamics.Joints
             if (_typeA == JointType.RevoluteJoint)
             {
                 _jvAc.SetZero();
-                _jwA  =  1.0f;
-                _jwC  =  1.0f;
+                _jwA = 1.0f;
+                _jwC = 1.0f;
                 _mass += _iA + _iC;
             }
             else
             {
-                var u  = MathUtils.Mul(qC, _localAxisC);
+                var u = MathUtils.Mul(qC, _localAxisC);
                 var rC = MathUtils.Mul(qC, _localAnchorC - _lcC);
                 var rA = MathUtils.Mul(qA, _localAnchorA - _lcA);
-                _jvAc =  u;
-                _jwC  =  MathUtils.Cross(rC, u);
-                _jwA  =  MathUtils.Cross(rA, u);
+                _jvAc = u;
+                _jwC = MathUtils.Cross(rC, u);
+                _jwA = MathUtils.Cross(rA, u);
                 _mass += _mC + _mA + _iC * _jwC * _jwC + _iA * _jwA * _jwA;
             }
 
             if (_typeB == JointType.RevoluteJoint)
             {
                 _jvBd.SetZero();
-                _jwB  =  _ratio;
-                _jwD  =  _ratio;
+                _jwB = _ratio;
+                _jwD = _ratio;
                 _mass += _ratio * _ratio * (_iB + _iD);
             }
             else
             {
-                var u  = MathUtils.Mul(qD, _localAxisD);
+                var u = MathUtils.Mul(qD, _localAxisD);
                 var rD = MathUtils.Mul(qD, _localAnchorD - _lcD);
                 var rB = MathUtils.Mul(qB, _localAnchorB - _lcB);
-                _jvBd =  _ratio * u;
-                _jwD  =  _ratio * MathUtils.Cross(rD, u);
-                _jwB  =  _ratio * MathUtils.Cross(rB, u);
+                _jvBd = _ratio * u;
+                _jwD = _ratio * MathUtils.Cross(rD, u);
+                _jwB = _ratio * MathUtils.Cross(rB, u);
                 _mass += _ratio * _ratio * (_mD + _mB) + _iD * _jwD * _jwD + _iB * _jwB * _jwB;
             }
 
@@ -389,28 +389,28 @@ namespace Box2DSharp.Dynamics.Joints
 
             float coordinateA, coordinateB;
 
-            var   JvAC = new Vector2();
-            var   JvBD = new Vector2();
+            var JvAC = new Vector2();
+            var JvBD = new Vector2();
             float JwA, JwB, JwC, JwD;
-            var   mass = 0.0f;
+            var mass = 0.0f;
 
             if (_typeA == JointType.RevoluteJoint)
             {
                 JvAC.SetZero();
-                JwA  =  1.0f;
-                JwC  =  1.0f;
+                JwA = 1.0f;
+                JwC = 1.0f;
                 mass += _iA + _iC;
 
                 coordinateA = aA - aC - _referenceAngleA;
             }
             else
             {
-                var u  = MathUtils.Mul(qC, _localAxisC);
+                var u = MathUtils.Mul(qC, _localAxisC);
                 var rC = MathUtils.Mul(qC, _localAnchorC - _lcC);
                 var rA = MathUtils.Mul(qA, _localAnchorA - _lcA);
-                JvAC =  u;
-                JwC  =  MathUtils.Cross(rC, u);
-                JwA  =  MathUtils.Cross(rA, u);
+                JvAC = u;
+                JwC = MathUtils.Cross(rC, u);
+                JwA = MathUtils.Cross(rA, u);
                 mass += _mC + _mA + _iC * JwC * JwC + _iA * JwA * JwA;
 
                 var pC = _localAnchorC - _lcC;
@@ -421,20 +421,20 @@ namespace Box2DSharp.Dynamics.Joints
             if (_typeB == JointType.RevoluteJoint)
             {
                 JvBD.SetZero();
-                JwB  =  _ratio;
-                JwD  =  _ratio;
+                JwB = _ratio;
+                JwD = _ratio;
                 mass += _ratio * _ratio * (_iB + _iD);
 
                 coordinateB = aB - aD - _referenceAngleB;
             }
             else
             {
-                var u  = MathUtils.Mul(qD, _localAxisD);
+                var u = MathUtils.Mul(qD, _localAxisD);
                 var rD = MathUtils.Mul(qD, _localAnchorD - _lcD);
                 var rB = MathUtils.Mul(qB, _localAnchorB - _lcB);
-                JvBD =  _ratio * u;
-                JwD  =  _ratio * MathUtils.Cross(rD, u);
-                JwB  =  _ratio * MathUtils.Cross(rB, u);
+                JvBD = _ratio * u;
+                JwD = _ratio * MathUtils.Cross(rD, u);
+                JwB = _ratio * MathUtils.Cross(rB, u);
                 mass += _ratio * _ratio * (_mD + _mB) + _iD * JwD * JwD + _iB * JwB * JwB;
 
                 var pD = _localAnchorD - _lcD;
@@ -460,13 +460,13 @@ namespace Box2DSharp.Dynamics.Joints
             aD -= _iD * impulse * JwD;
 
             data.Positions[_indexA].Center = cA;
-            data.Positions[_indexA].Angle  = aA;
+            data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
-            data.Positions[_indexB].Angle  = aB;
+            data.Positions[_indexB].Angle = aB;
             data.Positions[_indexC].Center = cC;
-            data.Positions[_indexC].Angle  = aC;
+            data.Positions[_indexC].Angle = aC;
             data.Positions[_indexD].Center = cD;
-            data.Positions[_indexD].Angle  = aD;
+            data.Positions[_indexD].Angle = aD;
 
             // TODO_ERIN not implemented
             return linearError < Settings.LinearSlop;

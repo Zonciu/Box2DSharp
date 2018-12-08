@@ -52,25 +52,25 @@ namespace Box2DSharp.Dynamics.Joints
 
         /// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
         private void Initialize(
-            Body       bA,
-            Body       bB,
+            Body bA,
+            Body bB,
             in Vector2 groundA,
             in Vector2 groundB,
             in Vector2 anchorA,
             in Vector2 anchorB,
-            float      r)
+            float r)
         {
-            BodyA         = bA;
-            BodyB         = bB;
+            BodyA = bA;
+            BodyB = bB;
             GroundAnchorA = groundA;
             GroundAnchorB = groundB;
-            LocalAnchorA  = BodyA.GetLocalPoint(anchorA);
-            LocalAnchorB  = BodyB.GetLocalPoint(anchorB);
+            LocalAnchorA = BodyA.GetLocalPoint(anchorA);
+            LocalAnchorB = BodyB.GetLocalPoint(anchorB);
             var dA = anchorA - groundA;
             LengthA = dA.Length();
             var dB = anchorB - groundB;
             LengthB = dB.Length();
-            Ratio   = r;
+            Ratio = r;
             Debug.Assert(Ratio > Settings.Epsilon);
         }
     }

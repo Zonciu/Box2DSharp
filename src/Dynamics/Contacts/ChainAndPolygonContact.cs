@@ -12,20 +12,6 @@ namespace Box2DSharp.Dynamics.Contacts
         private static readonly ObjectPool<ChainAndPolygonContact> _pool =
             new DefaultObjectPool<ChainAndPolygonContact>(new PoolPolicy());
 
-        private class PoolPolicy : IPooledObjectPolicy<ChainAndPolygonContact>
-        {
-            public ChainAndPolygonContact Create()
-            {
-                return new ChainAndPolygonContact();
-            }
-
-            public bool Return(ChainAndPolygonContact obj)
-            {
-                obj.Reset();
-                return true;
-            }
-        }
-
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Debug.Assert(fixtureA.ShapeType == ShapeType.Chain);
@@ -46,6 +32,20 @@ namespace Box2DSharp.Dynamics.Contacts
 
             chain.GetChildEdge(out var edge, IndexA);
             CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
+        }
+
+        private class PoolPolicy : IPooledObjectPolicy<ChainAndPolygonContact>
+        {
+            public ChainAndPolygonContact Create()
+            {
+                return new ChainAndPolygonContact();
+            }
+
+            public bool Return(ChainAndPolygonContact obj)
+            {
+                obj.Reset();
+                return true;
+            }
         }
     }
 }

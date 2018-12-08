@@ -11,11 +11,11 @@ namespace Box2DSharp.Collision.Collider
         /// point count, impulses, etc. The radii must come from the shapes
         /// that generated the manifold.
         public void Initialize(
-            in Manifold  manifold,
+            in Manifold manifold,
             in Transform xfA,
-            float        radiusA,
+            float radiusA,
             in Transform xfB,
-            float        radiusB)
+            float radiusB)
         {
             if (manifold.PointCount == 0)
             {
@@ -37,7 +37,7 @@ namespace Box2DSharp.Collision.Collider
 
                 var cA = pointA + radiusA * Normal;
                 var cB = pointB - radiusB * Normal;
-                Points[0]      = 0.5f * (cA + cB);
+                Points[0] = 0.5f * (cA + cB);
                 Separations[0] = MathUtils.Dot(cB - cA, Normal);
             }
                 break;
@@ -50,9 +50,9 @@ namespace Box2DSharp.Collision.Collider
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfB, manifold.Points[i].LocalPoint);
-                    var cA        = clipPoint + (radiusA - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
-                    var cB        = clipPoint - radiusB * Normal;
-                    Points[i]      = 0.5f * (cA + cB);
+                    var cA = clipPoint + (radiusA - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cB = clipPoint - radiusB * Normal;
+                    Points[i] = 0.5f * (cA + cB);
                     Separations[i] = MathUtils.Dot(cB - cA, Normal);
                 }
             }
@@ -66,9 +66,9 @@ namespace Box2DSharp.Collision.Collider
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfA, manifold.Points[i].LocalPoint);
-                    var cB        = clipPoint + (radiusB - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
-                    var cA        = clipPoint - radiusA * Normal;
-                    Points[i]      = 0.5f * (cA + cB);
+                    var cB = clipPoint + (radiusB - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cA = clipPoint - radiusA * Normal;
+                    Points[i] = 0.5f * (cA + cB);
                     Separations[i] = MathUtils.Dot(cA - cB, Normal);
                 }
 
@@ -91,5 +91,5 @@ namespace Box2DSharp.Collision.Collider
         /// a negative value indicates overlap, in meters, size Settings.MaxManifoldPoints
         /// </summary>
         public FixedArray2<float> Separations;
-    };
+    }
 }

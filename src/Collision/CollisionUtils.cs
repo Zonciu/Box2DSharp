@@ -6,7 +6,7 @@ using Box2DSharp.Common;
 namespace Box2DSharp.Collision
 {
     public static partial class CollisionUtils
-    { 
+    {
         /// Compute the point states given two manifolds. The states pertain to the transition from manifold1
         /// to manifold2. So state1 is either persist or remove while state2 is either add or persist.
         public static void GetPointStates(
@@ -59,10 +59,10 @@ namespace Box2DSharp.Collision
         /// Clipping for contact manifolds.
         public static int ClipSegmentToLine(
             ref ClipVertex[] vOut,
-            in  ClipVertex[] vIn,
-            in  Vector2      normal,
-            float            offset,
-            int              vertexIndexA)
+            in ClipVertex[] vIn,
+            in Vector2 normal,
+            float offset,
+            int vertexIndexA)
         {
             // Start with no output points
             var numOut = 0;
@@ -92,8 +92,8 @@ namespace Box2DSharp.Collision
                 // VertexA is hitting edgeB.
                 vOut[numOut].Id.ContactFeature.IndexA = (byte) vertexIndexA;
                 vOut[numOut].Id.ContactFeature.IndexB = vIn[0].Id.ContactFeature.IndexB;
-                vOut[numOut].Id.ContactFeature.TypeA  = (byte) ContactFeature.FeatureType.Vertex;
-                vOut[numOut].Id.ContactFeature.TypeB  = (byte) ContactFeature.FeatureType.Face;
+                vOut[numOut].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
+                vOut[numOut].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
                 ++numOut;
             }
 
@@ -102,10 +102,10 @@ namespace Box2DSharp.Collision
 
         /// Determine if two generic shapes overlap.
         public static bool TestOverlap(
-            Shape        shapeA,
-            int          indexA,
-            Shape        shapeB,
-            int          indexB,
+            Shape shapeA,
+            int indexA,
+            Shape shapeB,
+            int indexB,
             in Transform xfA,
             in Transform xfB)
         {
@@ -114,7 +114,7 @@ namespace Box2DSharp.Collision
             input.ProxyB.Set(shapeB, indexB);
             input.TransformA = xfA;
             input.TransformB = xfB;
-            input.UseRadii   = true;
+            input.UseRadii = true;
 
             var cache = new SimplexCache();
 

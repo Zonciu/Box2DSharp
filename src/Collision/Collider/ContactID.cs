@@ -12,5 +12,5 @@ namespace Box2DSharp.Collision.Collider
         /// Used to quickly compare contact ids.
         [FieldOffset(0)]
         public uint Key;
-    };
+    }
 }

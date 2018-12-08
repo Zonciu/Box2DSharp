@@ -16,5 +16,5 @@ namespace Box2DSharp.Collision
         public Transform TransformB;
 
         public bool UseRadii;
-    };
+    }
 }

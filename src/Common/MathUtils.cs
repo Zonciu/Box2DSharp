@@ -121,11 +121,7 @@ namespace Box2DSharp.Common
             // [qs  qc]   [rs  rc]   [qs*rc+qc*rs -qs*rs+qc*rc]
             // s = qs * rc + qc * rs
             // c = qc * rc - qs * rs
-            return new Rotation
-            {
-                Sin = q.Sin * r.Cos + q.Cos * r.Sin,
-                Cos = q.Cos * r.Cos - q.Sin * r.Sin
-            };
+            return new Rotation {Sin = q.Sin * r.Cos + q.Cos * r.Sin, Cos = q.Cos * r.Cos - q.Sin * r.Sin};
         }
 
         /// Transpose multiply two rotations: qT * r
@@ -169,8 +165,8 @@ namespace Box2DSharp.Common
         {
             var px = v.X - T.Position.X;
             var py = v.Y - T.Position.Y;
-            var x  = T.Rotation.Cos * px + T.Rotation.Sin * py;
-            var y  = -T.Rotation.Sin * px + T.Rotation.Cos * py;
+            var x = T.Rotation.Cos * px + T.Rotation.Sin * py;
+            var y = -T.Rotation.Sin * px + T.Rotation.Cos * py;
             return new Vector2(x, y);
         }
 

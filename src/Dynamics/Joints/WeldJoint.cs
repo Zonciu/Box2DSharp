@@ -8,6 +8,13 @@ namespace Box2DSharp.Dynamics.Joints
     /// distort somewhat because the island constraint solver is approximate.
     public class WeldJoint : Joint
     {
+        // Solver shared
+        private readonly Vector2 _localAnchorA;
+
+        private readonly Vector2 _localAnchorB;
+
+        private readonly float _referenceAngle;
+
         private float _bias;
 
         private float _dampingRatio;
@@ -31,11 +38,6 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _invMassB;
 
-        // Solver shared
-        private readonly Vector2 _localAnchorA;
-
-        private readonly Vector2 _localAnchorB;
-
         private Vector2 _localCenterA;
 
         private Vector2 _localCenterB;
@@ -46,15 +48,13 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Vector2 _rB;
 
-        private readonly float _referenceAngle;
-
         internal WeldJoint(WeldJointDef def) : base(def)
         {
-            _localAnchorA   = def.LocalAnchorA;
-            _localAnchorB   = def.LocalAnchorB;
+            _localAnchorA = def.LocalAnchorA;
+            _localAnchorB = def.LocalAnchorB;
             _referenceAngle = def.ReferenceAngle;
-            _frequencyHz    = def.FrequencyHz;
-            _dampingRatio   = def.DampingRatio;
+            _frequencyHz = def.FrequencyHz;
+            _dampingRatio = def.DampingRatio;
 
             _impulse.SetZero();
         }
@@ -145,14 +145,14 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         internal override void InitVelocityConstraints(in SolverData data)
         {
-            _indexA       = BodyA.IslandIndex;
-            _indexB       = BodyB.IslandIndex;
+            _indexA = BodyA.IslandIndex;
+            _indexB = BodyB.IslandIndex;
             _localCenterA = BodyA.Sweep.LocalCenter;
             _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA     = BodyA.InvMass;
-            _invMassB     = BodyB.InvMass;
-            _invIa        = BodyA.InverseInertia;
-            _invIb        = BodyB.InverseInertia;
+            _invMassA = BodyA.InvMass;
+            _invMassB = BodyB.InvMass;
+            _invIa = BodyA.InverseInertia;
+            _invIb = BodyB.InverseInertia;
 
             var aA = data.Positions[_indexA].Angle;
             var vA = data.Velocities[_indexA].V;
@@ -178,7 +178,7 @@ namespace Box2DSharp.Dynamics.Joints
             //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var K = new Matrix3x3();
             K.Ex.X = mA + mB + _rA.Y * _rA.Y * iA + _rB.Y * _rB.Y * iB;
@@ -196,7 +196,7 @@ namespace Box2DSharp.Dynamics.Joints
                 K.GetInverse22(ref _mass);
 
                 var invM = iA + iB;
-                var m    = invM > 0.0f ? 1.0f / invM : 0.0f;
+                var m = invM > 0.0f ? 1.0f / invM : 0.0f;
 
                 var C = aB - aA - _referenceAngle;
 
@@ -213,22 +213,22 @@ namespace Box2DSharp.Dynamics.Joints
                 var h = data.Step.Dt;
                 _gamma = h * (d + h * k);
                 _gamma = !_gamma.Equals(0.0f) ? 1.0f / _gamma : 0.0f;
-                _bias  = C * h * k * _gamma;
+                _bias = C * h * k * _gamma;
 
-                invM       += _gamma;
-                _mass.Ez.Z =  !invM .Equals(0.0f) ? 1.0f / invM : 0.0f;
+                invM += _gamma;
+                _mass.Ez.Z = !invM.Equals(0.0f) ? 1.0f / invM : 0.0f;
             }
             else if (K.Ez.Z.Equals(0.0f))
             {
                 K.GetInverse22(ref _mass);
                 _gamma = 0.0f;
-                _bias  = 0.0f;
+                _bias = 0.0f;
             }
             else
             {
                 K.GetSymInverse33(ref _mass);
                 _gamma = 0.0f;
-                _bias  = 0.0f;
+                _bias = 0.0f;
             }
 
             if (data.Step.WarmStarting)
@@ -264,7 +264,7 @@ namespace Box2DSharp.Dynamics.Joints
             var wB = data.Velocities[_indexB].W;
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             if (_frequencyHz > 0.0f)
             {
@@ -294,7 +294,7 @@ namespace Box2DSharp.Dynamics.Joints
             {
                 var cdot1 = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
                 var cdot2 = wB - wA;
-                var cdot  = new Vector3(cdot1.X, cdot1.Y, cdot2);
+                var cdot = new Vector3(cdot1.X, cdot1.Y, cdot2);
 
                 var impulse = -MathUtils.Mul(_mass, cdot);
                 _impulse += impulse;
@@ -326,7 +326,7 @@ namespace Box2DSharp.Dynamics.Joints
             var qB = new Rotation(aB);
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa,    iB = _invIb;
+            float iA = _invIa, iB = _invIb;
 
             var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
@@ -349,7 +349,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var C1 = cB + rB - cA - rA;
 
                 positionError = C1.Length();
-                angularError  = 0.0f;
+                angularError = 0.0f;
 
                 var P = -K.Solve22(C1);
 
@@ -365,7 +365,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var C2 = aB - aA - _referenceAngle;
 
                 positionError = C1.Length();
-                angularError  = Math.Abs(C2);
+                angularError = Math.Abs(C2);
 
                 var C = new Vector3(C1.X, C1.Y, C2);
 
@@ -390,9 +390,9 @@ namespace Box2DSharp.Dynamics.Joints
             }
 
             data.Positions[_indexA].Center = cA;
-            data.Positions[_indexA].Angle  = aA;
+            data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
-            data.Positions[_indexB].Angle  = aB;
+            data.Positions[_indexB].Angle = aB;
 
             return positionError <= Settings.LinearSlop && angularError <= Settings.AngularSlop;
         }

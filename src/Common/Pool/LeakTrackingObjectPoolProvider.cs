@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.ObjectPool
 
         public override ObjectPool<T> Create<T>(IPooledObjectPolicy<T> policy)
         {
-            var inner = _inner.Create<T>(policy);
+            var inner = _inner.Create(policy);
             return new LeakTrackingObjectPool<T>(inner);
         }
     }

@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 
 namespace Box2DSharp.Collision.Collider
@@ -10,5 +9,5 @@ namespace Box2DSharp.Collision.Collider
         public Vector2 Normal;
 
         public float Fraction;
-    };
+    }
 }

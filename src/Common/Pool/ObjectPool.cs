@@ -3,7 +3,8 @@
 
 namespace Microsoft.Extensions.ObjectPool
 {
-    public abstract class ObjectPool<T> where T : class
+    public abstract class ObjectPool<T>
+        where T : class
     {
         public abstract T Get();
 

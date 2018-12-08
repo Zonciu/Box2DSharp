@@ -12,5 +12,5 @@ namespace Box2DSharp.Collision
         public float Lambda;
 
         public int Iterations;
-    };
+    }
 }

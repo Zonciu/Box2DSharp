@@ -15,5 +15,5 @@ namespace Box2DSharp.Collision
 
         /// number of GJK iterations used
         public int Iterations;
-    };
+    }
 }

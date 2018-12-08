@@ -36,18 +36,18 @@ namespace Box2DSharp.Collision.Shapes
         {
             Debug.Assert(Alpha0 < 1.0f);
             var beta = (alpha - Alpha0) / (1.0f - Alpha0);
-            C0     += beta * (C - C0);
-            A0     += beta * (A - A0);
-            Alpha0 =  alpha;
+            C0 += beta * (C - C0);
+            A0 += beta * (A - A0);
+            Alpha0 = alpha;
         }
 
         /// Normalize the angles.
         public void Normalize()
         {
             var twoPi = 2.0f * Settings.Pi;
-            var d     = twoPi * (float) Math.Floor(A0 / twoPi);
+            var d = twoPi * (float) Math.Floor(A0 / twoPi);
             A0 -= d;
-            A  -= d;
+            A -= d;
         }
 
         /// <summary>

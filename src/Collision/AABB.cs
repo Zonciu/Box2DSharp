@@ -32,7 +32,7 @@ namespace Box2DSharp.Collision
         /// <returns></returns>
         public bool IsValid()
         {
-            var d     = UpperBound - LowerBound;
+            var d = UpperBound - LowerBound;
             var valid = d.X >= 0.0f && d.Y >= 0.0f;
             valid = valid && LowerBound.IsValid() && UpperBound.IsValid();
             return valid;
@@ -73,8 +73,8 @@ namespace Box2DSharp.Collision
             var tmin = -Settings.MaxFloat;
             var tmax = Settings.MaxFloat;
 
-            var p    = input.P1;
-            var d    = input.P2 - input.P1;
+            var p = input.P1;
+            var d = input.P2 - input.P1;
             var absD = Vector2.Abs(d);
 
             var normal = new Vector2();
@@ -91,8 +91,8 @@ namespace Box2DSharp.Collision
                 else
                 {
                     var invD = 1.0f / d.X;
-                    var t1   = (LowerBound.X - p.X) * invD;
-                    var t2   = (UpperBound.X - p.X) * invD;
+                    var t1 = (LowerBound.X - p.X) * invD;
+                    var t2 = (UpperBound.X - p.X) * invD;
 
                     // Sign of the normal vector.
                     var s = -1.0f;
@@ -108,7 +108,7 @@ namespace Box2DSharp.Collision
                     {
                         normal.SetZero();
                         normal.X = s;
-                        tmin     = t1;
+                        tmin = t1;
                     }
 
                     // Pull the max down
@@ -132,8 +132,8 @@ namespace Box2DSharp.Collision
                 else
                 {
                     var invD = 1.0f / d.Y;
-                    var t1   = (LowerBound.Y - p.Y) * invD;
-                    var t2   = (UpperBound.Y - p.Y) * invD;
+                    var t1 = (LowerBound.Y - p.Y) * invD;
+                    var t2 = (UpperBound.Y - p.Y) * invD;
 
                     // Sign of the normal vector.
                     var s = -1.0f;
@@ -149,7 +149,7 @@ namespace Box2DSharp.Collision
                     {
                         normal.SetZero();
                         normal.Y = s;
-                        tmin     = t1;
+                        tmin = t1;
                     }
 
                     // Pull the max down
@@ -170,11 +170,7 @@ namespace Box2DSharp.Collision
             }
 
             // Intersection.
-            output = new RayCastOutput
-            {
-                Fraction = tmin,
-                Normal   = normal
-            };
+            output = new RayCastOutput {Fraction = tmin, Normal = normal};
 
             return true;
         }
@@ -226,8 +222,8 @@ namespace Box2DSharp.Collision
             var tmin = -Settings.MaxFloat;
             var tmax = Settings.MaxFloat;
 
-            var p    = input.P1;
-            var d    = input.P2 - input.P1;
+            var p = input.P1;
+            var d = input.P2 - input.P1;
             var absD = Vector2.Abs(d);
 
             var normal = new Vector2();
@@ -243,8 +239,8 @@ namespace Box2DSharp.Collision
             else
             {
                 var inv_d = 1.0f / d.X;
-                var t1    = (LowerBound.X - p.X) * inv_d;
-                var t2    = (UpperBound.X - p.X) * inv_d;
+                var t1 = (LowerBound.X - p.X) * inv_d;
+                var t2 = (UpperBound.X - p.X) * inv_d;
 
                 // Sign of the normal vector.
                 var s = -1.0f;
@@ -260,7 +256,7 @@ namespace Box2DSharp.Collision
                 {
                     normal.SetZero();
                     normal.X = s;
-                    tmin     = t1;
+                    tmin = t1;
                 }
 
                 // Pull the max down
@@ -281,7 +277,7 @@ namespace Box2DSharp.Collision
 
             // Intersection.
             output.Fraction = tmin;
-            output.Normal   = normal;
+            output.Normal = normal;
             return true;
         }
     }
