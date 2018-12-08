@@ -342,7 +342,7 @@ namespace Box2DSharp.Dynamics.Joints
         public override void Dump()
         { }
 
-        internal override void InitVelocityConstraints(SolverData data)
+        internal override void InitVelocityConstraints(in SolverData data)
         {
             _indexA       = BodyA.IslandIndex;
             _indexB       = BodyB.IslandIndex;
@@ -481,7 +481,7 @@ namespace Box2DSharp.Dynamics.Joints
             data.Velocities[_indexB].W = wB;
         }
 
-        internal override void SolveVelocityConstraints(SolverData data)
+        internal override void SolveVelocityConstraints(in SolverData data)
         {
             var vA = data.Velocities[_indexA].V;
             var wA = data.Velocities[_indexA].W;
@@ -585,7 +585,7 @@ namespace Box2DSharp.Dynamics.Joints
         //
         // We could take the active state from the velocity solver.However, the joint might push past the limit when the velocity
         // solver indicates the limit is inactive.
-        internal override bool SolvePositionConstraints(SolverData data)
+        internal override bool SolvePositionConstraints(in SolverData data)
         {
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;

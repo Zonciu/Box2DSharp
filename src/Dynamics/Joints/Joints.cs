@@ -174,12 +174,12 @@ namespace Box2DSharp.Dynamics.Joints
         public virtual void ShiftOrigin(in Vector2 newOrigin)
         { }
 
-        internal abstract void InitVelocityConstraints(SolverData data);
+        internal abstract void InitVelocityConstraints(in SolverData data);
 
-        internal abstract void SolveVelocityConstraints(SolverData data);
+        internal abstract void SolveVelocityConstraints(in SolverData data);
 
         // This returns true if the position errors are within tolerance.
-        internal abstract bool SolvePositionConstraints(SolverData data);
+        internal abstract bool SolvePositionConstraints(in SolverData data);
 
         internal static Joint Create(JointDef jointDef)
         {

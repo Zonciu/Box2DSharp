@@ -1,7 +1,7 @@
 namespace Box2DSharp.Dynamics
 {
     /// Solver Data
-    public class SolverData
+    public struct SolverData
     {
         public TimeStep Step;
 

@@ -153,7 +153,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// <inheritdoc />
-        internal override void InitVelocityConstraints(SolverData data)
+        internal override void InitVelocityConstraints(in SolverData data)
         {
             _indexB = BodyB.IslandIndex;
             _localCenterB = BodyB.Sweep.LocalCenter;
@@ -227,7 +227,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// <inheritdoc />
-        internal override void SolveVelocityConstraints(SolverData data)
+        internal override void SolveVelocityConstraints(in SolverData data)
         {
             var vB = data.Velocities[_indexB].V;
             var wB = data.Velocities[_indexB].W;
@@ -254,7 +254,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// <inheritdoc />
-        internal override bool SolvePositionConstraints(SolverData data)
+        internal override bool SolvePositionConstraints(in SolverData data)
         {
             return true;
         }
