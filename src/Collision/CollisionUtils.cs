@@ -6,7 +6,56 @@ using Box2DSharp.Common;
 namespace Box2DSharp.Collision
 {
     public static partial class CollisionUtils
-    {
+    { 
+        /// Compute the point states given two manifolds. The states pertain to the transition from manifold1
+        /// to manifold2. So state1 is either persist or remove while state2 is either add or persist.
+        public static void GetPointStates(
+            in PointState[] state1,
+            in PointState[] state2,
+            in Manifold manifold1,
+            in Manifold manifold2)
+        {
+            for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
+            {
+                state1[i] = PointState.NullState;
+                state2[i] = PointState.NullState;
+            }
+
+            // Detect persists and removes.
+            for (var i = 0; i < manifold1.PointCount; ++i)
+            {
+                var id = manifold1.Points[i].Id;
+
+                state1[i] = PointState.RemoveState;
+
+                for (var j = 0; j < manifold2.PointCount; ++j)
+                {
+                    if (manifold2.Points[j].Id.Key == id.Key)
+                    {
+                        state1[i] = PointState.PersistState;
+                        break;
+                    }
+                }
+            }
+
+            // Detect persists and adds.
+            for (var i = 0; i < manifold2.PointCount; ++i)
+            {
+                var id = manifold2.Points[i].Id;
+
+                state2[i] = PointState.AddState;
+
+                for (var j = 0; j < manifold1.PointCount; ++j)
+                {
+                    if (manifold1.Points[j].Id.Key == id.Key)
+                    {
+                        state2[i] = PointState.PersistState;
+                        break;
+                    }
+                }
+            }
+        }
+
         /// Clipping for contact manifolds.
         public static int ClipSegmentToLine(
             ref ClipVertex[] vOut,
