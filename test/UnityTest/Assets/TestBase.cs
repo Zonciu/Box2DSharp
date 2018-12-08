@@ -235,7 +235,7 @@ namespace Box2DSharp
             World.QueryAABB(
                 fixture1 =>
                 {
-                    var body = fixture1.GetBody();
+                    var body = fixture1.Body;
                     if (body.BodyType == BodyType.DynamicBody)
                     {
                         bool inside = fixture1.TestPoint(p);
@@ -255,7 +255,7 @@ namespace Box2DSharp
 
             if (fixture != null)
             {
-                var body = fixture.GetBody();
+                var body = fixture.Body;
                 var md = new MouseJointDef
                 {
                     BodyA = GroundBody,

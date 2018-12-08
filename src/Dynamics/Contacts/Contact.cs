@@ -96,8 +96,8 @@ namespace Box2DSharp.Dynamics.Contacts
             Fixture fixtureB,
             int indexB)
         {
-            var type1 = fixtureA.GetShapeType();
-            var type2 = fixtureB.GetShapeType();
+            var type1 = fixtureA.ShapeType;
+            var type2 = fixtureB.ShapeType;
 
             Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
             Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
@@ -122,12 +122,12 @@ namespace Box2DSharp.Dynamics.Contacts
 
             if (contact.Manifold.PointCount > 0 && fixtureA.IsSensor == false && fixtureB.IsSensor == false)
             {
-                fixtureA.GetBody().IsAwake = true;
-                fixtureB.GetBody().IsAwake = true;
+                fixtureA.Body.IsAwake = true;
+                fixtureB.Body.IsAwake = true;
             }
 
-            var typeA = fixtureA.GetShapeType();
-            var typeB = fixtureB.GetShapeType();
+            var typeA = fixtureA.ShapeType;
+            var typeB = fixtureB.ShapeType;
 
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
@@ -179,10 +179,10 @@ namespace Box2DSharp.Dynamics.Contacts
         /// Get the world manifold.
         public void GetWorldManifold(out WorldManifold worldManifold)
         {
-            var bodyA = FixtureA.GetBody();
-            var bodyB = FixtureB.GetBody();
-            var shapeA = FixtureA.GetShape();
-            var shapeB = FixtureB.GetShape();
+            var bodyA = FixtureA.Body;
+            var bodyB = FixtureB.Body;
+            var shapeA = FixtureA.Shape;
+            var shapeB = FixtureB.Shape;
             worldManifold = new WorldManifold();
             worldManifold.Initialize(
                 Manifold,
@@ -316,16 +316,16 @@ namespace Box2DSharp.Dynamics.Contacts
             var sensorB = FixtureB.IsSensor;
             var sensor = sensorA || sensorB;
 
-            var bodyA = FixtureA.GetBody();
-            var bodyB = FixtureB.GetBody();
+            var bodyA = FixtureA.Body;
+            var bodyB = FixtureB.Body;
             var xfA = bodyA.GetTransform();
             var xfB = bodyB.GetTransform();
 
             // Is this contact a sensor?
             if (sensor)
             {
-                var shapeA = FixtureA.GetShape();
-                var shapeB = FixtureB.GetShape();
+                var shapeA = FixtureA.Shape;
+                var shapeB = FixtureB.Shape;
                 touching = CollisionUtils.TestOverlap(shapeA, IndexA, shapeB, IndexB, xfA, xfB);
 
                 // Sensors don't generate manifolds.

@@ -45,12 +45,12 @@ namespace Box2DSharp.Dynamics.Contacts
 
                 var fixtureA = contact.FixtureA;
                 var fixtureB = contact.FixtureB;
-                var shapeA   = fixtureA.GetShape();
-                var shapeB   = fixtureB.GetShape();
+                var shapeA   = fixtureA.Shape;
+                var shapeB   = fixtureB.Shape;
                 var radiusA  = shapeA.Radius;
                 var radiusB  = shapeB.Radius;
-                var bodyA    = fixtureA.GetBody();
-                var bodyB    = fixtureB.GetBody();
+                var bodyA    = fixtureA.Body;
+                var bodyB    = fixtureB.Body;
                 ref readonly var manifold = ref contact.GetManifold();
 
                 var pointCount = manifold.PointCount;

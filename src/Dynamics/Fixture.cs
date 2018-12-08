@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices.ComTypes;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics
 {
@@ -14,13 +16,47 @@ namespace Box2DSharp.Dynamics
     /// @warning you cannot reuse fixtures.
     public class Fixture
     {
-        public Body Body;
+        /// Get the parent body of this fixture. This is null if the fixture is not attached.
+        /// @return the parent body.
+        public Body Body { get; set; }
 
-        public float Density;
+        /// <summary>
+        /// the density of this fixture. This will _not_ automatically adjust the mass of the body. You must call b2Body::ResetMassData to update the body's mass.
+        /// </summary>
+        public float Density
+        {
+            get => _density;
+            set
+            {
+                Debug.Assert(value.IsValid() && value >= 0.0f);
+                _density = value;
+            }
+        }
 
-        public Filter Filter;
+        private float _density;
 
-        public float Friction;
+        /// Get the child shape. You can modify the child shape, however you should not change the
+        /// number of vertices because this will crash some collision caching mechanisms.
+        /// Manipulating the shape may lead to non-physical behavior.
+        /// Set the contact filtering data. This will not update contacts until the next time
+        /// step when either parent body is active and awake.
+        /// This automatically calls Refilter.
+        public Filter Filter
+        {
+            get => _filter;
+            set
+            {
+                _filter = value;
+                Refilter();
+            }
+        }
+
+        private Filter _filter;
+
+        /// <summary>
+        /// the coefficient of friction. This will _not_ change the friction of existing contacts.
+        /// </summary>
+        public float Friction { get; set; }
 
         public bool IsSensor
         {
@@ -30,60 +66,96 @@ namespace Box2DSharp.Dynamics
                 if (_isSensor != value)
                 {
                     Body.IsAwake = true;
-                    _isSensor    = value;
+                    _isSensor = value;
                 }
             }
         }
 
         private bool _isSensor;
 
-        public FixtureProxy[] Proxies;
+        public FixtureProxy[] Proxies { get; private set; }
 
-        public int ProxyCount;
+        public int ProxyCount { get; private set; }
 
+        /// <summary>
+        /// the coefficient of restitution. This will _not_ change the restitution of existing contacts.
+        /// </summary>
         public float Restitution;
 
-        private Shape _shape;
+        public Shape Shape { get; private set; }
 
-        public object UserData;
+        /// <summary>
+        /// the user data that was assigned in the fixture definition. Use this to store your application specific data.
+        /// </summary>
+        public object UserData { get; set; }
+
+        private static readonly ObjectPool<Fixture> _pool = new DefaultObjectPool<Fixture>(new FixturePoolPolicy());
+
+        private class FixturePoolPolicy : IPooledObjectPolicy<Fixture>
+        {
+            /// <inheritdoc />
+            public Fixture Create()
+            {
+                return new Fixture();
+            }
+
+            /// <inheritdoc />
+            public bool Return(Fixture obj)
+            {
+                obj.Body = default;
+                obj.Density = default;
+                obj.Filter = default;
+                obj.Friction = default;
+                obj._isSensor = default;
+                var proxies = obj.Proxies;
+                obj.Proxies = default;
+                for (var i = 0; i < proxies.Length; i++)
+                {
+                    var proxy = proxies[i];
+                    proxies[i] = null;
+                    FixtureProxy.Return(proxy);
+                }
+
+                obj.ProxyCount = default;
+                obj.Restitution = default;
+                obj.Shape = default;
+                obj.UserData = default;
+
+                return true;
+            }
+        }
 
         /// We need separation create/destroy functions from the constructor/destructor because
         /// the destructor cannot access the allocator (no destructor arguments allowed by C++).
-        /// Todo use Object Pool
         internal static Fixture Create(Body body, FixtureDef def)
         {
-            var childCount = def.shape.GetChildCount();
-            var fixture = new Fixture
-            {
-                UserData    = def.userData,
-                Friction    = def.friction,
-                Restitution = def.restitution,
-                Body        = body,
-                Filter      = def.filter,
-                IsSensor    = def.isSensor,
-                _shape      = def.shape.Clone(),
-                ProxyCount  = 0,
-                Density     = def.density,
+            var childCount = def.Shape.GetChildCount();
 
-                // Reserve proxy space
-                Proxies = new FixtureProxy[childCount]
-            };
+            var fixture = _pool.Get();
+            fixture.UserData = def.UserData;
+            fixture.Friction = def.Friction;
+            fixture.Restitution = def.Restitution;
+            fixture.Body = body;
+            fixture.Filter = def.Filter;
+            fixture.IsSensor = def.IsSensor;
+            fixture.Shape = def.Shape.Clone();
+            fixture.ProxyCount = 0;
+            fixture.Density = def.Density;
+            fixture.Proxies = new FixtureProxy[childCount]; // Reserve proxy space
+
             for (var i = 0; i < childCount; ++i)
             {
-                fixture.Proxies[i] = new FixtureProxy();
+                fixture.Proxies[i] = FixtureProxy.Get();
             }
 
             return fixture;
         }
 
-        internal void Destroy()
+        internal static void Destroy(Fixture fixture)
         {
             // The proxies must be destroyed before calling this.
-            Debug.Assert(ProxyCount == 0);
-
-            // Free the proxy array.
-            Proxies = null;
-            _shape  = null;
+            Debug.Assert(fixture.ProxyCount == 0);
+            _pool.Return(fixture);
         }
 
         // These support body activation/deactivation.
@@ -92,15 +164,15 @@ namespace Box2DSharp.Dynamics
             Debug.Assert(ProxyCount == 0);
 
             // Create proxies in the broad-phase.
-            ProxyCount = _shape.GetChildCount();
+            ProxyCount = Shape.GetChildCount();
 
             for (var i = 0; i < ProxyCount; ++i)
             {
                 var proxy = Proxies[i];
-                _shape.ComputeAABB(out proxy.AABB, xf, i);
-                proxy.Fixture    = this;
+                Shape.ComputeAABB(out proxy.AABB, xf, i);
+                proxy.Fixture = this;
                 proxy.ChildIndex = i;
-                proxy.ProxyId    = broadPhase.CreateProxy(proxy.AABB, proxy);
+                proxy.ProxyId = broadPhase.CreateProxy(proxy.AABB, proxy);
             }
         }
 
@@ -119,34 +191,7 @@ namespace Box2DSharp.Dynamics
 
         /// Get the type of the child shape. You can use this to down cast to the concrete shape.
         /// @return the shape type.
-        public ShapeType GetShapeType()
-        {
-            return _shape.ShapeType;
-        }
-
-        /// Get the child shape. You can modify the child shape, however you should not change the
-        /// number of vertices because this will crash some collision caching mechanisms.
-        /// Manipulating the shape may lead to non-physical behavior.
-        public Shape GetShape()
-        {
-            return _shape;
-        }
-
-        /// Set the contact filtering data. This will not update contacts until the next time
-        /// step when either parent body is active and awake.
-        /// This automatically calls Refilter.
-        public void SetFilterData(Filter filter)
-        {
-            Filter = filter;
-
-            Refilter();
-        }
-
-        /// Get the contact filtering data.
-        public ref readonly Filter GetFilterData()
-        {
-            return ref Filter;
-        }
+        public ShapeType ShapeType => Shape.ShapeType;
 
         /// Call this if you want to establish collision that was previously disabled by b2ContactFilter::ShouldCollide.
         public void Refilter()
@@ -180,31 +225,11 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        /// Get the parent body of this fixture. This is null if the fixture is not attached.
-        /// @return the parent body.
-        public Body GetBody()
-        {
-            return Body;
-        }
-
-        /// Get the user data that was assigned in the fixture definition. Use this to
-        /// store your application specific data.
-        public object GetUserData()
-        {
-            return UserData;
-        }
-
-        /// Set the user data. Use this to store your application specific data.
-        public void SetUserData(object data)
-        {
-            UserData = data;
-        }
-
         /// Test a point for containment in this fixture.
         /// @param p a point in world coordinates.
         public bool TestPoint(in Vector2 p)
         {
-            return _shape.TestPoint(Body.GetTransform(), p);
+            return Shape.TestPoint(Body.GetTransform(), p);
         }
 
         /// Cast a ray against this shape.
@@ -212,7 +237,7 @@ namespace Box2DSharp.Dynamics
         /// @param input the ray-cast input parameters.
         public bool RayCast(out RayCastOutput output, in RayCastInput input, int childIndex)
         {
-            return _shape.RayCast(out output, input, Body.GetTransform(), childIndex);
+            return Shape.RayCast(out output, input, Body.GetTransform(), childIndex);
         }
 
         /// Get the mass data for this fixture. The mass data is based on the density and
@@ -220,47 +245,7 @@ namespace Box2DSharp.Dynamics
         /// may be expensive.
         public void GetMassData(out MassData massData)
         {
-            _shape.ComputeMass(out massData, Density);
-        }
-
-        /// Set the density of this fixture. This will _not_ automatically adjust the mass
-        /// of the body. You must call b2Body::ResetMassData to update the body's mass.
-        public void SetDensity(float density)
-        {
-            Debug.Assert(density.IsValid() && density >= 0.0f);
-            Density = density;
-        }
-
-        /// Get the density of this fixture.
-        public float GetDensity()
-        {
-            return Density;
-        }
-
-        /// Get the coefficient of friction.
-        public float GetFriction()
-        {
-            return Friction;
-        }
-
-        /// Set the coefficient of friction. This will _not_ change the friction of
-        /// existing contacts.
-        public void SetFriction(float friction)
-        {
-            Friction = friction;
-        }
-
-        /// Get the coefficient of restitution.
-        public float GetRestitution()
-        {
-            return Restitution;
-        }
-
-        /// Set the coefficient of restitution. This will _not_ change the restitution of
-        /// existing contacts.
-        public void SetRestitution(float restitution)
-        {
-            Restitution = restitution;
+            Shape.ComputeMass(out massData, Density);
         }
 
         /// Get the fixture's AABB. This AABB may be enlarge and/or stale.
@@ -280,11 +265,11 @@ namespace Box2DSharp.Dynamics
             Logger.Log($"    fd.restitution = {Restitution};");
             Logger.Log($"    fd.density = {Density};");
             Logger.Log($"    fd.isSensor = bool({IsSensor});");
-            Logger.Log($"    fd.filter.categoryBits = uint16({Filter.categoryBits});");
-            Logger.Log($"    fd.filter.maskBits = uint16({Filter.maskBits});");
-            Logger.Log($"    fd.filter.groupIndex = int16({Filter.groupIndex});");
+            Logger.Log($"    fd.filter.categoryBits = uint16({Filter.CategoryBits});");
+            Logger.Log($"    fd.filter.maskBits = uint16({Filter.MaskBits});");
+            Logger.Log($"    fd.filter.groupIndex = int16({Filter.GroupIndex});");
 
-            switch (_shape)
+            switch (Shape)
             {
             case CircleShape s:
             {
@@ -366,8 +351,8 @@ namespace Box2DSharp.Dynamics
 
                 // Compute an AABB that covers the swept shape (may miss some rotation effect).
 
-                _shape.ComputeAABB(out var aabb1, transform1, proxy.ChildIndex);
-                _shape.ComputeAABB(out var aabb2, transform2, proxy.ChildIndex);
+                Shape.ComputeAABB(out var aabb1, transform1, proxy.ChildIndex);
+                Shape.ComputeAABB(out var aabb2, transform2, proxy.ChildIndex);
 
                 proxy.AABB.Combine(aabb1, aabb2);
 
@@ -382,22 +367,22 @@ namespace Box2DSharp.Dynamics
     public struct Filter
     {
         /// The collision category bits. Normally you would just set one bit.
-        public ushort categoryBits;
+        public ushort CategoryBits;
 
         /// The collision mask bits. This states the categories that this
         /// shape would accept for collision.
-        public ushort maskBits;
+        public ushort MaskBits;
 
         /// Collision groups allow a certain group of objects to never collide (negative)
         /// or always collide (positive). Zero means no collision group. Non-zero group
         /// filtering always wins against the mask bits.
-        public ushort groupIndex;
+        public ushort GroupIndex;
 
         public static Filter Default = new Filter
         {
-            categoryBits = 0x0001,
-            maskBits     = 0xFFFF,
-            groupIndex   = 0
+            CategoryBits = 0x0001,
+            MaskBits = 0xFFFF,
+            GroupIndex = 0
         };
     }
 
@@ -406,38 +391,38 @@ namespace Box2DSharp.Dynamics
     public class FixtureDef
     {
         /// The density, usually in kg/m^2.
-        public float density;
+        public float Density;
 
         /// Contact filtering data.
-        public Filter filter;
+        public Filter Filter;
 
         /// The friction coefficient, usually in the range [0,1].
-        public float friction;
+        public float Friction;
 
         /// A sensor shape collects contact information but never generates a collision
         /// response.
-        public bool isSensor;
+        public bool IsSensor;
 
         /// The restitution (elasticity) usually in the range [0,1].
-        public float restitution;
+        public float Restitution;
 
         /// The shape, this must be set. The shape will be cloned, so you
         /// can create the shape on the stack.
-        public Shape shape;
+        public Shape Shape;
 
         /// Use this to store application specific fixture data.
-        public object userData;
+        public object UserData;
 
         /// The constructor sets the default fixture definition values.
         public FixtureDef()
         {
-            shape       = null;
-            userData    = null;
-            friction    = 0.2f;
-            restitution = 0.0f;
-            density     = 0.0f;
-            isSensor    = false;
-            filter      = Filter.Default;
+            Shape = null;
+            UserData = null;
+            Friction = 0.2f;
+            Restitution = 0.0f;
+            Density = 0.0f;
+            IsSensor = false;
+            Filter = Filter.Default;
         }
     }
 
@@ -447,6 +432,35 @@ namespace Box2DSharp.Dynamics
     /// </summary>
     public class FixtureProxy
     {
+        private static readonly ObjectPool<FixtureProxy> _pool =
+            new DefaultObjectPool<FixtureProxy>(new FixtureProxyPoolPolicy());
+
+        private class FixtureProxyPoolPolicy : IPooledObjectPolicy<FixtureProxy>
+        {
+            /// <inheritdoc />
+            public FixtureProxy Create()
+            {
+                return new FixtureProxy();
+            }
+
+            /// <inheritdoc />
+            public bool Return(FixtureProxy obj)
+            {
+                obj.AABB = default;
+                obj.ChildIndex = default;
+                obj.Fixture = default;
+                obj.ProxyId = default;
+                return true;
+            }
+        }
+
+        private FixtureProxy()
+        { }
+
+        public static FixtureProxy Get() => _pool.Get();
+
+        public static void Return(FixtureProxy proxy) => _pool.Return(proxy);
+
         public AABB AABB;
 
         public int ChildIndex;

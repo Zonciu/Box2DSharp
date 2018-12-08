@@ -27,8 +27,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Circle);
-            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Circle);
+            Debug.Assert(fixtureA.ShapeType == ShapeType.Circle);
+            Debug.Assert(fixtureB.ShapeType == ShapeType.Circle);
             var contact = _pool.Get();
             contact.Initialize(fixtureA, 0, fixtureB, 0);
             return contact;
@@ -43,9 +43,9 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Collision.CollisionUtils.CollideCircles(
                 ref manifold,
-                (CircleShape) FixtureA.GetShape(),
+                (CircleShape) FixtureA.Shape,
                 xfA,
-                (CircleShape) FixtureB.GetShape(),
+                (CircleShape) FixtureB.Shape,
                 xfB);
         }
     }

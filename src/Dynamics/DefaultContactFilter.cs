@@ -8,16 +8,16 @@ namespace Box2DSharp.Dynamics
         /// @warning for performance reasons this is only called when the AABBs begin to overlap.
         public bool ShouldCollide(Fixture fixtureA, Fixture fixtureB)
         {
-            ref readonly var filterA = ref fixtureA.GetFilterData();
-            ref readonly var filterB = ref fixtureB.GetFilterData();
+            var filterA = fixtureA.Filter;
+            var filterB = fixtureB.Filter;
 
-            if (filterA.groupIndex == filterB.groupIndex && filterA.groupIndex != 0)
+            if (filterA.GroupIndex == filterB.GroupIndex && filterA.GroupIndex != 0)
             {
-                return filterA.groupIndex > 0;
+                return filterA.GroupIndex > 0;
             }
 
-            var collide = (filterA.maskBits & filterB.categoryBits) != 0
-                       && (filterA.categoryBits & filterB.maskBits) != 0;
+            var collide = (filterA.MaskBits & filterB.CategoryBits) != 0
+                       && (filterA.CategoryBits & filterB.MaskBits) != 0;
             return collide;
         }
     }

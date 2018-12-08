@@ -31,8 +31,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Edge);
-            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Polygon);
+            Debug.Assert(fixtureA.ShapeType == ShapeType.Edge);
+            Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
             var contact = _pool.Get();
             contact.Initialize(fixtureA, 0, fixtureB, 0);
             return contact;
@@ -48,9 +48,9 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             CollisionUtils.CollideEdgeAndPolygon(
                 ref manifold,
-                (EdgeShape) FixtureA.GetShape(),
+                (EdgeShape) FixtureA.Shape,
                 xfA,
-                (PolygonShape) FixtureB.GetShape(),
+                (PolygonShape) FixtureB.Shape,
                 xfB);
         }
     }

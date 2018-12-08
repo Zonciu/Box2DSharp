@@ -32,9 +32,9 @@ namespace Box2DSharp.Tests
             // Define the dynamic body fixture.
             var fixtureDef = new FixtureDef
             {
-                shape = dynamicBox,
-                density = 1.0f,
-                friction = 0.3f
+                Shape = dynamicBox,
+                Density = 1.0f,
+                Friction = 0.3f
             };
 
             // Set the box density to be non-zero, so it will be dynamic.

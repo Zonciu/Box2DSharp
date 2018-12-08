@@ -662,8 +662,8 @@ namespace Box2DSharp.Dynamics
         {
             var def = new FixtureDef
             {
-                shape   = shape,
-                density = density
+                Shape   = shape,
+                Density = density
             };
 
             return CreateFixture(def);
@@ -721,7 +721,7 @@ namespace Box2DSharp.Dynamics
 
             FixtureList.Remove(fixture);
             fixture.Body = null;
-            fixture.Destroy();
+            Fixture.Destroy(fixture);
 
             // Reset the mass data.
             // 夹具销毁后重新计算物体质量

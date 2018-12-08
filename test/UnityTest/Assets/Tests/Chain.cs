@@ -26,9 +26,9 @@ namespace Box2DSharp.Tests
 
                 var fd = new FixtureDef
                 {
-                    shape = shape,
-                    density = 20.0f,
-                    friction = 0.2f
+                    Shape = shape,
+                    Density = 20.0f,
+                    Friction = 0.2f
                 };
 
                 var jd = new RevoluteJointDef {CollideConnected = false};

@@ -107,7 +107,7 @@ namespace Box2DSharp.Dynamics
         public Profile Profile => _profile;
 
         private Profile _profile = new Profile();
-        
+
         public World() : this(new Vector2(0, -10))
         { }
 
@@ -136,8 +136,7 @@ namespace Box2DSharp.Dynamics
 
                 foreach (var t in b.Value.FixtureList)
                 {
-                    t.ProxyCount = 0;
-                    t.Destroy();
+                    Fixture.Destroy(t);
                 }
 
                 b = bNext;
@@ -851,8 +850,8 @@ namespace Box2DSharp.Dynamics
                             continue;
                         }
 
-                        var bA = fA.GetBody();
-                        var bB = fB.GetBody();
+                        var bA = fA.Body;
+                        var bB = fB.Body;
 
                         var typeA = bA.BodyType;
                         var typeB = bB.BodyType;
@@ -898,8 +897,8 @@ namespace Box2DSharp.Dynamics
 
                         // Compute the time of impact in interval [0, minTOI]
                         var input = new ToiInput();
-                        input.ProxyA.Set(fA.GetShape(), indexA);
-                        input.ProxyB.Set(fB.GetShape(), indexB);
+                        input.ProxyA.Set(fA.Shape, indexA);
+                        input.ProxyB.Set(fB.Shape, indexB);
                         input.SweepA = bA.Sweep;
                         input.SweepB = bB.Sweep;
                         input.Tmax = 1.0f;
@@ -939,8 +938,8 @@ namespace Box2DSharp.Dynamics
                 // Advance the bodies to the TOI.
                 var fixtureA = minContact.GetFixtureA();
                 var fixtureB = minContact.GetFixtureB();
-                var bodyA = fixtureA.GetBody();
-                var bodyB = fixtureB.GetBody();
+                var bodyA = fixtureA.Body;
+                var bodyB = fixtureB.Body;
 
                 var backup1 = bodyA.Sweep;
                 var backup2 = bodyB.Sweep;
@@ -1361,7 +1360,7 @@ namespace Box2DSharp.Dynamics
         /// <param name="color"></param>
         private void DrawShape(Fixture fixture, in Transform xf, in Color color)
         {
-            switch (fixture.GetShape())
+            switch (fixture.Shape)
             {
             case CircleShape circle:
             {

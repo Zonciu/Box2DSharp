@@ -28,8 +28,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
-            Debug.Assert(fixtureA.GetShapeType() == ShapeType.Chain);
-            Debug.Assert(fixtureB.GetShapeType() == ShapeType.Polygon);
+            Debug.Assert(fixtureA.ShapeType == ShapeType.Chain);
+            Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
             var contact = _pool.Get();
             contact.Initialize(fixtureA, indexA, fixtureB, indexB);
             return contact;
@@ -42,10 +42,10 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
-            var chain = (ChainShape) FixtureA.GetShape();
+            var chain = (ChainShape) FixtureA.Shape;
 
             chain.GetChildEdge(out var edge, IndexA);
-            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.GetShape(), xfB);
+            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
         }
     }
 }

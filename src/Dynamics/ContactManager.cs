@@ -29,8 +29,8 @@ namespace Box2DSharp.Dynamics
             var indexA = proxyA.ChildIndex;
             var indexB = proxyB.ChildIndex;
 
-            var bodyA = fixtureA.GetBody();
-            var bodyB = fixtureB.GetBody();
+            var bodyA = fixtureA.Body;
+            var bodyB = fixtureB.Body;
 
             // Are the fixtures on the same body?
             if (bodyA == bodyB)
@@ -97,8 +97,8 @@ namespace Box2DSharp.Dynamics
             fixtureB = c.GetFixtureB();
             indexA   = c.GetChildIndexA();
             indexB   = c.GetChildIndexB();
-            bodyA    = fixtureA.GetBody();
-            bodyB    = fixtureB.GetBody();
+            bodyA    = fixtureA.Body;
+            bodyB    = fixtureB.Body;
 
             // Insert into the world.
             var node = ContactList.AddFirst(c);
@@ -135,8 +135,8 @@ namespace Box2DSharp.Dynamics
         {
             var fixtureA = c.GetFixtureA();
             var fixtureB = c.GetFixtureB();
-            var bodyA    = fixtureA.GetBody();
-            var bodyB    = fixtureB.GetBody();
+            var bodyA    = fixtureA.Body;
+            var bodyB    = fixtureB.Body;
 
             if (c.IsTouching()) // 存在接触监听器且当前接触点接触,则触发结束接触
             {
@@ -169,8 +169,8 @@ namespace Box2DSharp.Dynamics
                 var fixtureB = c.GetFixtureB();
                 var indexA   = c.GetChildIndexA();
                 var indexB   = c.GetChildIndexB();
-                var bodyA    = fixtureA.GetBody();
-                var bodyB    = fixtureB.GetBody();
+                var bodyA    = fixtureA.Body;
+                var bodyB    = fixtureB.Body;
 
                 // Is this contact flagged for filtering?
                 if (c.Flags.HasFlag(Contact.ContactFlag.FilterFlag))

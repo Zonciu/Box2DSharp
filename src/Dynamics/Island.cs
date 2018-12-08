@@ -316,8 +316,8 @@ namespace Box2DSharp.Dynamics
                 int indexB = c.GetChildIndexB();
 
                 b2DistanceInput input = new b2DistanceInput();
-                input.proxyA.Set(fA.GetShape(), indexA);
-                input.proxyB.Set(fB.GetShape(), indexB);
+                input.proxyA.Set(fA.Shape, indexA);
+                input.proxyB.Set(fB.Shape, indexB);
                 input.transformA = bA.GetTransform();
                 input.transformB = bB.GetTransform();
                 input.useRadii = false;
