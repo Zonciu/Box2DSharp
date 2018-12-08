@@ -9,10 +9,7 @@ a174dbac1bc32e05e790cd867d9e30fb37681d47
 * Fixed link 
 ```
 
-# Test
-* [x] ContactFiter
-* [x] ContactListener
-
 # Test case
 * [x] Hello World
 * [x] Chain
+* [x] Tiles
