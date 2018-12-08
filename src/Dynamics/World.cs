@@ -458,7 +458,7 @@ namespace Box2DSharp.Dynamics
                 timer.Restart();
                 SolveTOI(step);
                 timer.Stop();
-                _profile.SolveToi = timer.ElapsedMilliseconds;
+                _profile.SolveTOI = timer.ElapsedMilliseconds;
             }
 
             if (step.Dt > 0.0f)
