@@ -19,7 +19,7 @@ namespace Box2DSharp.Collision.Collider
     /// account for movement, which is critical for continuous physics.
     /// All contact scenarios must be expressed in one of these types.
     /// This structure is stored across time steps, so we keep it small.
-    public class Manifold
+    public struct Manifold
     {
         
         /// <summary>
@@ -28,14 +28,14 @@ namespace Box2DSharp.Collision.Collider
         public FixedArray2<ManifoldPoint> Points;
 
         /// not use for Type::e_points
-        public Vector2 LocalNormal = Vector2.Zero;
+        public Vector2 LocalNormal;
 
         /// usage depends on manifold type
-        public Vector2 LocalPoint = Vector2.Zero;
+        public Vector2 LocalPoint;
 
-        public ManifoldType Type = 0;
+        public ManifoldType Type;
 
         /// the number of manifold points
-        public int PointCount = 0;
+        public int PointCount;
     }
 }

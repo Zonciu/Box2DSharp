@@ -51,7 +51,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 var radiusB  = shapeB.Radius;
                 var bodyA    = fixtureA.GetBody();
                 var bodyB    = fixtureB.GetBody();
-                var manifold = contact.GetManifold();
+                ref readonly var manifold = ref contact.GetManifold();
 
                 var pointCount = manifold.PointCount;
                 Debug.Assert(pointCount > 0);
@@ -123,7 +123,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
                 var radiusA  = pc.RadiusA;
                 var radiusB  = pc.RadiusB;
-                var manifold = _contacts[vc.ContactIndex].GetManifold();
+                ref readonly var manifold = ref _contacts[vc.ContactIndex].GetManifold();
 
                 var indexA = vc.IndexA;
                 var indexB = vc.IndexB;
@@ -588,11 +588,11 @@ namespace Box2DSharp.Dynamics.Contacts
             for (var i = 0; i < _count; ++i)
             {
                 var vc       = VelocityConstraints[i];
-                ref readonly var manifold = ref _contacts[vc.ContactIndex].GetManifold();
+                ref var manifold = ref _contacts[vc.ContactIndex].Manifold;
 
                 for (var j = 0; j < vc.PointCount; ++j)
                 {
-                    ref var point =ref manifold.Points.GetRef(j);
+                    ref var point = ref manifold.Points.GetRef(j);
                     point.NormalImpulse  = vc.Points[j].NormalImpulse;
                     point.TangentImpulse = vc.Points[j].TangentImpulse;
                 }

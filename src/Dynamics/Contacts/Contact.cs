@@ -82,11 +82,6 @@ namespace Box2DSharp.Dynamics.Contacts
             IndexA = indexA;
             IndexB = indexB;
 
-            Manifold = new Manifold();
-
-            NodeA = new ContactEdge();
-            NodeB = new ContactEdge();
-
             ToiCount = 0;
 
             Friction = MixFriction(FixtureA.Friction, FixtureB.Friction);

@@ -18,17 +18,17 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 新增夹具
         /// </summary>
-        internal bool HasNewFixture { get; set; }
+        internal bool HasNewFixture;
 
         /// <summary>
         /// 锁定世界
         /// </summary>
-        internal bool IsLocked { get; set; }
+        internal bool IsLocked;
 
         /// <summary>
         /// 清除受力
         /// </summary>
-        public bool IsAutoClearForces { get; set; }
+        public bool IsAutoClearForces;
 
         /// <summary>
         /// 世界是否允许休眠
@@ -59,7 +59,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 是否启用连续碰撞
         /// </summary>
-        public bool ContinuousPhysics { get; set; }
+        public bool ContinuousPhysics;
 
         /// <summary>
         /// 解构监听
@@ -74,7 +74,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 重力常数
         /// </summary>
-        private Vector2 _gravity;
+        public Vector2 Gravity;
 
         /// <summary>
         /// This is used to compute the time step ratio to
@@ -89,31 +89,35 @@ namespace Box2DSharp.Dynamics
         private bool _stepComplete;
 
         /// <summary>
+        /// Enable/disable single stepped continuous physics. For testing. 
         /// 子步进
         /// </summary>
-        private bool _subStepping;
+        public bool SubStepping { get; set; }
 
         /// <summary>
         /// These are for debugging the solver.
+        /// Enable/disable warm starting. For testing.
         /// 热启动,用于调试求解器
         /// </summary>
-        private bool _warmStarting;
+        public bool WarmStarting { get; set; }
 
         /// <summary>
-        /// 性能查看
+        /// 性能统计
         /// </summary>
-        public Profile Profile;
+        public Profile Profile => _profile;
 
+        private Profile _profile = new Profile();
+        
         public World() : this(new Vector2(0, -10))
         { }
 
         public World(in Vector2 gravity)
         {
-            _gravity = gravity;
+            Gravity = gravity;
 
-            _warmStarting = true;
+            WarmStarting = true;
             ContinuousPhysics = true;
-            _subStepping = false;
+            SubStepping = false;
 
             _stepComplete = true;
 
@@ -159,23 +163,23 @@ namespace Box2DSharp.Dynamics
         public int ProxyCount => ContactManager.BroadPhase.GetProxyCount();
 
         /// Get the number of bodies.
-        public int GetBodyCount => BodyList.Count;
+        public int BodyCount => BodyList.Count;
 
         /// Get the number of joints.
-        public int GetJointCount => JointList.Count;
+        public int JointCount => JointList.Count;
 
         /// Get the number of contacts (each may have 0 or more contact points).
-        public int GetContactCount => ContactManager.ContactList.Count;
+        public int ContactCount => ContactManager.ContactList.Count;
 
         /// Get the height of the dynamic tree.
-        public int GetTreeHeight => ContactManager.BroadPhase.GetTreeHeight();
+        public int TreeHeight => ContactManager.BroadPhase.GetTreeHeight();
 
         /// Get the balance of the dynamic tree.
-        public int GetTreeBalance => ContactManager.BroadPhase.GetTreeBalance();
+        public int TreeBalance => ContactManager.BroadPhase.GetTreeBalance();
 
         /// Get the quality metric of the dynamic tree. The smaller the better.
         /// The minimum is 1.
-        public float GetTreeQuality => ContactManager.BroadPhase.GetTreeQuality();
+        public float TreeQuality => ContactManager.BroadPhase.GetTreeQuality();
 
         /// <summary>
         /// Register a destruction listener. The listener is owned by you and must
@@ -426,7 +430,7 @@ namespace Box2DSharp.Dynamics
 
             step.DtRatio = _invDt0 * dt;
 
-            step.WarmStarting = _warmStarting;
+            step.WarmStarting = WarmStarting;
             var timer = Stopwatch.StartNew();
 
             // Update contacts. This is where some contacts are destroyed.
@@ -434,7 +438,7 @@ namespace Box2DSharp.Dynamics
             {
                 ContactManager.Collide();
                 timer.Stop();
-                Profile.Collide = timer.ElapsedMilliseconds;
+                _profile.Collide = timer.ElapsedMilliseconds;
             }
 
             // Integrate velocities, solve velocity constraints, and integrate positions.
@@ -444,7 +448,7 @@ namespace Box2DSharp.Dynamics
                 timer.Restart();
                 Solve(step);
                 timer.Stop();
-                Profile.Solve = timer.ElapsedMilliseconds;
+                _profile.Solve = timer.ElapsedMilliseconds;
             }
 
             // Handle TOI events.
@@ -454,7 +458,7 @@ namespace Box2DSharp.Dynamics
                 timer.Restart();
                 SolveTOI(step);
                 timer.Stop();
-                Profile.SolveToi = timer.ElapsedMilliseconds;
+                _profile.SolveToi = timer.ElapsedMilliseconds;
             }
 
             if (step.Dt > 0.0f)
@@ -471,7 +475,7 @@ namespace Box2DSharp.Dynamics
             // 时间步完成,解锁世界
             IsLocked = false;
             stepTimer.Stop();
-            Profile.Step = stepTimer.ElapsedMilliseconds;
+            _profile.Step = stepTimer.ElapsedMilliseconds;
         }
 
         /// Manually clear the force buffer on all bodies. By default, forces are cleared automatically
@@ -543,40 +547,6 @@ namespace Box2DSharp.Dynamics
                 input);
         }
 
-        /// Enable/disable warm starting. For testing.
-        public void SetWarmStarting(bool flag)
-        {
-            _warmStarting = flag;
-        }
-
-        public bool GetWarmStarting()
-        {
-            return _warmStarting;
-        }
-
-        /// Enable/disable single stepped continuous physics. For testing.
-        public void SetSubStepping(bool flag)
-        {
-            _subStepping = flag;
-        }
-
-        public bool GetSubStepping()
-        {
-            return _subStepping;
-        }
-
-        /// Change the global gravity vector.
-        public void SetGravity(in Vector2 gravity)
-        {
-            _gravity = gravity;
-        }
-
-        /// Get the global gravity vector.
-        public Vector2 GetGravity()
-        {
-            return _gravity;
-        }
-
         /// Shift the world origin. Useful for large worlds.
         /// The body shift formula is: position -= newOrigin
         /// @param newOrigin the new origin with respect to the old origin
@@ -610,9 +580,9 @@ namespace Box2DSharp.Dynamics
         /// <param name="step"></param>
         private void Solve(in TimeStep step)
         {
-            Profile.SolveInit = 0.0f;
-            Profile.SolveVelocity = 0.0f;
-            Profile.SolvePosition = 0.0f;
+            _profile.SolveInit = 0.0f;
+            _profile.SolveVelocity = 0.0f;
+            _profile.SolvePosition = 0.0f;
 
             // Size the island for the worst case.
             // 最坏情况岛屿容量,即全世界在同一个岛屿
@@ -767,10 +737,10 @@ namespace Box2DSharp.Dynamics
                 }
 
                 // 岛屿碰撞求解
-                var profile = island.Solve(step, _gravity, AllowSleep);
-                Profile.SolveInit += profile.SolveInit;
-                Profile.SolveVelocity += profile.SolveVelocity;
-                Profile.SolvePosition += profile.SolvePosition;
+                var profile = island.Solve(step, Gravity, AllowSleep);
+                _profile.SolveInit += profile.SolveInit;
+                _profile.SolveVelocity += profile.SolveVelocity;
+                _profile.SolvePosition += profile.SolvePosition;
 
                 // Post solve cleanup.
                 for (var i = 0; i < island.BodyCount; ++i)
@@ -808,7 +778,7 @@ namespace Box2DSharp.Dynamics
                 // Look for new contacts.
                 ContactManager.FindNewContacts();
                 timer.Stop();
-                Profile.Broadphase = timer.ElapsedMilliseconds;
+                _profile.Broadphase = timer.ElapsedMilliseconds;
             }
         }
 
@@ -1142,7 +1112,7 @@ namespace Box2DSharp.Dynamics
                 // Also, some contacts can be destroyed.
                 ContactManager.FindNewContacts();
 
-                if (_subStepping)
+                if (SubStepping)
                 {
                     _stepComplete = false;
                     break;
@@ -1159,7 +1129,7 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            Logger.Log($"gravity = ({_gravity.X}, {_gravity.Y});");
+            Logger.Log($"gravity = ({Gravity.X}, {Gravity.Y});");
             Logger.Log($"bodies  = {BodyList.Count};");
             Logger.Log($"joints  = {JointList.Count};");
             var i = 0;
@@ -1326,19 +1296,6 @@ namespace Box2DSharp.Dynamics
                     var xf = b.GetTransform();
                     xf.Position = b.GetWorldCenter();
                     _drawer.DrawTransform(xf);
-                }
-            }
-
-            if (flags.HasFlag(DrawFlag.DrawContactPoint))
-            {
-                foreach (var contact in ContactManager.ContactList)
-                {
-                    var manifold = contact.GetManifold();
-                    contact.GetWorldManifold(out var worldManifold);
-                    for (var i = 0; i < manifold.PointCount; i++)
-                    {
-                        _drawer.DrawPoint(worldManifold.Points[i], 0.1f, Color.Blue);
-                    }
                 }
             }
         }
