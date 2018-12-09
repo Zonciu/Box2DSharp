@@ -8,7 +8,7 @@ using Box2DSharp.Dynamics.Joints;
 namespace Box2DSharp.Dynamics
 {
     /// This is an internal class.
-    public class Island
+    public struct Island
     {
         internal Body[] Bodies;
 

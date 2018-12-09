@@ -205,25 +205,25 @@ namespace Box2DSharp.Collision
         }
 
         // Reference face used for clipping
-        public class ReferenceFace
+        private struct ReferenceFace
         {
-            public int i1, i2;
+            public int I1, I2;
 
-            public Vector2 normal;
+            public Vector2 Normal;
 
-            public Vector2 sideNormal1;
+            public Vector2 SideNormal1;
 
-            public Vector2 sideNormal2;
+            public Vector2 SideNormal2;
 
-            public float sideOffset1;
+            public float SideOffset1;
 
-            public float sideOffset2;
+            public float SideOffset2;
 
-            public Vector2 v1, v2;
+            public Vector2 V1, V2;
         }
 
         // This class collides and edge and a polygon, taking into account edge adjacency.
-        public class EPCollider
+        public struct EPCollider
         {
             public enum VertexType
             {
@@ -549,19 +549,19 @@ namespace Box2DSharp.Collision
 
                     if (Front)
                     {
-                        rf.i1 = 0;
-                        rf.i2 = 1;
-                        rf.v1 = V1;
-                        rf.v2 = V2;
-                        rf.normal = Normal1;
+                        rf.I1 = 0;
+                        rf.I2 = 1;
+                        rf.V1 = V1;
+                        rf.V2 = V2;
+                        rf.Normal = Normal1;
                     }
                     else
                     {
-                        rf.i1 = 1;
-                        rf.i2 = 0;
-                        rf.v1 = V2;
-                        rf.v2 = V1;
-                        rf.normal = -Normal1;
+                        rf.I1 = 1;
+                        rf.I2 = 0;
+                        rf.V1 = V2;
+                        rf.V2 = V1;
+                        rf.Normal = -Normal1;
                     }
                 }
                 else
@@ -580,17 +580,17 @@ namespace Box2DSharp.Collision
                     ie[1].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
                     ie[1].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
 
-                    rf.i1 = primaryAxis.Index;
-                    rf.i2 = rf.i1 + 1 < PolygonB.Count ? rf.i1 + 1 : 0;
-                    rf.v1 = PolygonB.Vertices[rf.i1];
-                    rf.v2 = PolygonB.Vertices[rf.i2];
-                    rf.normal = PolygonB.Normals[rf.i1];
+                    rf.I1 = primaryAxis.Index;
+                    rf.I2 = rf.I1 + 1 < PolygonB.Count ? rf.I1 + 1 : 0;
+                    rf.V1 = PolygonB.Vertices[rf.I1];
+                    rf.V2 = PolygonB.Vertices[rf.I2];
+                    rf.Normal = PolygonB.Normals[rf.I1];
                 }
 
-                rf.sideNormal1.Set(rf.normal.Y, -rf.normal.X);
-                rf.sideNormal2 = -rf.sideNormal1;
-                rf.sideOffset1 = MathUtils.Dot(rf.sideNormal1, rf.v1);
-                rf.sideOffset2 = MathUtils.Dot(rf.sideNormal2, rf.v2);
+                rf.SideNormal1.Set(rf.Normal.Y, -rf.Normal.X);
+                rf.SideNormal2 = -rf.SideNormal1;
+                rf.SideOffset1 = MathUtils.Dot(rf.SideNormal1, rf.V1);
+                rf.SideOffset2 = MathUtils.Dot(rf.SideNormal2, rf.V2);
 
                 // Clip incident edge against extruded edge1 side edges.
                 var clipPoints1 = new ClipVertex[2];
@@ -601,9 +601,9 @@ namespace Box2DSharp.Collision
                 np = ClipSegmentToLine(
                     ref clipPoints1,
                     ie,
-                    rf.sideNormal1,
-                    rf.sideOffset1,
-                    rf.i1);
+                    rf.SideNormal1,
+                    rf.SideOffset1,
+                    rf.I1);
 
                 if (np < Settings.MaxManifoldPoints)
                 {
@@ -614,9 +614,9 @@ namespace Box2DSharp.Collision
                 np = ClipSegmentToLine(
                     ref clipPoints2,
                     clipPoints1,
-                    rf.sideNormal2,
-                    rf.sideOffset2,
-                    rf.i2);
+                    rf.SideNormal2,
+                    rf.SideOffset2,
+                    rf.I2);
 
                 if (np < Settings.MaxManifoldPoints)
                 {
@@ -626,19 +626,19 @@ namespace Box2DSharp.Collision
                 // Now clipPoints2 contains the clipped points.
                 if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                 {
-                    manifold.LocalNormal = rf.normal;
-                    manifold.LocalPoint = rf.v1;
+                    manifold.LocalNormal = rf.Normal;
+                    manifold.LocalPoint = rf.V1;
                 }
                 else
                 {
-                    manifold.LocalNormal = polygonB.Normals[rf.i1];
-                    manifold.LocalPoint = polygonB.Vertices[rf.i1];
+                    manifold.LocalNormal = polygonB.Normals[rf.I1];
+                    manifold.LocalPoint = polygonB.Vertices[rf.I1];
                 }
 
                 var pointCount = 0;
                 for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
                 {
-                    var separation = MathUtils.Dot(rf.normal, clipPoints2[i].Vector - rf.v1);
+                    var separation = MathUtils.Dot(rf.Normal, clipPoints2[i].Vector - rf.V1);
 
                     if (separation <= Radius)
                     {

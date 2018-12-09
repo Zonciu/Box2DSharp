@@ -6,7 +6,7 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class PositionSolverManifold
+    public struct PositionSolverManifold
     {
         public Vector2 Normal;
 

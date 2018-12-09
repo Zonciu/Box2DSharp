@@ -6,7 +6,7 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class ContactSolver
+    public struct ContactSolver
     {
         private static readonly bool BlockSolve = true;
 
