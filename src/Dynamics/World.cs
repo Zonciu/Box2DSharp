@@ -267,9 +267,12 @@ namespace Box2DSharp.Dynamics
 
             // Delete the attached contacts.
             // 删除所有附加的接触点
-            foreach (var edge in body.ContactList)
+            var contactPointer = body.ContactList.First;
+            while (contactPointer != default)
             {
-                ContactManager.Destroy(edge.Contact);
+                var next = contactPointer.Next;
+                ContactManager.Destroy(contactPointer.Value.Contact);
+                contactPointer = next;
             }
 
             // Delete the attached fixtures. This destroys broad-phase proxies.
