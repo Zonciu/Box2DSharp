@@ -302,12 +302,15 @@ namespace Box2DSharp.Collision
             }
         }
 
-        public static bool ShapeCast(ref ShapeCastOutput output, in ShapeCastInput input)
+        public static bool ShapeCast(out ShapeCastOutput output, in ShapeCastInput input)
         {
-            output.Iterations = 0;
-            output.Lambda = 1.0f;
-            output.Normal.SetZero();
-            output.Point.SetZero();
+            output = new ShapeCastOutput
+            {
+                Iterations = 0,
+                Lambda = 1.0f,
+                Normal = Vector2.Zero,
+                Point = Vector2.Zero
+            };
 
             ref readonly var proxyA = ref input.ProxyA;
             ref readonly var proxyB = ref input.ProxyB;
