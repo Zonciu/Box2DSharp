@@ -35,7 +35,8 @@ namespace Box2DSharp.Collision
             case ChainShape chain:
             {
                 Debug.Assert(0 <= index && index < chain.Count);
-
+                Count = 2;
+                Buffer = new Vector2[Count];
                 Buffer[0] = chain.Vertices[index];
                 if (index + 1 < chain.Count)
                 {
@@ -47,7 +48,6 @@ namespace Box2DSharp.Collision
                 }
 
                 Vertices = Buffer;
-                Count = 2;
                 Radius = chain.Radius;
             }
                 break;
@@ -128,6 +128,9 @@ namespace Box2DSharp.Collision
             return ref Vertices[index];
         }
 
+        /// <summary>
+        /// Size = 2
+        /// </summary>
         public Vector2[] Buffer;
 
         public Vector2[] Vertices;
