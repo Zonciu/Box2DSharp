@@ -13,11 +13,12 @@ using UnityEngine.Experimental.UIElements;
 using Logger = Box2DSharp.Common.Logger;
 using Vector2 = System.Numerics.Vector2;
 using Color = System.Drawing.Color;
+using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using MathUtils = Box2DSharp.Common.MathUtils;
 
 namespace Box2DSharp
 {
-    public abstract class TestBase : MonoBehaviour, IContactListener
+    public abstract class TestBase : MonoBehaviour, IContactListener, IDestructionListener
     {
         public TestSettings TestSettings;
 
@@ -30,6 +31,12 @@ namespace Box2DSharp
         public FrameManager FrameManager;
 
         public IDrawer Drawer { get; private set; }
+
+        private float _deltaTime;
+
+        private readonly Profile _maxProfile = new Profile();
+
+        private readonly Profile _totalProfile = new Profile();
 
         private void Awake()
         {
@@ -61,18 +68,16 @@ namespace Box2DSharp
                 Interval = 1 / TestSettings.Frequency
             };
             World.SetContactListener(this);
-            World.SetDebugDrawer(TestSettings.WorldDrawer);
+            World.DestructionListener = this;
+            World.Drawer = TestSettings.WorldDrawer;
             Drawer = TestSettings.WorldDrawer;
             Logger.SetLogger(new UnityLogger());
 
             // DrawString
-            //_line = 0f;
-            //_lineHeight = Screen.height * 2 / 100f;
             _rect = new Rect(0, 0, Screen.width, Screen.height * 2f / 100f);
             _style = new GUIStyle
             {
-                alignment = TextAnchor.UpperLeft,
-                fontSize = Screen.height * 2 / 100,
+                alignment = TextAnchor.UpperLeft, fontSize = Screen.height * 2 / 100,
                 normal = {textColor = new UnityEngine.Color(0.0f, 0.0f, 0.5f, 1.0f)}
             };
         }
@@ -107,11 +112,18 @@ namespace Box2DSharp
             FrameManager.Tick();
 
             // Mouse left drag
-            Mouse = MainCamera.ScreenToWorldPoint(Input.mousePosition);
-            _mouseJoint?.SetTarget(Mouse.ToVector2());
+            MouseWorld = MainCamera.ScreenToWorldPoint(Input.mousePosition).ToVector2();
+            MouseJoint?.SetTarget(MouseWorld);
             if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
             {
-                MouseDown();
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                {
+                    ShiftMouseDown();
+                }
+                else
+                {
+                    MouseDown();
+                }
             }
 
             if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
@@ -131,15 +143,27 @@ namespace Box2DSharp
             //Zoom out
             if (Input.GetAxis("Mouse ScrollWheel") < 0)
             {
-                MainCamera.fieldOfView += 2;
-                MainCamera.orthographicSize += 1F;
+                if (MainCamera.orthographicSize > 1)
+                {
+                    MainCamera.orthographicSize += 1f;
+                }
+                else
+                {
+                    MainCamera.orthographicSize += 0.1f;
+                }
             }
 
             //Zoom in
             if (Input.GetAxis("Mouse ScrollWheel") > 0)
             {
-                MainCamera.fieldOfView -= 2;
-                MainCamera.orthographicSize -= 1F;
+                if (MainCamera.orthographicSize > 1)
+                {
+                    MainCamera.orthographicSize -= 1f;
+                }
+                else if (MainCamera.orthographicSize > 0.2f)
+                {
+                    MainCamera.orthographicSize -= 0.1f;
+                }
             }
 
             _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
@@ -251,14 +275,6 @@ namespace Box2DSharp
             }
         }
 
-        private readonly Color _c1 = Color.FromArgb(77, 242, 77);
-
-        private readonly Color _c2 = Color.FromArgb(77, 77, 242);
-
-        private readonly Color _c3 = Color.FromArgb(230, 230, 230);
-
-        private readonly Color _c4 = Color.FromArgb(230, 230, 77);
-
         private void DrawWorld()
         {
             World.DrawDebugData();
@@ -273,25 +289,25 @@ namespace Box2DSharp
                     if (point.State == PointState.AddState)
                     {
                         // Add
-                        debugDraw.DrawPoint(point.Position, 10f, _c1);
+                        debugDraw.DrawPoint(point.Position, 10f, Color.FromArgb(77, 242, 77));
                     }
                     else if (point.State == PointState.PersistState)
                     {
                         // Persist
-                        debugDraw.DrawPoint(point.Position, 5f, _c2);
+                        debugDraw.DrawPoint(point.Position, 5f, Color.FromArgb(77, 77, 242));
                     }
 
                     if (TestSettings.ContactNormals)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + axisScale * point.Normal;
-                        debugDraw.DrawSegment(p1, p2, _c3);
+                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 230));
                     }
                     else if (TestSettings.ContactImpulse)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.NormalImpulse * point.Normal;
-                        debugDraw.DrawSegment(p1, p2, _c4);
+                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
                     }
 
                     if (TestSettings.FrictionImpulse)
@@ -299,24 +315,30 @@ namespace Box2DSharp
                         var tangent = MathUtils.Cross(point.Normal, 1.0f);
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.TangentImpulse * tangent;
-                        debugDraw.DrawSegment(p1, p2, _c4);
+                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
                     }
                 }
             }
+
+            if (BombSpawning)
+            {
+                Drawer.DrawPoint(BombSpawnPoint, 4.0f, Color.Blue);
+                Drawer.DrawSegment(MouseWorld, BombSpawnPoint, Color.FromArgb(203, 203, 203));
+            }
         }
 
-        public Vector3 Mouse;
+        public Vector2 MouseWorld;
 
-        private MouseJoint _mouseJoint;
+        public MouseJoint MouseJoint;
 
-        private void MouseDown()
+        public void MouseDown()
         {
-            if (_mouseJoint != null)
+            if (MouseJoint != null)
             {
                 return;
             }
 
-            var p = Mouse.ToVector2();
+            var p = MouseWorld;
 
             // Make a small box.
             var aabb = new AABB();
@@ -352,36 +374,102 @@ namespace Box2DSharp
                 var body = fixture.Body;
                 var md = new MouseJointDef
                 {
-                    BodyA = GroundBody,
-                    BodyB = body,
-                    Target = p,
-                    MaxForce = 1000.0f * body.Mass
+                    BodyA = GroundBody, BodyB = body,
+                    Target = p, MaxForce = 1000.0f * body.Mass
                 };
-                _mouseJoint = (MouseJoint) World.CreateJoint(md);
+                MouseJoint = (MouseJoint) World.CreateJoint(md);
                 body.IsAwake = true;
             }
         }
 
-        private void MouseUp()
+        public void MouseUp()
         {
-            if (_mouseJoint != null)
+            if (MouseJoint != null)
             {
-                World.DestroyJoint(_mouseJoint);
-                _mouseJoint = null;
+                World.DestroyJoint(MouseJoint);
+                MouseJoint = null;
+            }
+
+            if (BombSpawning)
+            {
+                CompleteBombSpawn(MouseWorld);
             }
         }
 
-        private void OnDestroy()
+        public void MouseMove()
         {
-            FrameManager.Dispose();
-            World = null;
+            MouseJoint?.SetTarget(MouseWorld);
         }
 
-        private float _deltaTime;
+        protected Vector2 BombSpawnPoint;
 
-        private Profile _maxProfile = new Profile();
+        protected bool BombSpawning;
 
-        private Profile _totalProfile = new Profile();
+        public void SpawnBomb(Vector2 worldPt)
+        {
+            BombSpawnPoint = worldPt;
+            BombSpawning = true;
+        }
+
+        public void CompleteBombSpawn(Vector2 p)
+        {
+            if (BombSpawning == false)
+            {
+                return;
+            }
+
+            const float multiplier = 30.0f;
+            var vel = BombSpawnPoint - p;
+            vel *= multiplier;
+            LaunchBomb(BombSpawnPoint, vel);
+            BombSpawning = false;
+        }
+
+        public void ShiftMouseDown()
+        {
+            if (MouseJoint != null)
+            {
+                return;
+            }
+
+            SpawnBomb(MouseWorld);
+        }
+
+        public void LaunchBomb()
+        {
+            var p = new Vector2(UnityEngine.Random.Range(-15.0f, 15.0f), 30.0f);
+            var v = -5.0f * p;
+            LaunchBomb(p, v);
+        }
+
+        protected Body Bomb;
+
+        public void LaunchBomb(Vector2 position, Vector2 velocity)
+        {
+            if (Bomb != default)
+            {
+                World.DestroyBody(Bomb);
+                Bomb = default;
+            }
+
+            var bd = new BodyDef
+            {
+                BodyType = BodyType.DynamicBody, Position = position,
+                Bullet = true
+            };
+            Bomb = World.CreateBody(bd);
+            Bomb.SetLinearVelocity(velocity);
+
+            var circle = new CircleShape {Radius = 0.3f};
+
+            var fd = new FixtureDef
+            {
+                Shape = circle, Density = 20.0f,
+                Restitution = 0.0f
+            };
+
+            Bomb.CreateFixture(fd);
+        }
 
         private Rect _rect;
 
@@ -444,14 +532,10 @@ namespace Box2DSharp
             {
                 var cp = new ContactPoint
                 {
-                    FixtureA = fixtureA,
-                    FixtureB = fixtureB,
-                    Position = worldManifold.Points[i],
-                    Normal = worldManifold.Normal,
-                    State = state2[i],
-                    NormalImpulse = manifold.Points[i].NormalImpulse,
-                    TangentImpulse = manifold.Points[i].TangentImpulse,
-                    Separation = worldManifold.Separations[i]
+                    FixtureA = fixtureA, FixtureB = fixtureB,
+                    Position = worldManifold.Points[i], Normal = worldManifold.Normal,
+                    State = state2[i], NormalImpulse = manifold.Points[i].NormalImpulse,
+                    TangentImpulse = manifold.Points[i].TangentImpulse, Separation = worldManifold.Separations[i]
                 };
                 _points[_pointsCount] = cp;
                 ++_pointsCount;
@@ -462,7 +546,35 @@ namespace Box2DSharp
         public void PostSolve(Contact contact, in ContactImpulse impulse)
         { }
 
-        struct ContactPoint
+        private void OnDestroy()
+        {
+            FrameManager.Dispose();
+            World = null;
+        }
+
+        public virtual void JointDestroyed(Joint joint)
+        { }
+
+        /// <inheritdoc />
+        public void SayGoodbye(Joint joint)
+        {
+            if (MouseJoint == joint)
+            {
+                MouseJoint = null;
+            }
+            else
+            {
+                JointDestroyed(joint);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SayGoodbye(Fixture fixture)
+        {
+            /* Do nothing */
+        }
+
+        private struct ContactPoint
         {
             public Fixture FixtureA;
 
@@ -480,43 +592,5 @@ namespace Box2DSharp
 
             public float Separation;
         };
-
-        void LaunchBomb()
-        {
-            var p = new Vector2(UnityEngine.Random.Range(-15.0f, 15.0f), 30.0f);
-            var v = -5.0f * p;
-            LaunchBomb(p, v);
-        }
-
-        private Body _bomb;
-
-        void LaunchBomb(Vector2 position, Vector2 velocity)
-        {
-            if (_bomb != default)
-            {
-                World.DestroyBody(_bomb);
-                _bomb = default;
-            }
-
-            var bd = new BodyDef
-            {
-                BodyType = BodyType.DynamicBody,
-                Position = position,
-                Bullet = true
-            };
-            _bomb = World.CreateBody(bd);
-            _bomb.SetLinearVelocity(velocity);
-
-            var circle = new CircleShape {Radius = 0.3f};
-
-            var fd = new FixtureDef
-            {
-                Shape = circle,
-                Density = 20.0f,
-                Restitution = 0.0f
-            };
-
-            _bomb.CreateFixture(fd);
-        }
     }
 }

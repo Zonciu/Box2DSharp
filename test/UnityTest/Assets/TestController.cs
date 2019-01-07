@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Box2DSharp.Inspection;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,13 +12,19 @@ namespace Box2DSharp
 {
     public class TestController : MonoBehaviour
     {
-        public TestSettings Settings;
+        public GameObject ControlPanel { get; set; }
 
-        public Dropdown Dropdown;
+        public TestSettings Settings { get; set; }
 
-        public Button RestartButton;
+        public Dropdown Dropdown { get; set; }
 
-        private GameObject _testObject;
+        public Button RestartButton { get; set; }
+
+        public Button QuitButton { get; set; }
+
+        public Toggle ShowToggle { get; set; }
+
+        public GameObject TestObject { get; set; }
 
         private Type _currentTest;
 
@@ -24,15 +32,16 @@ namespace Box2DSharp
 
         private void Awake()
         {
-            if (!Dropdown)
-            {
-                throw new NullReferenceException("Test dropdown not found");
-            }
+            ControlPanel = GameObject.Find("ControlPanel");
+            Dropdown = GameObject.Find("TestSelector").GetComponent<Dropdown>()
+                    ?? throw new NullReferenceException("TestSelector not found");
+            RestartButton = GameObject.Find("RestartButton").GetComponent<Button>()
+                         ?? throw new NullReferenceException("RestartButton not found");
+            QuitButton = GameObject.Find("QuitButton").GetComponent<Button>()
+                      ?? throw new NullReferenceException("QuitButton not found");
 
-            if (!RestartButton)
-            {
-                throw new NullReferenceException("Restart button not found");
-            }
+            RestartButton.onClick.AddListener(Restart);
+            QuitButton.onClick.AddListener(Application.Quit);
 
             _testTypes = typeof(TestBase).Assembly.GetTypes()
                                          .Where(e => e.BaseType == typeof(TestBase))
@@ -47,20 +56,20 @@ namespace Box2DSharp
             Dropdown.AddOptions(_testTypes.Select(e => e.TestName).ToList());
             Dropdown.onValueChanged.AddListener(OnTestSelect);
 
-            RestartButton.onClick.AddListener(Restart);
-
             foreach (var toggleField in typeof(TestSettings)
                                        .GetFields()
                                        .Where(f => f.GetCustomAttribute<ToggleAttribute>() != null))
             {
-                var toggleName = $"Canvas/{toggleField.Name}";
+                var toggleName = $"ControlPanel/Toggles/{toggleField.Name}";
                 var toggleObject = GameObject.Find(toggleName)
                                 ?? throw new NullReferenceException($"{toggleName} not found");
                 var toggle = toggleObject.GetComponent<Toggle>();
                 toggle.isOn = (bool) toggleField.GetValue(Settings);
-                toggle.onValueChanged.AddListener(
-                    value => { toggleField.SetValue(Settings, value); });
+                toggle.onValueChanged.AddListener(value => { toggleField.SetValue(Settings, value); });
             }
+
+            ShowToggle = GameObject.Find("ShowToggle").GetComponent<Toggle>();
+            ShowToggle.onValueChanged.AddListener(ToggleControlPanel);
         }
 
         private void Start()
@@ -87,15 +96,20 @@ namespace Box2DSharp
 
         private void SetTest(Type type)
         {
-            if (_testObject != null)
+            if (TestObject != null)
             {
-                var oldTest = _testObject;
+                var oldTest = TestObject;
                 Destroy(oldTest);
             }
 
             _currentTest = type;
-            _testObject = new GameObject(type.Name);
-            _testObject.AddComponent(type);
+            TestObject = new GameObject(type.Name);
+            TestObject.AddComponent(type);
+        }
+
+        public void ToggleControlPanel(bool isShow)
+        {
+            ControlPanel.SetActive(isShow);
         }
     }
 }
