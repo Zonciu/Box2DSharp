@@ -145,12 +145,15 @@ namespace Box2DSharp.Dynamics
 
             // Remove from the world.
             ContactList.Remove(c);
+            c.Node = null;
 
             // Remove from body 1
             bodyA.ContactEdges.Remove(c.NodeA.Node);
+            c.NodeA.Node = null;
 
             // Remove from body 2
             bodyB.ContactEdges.Remove(c.NodeB.Node);
+            c.NodeB.Node = null;
 
             // Call the factory.
             Contact.DestroyContact(c);

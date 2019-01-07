@@ -292,6 +292,11 @@ namespace Box2DSharp.Dynamics
             UserData = def.UserData;
         }
 
+        ~Body()
+        {
+            Dispose();
+        }
+
         public float AngularDamping
         {
             get => _angularDamping;
@@ -375,7 +380,7 @@ namespace Box2DSharp.Dynamics
                     _world.ContactManager.Destroy(ce.Contact);
                 }
 
-                ContactEdges.Clear(); // Todo ???
+                ContactEdges.Clear();
 
                 // Touch the proxies so that new contacts will be created (when appropriate)
                 var broadPhase = _world.ContactManager.BroadPhase;
@@ -689,8 +694,7 @@ namespace Box2DSharp.Dynamics
 
             // You tried to remove a shape that is not attached to this body.
             // 确定该夹具存在于物体的夹具列表中
-            var found = Fixtures.Any(e => e == fixture);
-            Debug.Assert(found);
+            Debug.Assert(Fixtures.Any(e => e == fixture));
 
             // Destroy any contacts associated with the fixture.
             // 销毁关联在夹具上的接触点

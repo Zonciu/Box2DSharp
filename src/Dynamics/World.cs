@@ -259,29 +259,28 @@ namespace Box2DSharp.Dynamics
             }
 
             // Delete the attached joints.
-            // 删除所有附加的关节
-            var jointPointer = body.JointEdges.First;
-            while (jointPointer != default)
+            // 删除所有挂载的关节
+            var jointEdgePointer = body.JointEdges.First;
+            while (jointEdgePointer != default)
             {
-                var next = jointPointer.Next;
-                DestructionListener?.SayGoodbye(jointPointer.Value.Joint);
-                DestroyJoint(jointPointer.Value.Joint);
-                jointPointer = next;
+                var next = jointEdgePointer.Next;
+                DestructionListener?.SayGoodbye(jointEdgePointer.Value.Joint);
+                DestroyJoint(jointEdgePointer.Value.Joint);
+                jointEdgePointer = next;
             }
 
             // Delete the attached contacts.
-            // 删除所有附加的接触点
-            var contactPointer = body.ContactEdges.First;
-            while (contactPointer != default)
+            // 删除所有挂载的接触点
+            var contactEdgePointer = body.ContactEdges.First;
+            while (contactEdgePointer != default)
             {
-                var next = contactPointer.Next;
-                ContactManager.Destroy(contactPointer.Value.Contact);
-                contactPointer = next;
+                var next = contactEdgePointer.Next;
+                ContactManager.Destroy(contactEdgePointer.Value.Contact);
+                contactEdgePointer = next;
             }
 
             // Delete the attached fixtures. This destroys broad-phase proxies.
-            // 删除所有附加的夹具,同时会删除对应的粗检测代理
-            // Todo 链表删除
+            // 删除所有挂载的夹具,同时会删除对应的粗检测代理
             foreach (var fixture in body.Fixtures)
             {
                 DestructionListener?.SayGoodbye(fixture);
@@ -370,10 +369,12 @@ namespace Box2DSharp.Dynamics
             var bodyA = joint.BodyA;
             bodyA.IsAwake = true;
             bodyA.JointEdges.Remove(joint.EdgeA.Node);
+            joint.EdgeA.Node = null;
 
             var bodyB = joint.BodyB;
             bodyB.IsAwake = true;
             bodyB.JointEdges.Remove(joint.EdgeB.Node);
+            joint.EdgeB.Node = null;
 
             Debug.Assert(JointList.Count > 0);
 
