@@ -417,8 +417,7 @@ namespace Box2DSharp.Dynamics
             // 时间间隔与迭代次数
             var step = new TimeStep
             {
-                Dt = timeStep,
-                VelocityIterations = velocityIterations,
+                Dt = timeStep, VelocityIterations = velocityIterations,
                 PositionIterations = positionIterations
             };
 
@@ -524,8 +523,7 @@ namespace Box2DSharp.Dynamics
         {
             var input = new RayCastInput
             {
-                MaxFraction = 1.0f,
-                P1 = point1,
+                MaxFraction = 1.0f, P1 = point1,
                 P2 = point2
             };
 
@@ -707,7 +705,7 @@ namespace Box2DSharp.Dynamics
                         stack.Push(other);
                         other.SetFlag(BodyFlags.Island);
                     }
-                    
+
                     // Search all joints connect to this body.
                     // 将该物体的关节所关联的物体也加入到岛屿中
                     foreach (var je in b.JointEdges)
@@ -1082,12 +1080,9 @@ namespace Box2DSharp.Dynamics
                 var dt = (1.0f - minAlpha) * step.Dt;
                 var subStep = new TimeStep
                 {
-                    Dt = dt,
-                    InvDt = 1.0f / dt,
-                    DtRatio = 1.0f,
-                    PositionIterations = 20,
-                    VelocityIterations = step.VelocityIterations,
-                    WarmStarting = false
+                    Dt = dt, InvDt = 1.0f / dt,
+                    DtRatio = 1.0f, PositionIterations = 20,
+                    VelocityIterations = step.VelocityIterations, WarmStarting = false
                 };
 
                 island.SolveTOI(subStep, bodyA.IslandIndex, bodyB.IslandIndex);
