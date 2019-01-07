@@ -1,7 +1,7 @@
 namespace Box2DSharp.Dynamics
 {
     /// Profiling data. Times are in milliseconds.
-    public struct Profile
+    public class Profile
     {
         public float Step;
 

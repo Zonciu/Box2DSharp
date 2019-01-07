@@ -168,7 +168,7 @@ namespace Box2DSharp.Dynamics
 
             // Flag associated contacts for filtering.
 
-            foreach (var edge in Body.ContactList)
+            foreach (var edge in Body.ContactEdges)
             {
                 var contact = edge.Contact;
                 if (contact.FixtureA == this || contact.FixtureB == this)

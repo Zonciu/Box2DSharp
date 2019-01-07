@@ -110,17 +110,17 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 接触边缘列表
         /// </summary>
-        internal readonly LinkedList<ContactEdge> ContactList;
+        internal readonly LinkedList<ContactEdge> ContactEdges;
 
         /// <summary>
         /// 夹具列表
         /// </summary>
-        internal readonly List<Fixture> FixtureList;
+        internal readonly List<Fixture> Fixtures;
 
         /// <summary>
         /// 关节边缘列表
         /// </summary>
-        internal readonly LinkedList<JointEdge> JointList;
+        internal readonly LinkedList<JointEdge> JointEdges;
 
         /// <summary>
         /// Get/Set the angular damping of the body.
@@ -256,9 +256,9 @@ namespace Box2DSharp.Dynamics
                 Alpha0 = 0.0f
             };
 
-            JointList = new LinkedList<JointEdge>();
-            ContactList = new LinkedList<ContactEdge>();
-            FixtureList = new List<Fixture>();
+            JointEdges = new LinkedList<JointEdge>();
+            ContactEdges = new LinkedList<ContactEdge>();
+            Fixtures = new List<Fixture>();
             Node = null;
 
             LinearVelocity = def.LinearVelocity;
@@ -370,16 +370,16 @@ namespace Box2DSharp.Dynamics
                 // Delete the attached contacts.
                 // 删除所有接触点
 
-                foreach (var ce in ContactList)
+                foreach (var ce in ContactEdges)
                 {
                     _world.ContactManager.Destroy(ce.Contact);
                 }
 
-                ContactList.Clear(); // Todo ???
+                ContactEdges.Clear(); // Todo ???
 
                 // Touch the proxies so that new contacts will be created (when appropriate)
                 var broadPhase = _world.ContactManager.BroadPhase;
-                foreach (var f in FixtureList)
+                foreach (var f in Fixtures)
                 {
                     var proxyCount = f.ProxyCount;
                     for (var i = 0; i < proxyCount; ++i)
@@ -493,7 +493,7 @@ namespace Box2DSharp.Dynamics
                     // Create all proxies.
                     // 激活时创建粗检测代理
                     var broadPhase = _world.ContactManager.BroadPhase;
-                    foreach (var f in FixtureList)
+                    foreach (var f in Fixtures)
                     {
                         f.CreateProxies(broadPhase, Transform);
                     }
@@ -507,19 +507,19 @@ namespace Box2DSharp.Dynamics
                     // Destroy all proxies.
                     // 休眠时销毁粗检测代理
                     var broadPhase = _world.ContactManager.BroadPhase;
-                    foreach (var f in FixtureList)
+                    foreach (var f in Fixtures)
                     {
                         f.DestroyProxies(broadPhase);
                     }
 
                     // Destroy the attached contacts.
                     // 销毁接触点
-                    foreach (var ce in ContactList)
+                    foreach (var ce in ContactEdges)
                     {
                         _world.ContactManager.Destroy(ce.Contact);
                     }
 
-                    ContactList.Clear();
+                    ContactEdges.Clear();
                 }
             }
         }
@@ -564,9 +564,9 @@ namespace Box2DSharp.Dynamics
         /// <inheritdoc />
         public void Dispose()
         {
-            ContactList.Clear();
-            JointList.Clear();
-            FixtureList.Clear();
+            ContactEdges.Clear();
+            JointEdges.Clear();
+            Fixtures.Clear();
         }
 
         public void SetAngularVelocity(float value)
@@ -628,7 +628,7 @@ namespace Box2DSharp.Dynamics
             }
 
             fixture.Body = this;
-            FixtureList.Add(fixture);
+            Fixtures.Add(fixture);
 
             // Adjust mass properties if needed.
             if (fixture.Density > 0.0f)
@@ -639,7 +639,7 @@ namespace Box2DSharp.Dynamics
             // Let the world know we have a new fixture. This will cause new contacts
             // to be created at the beginning of the next time step.
             // 通知世界存在新增夹具,在下一个时间步中将自动创建新夹具的接触点
-            _world.HasNewFixture = true;
+            _world.NotifyNewFixture();
 
             return fixture;
         }
@@ -685,16 +685,16 @@ namespace Box2DSharp.Dynamics
             Debug.Assert(fixture.Body == this);
 
             // Remove the fixture from this body's singly linked list.
-            Debug.Assert(FixtureList.Count > 0);
+            Debug.Assert(Fixtures.Count > 0);
 
             // You tried to remove a shape that is not attached to this body.
             // 确定该夹具存在于物体的夹具列表中
-            var found = FixtureList.Any(e => e == fixture);
+            var found = Fixtures.Any(e => e == fixture);
             Debug.Assert(found);
 
             // Destroy any contacts associated with the fixture.
             // 销毁关联在夹具上的接触点
-            foreach (var edge in ContactList.Where(
+            foreach (var edge in ContactEdges.Where(
                 e => e.Contact.FixtureA == fixture || e.Contact.FixtureB == fixture))
             {
                 // This destroys the contact and removes it from
@@ -709,7 +709,7 @@ namespace Box2DSharp.Dynamics
                 fixture.DestroyProxies(broadPhase);
             }
 
-            FixtureList.Remove(fixture);
+            Fixtures.Remove(fixture);
             fixture.Body = null;
             Fixture.Destroy(fixture);
 
@@ -741,7 +741,7 @@ namespace Box2DSharp.Dynamics
             Sweep.A0 = angle;
 
             var broadPhase = _world.ContactManager.BroadPhase;
-            foreach (var f in FixtureList)
+            foreach (var f in Fixtures)
             {
                 f.Synchronize(broadPhase, Transform, Transform);
             }
@@ -1038,7 +1038,7 @@ namespace Box2DSharp.Dynamics
 
             // Accumulate mass over all fixtures.
             var localCenter = Vector2.Zero;
-            foreach (var f in FixtureList)
+            foreach (var f in Fixtures)
             {
                 if (f.Density.Equals(0.0f))
                 {
@@ -1155,7 +1155,7 @@ namespace Box2DSharp.Dynamics
             Logger.Log($"  bd.active = bool({Flags.HasFlag(BodyFlags.IsActive)});");
             Logger.Log($"  bd.gravityScale = {GravityScale};");
             Logger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
-            foreach (var f in FixtureList)
+            foreach (var f in Fixtures)
             {
                 Logger.Log("  {");
                 f.Dump(bodyIndex);
@@ -1175,7 +1175,7 @@ namespace Box2DSharp.Dynamics
             xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
 
             var broadPhase = _world.ContactManager.BroadPhase;
-            foreach (var b2Fixture in FixtureList)
+            foreach (var b2Fixture in Fixtures)
             {
                 b2Fixture.Synchronize(broadPhase, xf1, Transform);
             }
@@ -1206,7 +1206,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // Does a joint prevent collision?
-            foreach (var joint in JointList)
+            foreach (var joint in JointEdges)
             {
                 if (joint.Other == other)
                 {

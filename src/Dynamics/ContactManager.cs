@@ -41,7 +41,7 @@ namespace Box2DSharp.Dynamics
             // TODO_ERIN use a hash table to remove a potential bottleneck when both
             // bodies have a lot of contacts.
             // Does a contact already exist?
-            if (bodyB.ContactList
+            if (bodyB.ContactEdges
                      .Where(e => e.Other == bodyA)
                      .Any(
                           edge =>
@@ -109,13 +109,13 @@ namespace Box2DSharp.Dynamics
             // Connect to body A
             c.NodeA.Contact = c;
             c.NodeA.Other = bodyB;
-            var nodeA = bodyA.ContactList.AddFirst(c.NodeA);
+            var nodeA = bodyA.ContactEdges.AddFirst(c.NodeA);
             c.NodeA.Node = nodeA;
 
             // Connect to body B
             c.NodeB.Contact = c;
             c.NodeB.Other = bodyA;
-            var nodeB = bodyB.ContactList.AddFirst(c.NodeB);
+            var nodeB = bodyB.ContactEdges.AddFirst(c.NodeB);
             c.NodeB.Node = nodeB;
 
             // Wake up the bodies
@@ -147,10 +147,10 @@ namespace Box2DSharp.Dynamics
             ContactList.Remove(c);
 
             // Remove from body 1
-            bodyA.ContactList.Remove(c.NodeA.Node);
+            bodyA.ContactEdges.Remove(c.NodeA.Node);
 
             // Remove from body 2
-            bodyB.ContactList.Remove(c.NodeB.Node);
+            bodyB.ContactEdges.Remove(c.NodeB.Node);
 
             // Call the factory.
             Contact.DestroyContact(c);
