@@ -3,6 +3,9 @@
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
+    <_TargetFrameworkDirectories>non_empty_path_generated_by_rider_editor_plugin</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>non_empty_path_generated_by_rider_editor_plugin</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -64,7 +67,9 @@
     <Compile Include="Assets\TestBase.cs" />
     <Compile Include="Assets\TestController.cs" />
     <Compile Include="Assets\Tests\Chain.cs" />
+    <Compile Include="Assets\Tests\CharacterCollision.cs" />
     <Compile Include="Assets\Tests\HelloWorld.cs" />
+    <Compile Include="Assets\Tests\ShapeCast.cs" />
     <Compile Include="Assets\Tests\Tiles.cs" />
     <Compile Include="Assets\TestSettings.cs" />
     <Compile Include="Assets\UnityLogger.cs" />

@@ -13,3 +13,5 @@ a174dbac1bc32e05e790cd867d9e30fb37681d47
 * [x] Hello World
 * [x] Chain
 * [x] Tiles
+* [x] Shape Cast
+* [x] Character Collision

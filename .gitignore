@@ -31,3 +31,5 @@ packages/
 .idea/
 .DS_Store
 .vs/
+
+test/UnityTest/UnityTest\.sln\.DotSettings\.user
