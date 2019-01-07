@@ -4,7 +4,6 @@ using Box2DSharp.Common;
 using Box2DSharp.Inspection;
 using UnityEngine;
 using Color = System.Drawing.Color;
-using Logger = Box2DSharp.Common.Logger;
 using Transform = Box2DSharp.Common.Transform;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -61,7 +60,7 @@ namespace Box2DSharp
         /// <inheritdoc />
         public void DrawCircle(in Vector2 center, float radius, in Color color)
         {
-            var       lines     = new List<(Vector3, Vector3)>();
+            var lines = new List<(Vector3, Vector3)>();
             const int lineCount = 200;
             for (var i = 0; i <= lineCount; ++i) //割圆术画圆
             {
@@ -82,7 +81,7 @@ namespace Box2DSharp
         /// <inheritdoc />
         public void DrawSolidCircle(in Vector2 center, float radius, in Vector2 axis, in Color color)
         {
-            var       lines     = new List<(Vector3, Vector3)>();
+            var lines = new List<(Vector3, Vector3)>();
             const int lineCount = 200;
 
             //GL.Begin(GL.LINE_STRIP);

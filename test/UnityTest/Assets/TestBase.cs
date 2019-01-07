@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
+using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Contacts;
@@ -28,6 +28,8 @@ namespace Box2DSharp
         public Camera MainCamera;
 
         public FrameManager FrameManager;
+
+        public IDrawer Drawer { get; private set; }
 
         private void Awake()
         {
@@ -60,6 +62,7 @@ namespace Box2DSharp
             };
             World.SetContactListener(this);
             World.SetDebugDrawer(TestSettings.WorldDrawer);
+            Drawer = TestSettings.WorldDrawer;
             Logger.SetLogger(new UnityLogger());
 
             // DrawString
@@ -93,6 +96,12 @@ namespace Box2DSharp
             // Frame
             {
                 DrawString($"{FrameManager.FrameCount} Frames");
+            }
+
+            // Launch Bomb
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                LaunchBomb();
             }
 
             FrameManager.Tick();
@@ -386,7 +395,6 @@ namespace Box2DSharp
             DrawString();
         }
 
-        //private List<string> _text = new List<string>(20);
         private readonly StringBuilder _stringBuilder = new StringBuilder();
 
         private string _text;
@@ -394,8 +402,6 @@ namespace Box2DSharp
         private void DrawString()
         {
             GUI.Label(_rect, _text, _style);
-
-            //_line += _lineHeight;
         }
 
         public void DrawString(string text)
@@ -474,5 +480,43 @@ namespace Box2DSharp
 
             public float Separation;
         };
+
+        void LaunchBomb()
+        {
+            var p = new Vector2(UnityEngine.Random.Range(-15.0f, 15.0f), 30.0f);
+            var v = -5.0f * p;
+            LaunchBomb(p, v);
+        }
+
+        private Body _bomb;
+
+        void LaunchBomb(Vector2 position, Vector2 velocity)
+        {
+            if (_bomb != default)
+            {
+                World.DestroyBody(_bomb);
+                _bomb = default;
+            }
+
+            var bd = new BodyDef
+            {
+                BodyType = BodyType.DynamicBody,
+                Position = position,
+                Bullet = true
+            };
+            _bomb = World.CreateBody(bd);
+            _bomb.SetLinearVelocity(velocity);
+
+            var circle = new CircleShape {Radius = 0.3f};
+
+            var fd = new FixtureDef
+            {
+                Shape = circle,
+                Density = 20.0f,
+                Restitution = 0.0f
+            };
+
+            _bomb.CreateFixture(fd);
+        }
     }
 }

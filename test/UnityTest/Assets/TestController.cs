@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Box2DSharp.Inspection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +20,7 @@ namespace Box2DSharp
 
         private Type _currentTest;
 
-        private Type[] _testTypes;
+        private (string TestName, Type TestType)[] _testTypes;
 
         private void Awake()
         {
@@ -33,14 +34,17 @@ namespace Box2DSharp
                 throw new NullReferenceException("Restart button not found");
             }
 
-            _testTypes = typeof(TestBase).Assembly.GetTypes().Where(e => e.BaseType == typeof(TestBase)).ToArray();
+            _testTypes = typeof(TestBase).Assembly.GetTypes()
+                                         .Where(e => e.BaseType == typeof(TestBase))
+                                         .Select(e => (GetTestName(e), e))
+                                         .ToArray();
 
             Settings = gameObject.GetComponent<TestSettings>() ?? gameObject.AddComponent<TestSettings>();
             Settings.DebugDrawer = DebugDrawer.GetDrawer();
             Settings.WorldDrawer = new BoxDrawer {Drawer = Settings.DebugDrawer};
 
             Dropdown.ClearOptions();
-            Dropdown.AddOptions(_testTypes.Select(e => e.Name).ToList());
+            Dropdown.AddOptions(_testTypes.Select(e => e.TestName).ToList());
             Dropdown.onValueChanged.AddListener(OnTestSelect);
 
             RestartButton.onClick.AddListener(Restart);
@@ -61,14 +65,19 @@ namespace Box2DSharp
 
         private void Start()
         {
-            SetTest(_testTypes[0]);
+            SetTest(_testTypes[0].TestType);
         }
 
         private void OnTestSelect(int i)
         {
             var test = _testTypes[i];
-            Debug.Log($"Select {test.Name} Test");
-            SetTest(test);
+            Debug.Log($"Select {test.TestName} Test");
+            SetTest(test.TestType);
+        }
+
+        private string GetTestName(Type type)
+        {
+            return Regex.Replace(type.Name, @"(\B[A-Z])", " $1");
         }
 
         private void Restart()
