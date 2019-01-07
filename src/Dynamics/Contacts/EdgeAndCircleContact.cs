@@ -13,7 +13,7 @@ namespace Box2DSharp.Dynamics.Contacts
     public class EdgeAndCircleContact : Contact
     {
         private static readonly ObjectPool<EdgeAndCircleContact> _pool =
-            new DefaultObjectPool<EdgeAndCircleContact>(new PoolPolicy());
+            new DefaultObjectPool<EdgeAndCircleContact>(new ContactPoolPolicy<EdgeAndCircleContact>());
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
@@ -38,20 +38,6 @@ namespace Box2DSharp.Dynamics.Contacts
                 xfA,
                 (CircleShape) FixtureB.Shape,
                 xfB);
-        }
-
-        private class PoolPolicy : IPooledObjectPolicy<EdgeAndCircleContact>
-        {
-            public EdgeAndCircleContact Create()
-            {
-                return new EdgeAndCircleContact();
-            }
-
-            public bool Return(EdgeAndCircleContact obj)
-            {
-                obj.Reset();
-                return true;
-            }
         }
     }
 }

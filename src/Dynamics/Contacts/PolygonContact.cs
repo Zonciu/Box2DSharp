@@ -10,7 +10,7 @@ namespace Box2DSharp.Dynamics.Contacts
     public class PolygonContact : Contact
     {
         private static readonly ObjectPool<PolygonContact> _pool =
-            new DefaultObjectPool<PolygonContact>(new PoolPolicy());
+            new DefaultObjectPool<PolygonContact>(new ContactPoolPolicy<PolygonContact>());
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {

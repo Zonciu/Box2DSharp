@@ -48,10 +48,7 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Register(ShapeType.Circle, ShapeType.Circle, CircleContact.Create, CircleContact.Destroy);
             Register(
-                ShapeType.Polygon,
-                ShapeType.Circle,
-                PolygonAndCircleContact.Create,
-                PolygonAndCircleContact.Destroy);
+                ShapeType.Polygon, ShapeType.Circle, PolygonAndCircleContact.Create, PolygonAndCircleContact.Destroy);
             Register(ShapeType.Polygon, ShapeType.Polygon, PolygonContact.Create, PolygonContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Circle, EdgeAndCircleContact.Create, EdgeAndCircleContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Polygon, EdgeAndPolygonContact.Create, EdgeAndPolygonContact.Destroy);
@@ -141,7 +138,7 @@ namespace Box2DSharp.Dynamics.Contacts
             }
         }
 
-        protected virtual void Reset()
+        internal virtual void Reset()
         {
             FixtureA = default;
             FixtureB = default;

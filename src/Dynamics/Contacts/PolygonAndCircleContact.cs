@@ -13,7 +13,7 @@ namespace Box2DSharp.Dynamics.Contacts
     public class PolygonAndCircleContact : Contact
     {
         private static readonly ObjectPool<PolygonAndCircleContact> _pool =
-            new DefaultObjectPool<PolygonAndCircleContact>(new PoolPolicy());
+            new DefaultObjectPool<PolygonAndCircleContact>(new ContactPoolPolicy<PolygonAndCircleContact>());
 
         internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
