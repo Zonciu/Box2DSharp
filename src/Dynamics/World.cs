@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
@@ -362,28 +363,28 @@ namespace Box2DSharp.Dynamics
 
             // Remove from the doubly linked list.
             JointList.Remove(joint.Node);
+            joint.Node = null;
 
             // Disconnect from island graph.
-            var bodyA = joint.BodyA;
-            var bodyB = joint.BodyB;
-
             // Wake up connected bodies.
+            var bodyA = joint.BodyA;
             bodyA.IsAwake = true;
+            bodyA.JointEdges.Remove(joint.EdgeA.Node);
+
+            var bodyB = joint.BodyB;
             bodyB.IsAwake = true;
+            bodyB.JointEdges.Remove(joint.EdgeB.Node);
 
             Debug.Assert(JointList.Count > 0);
 
             // If the joint prevents collisions, then flag any contacts for filtering.
             if (collideConnected == false)
             {
-                foreach (var edge in bodyB.ContactEdges)
+                foreach (var contactEdge in bodyB.ContactEdges.Where(e => e.Other == bodyA))
                 {
-                    if (edge.Other == bodyA)
-                    {
-                        // Flag the contact for filtering at the next time step (where either
-                        // body is awake).
-                        edge.Contact.FlagForFiltering();
-                    }
+                    // Flag the contact for filtering at the next time step (where either
+                    // body is awake).
+                    contactEdge.Contact.FlagForFiltering();
                 }
             }
         }
