@@ -38,6 +38,16 @@ namespace Box2DSharp
 
         private readonly Profile _totalProfile = new Profile();
 
+        public Vector2 MouseWorld;
+
+        public MouseJoint MouseJoint;
+
+        private Vector3 _origin;
+
+        private Vector3 _diference;
+
+        private bool _drag = false;
+
         private void Awake()
         {
             if (!Camera.main)
@@ -134,9 +144,21 @@ namespace Box2DSharp
             // Mouse right move camera
             if (Input.GetMouseButton((int) MouseButton.RightMouse))
             {
-                var h = Input.GetAxis("Mouse X");
-                var v = Input.GetAxis("Mouse Y");
-                MainCamera.transform.Translate(-h, -v, 0, Space.World);
+                _diference = (MainCamera.ScreenToWorldPoint(Input.mousePosition)) - MainCamera.transform.position;
+                if (_drag == false)
+                {
+                    _drag = true;
+                    _origin = MainCamera.ScreenToWorldPoint(Input.mousePosition);
+                }
+            }
+            else
+            {
+                _drag = false;
+            }
+
+            if (_drag)
+            {
+                MainCamera.transform.position = _origin - _diference;
             }
 
             // Mouse wheel zoom
@@ -326,10 +348,6 @@ namespace Box2DSharp
                 Drawer.DrawSegment(MouseWorld, BombSpawnPoint, Color.FromArgb(203, 203, 203));
             }
         }
-
-        public Vector2 MouseWorld;
-
-        public MouseJoint MouseJoint;
 
         public void MouseDown()
         {
