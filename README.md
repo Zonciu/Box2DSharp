@@ -15,3 +15,6 @@ a174dbac1bc32e05e790cd867d9e30fb37681d47
 * [x] Tiles
 * [x] Shape Cast
 * [x] Character Collision
+* [x] Heavy On Light
+* [x] Heavy On Light Two
+* [x] Vertical Stack
