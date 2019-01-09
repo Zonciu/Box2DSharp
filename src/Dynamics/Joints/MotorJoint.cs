@@ -67,7 +67,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Set/get the target linear offset, in frame A, in meters.
-        private void SetLinearOffset(in Vector2 linearOffset)
+        public void SetLinearOffset(in Vector2 linearOffset)
         {
             if (!linearOffset.X.Equals(_linearOffset.X) || !linearOffset.Y.Equals(_linearOffset.Y))
             {
@@ -77,13 +77,13 @@ namespace Box2DSharp.Dynamics.Joints
             }
         }
 
-        private ref readonly Vector2 GetLinearOffset()
+        public Vector2 GetLinearOffset()
         {
-            return ref _linearOffset;
+            return _linearOffset;
         }
 
         /// Set/get the target angular offset, in radians.
-        private void SetAngularOffset(float angularOffset)
+        public void SetAngularOffset(float angularOffset)
         {
             if (!angularOffset.Equals(_angularOffset))
             {
@@ -93,46 +93,46 @@ namespace Box2DSharp.Dynamics.Joints
             }
         }
 
-        private float GetAngularOffset()
+        public float GetAngularOffset()
         {
             return _angularOffset;
         }
 
         /// Set the maximum friction force in N.
-        private void SetMaxForce(float force)
+        public void SetMaxForce(float force)
         {
             Debug.Assert(force.IsValid() && force >= 0.0f);
             _maxForce = force;
         }
 
         /// Get the maximum friction force in N.
-        private float GetMaxForce()
+        public float GetMaxForce()
         {
             return _maxForce;
         }
 
         /// Set the maximum friction torque in N*m.
-        private void SetMaxTorque(float torque)
+        public void SetMaxTorque(float torque)
         {
             Debug.Assert(torque.IsValid() && torque >= 0.0f);
             _maxTorque = torque;
         }
 
         /// Get the maximum friction torque in N*m.
-        private float GetMaxTorque()
+        public float GetMaxTorque()
         {
             return _maxTorque;
         }
 
         /// Set the position correction factor in the range [0,1].
-        private void SetCorrectionFactor(float factor)
+        public void SetCorrectionFactor(float factor)
         {
             Debug.Assert(factor.IsValid() && 0.0f <= factor && factor <= 1.0f);
             _correctionFactor = factor;
         }
 
         /// Get the position correction factor in the range [0,1].
-        private float GetCorrectionFactor()
+        public float GetCorrectionFactor()
         {
             return _correctionFactor;
         }

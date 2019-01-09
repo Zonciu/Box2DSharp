@@ -158,25 +158,25 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the first joint.
-        private Joint GetJoint1()
+        public Joint GetJoint1()
         {
             return _joint1;
         }
 
         /// Get the second joint.
-        private Joint GetJoint2()
+        public Joint GetJoint2()
         {
             return _joint2;
         }
 
         /// Set/Get the gear ratio.
-        private void SetRatio(float ratio)
+        public void SetRatio(float ratio)
         {
             Debug.Assert(ratio.IsValid());
             _ratio = ratio;
         }
 
-        private float GetRatio()
+        public float GetRatio()
         {
             return _ratio;
         }

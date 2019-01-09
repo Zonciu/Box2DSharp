@@ -81,15 +81,15 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// The local anchor point relative to bodyA's origin.
-        public ref Vector2 GetLocalAnchorA()
+        public Vector2 GetLocalAnchorA()
         {
-            return ref _localAnchorA;
+            return _localAnchorA;
         }
 
         /// The local anchor point relative to bodyB's origin.
-        public ref Vector2 GetLocalAnchorB()
+        public Vector2 GetLocalAnchorB()
         {
-            return ref _localAnchorB;
+            return _localAnchorB;
         }
 
         /// <inheritdoc />

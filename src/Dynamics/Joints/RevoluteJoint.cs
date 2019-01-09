@@ -11,7 +11,7 @@ namespace Box2DSharp.Dynamics.Joints
     /// a joint limit that specifies a lower and upper angle. You can use a motor
     /// to drive the relative rotation about the shared point. A maximum motor torque
     /// is provided so that infinite forces are not generated.
-    internal class RevoluteJoint : Joint
+    public class RevoluteJoint : Joint
     {
         internal readonly float ReferenceAngle;
 
@@ -82,15 +82,15 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// The local anchor point relative to bodyA's origin.
-        public ref readonly Vector2 GetLocalAnchorA()
+        public Vector2 GetLocalAnchorA()
         {
-            return ref LocalAnchorA;
+            return LocalAnchorA;
         }
 
         /// The local anchor point relative to bodyB's origin.
-        public ref readonly Vector2 GetLocalAnchorB()
+        public Vector2 GetLocalAnchorB()
         {
-            return ref LocalAnchorB;
+            return LocalAnchorB;
         }
 
         /// Get the reference angle.

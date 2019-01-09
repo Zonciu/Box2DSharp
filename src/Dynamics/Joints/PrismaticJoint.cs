@@ -72,7 +72,7 @@ namespace Box2DSharp.Dynamics.Joints
     ///
     /// Now compute impulse to be applied:
     /// df = f2 - f1
-    internal class PrismaticJoint : Joint
+    public class PrismaticJoint : Joint
     {
         private readonly Vector2 _localYAxisA;
 
@@ -156,21 +156,21 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// The local anchor point relative to bodyA's origin.
-        public ref readonly Vector2 GetLocalAnchorA()
+        public Vector2 GetLocalAnchorA()
         {
-            return ref LocalAnchorA;
+            return LocalAnchorA;
         }
 
         /// The local anchor point relative to bodyB's origin.
-        public ref readonly Vector2 GetLocalAnchorB()
+        public Vector2 GetLocalAnchorB()
         {
-            return ref LocalAnchorB;
+            return LocalAnchorB;
         }
 
         /// The local joint axis relative to bodyA.
-        public ref readonly Vector2 GetLocalAxisA()
+        public Vector2 GetLocalAxisA()
         {
-            return ref LocalXAxisA;
+            return LocalXAxisA;
         }
 
         /// Get the reference angle.
@@ -233,19 +233,19 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the lower joint limit, usually in meters.
-        private float GetLowerLimit()
+        public float GetLowerLimit()
         {
             return _lowerTranslation;
         }
 
         /// Get the upper joint limit, usually in meters.
-        private float GetUpperLimit()
+        public float GetUpperLimit()
         {
             return _upperTranslation;
         }
 
         /// Set the joint limits, usually in meters.
-        private void SetLimits(float lower, float upper)
+        public void SetLimits(float lower, float upper)
         {
             Debug.Assert(lower <= upper);
             if (lower != _lowerTranslation || upper != _upperTranslation)
@@ -259,13 +259,13 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Is the joint motor enabled?
-        private bool IsMotorEnabled()
+        public bool IsMotorEnabled()
         {
             return _enableMotor;
         }
 
         /// Enable/disable the joint motor.
-        private void EnableMotor(bool flag)
+        public void EnableMotor(bool flag)
         {
             if (flag != _enableMotor)
             {
@@ -276,7 +276,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Set the motor speed, usually in meters per second.
-        private void SetMotorSpeed(float speed)
+        public void SetMotorSpeed(float speed)
         {
             if (speed != _motorSpeed)
             {
@@ -287,15 +287,15 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the motor speed, usually in meters per second.
-        private float GetMotorSpeed()
+        public float GetMotorSpeed()
         {
             return _motorSpeed;
         }
 
         /// Set the maximum motor force, usually in N.
-        private void SetMaxMotorForce(float force)
+        public void SetMaxMotorForce(float force)
         {
-            if (force != _maxMotorForce)
+            if (Math.Abs(force - _maxMotorForce) > 0.000001f)
             {
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
@@ -303,13 +303,13 @@ namespace Box2DSharp.Dynamics.Joints
             }
         }
 
-        private float GetMaxMotorForce()
+        public float GetMaxMotorForce()
         {
             return _maxMotorForce;
         }
 
         /// Get the current motor force given the inverse time step, usually in N.
-        private float GetMotorForce(float inv_dt)
+        public float GetMotorForce(float inv_dt)
         {
             return inv_dt * _motorImpulse;
         }

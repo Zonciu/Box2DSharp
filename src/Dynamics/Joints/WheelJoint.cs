@@ -8,7 +8,7 @@ namespace Box2DSharp.Dynamics.Joints
     /// along an axis fixed in bodyA and rotation in the plane. In other words, it is a point to
     /// line constraint with a rotational motor and a linear spring/damper.
     /// This joint is designed for vehicle suspensions.
-    internal class WheelJoint : Joint
+    public class WheelJoint : Joint
     {
         // Solver shared
         private readonly Vector2 _localAnchorA;
@@ -97,25 +97,25 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// The local anchor point relative to bodyA's origin.
-        private Vector2 GetLocalAnchorA()
+        public Vector2 GetLocalAnchorA()
         {
             return _localAnchorA;
         }
 
         /// The local anchor point relative to bodyB's origin.
-        private Vector2 GetLocalAnchorB()
+        public Vector2 GetLocalAnchorB()
         {
             return _localAnchorB;
         }
 
         /// The local joint axis relative to bodyA.
-        private Vector2 GetLocalAxisA()
+        public Vector2 GetLocalAxisA()
         {
             return _localXAxisA;
         }
 
         /// Get the current joint translation, usually in meters.
-        private float GetJointTranslation()
+        public float GetJointTranslation()
         {
             var bA = BodyA;
             var bB = BodyB;
@@ -130,7 +130,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the current joint linear speed, usually in meters per second.
-        private float GetJointLinearSpeed()
+        public float GetJointLinearSpeed()
         {
             var bA = BodyA;
             var bB = BodyB;
@@ -153,7 +153,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the current joint angle in radians.
-        private float GetJointAngle()
+        public float GetJointAngle()
         {
             var bA = BodyA;
             var bB = BodyB;
@@ -161,7 +161,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the current joint angular speed in radians per second.
-        private float GetJointAngularSpeed()
+        public float GetJointAngularSpeed()
         {
             var wA = BodyA.AngularVelocity;
             var wB = BodyB.AngularVelocity;
@@ -169,13 +169,13 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Is the joint motor enabled?
-        private bool IsMotorEnabled()
+        public bool IsMotorEnabled()
         {
             return _enableMotor;
         }
 
         /// Enable/disable the joint motor.
-        private void EnableMotor(bool flag)
+        public void EnableMotor(bool flag)
         {
             if (flag != _enableMotor)
             {
@@ -186,7 +186,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Set the motor speed, usually in radians per second.
-        private void SetMotorSpeed(float speed)
+        public void SetMotorSpeed(float speed)
         {
             if (!speed.Equals(_motorSpeed))
             {
@@ -197,13 +197,13 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Get the motor speed, usually in radians per second.
-        private float GetMotorSpeed()
+        public float GetMotorSpeed()
         {
             return _motorSpeed;
         }
 
         /// Set/Get the maximum motor force, usually in N-m.
-        private void SetMaxMotorTorque(float torque)
+        public void SetMaxMotorTorque(float torque)
         {
             if (torque != _maxMotorTorque)
             {
@@ -213,35 +213,35 @@ namespace Box2DSharp.Dynamics.Joints
             }
         }
 
-        private float GetMaxMotorTorque()
+        public float GetMaxMotorTorque()
         {
             return _maxMotorTorque;
         }
 
         /// Get the current motor torque given the inverse time step, usually in N-m.
-        private float GetMotorTorque(float inv_dt)
+        public float GetMotorTorque(float inv_dt)
         {
             return inv_dt * _motorImpulse;
         }
 
         /// Set/Get the spring frequency in hertz. Setting the frequency to zero disables the spring.
-        private void SetSpringFrequencyHz(float hz)
+        public void SetSpringFrequencyHz(float hz)
         {
             _frequencyHz = hz;
         }
 
-        private float GetSpringFrequencyHz()
+        public float GetSpringFrequencyHz()
         {
             return _frequencyHz;
         }
 
         /// Set/Get the spring damping ratio
-        private void SetSpringDampingRatio(float ratio)
+        public void SetSpringDampingRatio(float ratio)
         {
             _dampingRatio = ratio;
         }
 
-        private float GetSpringDampingRatio()
+        public float GetSpringDampingRatio()
         {
             return _dampingRatio;
         }

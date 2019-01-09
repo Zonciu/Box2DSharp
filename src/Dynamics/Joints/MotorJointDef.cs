@@ -32,7 +32,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Initialize the bodies and offsets using the current transforms.
-        internal void Initialize(Body bA, Body bB)
+        public void Initialize(Body bA, Body bB)
         {
             BodyA = bA;
             BodyB = bB;

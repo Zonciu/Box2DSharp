@@ -14,7 +14,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// @see b2GearJoint for explanation.
         public float Ratio;
 
-        private GearJointDef()
+        public GearJointDef()
         {
             JointType = JointType.GearJoint;
             Joint1 = null;

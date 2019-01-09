@@ -60,41 +60,41 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// The local anchor point relative to bodyA's origin.
-        private ref readonly Vector2 GetLocalAnchorA()
+        public Vector2 GetLocalAnchorA()
         {
-            return ref _localAnchorA;
+            return _localAnchorA;
         }
 
         /// The local anchor point relative to bodyB's origin.
-        private ref readonly Vector2 GetLocalAnchorB()
+        public Vector2 GetLocalAnchorB()
         {
-            return ref _localAnchorB;
+            return _localAnchorB;
         }
 
         /// Get the reference angle.
-        private float GetReferenceAngle()
+        public float GetReferenceAngle()
         {
             return _referenceAngle;
         }
 
         /// Set/get frequency in Hz.
-        private void SetFrequency(float hz)
+        public void SetFrequency(float hz)
         {
             _frequencyHz = hz;
         }
 
-        private float GetFrequency()
+        public float GetFrequency()
         {
             return _frequencyHz;
         }
 
         /// Set/get damping ratio.
-        private void SetDampingRatio(float ratio)
+        public void SetDampingRatio(float ratio)
         {
             _dampingRatio = ratio;
         }
 
-        private float GetDampingRatio()
+        public float GetDampingRatio()
         {
             return _dampingRatio;
         }

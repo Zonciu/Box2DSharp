@@ -51,7 +51,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
-        private void Initialize(
+        public void Initialize(
             Body bA,
             Body bB,
             in Vector2 groundA,

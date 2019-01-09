@@ -76,9 +76,9 @@ namespace Box2DSharp.Dynamics.Joints
             }
         }
 
-        public ref readonly Vector2 GetTarget()
+        public Vector2 GetTarget()
         {
-            return ref _targetA;
+            return _targetA;
         }
 
         /// Set/get the maximum force in Newtons.

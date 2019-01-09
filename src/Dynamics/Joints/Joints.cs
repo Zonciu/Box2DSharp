@@ -84,34 +84,34 @@ namespace Box2DSharp.Dynamics.Joints
         /// <summary>
         /// A物体
         /// </summary>
-        internal Body BodyA;
+        public Body BodyA;
 
         /// <summary>
         /// B物体
         /// </summary>
-        internal Body BodyB;
+        public Body BodyB;
 
-        internal bool CollideConnected;
+        public readonly bool CollideConnected;
 
         /// <summary>
         /// 关节A头
         /// </summary>
-        internal JointEdge EdgeA;
+        public JointEdge EdgeA;
 
         /// <summary>
         /// 关节B头
         /// </summary>
-        internal JointEdge EdgeB;
+        public JointEdge EdgeB;
 
         /// <summary>
         /// 关节索引值,只用于Dump
         /// </summary>
-        internal int Index;
+        public int Index;
 
         /// <summary>
         /// 当前关节是否已经在孤岛中
         /// </summary>
-        internal bool IslandFlag;
+        public bool IslandFlag;
 
         /// <summary>
         /// 关节链表节点

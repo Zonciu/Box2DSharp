@@ -20,7 +20,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// the joint will have no effect.
         public float MaxLength;
 
-        private RopeJointDef()
+        public RopeJointDef()
         {
             JointType = JointType.RopeJoint;
             LocalAnchorA.Set(-1.0f, 0.0f);

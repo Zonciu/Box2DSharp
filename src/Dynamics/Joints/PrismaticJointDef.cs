@@ -41,7 +41,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// The upper translation limit, usually in meters.
         public float UpperTranslation;
 
-        private PrismaticJointDef()
+        public PrismaticJointDef()
         {
             JointType = JointType.PrismaticJoint;
             LocalAnchorA.SetZero();
@@ -58,7 +58,7 @@ namespace Box2DSharp.Dynamics.Joints
 
         /// Initialize the bodies, anchors, axis, and reference angle using the world
         /// anchor and unit world axis.
-        internal void Initialize(Body bA, Body bB, in Vector2 anchor, in Vector2 axis)
+        public void Initialize(Body bA, Body bB, in Vector2 anchor, in Vector2 axis)
         {
             BodyA = bA;
             BodyB = bB;
