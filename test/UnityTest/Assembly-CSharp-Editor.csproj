@@ -304,6 +304,12 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>D:/Program Files/Unity/2018.3.0f2/Editor/Data/PlaybackEngines/windowsstandalonesupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Box2DSharp">
+      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.ObjectPool">
+      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Rider.Unity.Editor.Plugin.Repacked">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll</HintPath>
     </Reference>
@@ -327,12 +333,6 @@
     </Reference>
     <Reference Include="UnityEditor.Purchasing">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Library/PackageCache/com.unity.purchasing@2.0.3/Editor/UnityEditor.Purchasing.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.ObjectPool">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>
-    </Reference>
-    <Reference Include="Box2DSharp">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>D:/Program Files/Unity/2018.3.0f2/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>

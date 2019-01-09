@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Box2DSharp.Dynamics;
 using Box2DSharp.Inspection;
 using UnityEditor;
 using UnityEngine;
@@ -23,6 +24,18 @@ namespace Box2DSharp
         public Button QuitButton { get; set; }
 
         public Toggle ShowToggle { get; set; }
+
+        public Slider VelSlider { get; set; }
+
+        public Text VelText { get; set; }
+
+        public Slider PosSlider { get; set; }
+
+        public Text PosText { get; set; }
+
+        public Slider HertzSlider { get; set; }
+
+        public Text HertzText { get; set; }
 
         public GameObject TestObject { get; set; }
 
@@ -70,11 +83,57 @@ namespace Box2DSharp
 
             ShowToggle = GameObject.Find("ShowToggle").GetComponent<Toggle>();
             ShowToggle.onValueChanged.AddListener(ToggleControlPanel);
+
+            VelSlider = GameObject.Find("VelSlider").GetComponent<Slider>();
+            VelText = GameObject.Find("VelText").GetComponent<Text>();
+            VelSlider.onValueChanged.AddListener(
+                v =>
+                {
+                    var val = (int) v;
+                    VelText.text = GetSliderText(VelText.text, val);
+                    Settings.VelocityIteration = val;
+                });
+            VelText.text = GetSliderText(VelText.text, Settings.VelocityIteration);
+
+            PosSlider = GameObject.Find("PosSlider").GetComponent<Slider>();
+            PosText = GameObject.Find("PosText").GetComponent<Text>();
+            PosSlider.onValueChanged.AddListener(
+                v =>
+                {
+                    var val = (int) v;
+                    PosText.text = GetSliderText(PosText.text, val);
+                    Settings.PositionIteration = val;
+                });
+            PosText.text = GetSliderText(PosText.text, Settings.PositionIteration);
+
+            HertzSlider = GameObject.Find("HertzSlider").GetComponent<Slider>();
+            HertzText = GameObject.Find("HertzText").GetComponent<Text>();
+            HertzSlider.onValueChanged.AddListener(
+                v =>
+                {
+                    var val = (int) v;
+                    HertzText.text = GetSliderText(HertzText.text, val);
+                    Settings.Frequency = val;
+                });
+            HertzText.text = GetSliderText(HertzText.text, Settings.Frequency);
         }
 
         private void Start()
         {
             SetTest(_testTypes[0].TestType);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Restart();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                Application.Quit();
+            }
         }
 
         private void OnTestSelect(int i)
@@ -96,7 +155,7 @@ namespace Box2DSharp
 
         private void SetTest(Type type)
         {
-            if (TestObject != null)
+            if (TestObject)
             {
                 var oldTest = TestObject;
                 Destroy(oldTest);
@@ -110,6 +169,11 @@ namespace Box2DSharp
         public void ToggleControlPanel(bool isShow)
         {
             ControlPanel.SetActive(isShow);
+        }
+
+        private string GetSliderText(string text, int value)
+        {
+            return Regex.Replace(text, "([0-9]+)", $"{value}");
         }
     }
 }

@@ -13,8 +13,10 @@ using UnityEngine.Experimental.UIElements;
 using Logger = Box2DSharp.Common.Logger;
 using Vector2 = System.Numerics.Vector2;
 using Color = System.Drawing.Color;
+using Debug = System.Diagnostics.Debug;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using MathUtils = Box2DSharp.Common.MathUtils;
+using Transform = UnityEngine.Transform;
 
 namespace Box2DSharp
 {
@@ -98,7 +100,13 @@ namespace Box2DSharp
         protected virtual void PostStep()
         { }
 
-        private void Update()
+        protected virtual void OnUpdate()
+        { }
+
+        protected virtual void OnLateUpdate()
+        { }
+
+        protected void Update()
         {
             // FPS
             {
@@ -119,6 +127,7 @@ namespace Box2DSharp
                 LaunchBomb();
             }
 
+            OnUpdate();
             FrameManager.Tick();
 
             // Mouse left drag
@@ -193,6 +202,7 @@ namespace Box2DSharp
 
         private void LateUpdate()
         {
+            OnLateUpdate();
             DrawFlag flags = 0;
             if (TestSettings.Shape)
             {

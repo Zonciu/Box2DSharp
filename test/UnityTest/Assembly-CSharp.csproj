@@ -68,9 +68,12 @@
     <Compile Include="Assets\TestController.cs" />
     <Compile Include="Assets\Tests\Chain.cs" />
     <Compile Include="Assets\Tests\CharacterCollision.cs" />
+    <Compile Include="Assets\Tests\HeavyOnLight.cs" />
+    <Compile Include="Assets\Tests\HeavyOnLightTwo.cs" />
     <Compile Include="Assets\Tests\HelloWorld.cs" />
     <Compile Include="Assets\Tests\ShapeCast.cs" />
     <Compile Include="Assets\Tests\Tiles.cs" />
+    <Compile Include="Assets\Tests\VerticalStack.cs" />
     <Compile Include="Assets\TestSettings.cs" />
     <Compile Include="Assets\UnityLogger.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
@@ -289,6 +292,12 @@
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>D:/Program Files/Unity/2018.3.0f2/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
+    <Reference Include="Box2DSharp">
+      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.ObjectPool">
+      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Advertisements">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Library/PackageCache/com.unity.ads@2.3.1/Runtime/UnityEngine.Advertisements.dll</HintPath>
     </Reference>
@@ -303,12 +312,6 @@
     </Reference>
     <Reference Include="Unity.Analytics.Tracker">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.ObjectPool">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>
-    </Reference>
-    <Reference Include="Box2DSharp">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>D:/Program Files/Unity/2018.3.0f2/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
