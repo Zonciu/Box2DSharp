@@ -48,7 +48,10 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Register(ShapeType.Circle, ShapeType.Circle, CircleContact.Create, CircleContact.Destroy);
             Register(
-                ShapeType.Polygon, ShapeType.Circle, PolygonAndCircleContact.Create, PolygonAndCircleContact.Destroy);
+                ShapeType.Polygon,
+                ShapeType.Circle,
+                PolygonAndCircleContact.Create,
+                PolygonAndCircleContact.Destroy);
             Register(ShapeType.Polygon, ShapeType.Polygon, PolygonContact.Create, PolygonContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Circle, EdgeAndCircleContact.Create, EdgeAndCircleContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Polygon, EdgeAndPolygonContact.Create, EdgeAndPolygonContact.Destroy);
@@ -85,6 +88,8 @@ namespace Box2DSharp.Dynamics.Contacts
             Restitution = MixRestitution(FixtureA.Restitution, FixtureB.Restitution);
 
             TangentSpeed = 0.0f;
+
+            Manifold = new Manifold() {Points = FixedArray2<ManifoldPoint>.Create()};
         }
 
         internal static Contact CreateContact(

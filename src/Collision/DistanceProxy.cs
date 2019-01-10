@@ -165,7 +165,7 @@ namespace Box2DSharp.Collision
             var transformB = input.TransformB;
 
             // Initialize the simplex.
-            var simplex = new Simplex();
+            var simplex = Simplex.Create();
             simplex.ReadCache(
                 ref cache,
                 proxyA,
@@ -330,7 +330,7 @@ namespace Box2DSharp.Collision
             var lambda = 0.0f;
 
             // Initial simplex
-            var simplex = new Simplex {Count = 0};
+            var simplex = Simplex.Create();
 
             // Get simplex vertices as an array.
             // ref var vertices = ref simplex.Vertices;

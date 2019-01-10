@@ -11,6 +11,15 @@ namespace Box2DSharp.Collision
 
         public int Count;
 
+        public static Simplex Create(int count = 0)
+        {
+            return new Simplex()
+            {
+                Count = count,
+                Vertices = FixedArray3<SimplexVertex>.Create()
+            };
+        }
+
         public void ReadCache(
             ref SimplexCache cache,
             in DistanceProxy proxyA,
@@ -55,7 +64,7 @@ namespace Box2DSharp.Collision
             // If the cache is empty or invalid ...
             if (Count == 0)
             {
-                ref var v = ref Vertices.Value0;
+                ref var v = ref Vertices.Values[0];
                 v.IndexA = 0;
                 v.IndexB = 0;
                 var wALocal = proxyA.GetVertex(0);
@@ -196,8 +205,10 @@ namespace Box2DSharp.Collision
         // a2 = d12_2 / d12
         public void Solve2()
         {
-            var w1 = Vertices.Value0.W;
-            var w2 = Vertices.Value1.W;
+            ref var v0 = ref Vertices.Values[0];
+            ref var v1 = ref Vertices.Values[1];
+            var w1 = v0.W;
+            var w2 = v1.W;
             var e12 = w2 - w1;
 
             // w1 region
@@ -205,7 +216,7 @@ namespace Box2DSharp.Collision
             if (d12_2 <= 0.0f)
             {
                 // a2 <= 0, so we clamp it to 0
-                Vertices.Value0.A = 1.0f;
+                v0.A = 1.0f;
                 Count = 1;
                 return;
             }
@@ -215,7 +226,7 @@ namespace Box2DSharp.Collision
             if (d12_1 <= 0.0f)
             {
                 // a1 <= 0, so we clamp it to 0
-                Vertices.Value1.A = 1.0f;
+                v1.A = 1.0f;
                 Count = 1;
                 Vertices.Value0 = Vertices.Value1;
                 return;
@@ -223,8 +234,8 @@ namespace Box2DSharp.Collision
 
             // Must be in e12 region.
             var inv_d12 = 1.0f / (d12_1 + d12_2);
-            Vertices.Value0.A = d12_1 * inv_d12;
-            Vertices.Value1.A = d12_2 * inv_d12;
+            v0.A = d12_1 * inv_d12;
+            v0.A = d12_2 * inv_d12;
             Count = 2;
         }
 
@@ -235,9 +246,12 @@ namespace Box2DSharp.Collision
         // - inside the triangle
         public void Solve3()
         {
-            var w1 = Vertices.Value0.W;
-            var w2 = Vertices.Value1.W;
-            var w3 = Vertices.Value2.W;
+            ref var v0 = ref Vertices.Values[0];
+            ref var v1 = ref Vertices.Values[1];
+            ref var v2 = ref Vertices.Values[2];
+            var w1 = v0.W;
+            var w2 = v1.W;
+            var w3 = v2.W;
 
             // Edge12
             // [1      1     ][a1] = [1]
@@ -279,7 +293,7 @@ namespace Box2DSharp.Collision
             // w1 region
             if (d12_2 <= 0.0f && d13_2 <= 0.0f)
             {
-                Vertices.Value0.A = 1.0f;
+                v0.A = 1.0f;
                 Count = 1;
                 return;
             }
@@ -288,8 +302,8 @@ namespace Box2DSharp.Collision
             if (d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f)
             {
                 var inv_d12 = 1.0f / (d12_1 + d12_2);
-                Vertices.Value0.A = d12_1 * inv_d12;
-                Vertices.Value1.A = d12_2 * inv_d12;
+                v0.A = d12_1 * inv_d12;
+                v1.A = d12_2 * inv_d12;
                 Count = 2;
                 return;
             }
@@ -298,28 +312,28 @@ namespace Box2DSharp.Collision
             if (d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f)
             {
                 var inv_d13 = 1.0f / (d13_1 + d13_2);
-                Vertices.Value0.A = d13_1 * inv_d13;
-                Vertices.Value2.A = d13_2 * inv_d13;
+                v0.A = d13_1 * inv_d13;
+                v2.A = d13_2 * inv_d13;
                 Count = 2;
-                Vertices.Value1 = Vertices.Value2;
+                v1 = v2;
                 return;
             }
 
             // w2 region
             if (d12_1 <= 0.0f && d23_2 <= 0.0f)
             {
-                Vertices.Value1.A = 1.0f;
+                v1.A = 1.0f;
                 Count = 1;
-                Vertices.Value0 = Vertices.Value1;
+                v0 = v1;
                 return;
             }
 
             // w3 region
             if (d13_1 <= 0.0f && d23_1 <= 0.0f)
             {
-                Vertices.Value2.A = 1.0f;
+                v2.A = 1.0f;
                 Count = 1;
-                Vertices.Value0 = Vertices.Value2;
+                v0 = v2;
                 return;
             }
 
@@ -327,18 +341,18 @@ namespace Box2DSharp.Collision
             if (d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f)
             {
                 var inv_d23 = 1.0f / (d23_1 + d23_2);
-                Vertices.Value1.A = d23_1 * inv_d23;
-                Vertices.Value2.A = d23_2 * inv_d23;
+                v1.A = d23_1 * inv_d23;
+                v2.A = d23_2 * inv_d23;
                 Count = 2;
-                Vertices.Value0 = Vertices.Value2;
+                v0 = v2;
                 return;
             }
 
             // Must be in triangle123
             var inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
-            Vertices.Value0.A = d123_1 * inv_d123;
-            Vertices.Value1.A = d123_2 * inv_d123;
-            Vertices.Value2.A = d123_3 * inv_d123;
+            v0.A = d123_1 * inv_d123;
+            v1.A = d123_2 * inv_d123;
+            v2.A = d123_3 * inv_d123;
             Count = 3;
         }
     }

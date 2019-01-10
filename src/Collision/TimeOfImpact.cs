@@ -96,7 +96,7 @@ namespace Box2DSharp.Collision
             var iter = 0;
 
             // Prepare input for distance query.
-            var cache = new SimplexCache();
+            var cache = SimplexCache.Create();
             DistanceInput distanceInput;
             distanceInput.ProxyA = input.ProxyA;
             distanceInput.ProxyB = input.ProxyB;
@@ -345,7 +345,10 @@ namespace Box2DSharp.Collision
             ProxyB = proxyB;
             int count = cache.Count;
             Debug.Assert(0 < count && count < 3);
-
+            var av0 = cache.IndexA.Value0;
+            var av1 = cache.IndexA.Value1;
+            var bv0 = cache.IndexB.Value0;
+            var bv1 = cache.IndexB.Value1;
             SweepA = sweepA;
             SweepB = sweepB;
 
@@ -355,8 +358,8 @@ namespace Box2DSharp.Collision
             if (count == 1)
             {
                 Type = FunctionType.Points;
-                var localPointA = ProxyA.GetVertex(cache.IndexA.Value0);
-                var localPointB = ProxyB.GetVertex(cache.IndexB.Value0);
+                var localPointA = ProxyA.GetVertex(av0);
+                var localPointB = ProxyB.GetVertex(bv0);
                 var pointA = MathUtils.Mul(xfA, localPointA);
                 var pointB = MathUtils.Mul(xfB, localPointB);
                 Axis = pointB - pointA;
@@ -364,12 +367,12 @@ namespace Box2DSharp.Collision
                 return s;
             }
 
-            if (cache.IndexA.Value0 == cache.IndexA.Value1)
+            if (av0 == av1)
             {
                 // Two points on B and one on A.
                 Type = FunctionType.FaceB;
-                var localPointB1 = proxyB.GetVertex(cache.IndexB.Value0);
-                var localPointB2 = proxyB.GetVertex(cache.IndexB.Value1);
+                var localPointB1 = proxyB.GetVertex(bv0);
+                var localPointB2 = proxyB.GetVertex(bv1);
 
                 Axis = MathUtils.Cross(localPointB2 - localPointB1, 1.0f);
                 Axis.Normalize();
@@ -378,7 +381,7 @@ namespace Box2DSharp.Collision
                 LocalPoint = 0.5f * (localPointB1 + localPointB2);
                 var pointB = MathUtils.Mul(xfB, LocalPoint);
 
-                var localPointA = proxyA.GetVertex(cache.IndexA.Value0);
+                var localPointA = proxyA.GetVertex(av0);
                 var pointA = MathUtils.Mul(xfA, localPointA);
 
                 var s = MathUtils.Dot(pointA - pointB, normal);
@@ -394,8 +397,8 @@ namespace Box2DSharp.Collision
             {
                 // Two points on A and one or two points on B.
                 Type = FunctionType.FaceA;
-                var localPointA1 = ProxyA.GetVertex(cache.IndexA.Value0);
-                var localPointA2 = ProxyA.GetVertex(cache.IndexA.Value1);
+                var localPointA1 = ProxyA.GetVertex(av0);
+                var localPointA2 = ProxyA.GetVertex(av1);
 
                 Axis = MathUtils.Cross(localPointA2 - localPointA1, 1.0f);
                 Axis.Normalize();
@@ -404,7 +407,7 @@ namespace Box2DSharp.Collision
                 LocalPoint = 0.5f * (localPointA1 + localPointA2);
                 var pointA = MathUtils.Mul(xfA, LocalPoint);
 
-                var localPointB = ProxyB.GetVertex(cache.IndexB.Value0);
+                var localPointB = ProxyB.GetVertex(bv0);
                 var pointB = MathUtils.Mul(xfB, localPointB);
 
                 var s = MathUtils.Dot(pointB - pointA, normal);

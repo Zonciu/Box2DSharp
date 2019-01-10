@@ -22,6 +22,8 @@ namespace Box2DSharp.Collision.Collider
                 return;
             }
 
+            Points = FixedArray2<Vector2>.Create();
+            Separations = FixedArray2<float>.Create();
             switch (manifold.Type)
             {
             case ManifoldType.Circles:

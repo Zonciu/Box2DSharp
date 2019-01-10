@@ -16,5 +16,14 @@ namespace Box2DSharp.Collision
 
         /// vertices on shape B
         public FixedArray3<byte> IndexB;
+
+        public static SimplexCache Create()
+        {
+            return new SimplexCache()
+            {
+                IndexA = FixedArray3<byte>.Create(),
+                IndexB = FixedArray3<byte>.Create()
+            };
+        }
     }
 }

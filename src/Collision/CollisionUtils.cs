@@ -116,10 +116,9 @@ namespace Box2DSharp.Collision
             input.TransformB = xfB;
             input.UseRadii = true;
 
-            var cache = new SimplexCache();
+            var cache = SimplexCache.Create();
 
             DistanceAlgorithm.Distance(out var output, ref cache, input);
-
             return output.Distance < 10.0f * Settings.Epsilon;
         }
 
