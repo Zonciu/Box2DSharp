@@ -36,9 +36,9 @@ namespace Box2DSharp
 
         private float _deltaTime;
 
-        private readonly Profile _maxProfile = new Profile();
+        private Profile _maxProfile;
 
-        private readonly Profile _totalProfile = new Profile();
+        private Profile _totalProfile;
 
         public Vector2 MouseWorld;
 

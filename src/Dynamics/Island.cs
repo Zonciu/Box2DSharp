@@ -55,9 +55,9 @@ namespace Box2DSharp.Dynamics
             JointCount = 0;
         }
 
-        internal Profile Solve(in TimeStep step, in Vector2 gravity, bool allowSleep)
+        internal void Solve(out Profile profile, in TimeStep step, in Vector2 gravity, bool allowSleep)
         {
-            var profile = new Profile();
+            profile = new Profile();
             var timer = Stopwatch.StartNew();
 
             var h = step.Dt;
@@ -99,7 +99,7 @@ namespace Box2DSharp.Dynamics
                 Velocities[i].W = w;
             }
 
-            timer.Reset();
+            timer.Restart();
 
             // Solver data
             var solverData = new SolverData
@@ -135,7 +135,7 @@ namespace Box2DSharp.Dynamics
             profile.SolveInit = timer.ElapsedMilliseconds;
 
             // Solve velocity constraints
-            timer.Reset();
+            timer.Restart();
             for (var i = 0; i < step.VelocityIterations; ++i)
             {
                 for (var j = 0; j < JointCount; ++j)
@@ -184,7 +184,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // Solve position constraints
-            timer.Reset();
+            timer.Restart();
             var positionSolved = false;
             for (var i = 0; i < step.PositionIterations; ++i)
             {
@@ -261,8 +261,6 @@ namespace Box2DSharp.Dynamics
                     }
                 }
             }
-
-            return profile;
         }
 
         internal void SolveTOI(in TimeStep subStep, int toiIndexA, int toiIndexB)
@@ -301,7 +299,6 @@ namespace Box2DSharp.Dynamics
             }
 
 #if FALSE
-
 // Is the new position really safe?
             for (int i = 0; i < m_contactCount; ++i)
             {

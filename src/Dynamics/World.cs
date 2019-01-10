@@ -107,7 +107,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 性能统计
         /// </summary>
-        public Profile Profile { get; }
+        public Profile Profile;
 
         /// <summary>
         /// 接触点管理器
@@ -740,7 +740,7 @@ namespace Box2DSharp.Dynamics
                 }
 
                 // 岛屿碰撞求解
-                var profile = island.Solve(step, Gravity, AllowSleep);
+                island.Solve(out var profile, step, Gravity, AllowSleep);
                 Profile.SolveInit += profile.SolveInit;
                 Profile.SolveVelocity += profile.SolveVelocity;
                 Profile.SolvePosition += profile.SolvePosition;
