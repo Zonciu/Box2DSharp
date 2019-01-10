@@ -19,6 +19,10 @@ namespace Box2DSharp
 
         public Dropdown Dropdown { get; set; }
 
+        public Button PauseButton { get; set; }
+
+        public Button SingleStepButton { get; set; }
+
         public Button RestartButton { get; set; }
 
         public Button QuitButton { get; set; }
@@ -48,12 +52,18 @@ namespace Box2DSharp
             ControlPanel = GameObject.Find("ControlPanel");
             Dropdown = GameObject.Find("TestSelector").GetComponent<Dropdown>()
                     ?? throw new NullReferenceException("TestSelector not found");
+            PauseButton = GameObject.Find("PauseButton").GetComponent<Button>()
+                       ?? throw new NullReferenceException("PauseButton not found");
+            SingleStepButton = GameObject.Find("SingleStepButton").GetComponent<Button>()
+                            ?? throw new NullReferenceException("SingleStepButton not found");
             RestartButton = GameObject.Find("RestartButton").GetComponent<Button>()
                          ?? throw new NullReferenceException("RestartButton not found");
             QuitButton = GameObject.Find("QuitButton").GetComponent<Button>()
                       ?? throw new NullReferenceException("QuitButton not found");
 
+            SingleStepButton.onClick.AddListener(() => Settings.SingleStep = true);
             RestartButton.onClick.AddListener(Restart);
+            PauseButton.onClick.AddListener(() => Settings.Pause = !Settings.Pause);
             QuitButton.onClick.AddListener(Application.Quit);
 
             _testTypes = typeof(TestBase).Assembly.GetTypes()

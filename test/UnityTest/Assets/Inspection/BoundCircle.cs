@@ -36,7 +36,6 @@ namespace Box2DSharp.Inspection
 
             var lines = new List<(Vector3, Vector3)>();
 
-            //GL.Begin(GL.LINE_STRIP);
             for (var i = 0; i <= LineCount; ++i) //割圆术画圆
             {
                 lines.Add(
@@ -50,13 +49,6 @@ namespace Box2DSharp.Inspection
                     ));
             }
 
-            //
-            // GL.Vertex(
-            //     new Vector2(
-            //         center.x + Radius, // Radius * Mathf.Cos(0)
-            //         center.y)); // Radius * Mathf.Sin(0)
-
-            //GL.End();
             return lines;
         }
     }

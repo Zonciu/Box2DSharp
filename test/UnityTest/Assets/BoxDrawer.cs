@@ -61,7 +61,7 @@ namespace Box2DSharp
         public void DrawCircle(in Vector2 center, float radius, in Color color)
         {
             var lines = new List<(Vector3, Vector3)>();
-            const int lineCount = 200;
+            const int lineCount = 100;
             for (var i = 0; i <= lineCount; ++i) //割圆术画圆
             {
                 lines.Add(
@@ -82,9 +82,7 @@ namespace Box2DSharp
         public void DrawSolidCircle(in Vector2 center, float radius, in Vector2 axis, in Color color)
         {
             var lines = new List<(Vector3, Vector3)>();
-            const int lineCount = 200;
-
-            //GL.Begin(GL.LINE_STRIP);
+            const int lineCount = 100;
             for (var i = 0; i <= lineCount; ++i) //割圆术画圆
             {
                 lines.Add(

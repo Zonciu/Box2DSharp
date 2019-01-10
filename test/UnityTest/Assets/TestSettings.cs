@@ -57,6 +57,10 @@ namespace Box2DSharp
         [Toggle]
         public bool Profile = false;
 
+        public bool Pause;
+
+        public bool SingleStep;
+
         public int Frequency = 60;
 
         public int PositionIteration = 3;

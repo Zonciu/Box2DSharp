@@ -8,6 +8,7 @@ using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
 using Box2DSharp.Inspection;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 using Logger = Box2DSharp.Common.Logger;
@@ -16,6 +17,7 @@ using Color = System.Drawing.Color;
 using Debug = System.Diagnostics.Debug;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using MathUtils = Box2DSharp.Common.MathUtils;
+using Random = System.Random;
 using Transform = UnityEngine.Transform;
 
 namespace Box2DSharp
@@ -63,20 +65,7 @@ namespace Box2DSharp
             GroundBody = World.CreateBody(new BodyDef());
             FrameManager = new FrameManager
             {
-                Job = () =>
-                {
-                    PreStep();
-                    _pointsCount = 0;
-                    World.AllowSleep = TestSettings.Sleep;
-                    World.WarmStarting = TestSettings.WarmStarting;
-                    World.ContinuousPhysics = TestSettings.TimeOfImpact;
-                    World.SubStepping = TestSettings.SubStepping;
-                    World.Step(
-                        1f / TestSettings.Frequency,
-                        TestSettings.VelocityIteration,
-                        TestSettings.PositionIteration);
-                    PostStep();
-                },
+                Job = Tick,
                 Interval = 1 / TestSettings.Frequency
             };
             World.SetContactListener(this);
@@ -105,6 +94,33 @@ namespace Box2DSharp
 
         protected virtual void OnLateUpdate()
         { }
+
+        private void Tick()
+        {
+            PreStep();
+            _pointsCount = 0;
+            World.AllowSleep = TestSettings.Sleep;
+            World.WarmStarting = TestSettings.WarmStarting;
+            World.ContinuousPhysics = TestSettings.TimeOfImpact;
+            World.SubStepping = TestSettings.SubStepping;
+            var timeStep = 1f / TestSettings.Frequency;
+            if (TestSettings.Pause)
+            {
+                if (TestSettings.SingleStep)
+                {
+                    TestSettings.SingleStep = false;
+                }
+                else
+                {
+                    timeStep = 0.0f;
+                }
+
+                DrawString("****PAUSED****");
+            }
+
+            World.Step(timeStep, TestSettings.VelocityIteration, TestSettings.PositionIteration);
+            PostStep();
+        }
 
         protected void Update()
         {
@@ -506,7 +522,7 @@ namespace Box2DSharp
         /// <summary>
         /// Display Physic Frame
         /// </summary>
-        private void OnGUI()
+        protected virtual void OnGUI()
         {
             DrawString();
         }
@@ -600,6 +616,28 @@ namespace Box2DSharp
         public void SayGoodbye(Fixture fixture)
         {
             /* Do nothing */
+        }
+
+        public const int RandomLimit = 32767;
+
+        private readonly Random _random = new Random();
+
+        /// Random number in range [-1,1]
+        public float RandomFloat()
+        {
+            float r = (_random.Next() & (RandomLimit));
+            r /= RandomLimit;
+            r = 2.0f * r - 1.0f;
+            return r;
+        }
+
+        /// Random floating point number in range [lo, hi]
+        public float RandomFloat(float lo, float hi)
+        {
+            float r = (_random.Next() & (RandomLimit));
+            r /= RandomLimit;
+            r = (hi - lo) * r + lo;
+            return r;
         }
 
         private struct ContactPoint

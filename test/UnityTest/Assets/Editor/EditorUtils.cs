@@ -12,7 +12,7 @@ namespace Box2DSharp.Editor
         {
             var toggles = typeof(TestSettings).GetFields()
                                               .Where(f => f.GetCustomAttribute<ToggleAttribute>() != null)
-                                              .Select(toggleType => $"Canvas/Toggles/{toggleType.Name}")
+                                              .Select(toggleType => $"ControlPanel/Toggles/{toggleType.Name}")
                                               .Select(
                                                    toggleName =>
                                                        GameObject.Find(toggleName).GetComponent<RectTransform>())
@@ -22,7 +22,7 @@ namespace Box2DSharp.Editor
             {
                 var toggle = toggles[i];
                 var p = toggle.anchoredPosition;
-                p.y = -i * 30;
+                p.y = -i * 25;
                 toggle.anchoredPosition = p;
             }
         }
