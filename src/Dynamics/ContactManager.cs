@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Box2DSharp.Collision;
 using Box2DSharp.Dynamics.Contacts;
 
@@ -151,13 +150,13 @@ namespace Box2DSharp.Dynamics
 
         public void Collide()
         {
-            var current = ContactList.First;
+            var node = ContactList.First;
 
             // Update awake contacts.
-            while (current != default)
+            while (node != default)
             {
-                var c = current.Value;
-                current = current.Next;
+                var c = node.Value;
+                node = node.Next;
                 var fixtureA = c.GetFixtureA();
                 var fixtureB = c.GetFixtureB();
                 var indexA = c.GetChildIndexA();

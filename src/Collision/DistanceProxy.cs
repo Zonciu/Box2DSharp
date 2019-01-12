@@ -143,7 +143,11 @@ namespace Box2DSharp.Collision
     public static class DistanceAlgorithm
     {
         // GJK using Voronoi regions (Christer Ericson) and Barycentric coordinates.
-        public static int b2_gjkCalls, b2_gjkIters, b2_gjkMaxIters;
+        public static int GjkCalls;
+
+        public static int GjkIters;
+
+        public static int GjkMaxIters;
 
         /// <summary>
         /// GJK碰撞检测
@@ -156,7 +160,7 @@ namespace Box2DSharp.Collision
             ref SimplexCache cache,
             in DistanceInput input)
         {
-            ++b2_gjkCalls;
+            ++GjkCalls;
             output = new DistanceOutput();
             ref readonly var proxyA = ref input.ProxyA;
             ref readonly var proxyB = ref input.ProxyB;
@@ -244,7 +248,7 @@ namespace Box2DSharp.Collision
 
                 // Iteration count is equated to the number of support point calls.
                 ++iter;
-                ++b2_gjkIters;
+                ++GjkIters;
 
                 // Check for duplicate support points. This is the main termination criteria.
                 var duplicate = false;
@@ -267,7 +271,7 @@ namespace Box2DSharp.Collision
                 ++simplex.Count;
             }
 
-            b2_gjkMaxIters = Math.Max(b2_gjkMaxIters, iter);
+            GjkMaxIters = Math.Max(GjkMaxIters, iter);
 
             // Prepare output.
             simplex.GetWitnessPoints(out output.PointA, out output.PointB);

@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Threading;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -481,11 +479,11 @@ namespace Box2DSharp.Dynamics
         /// @see SetAutoClearForces
         public void ClearForces()
         {
-            var bodyNode = BodyList.First;
-            while (bodyNode != null)
+            var node = BodyList.First;
+            while (node != null)
             {
-                var body = bodyNode.Value;
-                bodyNode = bodyNode.Next;
+                var body = node.Value;
+                node = node.Next;
                 body.Force.SetZero();
                 body.Torque = 0.0f;
             }

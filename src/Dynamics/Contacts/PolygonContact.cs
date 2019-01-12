@@ -36,19 +36,5 @@ namespace Box2DSharp.Dynamics.Contacts
                 (PolygonShape) FixtureB.Shape,
                 xfB);
         }
-
-        private class PoolPolicy : IPooledObjectPolicy<PolygonContact>
-        {
-            public PolygonContact Create()
-            {
-                return new PolygonContact();
-            }
-
-            public bool Return(PolygonContact obj)
-            {
-                obj.Reset();
-                return true;
-            }
-        }
     }
 }

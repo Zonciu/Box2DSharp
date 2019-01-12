@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
@@ -60,11 +59,9 @@ namespace Box2DSharp.Dynamics.Contacts
                 Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
                 Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-                //_contactRegisters.Add((type1, type2), new ContactRegister(createFunc, destroyFunc, true));
                 _registers[(int) type1, (int) type2] = new ContactRegister(createFunc, destroyFunc, true);
                 if (type1 != type2)
                 {
-                    //_contactRegisters.Add((type2, type1), new ContactRegister(createFunc, destroyFunc, false));
                     _registers[(int) type2, (int) type1] = new ContactRegister(createFunc, destroyFunc, false);
                 }
             }

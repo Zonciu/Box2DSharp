@@ -4,7 +4,6 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics
 {
@@ -15,8 +14,6 @@ namespace Box2DSharp.Dynamics
     /// @warning you cannot reuse fixtures.
     public class Fixture
     {
-        private static readonly ObjectPool<Fixture> _pool = new DefaultObjectPool<Fixture>(new FixturePoolPolicy());
-
         private float _density;
 
         private Filter _filter;
@@ -100,21 +97,25 @@ namespace Box2DSharp.Dynamics
         {
             var childCount = def.Shape.GetChildCount();
 
-            var fixture = _pool.Get();
-            fixture.UserData = def.UserData;
-            fixture.Friction = def.Friction;
-            fixture.Restitution = def.Restitution;
-            fixture.Body = body;
-            fixture.Filter = def.Filter;
-            fixture.IsSensor = def.IsSensor;
-            fixture.Shape = def.Shape.Clone();
-            fixture.ProxyCount = 0;
-            fixture.Density = def.Density;
-            fixture.Proxies = new FixtureProxy[childCount]; // Reserve proxy space
+            var fixture = new Fixture
+            {
+                UserData = def.UserData,
+                Friction = def.Friction,
+                Restitution = def.Restitution,
+                Body = body,
+                Filter = def.Filter,
+                IsSensor = def.IsSensor,
+                Shape = def.Shape.Clone(),
+                ProxyCount = 0,
+                Density = def.Density,
+                Proxies = new FixtureProxy[childCount]
+            };
+
+            // Reserve proxy space
 
             for (var i = 0; i < childCount; ++i)
             {
-                fixture.Proxies[i] = FixtureProxy.Get();
+                fixture.Proxies[i] = new FixtureProxy();
             }
 
             return fixture;
@@ -124,7 +125,7 @@ namespace Box2DSharp.Dynamics
         {
             // The proxies must be destroyed before calling this.
             Debug.Assert(fixture.ProxyCount == 0);
-            _pool.Return(fixture);
+            fixture.Proxies = null;
         }
 
         // These support body activation/deactivation.
@@ -327,40 +328,6 @@ namespace Box2DSharp.Dynamics
                 broadPhase.MoveProxy(proxy.ProxyId, proxy.AABB, displacement);
             }
         }
-
-        private class FixturePoolPolicy : IPooledObjectPolicy<Fixture>
-        {
-            /// <inheritdoc />
-            public Fixture Create()
-            {
-                return new Fixture();
-            }
-
-            /// <inheritdoc />
-            public bool Return(Fixture obj)
-            {
-                obj.Body = default;
-                obj.Density = default;
-                obj.Filter = default;
-                obj.Friction = default;
-                obj._isSensor = default;
-                var proxies = obj.Proxies;
-                obj.Proxies = default;
-                for (var i = 0; i < proxies.Length; i++)
-                {
-                    var proxy = proxies[i];
-                    proxies[i] = null;
-                    FixtureProxy.Return(proxy);
-                }
-
-                obj.ProxyCount = default;
-                obj.Restitution = default;
-                obj.Shape = default;
-                obj.UserData = default;
-
-                return true;
-            }
-        }
     }
 
     /// This holds contact filtering data.
@@ -432,9 +399,6 @@ namespace Box2DSharp.Dynamics
     /// </summary>
     public class FixtureProxy
     {
-        private static readonly ObjectPool<FixtureProxy> _pool =
-            new DefaultObjectPool<FixtureProxy>(new FixtureProxyPoolPolicy());
-
         public AABB AABB;
 
         public int ChildIndex;
@@ -442,37 +406,5 @@ namespace Box2DSharp.Dynamics
         public Fixture Fixture;
 
         public int ProxyId = BroadPhase.NullProxy;
-
-        private FixtureProxy()
-        { }
-
-        public static FixtureProxy Get()
-        {
-            return _pool.Get();
-        }
-
-        public static void Return(FixtureProxy proxy)
-        {
-            _pool.Return(proxy);
-        }
-
-        private class FixtureProxyPoolPolicy : IPooledObjectPolicy<FixtureProxy>
-        {
-            /// <inheritdoc />
-            public FixtureProxy Create()
-            {
-                return new FixtureProxy();
-            }
-
-            /// <inheritdoc />
-            public bool Return(FixtureProxy obj)
-            {
-                obj.AABB = default;
-                obj.ChildIndex = default;
-                obj.Fixture = default;
-                obj.ProxyId = default;
-                return true;
-            }
-        }
     }
 }
