@@ -135,7 +135,7 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA = def.LocalAnchorA;
             LocalAnchorB = def.LocalAnchorB;
             LocalXAxisA = def.LocalAxisA;
-            LocalXAxisA.Normalize();
+            LocalXAxisA = Vector2.Normalize(LocalXAxisA);
             _localYAxisA = MathUtils.Cross(1.0f, LocalXAxisA);
             ReferenceAngle = def.ReferenceAngle;
 

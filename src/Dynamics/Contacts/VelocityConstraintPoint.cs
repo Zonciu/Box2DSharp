@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class VelocityConstraintPoint
+    public struct VelocityConstraintPoint
     {
         public float NormalImpulse;
 

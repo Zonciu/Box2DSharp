@@ -83,7 +83,7 @@ namespace Box2DSharp.Collision.Shapes
             var v2 = Vertex2;
             var e = v2 - v1;
             var normal = new Vector2(e.Y, -e.X);
-            normal.Normalize();
+            normal = Vector2.Normalize(normal);
 
             // q = p1 + t * d
             // dot(normal, q - v1) = 0

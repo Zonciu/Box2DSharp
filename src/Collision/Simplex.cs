@@ -37,9 +37,9 @@ namespace Box2DSharp.Collision
             //ref b2SimplexVertex vertices = ref m_v1;
             for (var i = 0; i < Count; ++i)
             {
-                ref var v = ref Vertices.GetRef(i);
-                v.IndexA = cache.IndexA[i];
-                v.IndexB = cache.IndexB[i];
+                ref var v = ref Vertices.Values[i];
+                v.IndexA = cache.IndexA.Values[i];
+                v.IndexB = cache.IndexB.Values[i];
                 var wALocal = proxyA.GetVertex(v.IndexA);
                 var wBLocal = proxyB.GetVertex(v.IndexB);
                 v.Wa = MathUtils.Mul(transformA, wALocal);
@@ -83,8 +83,8 @@ namespace Box2DSharp.Collision
             cache.Count = (ushort) Count;
             for (var i = 0; i < Count; ++i)
             {
-                cache.IndexA[i] = (byte) Vertices.GetRef(i).IndexA;
-                cache.IndexB[i] = (byte) Vertices.GetRef(i).IndexB;
+                cache.IndexA.Values[i] = (byte) Vertices.Values[i].IndexA;
+                cache.IndexB.Values[i] = (byte) Vertices.Values[i].IndexB;
             }
         }
 
@@ -235,7 +235,7 @@ namespace Box2DSharp.Collision
             // Must be in e12 region.
             var inv_d12 = 1.0f / (d12_1 + d12_2);
             v0.A = d12_1 * inv_d12;
-            v0.A = d12_2 * inv_d12;
+            v1.A = d12_2 * inv_d12;
             Count = 2;
         }
 

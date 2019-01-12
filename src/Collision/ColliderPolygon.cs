@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
@@ -186,7 +187,7 @@ namespace Box2DSharp.Collision
             var v12 = vertices1[iv2];
 
             var localTangent = v12 - v11;
-            localTangent.Normalize();
+            localTangent = Vector2.Normalize(localTangent);
 
             var localNormal = MathUtils.Cross(localTangent, 1.0f);
             var planePoint = 0.5f * (v11 + v12);
@@ -245,7 +246,7 @@ namespace Box2DSharp.Collision
 
                 if (separation <= totalRadius)
                 {
-                    ref var cp = ref manifold.Points.GetRef(pointCount);
+                    ref var cp = ref manifold.Points.Values[pointCount];
                     cp.LocalPoint = MathUtils.MulT(xf2, clipPoints2[i].Vector);
                     cp.Id = clipPoints2[i].Id;
                     if (flip != default)

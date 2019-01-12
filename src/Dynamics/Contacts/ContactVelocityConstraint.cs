@@ -3,13 +3,9 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class ContactVelocityConstraint
+    public struct ContactVelocityConstraint
     {
-        public readonly VelocityConstraintPoint[] Points = new VelocityConstraintPoint[Settings.MaxManifoldPoints]
-        {
-            new VelocityConstraintPoint(),
-            new VelocityConstraintPoint()
-        };
+        public VelocityConstraintPoint[] Points;
 
         public int ContactIndex;
 
@@ -34,5 +30,10 @@ namespace Box2DSharp.Dynamics.Contacts
         public float Restitution;
 
         public float TangentSpeed;
+
+        public void Initialize()
+        {
+            Points = new VelocityConstraintPoint[Settings.MaxManifoldPoints];
+        }
     }
 }

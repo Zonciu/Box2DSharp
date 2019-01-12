@@ -57,8 +57,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Distance(in Vector2 a, in Vector2 b)
         {
-            var c = a - b;
-            return c.Length();
+            return (a - b).Length();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,10 +92,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix2x2 MulT(in Matrix2x2 a, in Matrix2x2 b)
         {
-            var c1 = new Vector2(Dot(a.Ex, b.Ex), Dot(a.Ey, b.Ex));
-
-            var c2 = new Vector2(Dot(a.Ex, b.Ey), Dot(a.Ey, b.Ey));
-            return new Matrix2x2(c1, c2);
+            return new Matrix2x2(new Vector2(Dot(a.Ex, b.Ex), Dot(a.Ey, b.Ex)), new Vector2(Dot(a.Ex, b.Ey), Dot(a.Ey, b.Ey)));
         }
 
         /// Multiply a matrix times a vector.
@@ -132,10 +128,7 @@ namespace Box2DSharp.Common
             // [-qs qc]   [rs  rc]   [-qs*rc+qc*rs qs*rs+qc*rc]
             // s = qc * rs - qs * rc
             // c = qc * rc + qs * rs
-            Rotation qr;
-            qr.Sin = q.Cos * r.Sin - q.Sin * r.Cos;
-            qr.Cos = q.Cos * r.Cos + q.Sin * r.Sin;
-            return qr;
+            return new Rotation {Sin = q.Cos * r.Sin - q.Sin * r.Cos, Cos = q.Cos * r.Cos + q.Sin * r.Sin};
         }
 
         /// Rotate a vector
@@ -165,9 +158,7 @@ namespace Box2DSharp.Common
         {
             var px = v.X - T.Position.X;
             var py = v.Y - T.Position.Y;
-            var x = T.Rotation.Cos * px + T.Rotation.Sin * py;
-            var y = -T.Rotation.Sin * px + T.Rotation.Cos * py;
-            return new Vector2(x, y);
+            return new Vector2(T.Rotation.Cos * px + T.Rotation.Sin * py, -T.Rotation.Sin * px + T.Rotation.Cos * py);
         }
 
         // v2 = A.Rotation.Rot(B.Rotation.Rot(v1) + B.p) + A.p
@@ -175,10 +166,11 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Transform Mul(in Transform A, in Transform B)
         {
-            Transform C;
-            C.Rotation = Mul(A.Rotation, B.Rotation);
-            C.Position = Mul(A.Rotation, B.Position) + A.Position;
-            return C;
+            return new Transform
+            {
+                Rotation = Mul(A.Rotation, B.Rotation),
+                Position = Mul(A.Rotation, B.Position) + A.Position
+            };
         }
 
         // v2 = A.q' * (B.q * v1 + B.p - A.p)
@@ -186,16 +178,17 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Transform MulT(in Transform A, in Transform B)
         {
-            Transform C;
-            C.Rotation = MulT(A.Rotation, B.Rotation);
-            C.Position = MulT(A.Rotation, B.Position - A.Position);
-            return C;
+            return new Transform
+            {
+                Rotation = MulT(A.Rotation, B.Rotation),
+                Position = MulT(A.Rotation, B.Position - A.Position)
+            };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Clamp(float a, float low, float high)
         {
-            return Math.Max(low, Math.Min(a, high));
+            return a < low ? low : a > high ? high : a;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

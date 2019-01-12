@@ -4,9 +4,9 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class ContactPositionConstraint
+    public struct ContactPositionConstraint
     {
-        public readonly Vector2[] LocalPoints = new Vector2[Settings.MaxManifoldPoints];
+        public Vector2[] LocalPoints;
 
         public int IndexA;
 
@@ -27,5 +27,10 @@ namespace Box2DSharp.Dynamics.Contacts
         public float RadiusA, RadiusB;
 
         public ManifoldType Type;
+
+        public void Initialize()
+        {
+            LocalPoints = new Vector2[Settings.MaxManifoldPoints];
+        }
     }
 }

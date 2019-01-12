@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -11,8 +12,8 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public abstract class Contact
     {
-        private static readonly Dictionary<(ShapeType, ShapeType), ContactRegister> _contactRegisters =
-            new Dictionary<(ShapeType, ShapeType), ContactRegister>();
+        // private static readonly Dictionary<(ShapeType, ShapeType), ContactRegister> _contactRegisters =
+        //     new Dictionary<(ShapeType, ShapeType), ContactRegister>();
 
         internal Fixture FixtureA;
 
@@ -47,11 +48,7 @@ namespace Box2DSharp.Dynamics.Contacts
         static Contact()
         {
             Register(ShapeType.Circle, ShapeType.Circle, CircleContact.Create, CircleContact.Destroy);
-            Register(
-                ShapeType.Polygon,
-                ShapeType.Circle,
-                PolygonAndCircleContact.Create,
-                PolygonAndCircleContact.Destroy);
+            Register(ShapeType.Polygon, ShapeType.Circle, PolygonAndCircleContact.Create, PolygonAndCircleContact.Destroy);
             Register(ShapeType.Polygon, ShapeType.Polygon, PolygonContact.Create, PolygonContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Circle, EdgeAndCircleContact.Create, EdgeAndCircleContact.Destroy);
             Register(ShapeType.Edge, ShapeType.Polygon, EdgeAndPolygonContact.Create, EdgeAndPolygonContact.Destroy);
@@ -63,11 +60,12 @@ namespace Box2DSharp.Dynamics.Contacts
                 Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
                 Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-                _contactRegisters.Add((type1, type2), new ContactRegister(createFunc, destroyFunc, true));
-
+                //_contactRegisters.Add((type1, type2), new ContactRegister(createFunc, destroyFunc, true));
+                _registers[(int) type1, (int) type2] = new ContactRegister(createFunc, destroyFunc, true);
                 if (type1 != type2)
                 {
-                    _contactRegisters.Add((type2, type1), new ContactRegister(createFunc, destroyFunc, false));
+                    //_contactRegisters.Add((type2, type1), new ContactRegister(createFunc, destroyFunc, false));
+                    _registers[(int) type2, (int) type1] = new ContactRegister(createFunc, destroyFunc, false);
                 }
             }
         }
@@ -92,6 +90,9 @@ namespace Box2DSharp.Dynamics.Contacts
             Manifold = new Manifold() {Points = FixedArray2<ManifoldPoint>.Create()};
         }
 
+        private static readonly ContactRegister[,]
+            _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
+
         internal static Contact CreateContact(
             Fixture fixtureA,
             int indexA,
@@ -104,17 +105,13 @@ namespace Box2DSharp.Dynamics.Contacts
             Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
             Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-            if (_contactRegisters.TryGetValue((type1, type2), out var reg))
+            var reg = _registers[(int) type1, (int) type2];
+            if (reg.Primary)
             {
-                if (reg.primary)
-                {
-                    return reg.CreateFunc(fixtureA, indexA, fixtureB, indexB);
-                }
-
-                return reg.CreateFunc(fixtureB, indexB, fixtureA, indexA);
+                return reg.CreateFunction(fixtureA, indexA, fixtureB, indexB);
             }
 
-            return null;
+            return reg.CreateFunction(fixtureB, indexB, fixtureA, indexA);
         }
 
         internal static void DestroyContact(Contact contact)
@@ -133,14 +130,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
-            if (_contactRegisters.TryGetValue((typeA, typeB), out var reg))
-            {
-                reg.DestroyFunc(contact);
-            }
-            else
-            {
-                throw new DirectoryNotFoundException($"{typeA}:{typeB} contact not registered");
-            }
+            var reg = _registers[(int) typeA, (int) typeB];
+            reg.DestroyFunction(contact);
         }
 
         internal virtual void Reset()
@@ -197,7 +188,7 @@ namespace Box2DSharp.Dynamics.Contacts
         /// Is this contact touching?
         public bool IsTouching()
         {
-            return Flags.HasFlag(ContactFlag.TouchingFlag);
+            return HasFlag(ContactFlag.TouchingFlag);
         }
 
         /// Enable/disable this contact. This can be used inside the pre-solve
@@ -218,7 +209,7 @@ namespace Box2DSharp.Dynamics.Contacts
         /// Has this contact been disabled?
         public bool IsEnabled()
         {
-            return Flags.HasFlag(ContactFlag.EnabledFlag);
+            return HasFlag(ContactFlag.EnabledFlag);
         }
 
         /// Get fixture A in this contact.
@@ -312,7 +303,7 @@ namespace Box2DSharp.Dynamics.Contacts
             Flags |= ContactFlag.EnabledFlag;
 
             var touching = false;
-            var wasTouching = Flags.HasFlag(ContactFlag.TouchingFlag);
+            var wasTouching = HasFlag(ContactFlag.TouchingFlag);
 
             var sensorA = FixtureA.IsSensor;
             var sensorB = FixtureB.IsSensor;
@@ -342,14 +333,14 @@ namespace Box2DSharp.Dynamics.Contacts
                 // stored impulses to warm start the solver.
                 for (var i = 0; i < Manifold.PointCount; ++i)
                 {
-                    var mp2 = Manifold.Points[i];
+                    var mp2 = Manifold.Points.Values[i];
                     mp2.NormalImpulse = 0.0f;
                     mp2.TangentImpulse = 0.0f;
                     var id2 = mp2.Id;
 
                     for (var j = 0; j < oldManifold.PointCount; ++j)
                     {
-                        var mp1 = oldManifold.Points[j];
+                        var mp1 = oldManifold.Points.Values[j];
 
                         if (mp1.Id.Key == id2.Key)
                         {
@@ -397,7 +388,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
         // Flags stored in m_flags
         [Flags]
-        internal enum ContactFlag
+        public enum ContactFlag
         {
             // Used when crawling contact graph when forming islands.
             IslandFlag = 0x0001,
@@ -418,20 +409,37 @@ namespace Box2DSharp.Dynamics.Contacts
             ToiFlag = 0x0020
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool HasFlag(ContactFlag flag)
+        {
+            return (Flags & flag) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetFlag(ContactFlag flag)
+        {
+            Flags |= flag;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnsetFlag(ContactFlag flag)
+        {
+            Flags &= ~flag;
+        }
+
         private class ContactRegister
         {
-            public readonly CreateContact CreateFunc;
+            public readonly CreateContact CreateFunction;
 
-            public readonly DestroyContact DestroyFunc;
+            public readonly DestroyContact DestroyFunction;
 
-            public readonly bool primary;
+            public readonly bool Primary;
 
-            /// <inheritdoc />
-            public ContactRegister(CreateContact fcn, DestroyContact destroyFunc, bool primary)
+            public ContactRegister(CreateContact createFunction, DestroyContact destroyFunction, bool primary)
             {
-                CreateFunc = fcn;
-                DestroyFunc = destroyFunc;
-                this.primary = primary;
+                CreateFunction = createFunction;
+                DestroyFunction = destroyFunction;
+                Primary = primary;
             }
         }
     }

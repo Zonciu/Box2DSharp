@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>7.2</LangVersion>
+        <LangVersion>7.3</LangVersion>
         <AssemblyName>Box2DSharp</AssemblyName>
         <RootNamespace>Box2DSharp</RootNamespace>
         <Version>0.0.4</Version>
@@ -13,6 +13,11 @@
         <RepositoryUrl>https://github.com/Zonciu/Box2DSharp</RepositoryUrl>
         <Copyright>Copyright © Zonciu Liang 2018</Copyright>
         <Description>A C# port of Box2D</Description>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <DebugType>full</DebugType>
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>

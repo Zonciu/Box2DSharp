@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -81,9 +82,11 @@ namespace Box2DSharp.Dynamics
                 _allowSleep = value;
                 if (_allowSleep == false)
                 {
-                    foreach (var b in BodyList)
+                    var node = BodyList.First;
+                    while (node != null)
                     {
-                        b.IsAwake = true;
+                        node.Value.IsAwake = true;
+                        node = node.Next;
                     }
                 }
             }
@@ -164,23 +167,6 @@ namespace Box2DSharp.Dynamics
             Profile = new Profile();
         }
 
-        ~World()
-        {
-            // Some shapes allocate using b2Alloc.
-            var b = BodyList.First;
-            while (b != null)
-            {
-                var bNext = b.Next;
-
-                foreach (var t in b.Value.Fixtures)
-                {
-                    Fixture.Destroy(t);
-                }
-
-                b = bNext;
-            }
-        }
-
         internal void NotifyNewFixture()
         {
             _hasNewFixture = true;
@@ -222,7 +208,7 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         /// <param name="def"></param>
         /// <returns></returns>
-        public Body CreateBody(BodyDef def)
+        public Body CreateBody(in BodyDef def)
         {
             Debug.Assert(IsLocked == false);
             if (IsLocked) // 世界锁定时无法创建物体
@@ -235,8 +221,7 @@ namespace Box2DSharp.Dynamics
 
             // Add to world doubly linked list.
             // 添加物体到物体链表头部
-            var bodyNode = BodyList.AddFirst(body);
-            body.Node = bodyNode;
+            body.Node = BodyList.AddFirst(body);
             return body;
         }
 
@@ -271,12 +256,12 @@ namespace Box2DSharp.Dynamics
 
             // Delete the attached contacts.
             // 删除所有挂载的接触点
-            var contactEdgePointer = body.ContactEdges.First;
-            while (contactEdgePointer != default)
+            var contactEdge = body.ContactEdges.First;
+            while (contactEdge != default)
             {
-                var next = contactEdgePointer.Next;
-                ContactManager.Destroy(contactEdgePointer.Value.Contact);
-                contactEdgePointer = next;
+                var next = contactEdge.Next;
+                ContactManager.Destroy(contactEdge.Value.Contact);
+                contactEdge = next;
             }
 
             // Delete the attached fixtures. This destroys broad-phase proxies.
@@ -313,8 +298,7 @@ namespace Box2DSharp.Dynamics
 
             // Connect to the world list.
             // 添加到关节列表头部
-            var jointNode = JointList.AddFirst(j);
-            j.Node = jointNode;
+            j.Node = JointList.AddFirst(j);
 
             // Connect to the bodies' doubly linked lists.
             // 连接到物体的双向链表中
@@ -332,13 +316,16 @@ namespace Box2DSharp.Dynamics
             // If the joint prevents collisions, then flag any contacts for filtering.
             if (def.CollideConnected == false)
             {
-                foreach (var edge in bodyB.ContactEdges)
+                var node = bodyB.ContactEdges.First;
+                while (node != null)
                 {
-                    if (edge.Other == bodyA)
+                    var contactEdge = node.Value;
+                    node = node.Next;
+                    if (contactEdge.Other == bodyA)
                     {
                         // Flag the contact for filtering at the next time step (where either
                         // body is awake).
-                        edge.Contact.FlagForFiltering();
+                        contactEdge.Contact.FlagForFiltering();
                     }
                 }
             }
@@ -362,30 +349,33 @@ namespace Box2DSharp.Dynamics
 
             // Remove from the doubly linked list.
             JointList.Remove(joint.Node);
-            joint.Node = null;
 
             // Disconnect from island graph.
             // Wake up connected bodies.
             var bodyA = joint.BodyA;
             bodyA.IsAwake = true;
             bodyA.JointEdges.Remove(joint.EdgeA.Node);
-            joint.EdgeA.Node = null;
 
             var bodyB = joint.BodyB;
             bodyB.IsAwake = true;
             bodyB.JointEdges.Remove(joint.EdgeB.Node);
-            joint.EdgeB.Node = null;
 
             Debug.Assert(JointList.Count > 0);
 
             // If the joint prevents collisions, then flag any contacts for filtering.
             if (collideConnected == false)
             {
-                foreach (var contactEdge in bodyB.ContactEdges.Where(e => e.Other == bodyA))
+                var node = bodyB.ContactEdges.First;
+                while (node != null)
                 {
-                    // Flag the contact for filtering at the next time step (where either
-                    // body is awake).
-                    contactEdge.Contact.FlagForFiltering();
+                    var contactEdge = node.Value;
+                    node = node.Next;
+                    if (contactEdge.Other == bodyA)
+                    {
+                        // Flag the contact for filtering at the next time step (where either
+                        // body is awake).
+                        contactEdge.Contact.FlagForFiltering();
+                    }
                 }
             }
         }
@@ -491,8 +481,11 @@ namespace Box2DSharp.Dynamics
         /// @see SetAutoClearForces
         public void ClearForces()
         {
-            foreach (var body in BodyList)
+            var bodyNode = BodyList.First;
+            while (bodyNode != null)
             {
+                var body = bodyNode.Value;
+                bodyNode = bodyNode.Next;
                 body.Force.SetZero();
                 body.Torque = 0.0f;
             }
@@ -561,16 +554,21 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            foreach (var b in BodyList)
+            var bodyNode = BodyList.First;
+            while (bodyNode != null)
             {
+                var b = bodyNode.Value;
+                bodyNode = bodyNode.Next;
                 b.Transform.Position -= newOrigin;
                 b.Sweep.C0 -= newOrigin;
                 b.Sweep.C -= newOrigin;
             }
 
-            foreach (var j in JointList)
+            var jointNode = JointList.First;
+            while (jointNode != null)
             {
-                j.ShiftOrigin(newOrigin);
+                jointNode.Value.ShiftOrigin(newOrigin);
+                jointNode = jointNode.Next;
             }
 
             ContactManager.BroadPhase.ShiftOrigin(newOrigin);
@@ -597,26 +595,36 @@ namespace Box2DSharp.Dynamics
 
             // Clear all the island flags.
             // 清除所有岛屿标志
-            foreach (var body in BodyList)
+            var bodyNode = BodyList.First;
+            while (bodyNode != null)
             {
-                body.UnsetFlag(BodyFlags.Island);
+                bodyNode.Value.UnsetFlag(BodyFlags.Island);
+                bodyNode = bodyNode.Next;
             }
 
-            foreach (var contact in ContactManager.ContactList)
+            var contactNode = ContactManager.ContactList.First;
+            while (contactNode != null)
             {
-                contact.Flags &= ~Contact.ContactFlag.IslandFlag;
+                contactNode.Value.Flags &= ~Contact.ContactFlag.IslandFlag;
+                contactNode = contactNode.Next;
             }
 
-            foreach (var joint in JointList)
+            var jointNode = JointList.First;
+            while (jointNode != null)
             {
-                joint.IslandFlag = false;
+                jointNode.Value.IslandFlag = false;
+                jointNode = jointNode.Next;
             }
 
             // Build and simulate all awake islands.
             var stackSize = BodyList.Count;
             var stack = new Stack<Body>(stackSize);
-            foreach (var body in BodyList)
+
+            bodyNode = BodyList.First;
+            while (bodyNode != null)
             {
+                var body = bodyNode.Value;
+                bodyNode = bodyNode.Next;
                 if (body.HasFlag(BodyFlags.Island)) // 已经分配到岛屿则跳过
                 {
                     continue;
@@ -663,13 +671,17 @@ namespace Box2DSharp.Dynamics
 
                     // Search all contacts connected to this body.
                     // 查找该物体所有接触点
-                    foreach (var contactEdge in b.ContactEdges)
+                    var node = b.ContactEdges.First;
+                    while (node != null)
                     {
+                        var contactEdge = node.Value;
+                        node = node.Next;
+
                         var contact = contactEdge.Contact;
 
                         // Has this contact already been added to an island?
                         // 接触点已经标记岛屿,跳过
-                        if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
+                        if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
                         {
                             continue;
                         }
@@ -709,8 +721,11 @@ namespace Box2DSharp.Dynamics
 
                     // Search all joints connect to this body.
                     // 将该物体的关节所关联的物体也加入到岛屿中
-                    foreach (var je in b.JointEdges)
+                    var jointEdgeNode = b.JointEdges.First;
+                    while (jointEdgeNode != null)
                     {
+                        var je = jointEdgeNode.Value;
+                        jointEdgeNode = jointEdgeNode.Next;
                         if (je.Joint.IslandFlag)
                         {
                             continue;
@@ -761,8 +776,12 @@ namespace Box2DSharp.Dynamics
                 var timer = Stopwatch.StartNew();
 
                 // Synchronize fixtures, check for out of range bodies.
-                foreach (var b in BodyList)
+                bodyNode = BodyList.First;
+                while (bodyNode != null)
                 {
+                    var b = bodyNode.Value;
+                    bodyNode = bodyNode.Next;
+
                     // If a body was not in an island then it did not move.
                     if (!b.HasFlag(BodyFlags.Island))
                     {
@@ -800,14 +819,21 @@ namespace Box2DSharp.Dynamics
 
             if (_stepComplete)
             {
-                foreach (var b in BodyList)
+                var bodyNode = BodyList.First;
+                while (bodyNode != null)
                 {
+                    var b = bodyNode.Value;
+                    bodyNode = bodyNode.Next;
                     b.UnsetFlag(BodyFlags.Island);
                     b.Sweep.Alpha0 = 0.0f;
                 }
 
-                foreach (var c in ContactManager.ContactList)
+                var contactNode = ContactManager.ContactList.First;
+                while (contactNode != null)
                 {
+                    var c = contactNode.Value;
+                    contactNode = contactNode.Next;
+
                     // Invalidate TOI
                     c.Flags &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
                     c.ToiCount = 0;
@@ -822,8 +848,12 @@ namespace Box2DSharp.Dynamics
                 Contact minContact = null;
                 var minAlpha = 1.0f;
 
-                foreach (var c in ContactManager.ContactList)
+                var contactNode = ContactManager.ContactList.First;
+                while (contactNode != null)
                 {
+                    var c = contactNode.Value;
+                    contactNode = contactNode.Next;
+
                     // Is this contact disabled?
                     if (c.IsEnabled() == false)
                     {
@@ -837,7 +867,7 @@ namespace Box2DSharp.Dynamics
                     }
 
                     var alpha = 1.0f;
-                    if (c.Flags.HasFlag(Contact.ContactFlag.ToiFlag))
+                    if (c.HasFlag(Contact.ContactFlag.ToiFlag))
                     {
                         // This contact has a valid cached TOI.
                         alpha = c.Toi;
@@ -911,14 +941,7 @@ namespace Box2DSharp.Dynamics
 
                         // Beta is the fraction of the remaining portion of the .
                         var beta = output.Time;
-                        if (output.State == ToiOutput.ToiState.Touching)
-                        {
-                            alpha = Math.Min(alpha0 + (1.0f - alpha0) * beta, 1.0f);
-                        }
-                        else
-                        {
-                            alpha = 1.0f;
-                        }
+                        alpha = output.State == ToiOutput.ToiState.Touching ? Math.Min(alpha0 + (1.0f - alpha0) * beta, 1.0f) : 1.0f;
 
                         c.Toi = alpha;
                         c.Flags |= Contact.ContactFlag.ToiFlag;
@@ -992,8 +1015,12 @@ namespace Box2DSharp.Dynamics
                     var body = bodies[i];
                     if (body.BodyType == BodyType.DynamicBody)
                     {
-                        foreach (var ce in body.ContactEdges)
+                        var node = body.ContactEdges.First;
+                        while (node != null)
                         {
+                            var contactEdge = node.Value;
+                            node = node.Next;
+
                             if (island.BodyCount == island.Bodies.Length)
                             {
                                 break;
@@ -1004,16 +1031,16 @@ namespace Box2DSharp.Dynamics
                                 break;
                             }
 
-                            var contact = ce.Contact;
+                            var contact = contactEdge.Contact;
 
                             // Has this contact already been added to the island?
-                            if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
+                            if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
                             {
                                 continue;
                             }
 
                             // Only add static, kinematic, or bullet bodies.
-                            var other = ce.Other;
+                            var other = contactEdge.Other;
                             if (other.BodyType == BodyType.DynamicBody
                              && body.IsBullet == false
                              && other.IsBullet == false)
@@ -1102,9 +1129,11 @@ namespace Box2DSharp.Dynamics
                     body.SynchronizeFixtures();
 
                     // Invalidate all contact TOIs on this displaced body.
-                    foreach (var ce in body.ContactEdges)
+                    var node = bodyB.ContactEdges.First;
+                    while (node != null)
                     {
-                        ce.Contact.Flags &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
+                        node.Value.Contact.Flags &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
+                        node = node.Next;
                     }
                 }
 
@@ -1206,8 +1235,11 @@ namespace Box2DSharp.Dynamics
 
             if (flags.HasFlag(DrawFlag.DrawShape))
             {
-                foreach (var b in BodyList)
+                var node = BodyList.First;
+                while (node != null)
                 {
+                    var b = node.Value;
+                    node = node.Next;
                     var xf = b.GetTransform();
                     var isActive = b.IsActive;
                     var isAwake = b.IsAwake;
@@ -1239,17 +1271,22 @@ namespace Box2DSharp.Dynamics
 
             if (flags.HasFlag(DrawFlag.DrawJoint))
             {
-                foreach (var j in JointList)
+                var node = JointList.First;
+                while (node != null)
                 {
-                    DrawJoint(j);
+                    DrawJoint(node.Value);
+                    node = node.Next;
                 }
             }
 
             if (flags.HasFlag(DrawFlag.DrawPair))
             {
                 var color = Color.FromArgb(77, 230, 230);
-                foreach (var c in ContactManager.ContactList)
+                var node = ContactManager.ContactList.First;
+                while (node != null)
                 {
+                    var c = node.Value;
+                    node = node.Next;
                     var fixtureA = c.GetFixtureA();
                     var fixtureB = c.GetFixtureB();
 
@@ -1265,8 +1302,11 @@ namespace Box2DSharp.Dynamics
                 var color = Color.FromArgb(230, 77, 230);
                 var bp = ContactManager.BroadPhase;
 
-                foreach (var b in BodyList)
+                var node = BodyList.First;
+                while (node != null)
                 {
+                    var b = node.Value;
+                    node = node.Next;
                     if (b.IsActive == false)
                     {
                         continue;
@@ -1291,8 +1331,11 @@ namespace Box2DSharp.Dynamics
 
             if (flags.HasFlag(DrawFlag.DrawCenterOfMass))
             {
-                foreach (var b in BodyList)
+                var node = BodyList.First;
+                while (node != null)
                 {
+                    var b = node.Value;
+                    node = node.Next;
                     var xf = b.GetTransform();
                     xf.Position = b.GetWorldCenter();
                     Drawer.DrawTransform(xf);

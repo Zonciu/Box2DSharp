@@ -238,7 +238,7 @@ namespace Box2DSharp.Collision
             var p2 = input.P2;
             var r = p2 - p1;
             Debug.Assert(r.LengthSquared() > 0.0f);
-            r.Normalize();
+            r = Vector2.Normalize(r);
 
             // v is perpendicular to the segment.
             var v = MathUtils.Cross(1.0f, r);

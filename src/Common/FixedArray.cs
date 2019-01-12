@@ -1,62 +1,8 @@
-using System;
-using System.Diagnostics;
-
 namespace Box2DSharp.Common
 {
-    public static class FixedArrayExtensions
-    {
-        public static ref T GetRef<T>(ref this FixedArray2<T> array, int index)
-        {
-            if (index > -1 && index < 2)
-            {
-                return ref array.Values[index];
-            }
-
-            throw new IndexOutOfRangeException($"invalid index {index}");
-        }
-
-        public static ref T GetRef<T>(ref this FixedArray3<T> array, int index)
-        {
-            if (index > -1 && index < 3)
-            {
-                return ref array.Values[index];
-            }
-
-            throw new IndexOutOfRangeException($"invalid index {index}");
-        }
-
-        public static ref T GetRef<T>(ref this FixedArray4<T> array, int index)
-        {
-            if (index > -1 && index < 4)
-            {
-                return ref array.Values[index];
-            }
-
-            throw new IndexOutOfRangeException($"invalid index {index}");
-        }
-
-        public static ref T GetRef<T>(ref this FixedArray8<T> array, int index)
-        {
-            if (index > -1 && index < 8)
-            {
-                return ref array.Values[index];
-            }
-
-            throw new IndexOutOfRangeException($"invalid index {index}");
-        }
-    }
-
     public struct FixedArray2<T>
     {
         public T[] Values;
-
-        public static FixedArray2<T> Create()
-        {
-            return new FixedArray2<T>()
-            {
-                Values = new T[2]
-            };
-        }
 
         public T Value0
         {
@@ -72,27 +18,13 @@ namespace Box2DSharp.Common
 
         public T this[int index]
         {
-            get
-            {
-                if (index > -1 && index < 2)
-                {
-                    return Values[index];
-                }
-
-                throw new IndexOutOfRangeException($"invalid index {index}");
-            }
-            set
-            {
-                if (index > -1 && index < 2)
-                {
-                    Values[index] = value;
-                }
-                else
-                {
-                    throw new IndexOutOfRangeException($"invalid index {index}");
-                }
-            }
+            get => Values[index];
+            set => Values[index] = value;
         }
+
+        public void Initialize() => Values = new T[2];
+
+        public static FixedArray2<T> Create() => new FixedArray2<T>() {Values = new T[2]};
     }
 
     public struct FixedArray3<T>
@@ -117,37 +49,15 @@ namespace Box2DSharp.Common
             set => Values[2] = value;
         }
 
-        public static FixedArray3<T> Create()
-        {
-            return new FixedArray3<T>()
-            {
-                Values = new T[3]
-            };
-        }
-
         public T this[int index]
         {
-            get
-            {
-                if (index > -1 && index < 3)
-                {
-                    return Values[index];
-                }
-
-                throw new IndexOutOfRangeException($"invalid index {index}");
-            }
-            set
-            {
-                if (index > -1 && index < 3)
-                {
-                    Values[index] = value;
-                }
-                else
-                {
-                    throw new IndexOutOfRangeException($"invalid index {index}");
-                }
-            }
+            get => Values[index];
+            set => Values[index] = value;
         }
+
+        public void Initialize() => Values = new T[3];
+
+        public static FixedArray3<T> Create() => new FixedArray3<T>() {Values = new T[3]};
     }
 
     public struct FixedArray4<T>
@@ -178,37 +88,15 @@ namespace Box2DSharp.Common
             set => Values[3] = value;
         }
 
-        public static FixedArray4<T> Create()
-        {
-            return new FixedArray4<T>()
-            {
-                Values = new T[4]
-            };
-        }
-
         public T this[int index]
         {
-            get
-            {
-                if (index > -1 && index < 4)
-                {
-                    return Values[index];
-                }
-
-                throw new IndexOutOfRangeException($"invalid index {index}");
-            }
-            set
-            {
-                if (index > -1 && index < 4)
-                {
-                    Values[index] = value;
-                }
-                else
-                {
-                    throw new IndexOutOfRangeException($"invalid index {index}");
-                }
-            }
+            get => Values[index];
+            set => Values[index] = value;
         }
+
+        public void Initialize() => Values = new T[4];
+
+        public static FixedArray4<T> Create() => new FixedArray4<T>() {Values = new T[4]};
     }
 
     public struct FixedArray8<T>
@@ -263,36 +151,14 @@ namespace Box2DSharp.Common
             set => Values[7] = value;
         }
 
-        public static FixedArray8<T> Create()
-        {
-            return new FixedArray8<T>()
-            {
-                Values = new T[8]
-            };
-        }
-
         public T this[int index]
         {
-            get
-            {
-                if (index > -1 && index < 8)
-                {
-                    return Values[index];
-                }
-
-                throw new IndexOutOfRangeException($"invalid index {index}");
-            }
-            set
-            {
-                if (index > -1 && index < 8)
-                {
-                    Values[index] = value;
-                }
-                else
-                {
-                    throw new IndexOutOfRangeException($"invalid index {index}");
-                }
-            }
+            get => Values[index];
+            set => Values[index] = value;
         }
+
+        public void Initialize() => Values = new T[8];
+
+        public static FixedArray8<T> Create() => new FixedArray8<T>() {Values = new T[8]};
     }
 }

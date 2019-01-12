@@ -61,9 +61,9 @@ namespace Box2DSharp
             QuitButton = GameObject.Find("QuitButton").GetComponent<Button>()
                       ?? throw new NullReferenceException("QuitButton not found");
 
-            SingleStepButton.onClick.AddListener(() => Settings.SingleStep = true);
+            SingleStepButton.onClick.AddListener(SingleStep);
             RestartButton.onClick.AddListener(Restart);
-            PauseButton.onClick.AddListener(() => Settings.Pause = !Settings.Pause);
+            PauseButton.onClick.AddListener(Pause);
             QuitButton.onClick.AddListener(Application.Quit);
 
             _testTypes = typeof(TestBase).Assembly.GetTypes()
@@ -140,9 +140,14 @@ namespace Box2DSharp
                 Restart();
             }
 
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (Input.GetKeyDown(KeyCode.P))
             {
-                Application.Quit();
+                Pause();
+            }
+
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                SingleStep();
             }
         }
 
@@ -161,6 +166,16 @@ namespace Box2DSharp
         private void Restart()
         {
             SetTest(_currentTest);
+        }
+
+        private void Pause()
+        {
+            Settings.Pause = !Settings.Pause;
+        }
+
+        private void SingleStep()
+        {
+            Settings.SingleStep = true;
         }
 
         private void SetTest(Type type)

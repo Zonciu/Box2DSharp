@@ -96,7 +96,7 @@ namespace Box2DSharp.Dynamics
 
         /// We need separation create/destroy functions from the constructor/destructor because
         /// the destructor cannot access the allocator (no destructor arguments allowed by C++).
-        internal static Fixture Create(Body body, FixtureDef def)
+        internal static Fixture Create(Body body, in FixtureDef def)
         {
             var childCount = def.Shape.GetChildCount();
 
@@ -167,10 +167,11 @@ namespace Box2DSharp.Dynamics
             }
 
             // Flag associated contacts for filtering.
-
-            foreach (var edge in Body.ContactEdges)
+            var node = Body.ContactEdges.First;
+            while (node != null)
             {
-                var contact = edge.Contact;
+                var contact = node.Value.Contact;
+                node = node.Next;
                 if (contact.FixtureA == this || contact.FixtureB == this)
                 {
                     contact.FlagForFiltering();
@@ -387,16 +388,28 @@ namespace Box2DSharp.Dynamics
 
     /// A fixture definition is used to create a fixture. This class defines an
     /// abstract fixture definition. You can reuse fixture definitions safely.
-    public class FixtureDef
+    public struct FixtureDef
     {
         /// The density, usually in kg/m^2.
         public float Density;
 
+        private Filter? _filter;
+
         /// Contact filtering data.
-        public Filter Filter;
+        public Filter Filter
+        {
+            get => _filter ?? Filter.Default;
+            set => _filter = value;
+        }
+
+        private float? _friction;
 
         /// The friction coefficient, usually in the range [0,1].
-        public float Friction;
+        public float Friction
+        {
+            get => _friction ?? 0.2f;
+            set => _friction = value;
+        }
 
         /// A sensor shape collects contact information but never generates a collision
         /// response.
@@ -411,18 +424,6 @@ namespace Box2DSharp.Dynamics
 
         /// Use this to store application specific fixture data.
         public object UserData;
-
-        /// The constructor sets the default fixture definition values.
-        public FixtureDef()
-        {
-            Shape = null;
-            UserData = null;
-            Friction = 0.2f;
-            Restitution = 0.0f;
-            Density = 0.0f;
-            IsSensor = false;
-            Filter = Filter.Default;
-        }
     }
 
     /// <summary>

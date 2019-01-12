@@ -140,7 +140,7 @@ namespace Box2DSharp.Collision
                     n.Set(-n.X, -n.Y);
                 }
 
-                n.Normalize();
+                n = Vector2.Normalize(n);
 
                 cf.IndexA = 0;
                 cf.TypeA = (byte) ContactFeature.FeatureType.Face;
@@ -286,7 +286,7 @@ namespace Box2DSharp.Collision
                 var hasVertex3 = edgeA.HasVertex3;
 
                 var edge1 = V2 - V1;
-                edge1.Normalize();
+                edge1 = Vector2.Normalize(edge1);
                 Normal1.Set(edge1.Y, -edge1.X);
                 var offset1 = MathUtils.Dot(Normal1, CentroidB - V1);
                 float offset0 = 0.0f, offset2 = 0.0f;
@@ -296,7 +296,7 @@ namespace Box2DSharp.Collision
                 if (hasVertex0)
                 {
                     var edge0 = V1 - V0;
-                    edge0.Normalize();
+                    edge0 = Vector2.Normalize(edge0);
                     Normal0.Set(edge0.Y, -edge0.X);
                     convex1 = MathUtils.Cross(edge0, edge1) >= 0.0f;
                     offset0 = MathUtils.Dot(Normal0, CentroidB - V0);
@@ -306,7 +306,7 @@ namespace Box2DSharp.Collision
                 if (hasVertex3)
                 {
                     var edge2 = V3 - V2;
-                    edge2.Normalize();
+                    edge2 = Vector2.Normalize(edge2);
                     Normal2.Set(edge2.Y, -edge2.X);
                     convex2 = MathUtils.Cross(edge1, edge2) > 0.0f;
                     offset2 = MathUtils.Dot(Normal2, CentroidB - V2);
@@ -645,7 +645,7 @@ namespace Box2DSharp.Collision
 
                     if (separation <= Radius)
                     {
-                        ref var cp = ref manifold.Points.GetRef(pointCount);
+                        ref var cp = ref manifold.Points.Values[pointCount];
 
                         if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                         {

@@ -180,7 +180,7 @@ namespace Box2DSharp.Collision.Shapes
                 var edge = Vertices[i2] - Vertices[i1];
                 Debug.Assert(edge.LengthSquared() > Settings.Epsilon * Settings.Epsilon);
                 Normals[i] = MathUtils.Cross(edge, 1.0f);
-                Normals[i].Normalize();
+                Normals[i] = Vector2.Normalize(Normals[i]);
             }
 
             // Compute the polygon centroid.

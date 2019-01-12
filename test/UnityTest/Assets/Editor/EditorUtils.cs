@@ -1,5 +1,8 @@
+using System;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,6 +28,24 @@ namespace Box2DSharp.Editor
                 p.y = -i * 25;
                 toggle.anchoredPosition = p;
             }
+        }
+
+        [MenuItem("Assets/Box2D/Show Tests")]
+        public static void ShowTests()
+        {
+            var testNames = typeof(TestBase)
+                           .Assembly.GetTypes()
+                           .Where(e => e.BaseType == typeof(TestBase))
+                           .Select(e => (Regex.Replace(e.Name, @"(\B[A-Z])", " $1")))
+                           .ToArray();
+            Array.Sort(testNames);
+            var sb = new StringBuilder();
+            foreach (var testName in testNames)
+            {
+                sb.AppendLine($"* [x] {testName}");
+            }
+
+            Debug.Log(sb.ToString());
         }
     }
 }

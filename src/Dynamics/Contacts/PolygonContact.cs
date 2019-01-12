@@ -16,7 +16,7 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Debug.Assert(fixtureA.ShapeType == ShapeType.Polygon);
             Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
-            var contact = _pool.Get();
+            var contact = new PolygonContact();
             contact.Initialize(fixtureA, 0, fixtureB, 0);
             return contact;
         }

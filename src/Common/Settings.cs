@@ -1,10 +1,12 @@
+using System;
+
 namespace Box2DSharp.Common
 {
     public static class Settings
     {
         public const float MaxFloat = float.MaxValue;
 
-        public const float Epsilon = float.Epsilon;
+        public const float Epsilon = 1.192092896e-7f;
 
         public const float Pi = 3.14159265359f;
 

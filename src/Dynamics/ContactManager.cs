@@ -12,11 +12,11 @@ namespace Box2DSharp.Dynamics
 
         public static readonly IContactListener DefaultContactListener = new NullContactListener();
 
-        public BroadPhase BroadPhase = new BroadPhase();
+        public readonly BroadPhase BroadPhase = new BroadPhase();
 
         public IContactFilter ContactFilter = DefaultContactFilter;
 
-        public LinkedList<Contact> ContactList = new LinkedList<Contact>();
+        public readonly LinkedList<Contact> ContactList = new LinkedList<Contact>();
 
         public IContactListener ContactListener = DefaultContactListener;
 
@@ -41,32 +41,28 @@ namespace Box2DSharp.Dynamics
             // TODO_ERIN use a hash table to remove a potential bottleneck when both
             // bodies have a lot of contacts.
             // Does a contact already exist?
-            if (bodyB.ContactEdges
-                     .Where(e => e.Other == bodyA)
-                     .Any(
-                          edge =>
-                          {
-                              var fA = edge.Contact.GetFixtureA();
-                              var fB = edge.Contact.GetFixtureB();
-                              var iA = edge.Contact.GetChildIndexA();
-                              var iB = edge.Contact.GetChildIndexB();
-
-                              if (fA == fixtureA && fB == fixtureB && iA == indexA && iB == indexB)
-                              {
-                                  // A contact already exists.
-                                  return true;
-                              }
-
-                              if (fA == fixtureB && fB == fixtureA && iA == indexB && iB == indexA)
-                              {
-                                  // A contact already exists.
-                                  return true;
-                              }
-
-                              return false;
-                          }))
+            var node1 = bodyB.ContactEdges.First;
+            while (node1 != null)
             {
-                return;
+                var contactEdge = node1.Value;
+                node1 = node1.Next;
+
+                var fA = contactEdge.Contact.GetFixtureA();
+                var fB = contactEdge.Contact.GetFixtureB();
+                var iA = contactEdge.Contact.GetChildIndexA();
+                var iB = contactEdge.Contact.GetChildIndexB();
+
+                if (fA == fixtureA && fB == fixtureB && iA == indexA && iB == indexB)
+                {
+                    // A contact already exists.
+                    return;
+                }
+
+                if (fA == fixtureB && fB == fixtureA && iA == indexB && iB == indexA)
+                {
+                    // A contact already exists.
+                    return;
+                }
             }
 
             // Does a joint override collision? Is at least one body dynamic?
@@ -101,22 +97,19 @@ namespace Box2DSharp.Dynamics
             bodyB = fixtureB.Body;
 
             // Insert into the world.
-            var node = ContactList.AddFirst(c);
-            c.Node = node;
+            c.Node = ContactList.AddFirst(c);
 
             // Connect to island graph.
 
             // Connect to body A
             c.NodeA.Contact = c;
             c.NodeA.Other = bodyB;
-            var nodeA = bodyA.ContactEdges.AddFirst(c.NodeA);
-            c.NodeA.Node = nodeA;
+            c.NodeA.Node = bodyA.ContactEdges.AddFirst(c.NodeA);
 
             // Connect to body B
             c.NodeB.Contact = c;
             c.NodeB.Other = bodyA;
-            var nodeB = bodyB.ContactEdges.AddFirst(c.NodeB);
-            c.NodeB.Node = nodeB;
+            c.NodeB.Node = bodyB.ContactEdges.AddFirst(c.NodeB);
 
             // Wake up the bodies
             if (fixtureA.IsSensor == false && fixtureB.IsSensor == false)
@@ -144,16 +137,13 @@ namespace Box2DSharp.Dynamics
             }
 
             // Remove from the world.
-            ContactList.Remove(c);
-            c.Node = null;
+            ContactList.Remove(c.Node);
 
             // Remove from body 1
             bodyA.ContactEdges.Remove(c.NodeA.Node);
-            c.NodeA.Node = null;
 
             // Remove from body 2
             bodyB.ContactEdges.Remove(c.NodeB.Node);
-            c.NodeB.Node = null;
 
             // Call the factory.
             Contact.DestroyContact(c);
@@ -176,7 +166,7 @@ namespace Box2DSharp.Dynamics
                 var bodyB = fixtureB.Body;
 
                 // Is this contact flagged for filtering?
-                if (c.Flags.HasFlag(Contact.ContactFlag.FilterFlag))
+                if (c.HasFlag(Contact.ContactFlag.FilterFlag))
                 {
                     // Should these bodies collide?
                     if (!bodyB.ShouldCollide(bodyA))

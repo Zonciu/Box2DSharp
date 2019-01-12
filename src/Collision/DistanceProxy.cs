@@ -191,8 +191,8 @@ namespace Box2DSharp.Collision
                 saveCount = simplex.Count;
                 for (var i = 0; i < saveCount; ++i)
                 {
-                    saveA[i] = vertices.GetRef(i).IndexA;
-                    saveB[i] = vertices.GetRef(i).IndexB;
+                    saveA[i] = vertices.Values[i].IndexA;
+                    saveB[i] = vertices.Values[i].IndexB;
                 }
 
                 switch (simplex.Count)
@@ -234,7 +234,7 @@ namespace Box2DSharp.Collision
                 }
 
                 // Compute a tentative new simplex vertex using support points.
-                ref var vertex = ref vertices.GetRef(simplex.Count);
+                ref var vertex = ref vertices.Values[simplex.Count];
                 vertex.IndexA = proxyA.GetSupport(MathUtils.MulT(transformA.Rotation, -d));
                 vertex.Wa = MathUtils.Mul(transformA, proxyA.GetVertex(vertex.IndexA));
 
@@ -289,7 +289,7 @@ namespace Box2DSharp.Collision
                     // Move the witness points to the outer surface.
                     output.Distance -= rA + rB;
                     var normal = output.PointB - output.PointA;
-                    normal.Normalize();
+                    normal = Vector2.Normalize(normal);
                     output.PointA += rA * normal;
                     output.PointB -= rB * normal;
                 }
@@ -364,7 +364,7 @@ namespace Box2DSharp.Collision
                 var p = wA - wB;
 
                 // -v is a normal at p
-                v.Normalize();
+                v = Vector2.Normalize(v);
 
                 // Intersect ray with plane
                 var vp = MathUtils.Dot(v, p);
@@ -390,7 +390,7 @@ namespace Box2DSharp.Collision
                 // Shift by lambda * r because we want the closest point to the current clip point.
                 // Note that the support point p is not shifted because we want the plane equation
                 // to be formed in unshifted space.
-                ref var vertex = ref simplex.Vertices.GetRef(simplex.Count);
+                ref var vertex = ref simplex.Vertices.Values[simplex.Count];
                 vertex.IndexA = indexB;
                 vertex.Wa = wB + lambda * r;
                 vertex.IndexB = indexA;
@@ -438,7 +438,7 @@ namespace Box2DSharp.Collision
             if (v.LengthSquared() > 0.0f)
             {
                 n = -v;
-                n.Normalize();
+                n = Vector2.Normalize(n);
             }
 
             output.Point = pointA + radiusA * n;
