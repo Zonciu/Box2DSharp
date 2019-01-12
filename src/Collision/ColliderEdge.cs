@@ -333,7 +333,7 @@ namespace Box2DSharp.Collision
                     }
                     else if (convex1)
                     {
-                        Front = offset0 >= 0.0f || offset1 >= 0.0f && offset2 >= 0.0f;
+                        Front = offset0 >= 0.0f || (offset1 >= 0.0f && offset2 >= 0.0f);
                         if (Front)
                         {
                             Normal = Normal1;
@@ -349,7 +349,7 @@ namespace Box2DSharp.Collision
                     }
                     else if (convex2)
                     {
-                        Front = offset2 >= 0.0f || offset0 >= 0.0f && offset1 >= 0.0f;
+                        Front = offset2 >= 0.0f || (offset0 >= 0.0f && offset1 >= 0.0f);
                         if (Front)
                         {
                             Normal = Normal1;
@@ -472,7 +472,7 @@ namespace Box2DSharp.Collision
                 for (var i = 0; i < polygonB.Count; ++i)
                 {
                     PolygonB.Vertices[i] = MathUtils.Mul(Transform, polygonB.Vertices[i]);
-                    PolygonB.Normals[i] = MathUtils.Mul(Transform.Rotation, polygonB.Vertices[i]);
+                    PolygonB.Normals[i] = MathUtils.Mul(Transform.Rotation, polygonB.Normals[i]);
                 }
 
                 Radius = polygonB.Radius + edgeA.Radius;
