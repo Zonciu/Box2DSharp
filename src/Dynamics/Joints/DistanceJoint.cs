@@ -167,11 +167,11 @@ namespace Box2DSharp.Dynamics.Joints
             var invMass = _invMassA + _invIa * crAu * crAu + _invMassB + _invIb * crBu * crBu;
 
             // Compute the effective mass matrix.
-            _mass = !invMass.Equals(0.0f) ? 1.0f / invMass : 0.0f;
+            _mass = Math.Abs(invMass) > Settings.Epsilon ? 1.0f / invMass : 0.0f;
 
             if (FrequencyHz > 0.0f)
             {
-                var C = length - length;
+                var C = length - Length;
 
                 // Frequency
                 var omega = 2.0f * Settings.Pi * FrequencyHz;
@@ -189,7 +189,7 @@ namespace Box2DSharp.Dynamics.Joints
                 _bias = C * h * k * _gamma;
 
                 invMass += _gamma;
-                _mass = !invMass.Equals(0.0f) ? 1.0f / invMass : 0.0f;
+                _mass = Math.Abs(invMass) > Settings.Epsilon ? 1.0f / invMass : 0.0f;
             }
             else
             {
