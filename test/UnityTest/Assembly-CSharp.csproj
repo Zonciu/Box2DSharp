@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
@@ -57,6 +57,108 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Box2D\Collision\AABB.cs" />
+    <Compile Include="Assets\Box2D\Collision\BroadPhase.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\ClipVertex.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\ContactFeature.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\ContactID.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\Manifold.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\ManifoldPoint.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\ManifoldType.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\PointState.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\RayCastInput.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\RayCastOutput.cs" />
+    <Compile Include="Assets\Box2D\Collision\Collider\WorldManifold.cs" />
+    <Compile Include="Assets\Box2D\Collision\ColliderCircle.cs" />
+    <Compile Include="Assets\Box2D\Collision\ColliderEdge.cs" />
+    <Compile Include="Assets\Box2D\Collision\ColliderPolygon.cs" />
+    <Compile Include="Assets\Box2D\Collision\CollisionUtils.cs" />
+    <Compile Include="Assets\Box2D\Collision\DistanceInput.cs" />
+    <Compile Include="Assets\Box2D\Collision\DistanceOutput.cs" />
+    <Compile Include="Assets\Box2D\Collision\DistanceProxy.cs" />
+    <Compile Include="Assets\Box2D\Collision\DynamicTree.cs" />
+    <Compile Include="Assets\Box2D\Collision\ShapeCastInput.cs" />
+    <Compile Include="Assets\Box2D\Collision\ShapeCastOutput.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\ChainShape.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\CircleShape.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\EdgeShape.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\MassData.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\PolygonShape.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\Shape.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\ShapeType.cs" />
+    <Compile Include="Assets\Box2D\Collision\Shapes\Sweep.cs" />
+    <Compile Include="Assets\Box2D\Collision\Simplex.cs" />
+    <Compile Include="Assets\Box2D\Collision\SimplexCache.cs" />
+    <Compile Include="Assets\Box2D\Collision\SimplexVertex.cs" />
+    <Compile Include="Assets\Box2D\Collision\TimeOfImpact.cs" />
+    <Compile Include="Assets\Box2D\Common\Drawer.cs" />
+    <Compile Include="Assets\Box2D\Common\DrawFlag.cs" />
+    <Compile Include="Assets\Box2D\Common\FixedArray.cs" />
+    <Compile Include="Assets\Box2D\Common\Logger.cs" />
+    <Compile Include="Assets\Box2D\Common\MathExtensions.cs" />
+    <Compile Include="Assets\Box2D\Common\MathUtils.cs" />
+    <Compile Include="Assets\Box2D\Common\Matrix2x2.cs" />
+    <Compile Include="Assets\Box2D\Common\Matrix3x3.cs" />
+    <Compile Include="Assets\Box2D\Common\Rotation.cs" />
+    <Compile Include="Assets\Box2D\Common\Settings.cs" />
+    <Compile Include="Assets\Box2D\Common\Transform.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Body.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\BodyFlags.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Callbacks.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\ContactManager.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ChainAndCircleContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ChainAndPolygonContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\CircleContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\Contact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactEdge.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactImpulse.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactPoolPolicy.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactPositionConstraint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactSolve.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactSolverDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactVelocityConstraint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\EdgeAndCircleContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\EdgeAndPolygonContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\PolygonAndCircleContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\PolygonContact.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\PositionSolverManifold.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Contacts\VelocityConstraintPoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\DefaultContactFilter.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Fixture.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\IContactFilter.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\IContactListener.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\IDestructionListener.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Island.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\DistanceJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\DistanceJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\FrictionJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\FrictionJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\GearJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\GearJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\Joints.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\MotorJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\MotorJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\MouseJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\MouseJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\PrismaticJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\PrismaticJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\PulleyJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\PulleyJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\RevoluteJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\RevoluteJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\RopeJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\RopeJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\WeldJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\WeldJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\WheelJoint.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Joints\WheelJointDef.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\NullContactListener.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Position.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Profile.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\SolverData.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\TimeStep.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\Velocity.cs" />
+    <Compile Include="Assets\Box2D\Dynamics\World.cs" />
     <Compile Include="Assets\BoxDrawer.cs" />
     <Compile Include="Assets\FrameManager.cs" />
     <Compile Include="Assets\Inspection\BoundBase.cs" />
@@ -298,9 +400,6 @@
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>D:/Program Files/Unity/2018.3.1f1/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
-    </Reference>
-    <Reference Include="Box2DSharp">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.ObjectPool">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>

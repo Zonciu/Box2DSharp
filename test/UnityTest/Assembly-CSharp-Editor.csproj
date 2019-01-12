@@ -304,9 +304,6 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>D:/Program Files/Unity/2018.3.1f1/Editor/Data/PlaybackEngines/windowsstandalonesupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Box2DSharp">
-      <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Box2DSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Extensions.ObjectPool">
       <HintPath>E:/dev/Box2DSharp/test/UnityTest/Assets/Box2D/Microsoft.Extensions.ObjectPool.dll</HintPath>
     </Reference>

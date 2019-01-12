@@ -32,4 +32,10 @@ packages/
 .DS_Store
 .vs/
 
-test/UnityTest/UnityTest\.sln\.DotSettings\.user
+*.DotSettings.user
+test/UnityTest/Assets/Box2D/Collision
+test/UnityTest/Assets/Box2D/Common
+test/UnityTest/Assets/Box2D/Dynamics
+test/UnityTest/Assets/Box2D/*.meta
+src/**/*.meta
+

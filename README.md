@@ -9,6 +9,9 @@ a174dbac1bc32e05e790cd867d9e30fb37681d47
 * Fixed link 
 ```
 
+# Unity test
+Run link.bat to link source code to Unity project
+
 # Test case
 * [x] Apply Force
 * [x] Basic Slider Crank
