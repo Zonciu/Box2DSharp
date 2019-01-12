@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Dynamics;
 using Box2DSharp.Inspection;
+using UnityEngine;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
@@ -22,6 +23,12 @@ namespace Box2DSharp.Tests
         public int MinHeight;
 
         private const int Count = 20;
+
+        private const int MaxBodies = 256;
+
+        private readonly Body[] _bodies = new Body[MaxBodies];
+
+        private int _bodyIndex;
 
         private void Start()
         {
@@ -71,6 +78,14 @@ namespace Box2DSharp.Tests
                     {
                         var bd = new BodyDef {BodyType = BodyType.DynamicBody, Position = y};
                         var body = World.CreateBody(bd);
+                        if (_bodies[_bodyIndex] != null)
+                        {
+                            World.DestroyBody(_bodies[_bodyIndex]);
+                            _bodies[_bodyIndex] = null;
+                        }
+
+                        _bodies[_bodyIndex] = body;
+                        _bodyIndex = (_bodyIndex + 1) % MaxBodies;
                         body.CreateFixture(shape, 5.0f);
                         ++fixtureCount;
                         y += deltaY;
@@ -86,6 +101,23 @@ namespace Box2DSharp.Tests
 
         protected override void PreStep()
         {
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                var j = 0;
+                for (var z = 0; z < MaxBodies; z += 2)
+                {
+                    if (_bodies[z] != null)
+                    {
+                        ++j;
+                        Console.WriteLine($"Deactive {j}");
+
+                        var active = _bodies[z].IsActive;
+                        _bodies[z].IsActive = !active;
+                        Console.WriteLine($"Deactived {j}");
+                    }
+                }
+            }
+
             DrawString($"create time = {CreateTime} ms, fixture count = {FixtureCount}");
             DrawString($"dynamic tree height = {DynamicTreeHeight}, min = {MinHeight}");
             var cm = World.ContactManager;

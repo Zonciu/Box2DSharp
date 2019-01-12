@@ -440,14 +440,23 @@ namespace Box2DSharp
             }
         }
 
-        public void MouseMove()
+        public void ShiftMouseDown()
         {
-            MouseJoint?.SetTarget(MouseWorld);
+            if (MouseJoint != null)
+            {
+                return;
+            }
+
+            SpawnBomb(MouseWorld);
         }
+
+        #region Bomb
 
         protected Vector2 BombSpawnPoint;
 
         protected bool BombSpawning;
+
+        protected Body Bomb;
 
         public void SpawnBomb(Vector2 worldPt)
         {
@@ -469,24 +478,12 @@ namespace Box2DSharp
             BombSpawning = false;
         }
 
-        public void ShiftMouseDown()
-        {
-            if (MouseJoint != null)
-            {
-                return;
-            }
-
-            SpawnBomb(MouseWorld);
-        }
-
         public void LaunchBomb()
         {
             var p = new Vector2(UnityEngine.Random.Range(-15.0f, 15.0f), 30.0f);
             var v = -5.0f * p;
             LaunchBomb(p, v);
         }
-
-        protected Body Bomb;
 
         public void LaunchBomb(Vector2 position, Vector2 velocity)
         {
@@ -515,6 +512,10 @@ namespace Box2DSharp
             Bomb.CreateFixture(fd);
         }
 
+        #endregion
+
+        #region DrawString
+
         private Rect _rect;
 
         private GUIStyle _style;
@@ -541,6 +542,8 @@ namespace Box2DSharp
             _stringBuilder.AppendLine(text);
         }
 
+        #endregion
+
         private readonly ContactPoint[] _points = new ContactPoint[2048];
 
         private int _pointsCount = 0;
@@ -554,7 +557,7 @@ namespace Box2DSharp
         { }
 
         /// <inheritdoc />
-        public void PreSolve(Contact contact, in Manifold oldManifold)
+        public virtual void PreSolve(Contact contact, in Manifold oldManifold)
         {
             ref readonly var manifold = ref contact.GetManifold();
 
@@ -587,7 +590,7 @@ namespace Box2DSharp
         }
 
         /// <inheritdoc />
-        public void PostSolve(Contact contact, in ContactImpulse impulse)
+        public virtual void PostSolve(Contact contact, in ContactImpulse impulse)
         { }
 
         private void OnDestroy()

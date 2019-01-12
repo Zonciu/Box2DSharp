@@ -27,12 +27,10 @@ namespace Box2DSharp.Tests
 
                 var shape = new EdgeShape();
 
-                var sd = new FixtureDef
-                {
-                    Shape = shape,
-                    Density = 0.0f,
-                    Restitution = restitution
-                };
+                var sd = new FixtureDef();
+                sd.Shape = shape;
+                sd.Density = 0.0f;
+                sd.Restitution = restitution;
 
                 // Left vertical
                 shape.Set(new Vector2(-20.0f, -20.0f), new Vector2(-20.0f, 20.0f));
@@ -61,15 +59,14 @@ namespace Box2DSharp.Tests
                 vertices[1] = MathUtils.Mul(xf1, new Vector2(1.0f, 0.0f));
                 vertices[2] = MathUtils.Mul(xf1, new Vector2(0.0f, 0.5f));
 
-                var poly1 = new CircleShape()
-                {
-                    Radius = .1f
-                };
-                //poly1.Set(vertices);
+                var poly1 = new PolygonShape();
+                poly1.Set(vertices);
 
-                var sd1 = new FixtureDef {Shape = poly1, Density = 4.0f};
+                var sd1 = new FixtureDef();
+                sd1.Shape = poly1;
+                sd1.Density = 4.0f;
 
-                var xf2 = xf1;
+                var xf2 = new Transform();
                 xf2.Rotation.Set(-0.3524f * Settings.Pi);
                 xf2.Position = -xf2.Rotation.GetXAxis();
 
@@ -77,44 +74,41 @@ namespace Box2DSharp.Tests
                 vertices[1] = MathUtils.Mul(xf2, new Vector2(1.0f, 0.0f));
                 vertices[2] = MathUtils.Mul(xf2, new Vector2(0.0f, 0.5f));
 
-                // var poly2 = new PolygonShape();
-                // poly2.Set(vertices);
-                //
-                // var sd2 = sd1;
-                // sd2.Shape = poly2;
-                // sd2.Density = 2.0f;
+                var poly2 = new PolygonShape();
+                poly2.Set(vertices);
 
-                var bd = new BodyDef
-                {
-                    BodyType = BodyType.DynamicBody,
-                    AngularDamping = 2.0f,
-                    LinearDamping = 0.5f,
-                    Position = new Vector2(0.0f, 2.0f),
-                    Angle = Settings.Pi,
-                    AllowSleep = false
-                };
+                var sd2 = new FixtureDef();
+                sd2.Shape = poly2;
+                sd2.Density = 2.0f;
 
+                var bd = new BodyDef();
+                bd.BodyType = BodyType.DynamicBody;
+                bd.AngularDamping = 2.0f;
+                bd.LinearDamping = 0.5f;
+
+                bd.Position = new Vector2(0.0f, 2.0f);
+                bd.Angle = Settings.Pi;
+                bd.AllowSleep = false;
                 _body = World.CreateBody(bd);
                 _body.CreateFixture(sd1);
-                //_body.CreateFixture(sd2);
+                _body.CreateFixture(sd2);
             }
 
             {
                 var shape = new PolygonShape();
                 shape.SetAsBox(0.5f, 0.5f);
 
-                var fd = new FixtureDef
-                {
-                    Shape = shape,
-                    Density = 1.0f,
-                    Friction = 0.3f
-                };
+                var fd = new FixtureDef();
+                fd.Shape = shape;
+                fd.Density = 1.0f;
+                fd.Friction = 0.3f;
 
                 for (var i = 0; i < 10; ++i)
                 {
-                    var bd = new BodyDef {BodyType = BodyType.DynamicBody};
+                    var bd = new BodyDef();
+                    bd.BodyType = BodyType.DynamicBody;
 
-                    bd.Position.Set(0.0f, 5.0f + 1.54f * i);
+                    bd.Position = new Vector2(0.0f, 5.0f + 1.54f * i);
                     var body = World.CreateBody(bd);
 
                     body.CreateFixture(fd);

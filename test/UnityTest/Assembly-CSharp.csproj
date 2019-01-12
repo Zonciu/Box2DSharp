@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <LangVersion>7.3</LangVersion>
@@ -170,19 +170,37 @@
     <Compile Include="Assets\TestController.cs" />
     <Compile Include="Assets\Tests\ApplyForce.cs" />
     <Compile Include="Assets\Tests\BasicSliderCrank.cs" />
+    <Compile Include="Assets\Tests\BodyTypes.cs" />
+    <Compile Include="Assets\Tests\Cantilever.cs" />
+    <Compile Include="Assets\Tests\Car.cs" />
     <Compile Include="Assets\Tests\Chain.cs" />
     <Compile Include="Assets\Tests\CharacterCollision.cs" />
+    <Compile Include="Assets\Tests\ContinuousTest.cs" />
     <Compile Include="Assets\Tests\ConvexHull.cs" />
+    <Compile Include="Assets\Tests\ConveyorBelt.cs" />
+    <Compile Include="Assets\Tests\EdgeTest.cs" />
+    <Compile Include="Assets\Tests\Gears.cs" />
     <Compile Include="Assets\Tests\HeavyOnLight.cs" />
     <Compile Include="Assets\Tests\HeavyOnLightTwo.cs" />
     <Compile Include="Assets\Tests\HelloWorld.cs" />
+    <Compile Include="Assets\Tests\Mobile.cs" />
+    <Compile Include="Assets\Tests\MobileBalanced.cs" />
+    <Compile Include="Assets\Tests\MotorJointTest.cs" />
+    <Compile Include="Assets\Tests\OneSidePlatform.cs" />
+    <Compile Include="Assets\Tests\PolyShapes.cs" />
+    <Compile Include="Assets\Tests\Prismatic.cs" />
+    <Compile Include="Assets\Tests\Pulleys.cs" />
     <Compile Include="Assets\Tests\RayCast.cs" />
+    <Compile Include="Assets\Tests\Revolute.cs" />
     <Compile Include="Assets\Tests\ShapeCast.cs" />
+    <Compile Include="Assets\Tests\ShapeEditing.cs" />
     <Compile Include="Assets\Tests\SliderCrank.cs" />
     <Compile Include="Assets\Tests\SphereStack.cs" />
     <Compile Include="Assets\Tests\Tiles.cs" />
     <Compile Include="Assets\Tests\Tumbler.cs" />
+    <Compile Include="Assets\Tests\VaryingRestitution.cs" />
     <Compile Include="Assets\Tests\VerticalStack.cs" />
+    <Compile Include="Assets\Tests\Web.cs" />
     <Compile Include="Assets\TestSettings.cs" />
     <Compile Include="Assets\UnityLogger.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
