@@ -157,7 +157,7 @@ namespace Box2DSharp.Dynamics
             while (current != default)
             {
                 var c = current.Value;
-
+                current = current.Next;
                 var fixtureA = c.GetFixtureA();
                 var fixtureB = c.GetFixtureB();
                 var indexA = c.GetChildIndexA();
@@ -169,9 +169,8 @@ namespace Box2DSharp.Dynamics
                 if (c.HasFlag(Contact.ContactFlag.FilterFlag))
                 {
                     // Should these bodies collide?
-                    if (!bodyB.ShouldCollide(bodyA))
+                    if (bodyB.ShouldCollide(bodyA) == false)
                     {
-                        current = current.Next;
                         Destroy(c);
                         continue;
                     }
@@ -179,7 +178,6 @@ namespace Box2DSharp.Dynamics
                     // Check user filtering.
                     if (ContactFilter?.ShouldCollide(fixtureA, fixtureB) == false)
                     {
-                        current = current.Next;
                         Destroy(c);
                         continue;
                     }
@@ -194,7 +192,6 @@ namespace Box2DSharp.Dynamics
                 // At least one body must be awake and it must be dynamic or kinematic.
                 if (activeA == false && activeB == false)
                 {
-                    current = current.Next;
                     continue;
                 }
 
@@ -205,14 +202,12 @@ namespace Box2DSharp.Dynamics
                 // Here we destroy contacts that cease to overlap in the broad-phase.
                 if (overlap == false)
                 {
-                    current = current.Next;
                     Destroy(c);
                     continue;
                 }
 
                 // The contact persists.
                 c.Update(ContactListener);
-                current = current.Next;
             }
         }
     }

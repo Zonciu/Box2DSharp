@@ -384,8 +384,9 @@ namespace Box2DSharp.Dynamics
                 var node = ContactEdges.First;
                 while (node != null)
                 {
-                    _world.ContactManager.Destroy(node.Value.Contact);
+                    var c = node.Value;
                     node = node.Next;
+                    _world.ContactManager.Destroy(c.Contact);
                 }
 
                 ContactEdges.Clear();
@@ -530,8 +531,9 @@ namespace Box2DSharp.Dynamics
                     var node = ContactEdges.First;
                     while (node != null)
                     {
-                        _world.ContactManager.Destroy(node.Value.Contact);
+                        var c = node.Value;
                         node = node.Next;
+                        _world.ContactManager.Destroy(c.Contact);
                     }
 
                     ContactEdges.Clear();
