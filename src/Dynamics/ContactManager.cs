@@ -20,8 +20,10 @@ namespace Box2DSharp.Dynamics
         public IContactListener ContactListener = DefaultContactListener;
 
         // Broad-phase callback.
-        public void AddPair(FixtureProxy proxyA, FixtureProxy proxyB)
+        public void AddPair(object proxyUserDataA, object proxyUserDataB)
         {
+            var proxyA = (FixtureProxy) proxyUserDataA;
+            var proxyB = (FixtureProxy) proxyUserDataB;
             var fixtureA = proxyA.Fixture;
             var fixtureB = proxyB.Fixture;
 

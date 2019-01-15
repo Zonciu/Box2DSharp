@@ -23,7 +23,7 @@ namespace Box2DSharp.Dynamics
 
 namespace Box2DSharp.Dynamics.Internal
 {
-    public delegate void AddPairCallback(FixtureProxy proxyA, FixtureProxy proxyB);
+    public delegate void AddPairCallback(object proxyUserDataA, object proxyUserDataB);
 
     public delegate bool InternalQueryCallback(int proxyId);
 

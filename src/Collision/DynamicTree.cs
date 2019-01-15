@@ -95,7 +95,7 @@ namespace Box2DSharp.Collision
         }
 
         /// Create a proxy. Provide a tight fitting AABB and a userData pointer.
-        public int CreateProxy(in AABB aabb, FixtureProxy userData)
+        public int CreateProxy(in AABB aabb, object userData)
         {
             var proxyId = AllocateNode();
 
@@ -173,7 +173,7 @@ namespace Box2DSharp.Collision
 
         /// Get proxy user data.
         /// @return the proxy user data or 0 if the id is invalid.
-        public FixtureProxy GetUserData(int proxyId)
+        public object GetUserData(int proxyId)
         {
             Debug.Assert(0 <= proxyId && proxyId < _nodeCapacity);
             return _treeNodes[proxyId].UserData;
@@ -232,7 +232,7 @@ namespace Box2DSharp.Collision
         /// number of proxies in the tree.
         /// @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
         /// @param callback a callback class that is called for each proxy that is hit by the ray.
-        public void RayCast(InternalRayCastCallback callback, in RayCastInput input)
+        public void RayCast(InternalRayCastCallback inputCallback, in RayCastInput input)
         {
             var p1 = input.P1;
             var p2 = input.P2;
@@ -294,7 +294,7 @@ namespace Box2DSharp.Collision
                         MaxFraction = maxFraction
                     };
 
-                    var value = callback(subInput, nodeId);
+                    var value = inputCallback(subInput, nodeId);
 
                     if (value.Equals(0.0f))
                     {
@@ -938,7 +938,7 @@ namespace Box2DSharp.Collision
         // leaf = 0, free node = -1
         public int Height;
 
-        public FixtureProxy UserData;
+        public object UserData;
 
         // union next
         public int Parent { get; set; }
