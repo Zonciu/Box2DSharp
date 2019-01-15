@@ -5,6 +5,7 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
+    [TestName("Add Pair Stress Test")]
     public class AddPair : TestBase
     {
         protected override void Create()
