@@ -20,7 +20,7 @@ namespace Box2DSharp.Collision
         /// </summary>
         public Vector2 UpperBound;
 
-        public AABB(Vector2 lowerBound, Vector2 upperBound)
+        public AABB(in Vector2 lowerBound, in Vector2 upperBound)
         {
             LowerBound = lowerBound;
             UpperBound = upperBound;

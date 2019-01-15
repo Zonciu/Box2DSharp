@@ -1,5 +1,3 @@
-using System;
-
 namespace Box2DSharp.Common
 {
     public static class Settings

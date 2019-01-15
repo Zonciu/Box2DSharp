@@ -334,23 +334,28 @@ namespace Box2DSharp.Dynamics
     public struct Filter
     {
         /// The collision category bits. Normally you would just set one bit.
-        public ushort CategoryBits;
+        public ushort CategoryBits
+        {
+            get => _categoryBits.GetValueOrDefault(0x0001);
+            set => _categoryBits = value;
+        }
 
         /// The collision mask bits. This states the categories that this
         /// shape would accept for collision.
-        public ushort MaskBits;
+        public ushort MaskBits
+        {
+            get => _maskBits.GetValueOrDefault(0xFFFF);
+            set => _maskBits = value;
+        }
 
         /// Collision groups allow a certain group of objects to never collide (negative)
         /// or always collide (positive). Zero means no collision group. Non-zero group
         /// filtering always wins against the mask bits.
-        public ushort GroupIndex;
+        public short GroupIndex;
 
-        public static Filter Default = new Filter
-        {
-            CategoryBits = 0x0001,
-            MaskBits = 0xFFFF,
-            GroupIndex = 0
-        };
+        private ushort? _categoryBits;
+
+        private ushort? _maskBits;
     }
 
     /// A fixture definition is used to create a fixture. This class defines an
@@ -360,21 +365,15 @@ namespace Box2DSharp.Dynamics
         /// The density, usually in kg/m^2.
         public float Density;
 
-        private Filter? _filter;
-
         /// Contact filtering data.
-        public Filter Filter
-        {
-            get => _filter ?? Filter.Default;
-            set => _filter = value;
-        }
+        public Filter Filter;
 
         private float? _friction;
 
         /// The friction coefficient, usually in the range [0,1].
         public float Friction
         {
-            get => _friction ?? 0.2f;
+            get => _friction.GetValueOrDefault(0.2f);
             set => _friction = value;
         }
 

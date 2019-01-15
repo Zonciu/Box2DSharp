@@ -53,19 +53,24 @@ namespace Box2DSharp.Collision.Shapes
         /// @warning the points may be re-ordered, even if they form a convex polygon
         /// @warning collinear points are handled but not removed. Collinear points
         /// may lead to poor stacking behavior.
-        public void Set(params Vector2[] vertices)
+        public void Set(Vector2[] vertices, int count = -1)
         {
-            Debug.Assert(3 <= vertices.Length && vertices.Length <= MaxPolygonVertices);
+            if (count == -1)
+            {
+                count = vertices.Length;
+            }
+
+            Debug.Assert(3 <= count && count <= MaxPolygonVertices);
 
             // 顶点数小于3,视为盒子
-            if (vertices.Length < 3)
+            if (count < 3)
             {
                 SetAsBox(1.0f, 1.0f);
                 return;
             }
 
             // 顶点数最大为 MaxPolygonVertices
-            var n = Math.Min(vertices.Length, MaxPolygonVertices);
+            var n = Math.Min(count, MaxPolygonVertices);
 
             // Perform welding and copy vertices into local buffer.
             var ps = new Vector2[MaxPolygonVertices];

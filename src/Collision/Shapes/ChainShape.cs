@@ -40,9 +40,13 @@ namespace Box2DSharp.Collision.Shapes
         /// Create a loop. This automatically adjusts connectivity.
         /// @param vertices an array of vertices, these are copied
         /// @param count the vertex count
-        public void CreateLoop(Vector2[] vertices)
+        public void CreateLoop(Vector2[] vertices, int count = -1)
         {
-            var count = vertices.Length;
+            if (count == -1)
+            {
+                count = vertices.Length;
+            }
+
             Debug.Assert(Vertices == null && Count == 0);
             Debug.Assert(count >= 3);
             if (count < 3)
