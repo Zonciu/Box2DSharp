@@ -18,7 +18,7 @@ namespace Box2DSharp.Tests
 
         private GearJoint _joint5;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {

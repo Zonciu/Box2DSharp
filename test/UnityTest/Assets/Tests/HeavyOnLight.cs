@@ -6,7 +6,7 @@ namespace Box2DSharp.Tests
 {
     public class HeavyOnLight : TestBase
     {
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();

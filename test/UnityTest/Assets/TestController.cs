@@ -8,12 +8,15 @@ using Box2DSharp.Inspection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using MathUtils = Box2DSharp.Common.MathUtils;
 
 namespace Box2DSharp
 {
     public class TestController : MonoBehaviour
     {
         public GameObject ControlPanel { get; set; }
+
+        public RectTransform Background;
 
         public TestSettings Settings { get; set; }
 
@@ -43,6 +46,10 @@ namespace Box2DSharp
 
         public GameObject TestObject { get; set; }
 
+        public bool MouseInViewPort;
+
+        public bool MouseInUI;
+
         private Type _currentTest;
 
         private (string TestName, Type TestType)[] _testTypes;
@@ -50,6 +57,8 @@ namespace Box2DSharp
         private void Awake()
         {
             ControlPanel = GameObject.Find("ControlPanel");
+            Background = GameObject.Find("PanelBackground").GetComponent<RectTransform>()
+                      ?? throw new NullReferenceException(nameof(Background));
             Dropdown = GameObject.Find("TestSelector").GetComponent<Dropdown>()
                     ?? throw new NullReferenceException("TestSelector not found");
             PauseButton = GameObject.Find("PauseButton").GetComponent<Button>()
@@ -68,7 +77,8 @@ namespace Box2DSharp
 
             _testTypes = typeof(TestBase).Assembly.GetTypes()
                                          .Where(e => e.BaseType == typeof(TestBase))
-                                         .Select(e => (GetTestName(e), e))
+                                         .Select(e => (e.GetCustomAttribute<TestNameAttribute>()?.Name ?? GetTestName(e), e))
+                                         .OrderBy(e => e.Item1)
                                          .ToArray();
 
             Settings = gameObject.GetComponent<TestSettings>() ?? gameObject.AddComponent<TestSettings>();
@@ -76,7 +86,7 @@ namespace Box2DSharp
             Settings.WorldDrawer = new BoxDrawer {Drawer = Settings.DebugDrawer};
 
             Dropdown.ClearOptions();
-            Dropdown.AddOptions(_testTypes.Select(e => e.TestName).ToList());
+            Dropdown.AddOptions(_testTypes.OrderBy(e => e.TestName).Select(e => e.TestName).ToList());
             Dropdown.onValueChanged.AddListener(OnTestSelect);
 
             foreach (var toggleField in typeof(TestSettings)
@@ -93,6 +103,7 @@ namespace Box2DSharp
 
             ShowToggle = GameObject.Find("ShowToggle").GetComponent<Toggle>();
             ShowToggle.onValueChanged.AddListener(ToggleControlPanel);
+            Settings.ShowControlPanel = ShowToggle.isOn;
 
             VelSlider = GameObject.Find("VelSlider").GetComponent<Slider>();
             VelText = GameObject.Find("VelText").GetComponent<Text>();
@@ -130,11 +141,21 @@ namespace Box2DSharp
 
         private void Start()
         {
-            SetTest(_testTypes[0].TestType);
+            var tilesIndex = Array.FindIndex(_testTypes, t => t.TestName == "Tiles");
+            Dropdown.value = tilesIndex;
         }
 
         private void Update()
         {
+            var mousePosition = Input.mousePosition;
+            var rect = Background.rect;
+            MouseInViewPort = mousePosition.x > 0
+                           && mousePosition.x < Screen.width
+                           && mousePosition.y > 0
+                           && mousePosition.y < Screen.height;
+            MouseInUI = mousePosition.x > Screen.width - rect.width && mousePosition.y > Screen.height - rect.height;
+            Settings.EnableMouseAction = MouseInViewPort && (!Settings.ShowControlPanel || !MouseInUI);
+
             if (Input.GetKeyDown(KeyCode.R))
             {
                 Restart();
@@ -194,6 +215,7 @@ namespace Box2DSharp
         public void ToggleControlPanel(bool isShow)
         {
             ControlPanel.SetActive(isShow);
+            Settings.ShowControlPanel = isShow;
         }
 
         private string GetSliderText(string text, int value)

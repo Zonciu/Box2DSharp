@@ -108,7 +108,7 @@ namespace Box2DSharp.Tests
 
         private readonly CircleShape _circle = new CircleShape();
 
-        private void Start()
+        protected override void Create()
         {
             // Ground body
             {
@@ -222,7 +222,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             DrawString("Press 1-5 to drop stuff");
             DrawString("Press 'a' to (de)activate some bodies");
@@ -282,7 +282,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        protected override void OnLateUpdate()
+        protected override void PreLateUpdate()
         {
             var callback = new PolyShapesCallback(Drawer) {Circle = {Radius = 2.0f}};
             callback.Circle.Position.Set(0.0f, 1.1f);

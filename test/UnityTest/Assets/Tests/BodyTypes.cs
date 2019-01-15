@@ -15,7 +15,7 @@ namespace Box2DSharp.Tests
 
         private float _speed;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {
@@ -99,7 +99,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.D))
             {

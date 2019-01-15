@@ -11,7 +11,7 @@ namespace Box2DSharp.Tests
     {
         private Fixture _platform;
 
-        private void Start()
+        protected override void Create()
         {
             // Ground
             {

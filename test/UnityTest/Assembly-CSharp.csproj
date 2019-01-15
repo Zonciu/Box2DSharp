@@ -57,6 +57,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\ArrayExtensions.cs" />
     <Compile Include="Assets\Box2D\Collision\AABB.cs" />
     <Compile Include="Assets\Box2D\Collision\BroadPhase.cs" />
     <Compile Include="Assets\Box2D\Collision\Collider\ClipVertex.cs" />
@@ -165,19 +166,33 @@
     <Compile Include="Assets\Inspection\BoundCircle.cs" />
     <Compile Include="Assets\Inspection\BoundRect.cs" />
     <Compile Include="Assets\Inspection\DebugDrawer.cs" />
+    <Compile Include="Assets\Inspection\MouseInspector.cs" />
     <Compile Include="Assets\Inspection\Utils.cs" />
     <Compile Include="Assets\TestBase.cs" />
     <Compile Include="Assets\TestController.cs" />
+    <Compile Include="Assets\TestNameAttribute.cs" />
+    <Compile Include="Assets\Tests\AddPair.cs" />
     <Compile Include="Assets\Tests\ApplyForce.cs" />
     <Compile Include="Assets\Tests\BasicSliderCrank.cs" />
     <Compile Include="Assets\Tests\BodyTypes.cs" />
+    <Compile Include="Assets\Tests\Breakable.cs" />
+    <Compile Include="Assets\Tests\Bridge.cs" />
+    <Compile Include="Assets\Tests\BulletTest.cs" />
     <Compile Include="Assets\Tests\Cantilever.cs" />
     <Compile Include="Assets\Tests\Car.cs" />
     <Compile Include="Assets\Tests\Chain.cs" />
     <Compile Include="Assets\Tests\CharacterCollision.cs" />
+    <Compile Include="Assets\Tests\CollisionFiltering.cs" />
+    <Compile Include="Assets\Tests\CollisionProcessing.cs" />
+    <Compile Include="Assets\Tests\CompoundShapes.cs" />
+    <Compile Include="Assets\Tests\Confined.cs" />
     <Compile Include="Assets\Tests\ContinuousTest.cs" />
     <Compile Include="Assets\Tests\ConvexHull.cs" />
     <Compile Include="Assets\Tests\ConveyorBelt.cs" />
+    <Compile Include="Assets\Tests\DistanceTest.cs" />
+    <Compile Include="Assets\Tests\Dominos.cs" />
+    <Compile Include="Assets\Tests\DynamicTreeTest.cs" />
+    <Compile Include="Assets\Tests\EdgeShapes.cs" />
     <Compile Include="Assets\Tests\EdgeTest.cs" />
     <Compile Include="Assets\Tests\Gears.cs" />
     <Compile Include="Assets\Tests\HeavyOnLight.cs" />
@@ -187,17 +202,25 @@
     <Compile Include="Assets\Tests\MobileBalanced.cs" />
     <Compile Include="Assets\Tests\MotorJointTest.cs" />
     <Compile Include="Assets\Tests\OneSidePlatform.cs" />
+    <Compile Include="Assets\Tests\PinBall.cs" />
+    <Compile Include="Assets\Tests\PolyCollision.cs" />
     <Compile Include="Assets\Tests\PolyShapes.cs" />
     <Compile Include="Assets\Tests\Prismatic.cs" />
     <Compile Include="Assets\Tests\Pulleys.cs" />
+    <Compile Include="Assets\Tests\Pyramid.cs" />
     <Compile Include="Assets\Tests\RayCast.cs" />
     <Compile Include="Assets\Tests\Revolute.cs" />
+    <Compile Include="Assets\Tests\RopeJointTest.cs" />
+    <Compile Include="Assets\Tests\SensorTest.cs" />
     <Compile Include="Assets\Tests\ShapeCast.cs" />
     <Compile Include="Assets\Tests\ShapeEditing.cs" />
     <Compile Include="Assets\Tests\SliderCrank.cs" />
     <Compile Include="Assets\Tests\SphereStack.cs" />
+    <Compile Include="Assets\Tests\TheoJansen.cs" />
     <Compile Include="Assets\Tests\Tiles.cs" />
+    <Compile Include="Assets\Tests\TimeOfImpact.cs" />
     <Compile Include="Assets\Tests\Tumbler.cs" />
+    <Compile Include="Assets\Tests\VaryingFriction.cs" />
     <Compile Include="Assets\Tests\VaryingRestitution.cs" />
     <Compile Include="Assets\Tests\VerticalStack.cs" />
     <Compile Include="Assets\Tests\Web.cs" />

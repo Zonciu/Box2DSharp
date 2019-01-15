@@ -13,7 +13,7 @@ namespace Box2DSharp.Tests
     {
         private Body _body;
 
-        private void Start()
+        protected override void Create()
         {
             World.Gravity = new Vector2(0.0f, 0.0f);
 
@@ -135,7 +135,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             DrawString("Press A,D,W to control");
             if (Input.GetKeyDown(KeyCode.W))

@@ -8,49 +8,116 @@ using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
 using Box2DSharp.Inspection;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements;
+using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using Logger = Box2DSharp.Common.Logger;
+using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
 using Color = System.Drawing.Color;
-using Debug = System.Diagnostics.Debug;
-using Joint = Box2DSharp.Dynamics.Joints.Joint;
-using MathUtils = Box2DSharp.Common.MathUtils;
-using Random = System.Random;
-using Transform = UnityEngine.Transform;
 
 namespace Box2DSharp
 {
     public abstract class TestBase : MonoBehaviour, IContactListener, IDestructionListener
     {
-        public TestSettings TestSettings;
+        public const int RandomLimit = 32767;
 
-        public World World;
+        private readonly Random _random = new Random();
+
+        public readonly ContactPoint[] Points = new ContactPoint[2048];
+
+        private float _deltaTime;
+
+        public int PointsCount;
+
+        public Vector3 Diference;
+
+        public bool Drag;
+
+        public FrameManager FrameManager;
 
         public Body GroundBody;
 
         public Camera MainCamera;
 
-        public FrameManager FrameManager;
-
-        public IDrawer Drawer { get; private set; }
-
-        private float _deltaTime;
-
-        private Profile _maxProfile;
-
-        private Profile _totalProfile;
-
-        public Vector2 MouseWorld;
+        public Profile MaxProfile;
 
         public MouseJoint MouseJoint;
 
-        private Vector3 _origin;
+        public Vector2 MouseWorld;
 
-        private Vector3 _diference;
+        public UnityEngine.Vector2 MouseWorlcPosition;
 
-        private bool _drag = false;
+        public Vector3 Origin;
+
+        public TestSettings TestSettings;
+
+        public Profile TotalProfile;
+
+        public World World;
+
+        public BoxDrawer Drawer { get; private set; }
+
+        public virtual void BeginContact(Contact contact)
+        { }
+
+        public virtual void EndContact(Contact contact)
+        { }
+
+        public virtual void PreSolve(Contact contact, in Manifold oldManifold)
+        {
+            ref readonly var manifold = ref contact.GetManifold();
+
+            if (manifold.PointCount == 0)
+            {
+                return;
+            }
+
+            var fixtureA = contact.GetFixtureA();
+            var fixtureB = contact.GetFixtureB();
+
+            var state1 = new PointState [Settings.MaxManifoldPoints];
+            var state2 = new PointState [Settings.MaxManifoldPoints];
+            CollisionUtils.GetPointStates(state1, state2, oldManifold, manifold);
+
+            contact.GetWorldManifold(out var worldManifold);
+
+            for (var i = 0; i < manifold.PointCount && PointsCount < Points.Length; ++i)
+            {
+                var cp = new ContactPoint
+                {
+                    FixtureA = fixtureA, FixtureB = fixtureB,
+                    Position = worldManifold.Points[i], Normal = worldManifold.Normal,
+                    State = state2[i], NormalImpulse = manifold.Points[i].NormalImpulse,
+                    TangentImpulse = manifold.Points[i].TangentImpulse, Separation = worldManifold.Separations[i]
+                };
+                Points[PointsCount] = cp;
+                ++PointsCount;
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual void PostSolve(Contact contact, in ContactImpulse impulse)
+        { }
+
+        /// <inheritdoc />
+        public void SayGoodbye(Joint joint)
+        {
+            if (MouseJoint == joint)
+            {
+                MouseJoint = null;
+            }
+            else
+            {
+                JointDestroyed(joint);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SayGoodbye(Fixture fixture)
+        {
+            /* Do nothing */
+        }
 
         private void Awake()
         {
@@ -83,22 +150,36 @@ namespace Box2DSharp
             };
         }
 
+        private void Start()
+        {
+            Create();
+        }
+
+        protected virtual void Create()
+        { }
+
         protected virtual void PreStep()
         { }
 
         protected virtual void PostStep()
         { }
 
-        protected virtual void OnUpdate()
+        protected virtual void PreUpdate()
         { }
 
-        protected virtual void OnLateUpdate()
+        protected virtual void PostUpdate()
+        { }
+
+        protected virtual void PreLateUpdate()
+        { }
+
+        protected virtual void PostLateUpdate()
         { }
 
         private void Tick()
         {
             PreStep();
-            _pointsCount = 0;
+            PointsCount = 0;
             World.AllowSleep = TestSettings.Sleep;
             World.WarmStarting = TestSettings.WarmStarting;
             World.ContinuousPhysics = TestSettings.TimeOfImpact;
@@ -124,6 +205,8 @@ namespace Box2DSharp
 
         protected void Update()
         {
+            PreUpdate();
+
             // FPS
             {
                 var msec = _deltaTime * 1000.0f;
@@ -143,82 +226,86 @@ namespace Box2DSharp
                 LaunchBomb();
             }
 
-            OnUpdate();
             FrameManager.Tick();
 
             // Mouse left drag
             MouseWorld = MainCamera.ScreenToWorldPoint(Input.mousePosition).ToVector2();
             MouseJoint?.SetTarget(MouseWorld);
-            if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
+
+            if (TestSettings.EnableMouseAction)
             {
-                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
                 {
-                    ShiftMouseDown();
+                    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                    {
+                        ShiftMouseDown();
+                    }
+                    else
+                    {
+                        MouseDown();
+                    }
+                }
+
+                if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
+                {
+                    MouseUp();
+                }
+
+                // Mouse right move camera
+                if (Input.GetMouseButton((int) MouseButton.RightMouse))
+                {
+                    Diference = MainCamera.ScreenToWorldPoint(Input.mousePosition) - MainCamera.transform.position;
+                    if (Drag == false)
+                    {
+                        Drag = true;
+                        Origin = MainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    }
                 }
                 else
                 {
-                    MouseDown();
+                    Drag = false;
                 }
-            }
 
-            if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
-            {
-                MouseUp();
-            }
-
-            // Mouse right move camera
-            if (Input.GetMouseButton((int) MouseButton.RightMouse))
-            {
-                _diference = (MainCamera.ScreenToWorldPoint(Input.mousePosition)) - MainCamera.transform.position;
-                if (_drag == false)
+                if (Drag)
                 {
-                    _drag = true;
-                    _origin = MainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    MainCamera.transform.position = Origin - Diference;
                 }
-            }
-            else
-            {
-                _drag = false;
-            }
 
-            if (_drag)
-            {
-                MainCamera.transform.position = _origin - _diference;
-            }
+                // Mouse wheel zoom
+                //Zoom out
+                if (Input.GetAxis("Mouse ScrollWheel") < 0)
+                {
+                    if (MainCamera.orthographicSize > 1)
+                    {
+                        MainCamera.orthographicSize += 1f;
+                    }
+                    else
+                    {
+                        MainCamera.orthographicSize += 0.1f;
+                    }
+                }
 
-            // Mouse wheel zoom
-            //Zoom out
-            if (Input.GetAxis("Mouse ScrollWheel") < 0)
-            {
-                if (MainCamera.orthographicSize > 1)
+                //Zoom in
+                if (Input.GetAxis("Mouse ScrollWheel") > 0)
                 {
-                    MainCamera.orthographicSize += 1f;
-                }
-                else
-                {
-                    MainCamera.orthographicSize += 0.1f;
-                }
-            }
-
-            //Zoom in
-            if (Input.GetAxis("Mouse ScrollWheel") > 0)
-            {
-                if (MainCamera.orthographicSize > 1)
-                {
-                    MainCamera.orthographicSize -= 1f;
-                }
-                else if (MainCamera.orthographicSize > 0.2f)
-                {
-                    MainCamera.orthographicSize -= 0.1f;
+                    if (MainCamera.orthographicSize > 1)
+                    {
+                        MainCamera.orthographicSize -= 1f;
+                    }
+                    else if (MainCamera.orthographicSize > 0.2f)
+                    {
+                        MainCamera.orthographicSize -= 0.1f;
+                    }
                 }
             }
 
             _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
+            PostUpdate();
         }
 
         private void LateUpdate()
         {
-            OnLateUpdate();
+            PreLateUpdate();
             DrawFlag flags = 0;
             if (TestSettings.Shape)
             {
@@ -268,52 +355,52 @@ namespace Box2DSharp
                 var p = World.Profile;
 
                 // Track maximum profile times
-                _maxProfile.Step = Math.Max(_maxProfile.Step, p.Step);
-                _maxProfile.Collide = Math.Max(_maxProfile.Collide, p.Collide);
-                _maxProfile.Solve = Math.Max(_maxProfile.Solve, p.Solve);
-                _maxProfile.SolveInit = Math.Max(_maxProfile.SolveInit, p.SolveInit);
-                _maxProfile.SolveVelocity = Math.Max(_maxProfile.SolveVelocity, p.SolveVelocity);
-                _maxProfile.SolvePosition = Math.Max(_maxProfile.SolvePosition, p.SolvePosition);
-                _maxProfile.SolveTOI = Math.Max(_maxProfile.SolveTOI, p.SolveTOI);
-                _maxProfile.Broadphase = Math.Max(_maxProfile.Broadphase, p.Broadphase);
+                MaxProfile.Step = Math.Max(MaxProfile.Step, p.Step);
+                MaxProfile.Collide = Math.Max(MaxProfile.Collide, p.Collide);
+                MaxProfile.Solve = Math.Max(MaxProfile.Solve, p.Solve);
+                MaxProfile.SolveInit = Math.Max(MaxProfile.SolveInit, p.SolveInit);
+                MaxProfile.SolveVelocity = Math.Max(MaxProfile.SolveVelocity, p.SolveVelocity);
+                MaxProfile.SolvePosition = Math.Max(MaxProfile.SolvePosition, p.SolvePosition);
+                MaxProfile.SolveTOI = Math.Max(MaxProfile.SolveTOI, p.SolveTOI);
+                MaxProfile.Broadphase = Math.Max(MaxProfile.Broadphase, p.Broadphase);
 
-                _totalProfile.Step += p.Step;
-                _totalProfile.Collide += p.Collide;
-                _totalProfile.Solve += p.Solve;
-                _totalProfile.SolveInit += p.SolveInit;
-                _totalProfile.SolveVelocity += p.SolveVelocity;
-                _totalProfile.SolvePosition += p.SolvePosition;
-                _totalProfile.SolveTOI += p.SolveTOI;
-                _totalProfile.Broadphase += p.Broadphase;
+                TotalProfile.Step += p.Step;
+                TotalProfile.Collide += p.Collide;
+                TotalProfile.Solve += p.Solve;
+                TotalProfile.SolveInit += p.SolveInit;
+                TotalProfile.SolveVelocity += p.SolveVelocity;
+                TotalProfile.SolvePosition += p.SolvePosition;
+                TotalProfile.SolveTOI += p.SolveTOI;
+                TotalProfile.Broadphase += p.Broadphase;
 
                 var aveProfile = new Profile();
                 if (FrameManager.FrameCount > 0)
                 {
                     var scale = 1.0f / FrameManager.FrameCount;
-                    aveProfile.Step = scale * _totalProfile.Step;
-                    aveProfile.Collide = scale * _totalProfile.Collide;
-                    aveProfile.Solve = scale * _totalProfile.Solve;
-                    aveProfile.SolveInit = scale * _totalProfile.SolveInit;
-                    aveProfile.SolveVelocity = scale * _totalProfile.SolveVelocity;
-                    aveProfile.SolvePosition = scale * _totalProfile.SolvePosition;
-                    aveProfile.SolveTOI = scale * _totalProfile.SolveTOI;
-                    aveProfile.Broadphase = scale * _totalProfile.Broadphase;
+                    aveProfile.Step = scale * TotalProfile.Step;
+                    aveProfile.Collide = scale * TotalProfile.Collide;
+                    aveProfile.Solve = scale * TotalProfile.Solve;
+                    aveProfile.SolveInit = scale * TotalProfile.SolveInit;
+                    aveProfile.SolveVelocity = scale * TotalProfile.SolveVelocity;
+                    aveProfile.SolvePosition = scale * TotalProfile.SolvePosition;
+                    aveProfile.SolveTOI = scale * TotalProfile.SolveTOI;
+                    aveProfile.Broadphase = scale * TotalProfile.Broadphase;
                 }
 
-                DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({_maxProfile.Step})");
+                DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({MaxProfile.Step})");
                 DrawString(
-                    $"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({_maxProfile.Collide})");
-                DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({_maxProfile.Solve})");
+                    $"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({MaxProfile.Collide})");
+                DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({MaxProfile.Solve})");
                 DrawString(
-                    $"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({_maxProfile.SolveInit})");
+                    $"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({MaxProfile.SolveInit})");
                 DrawString(
-                    $"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({_maxProfile.SolveVelocity})");
+                    $"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({MaxProfile.SolveVelocity})");
                 DrawString(
-                    $"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({_maxProfile.SolvePosition})");
+                    $"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({MaxProfile.SolvePosition})");
                 DrawString(
-                    $"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({_maxProfile.SolveTOI})");
+                    $"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({MaxProfile.SolveTOI})");
                 DrawString(
-                    $"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({_maxProfile.Broadphase})");
+                    $"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({MaxProfile.Broadphase})");
             }
 
             if (_stringBuilder.Length > 0)
@@ -321,6 +408,8 @@ namespace Box2DSharp
                 _text = _stringBuilder.ToString();
                 _stringBuilder.Clear();
             }
+
+            PostLateUpdate();
         }
 
         private void DrawWorld()
@@ -331,9 +420,9 @@ namespace Box2DSharp
                 const float impulseScale = 0.1f;
                 const float axisScale = 0.3f;
                 var debugDraw = TestSettings.WorldDrawer;
-                for (var i = 0; i < _pointsCount; ++i)
+                for (var i = 0; i < PointsCount; ++i)
                 {
-                    var point = _points[i];
+                    var point = Points[i];
                     if (point.State == PointState.AddState)
                     {
                         // Add
@@ -363,15 +452,15 @@ namespace Box2DSharp
                         var tangent = MathUtils.Cross(point.Normal, 1.0f);
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.TangentImpulse * tangent;
-                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
+                        debugDraw.DrawSegment(p1, p2, System.Drawing.Color.FromArgb(230, 230, 77));
                     }
                 }
             }
 
             if (BombSpawning)
             {
-                Drawer.DrawPoint(BombSpawnPoint, 4.0f, Color.Blue);
-                Drawer.DrawSegment(MouseWorld, BombSpawnPoint, Color.FromArgb(203, 203, 203));
+                Drawer.DrawPoint(BombSpawnPoint, 4.0f, System.Drawing.Color.Blue);
+                Drawer.DrawSegment(MouseWorld, BombSpawnPoint, System.Drawing.Color.FromArgb(203, 203, 203));
             }
         }
 
@@ -398,7 +487,7 @@ namespace Box2DSharp
                     var body = fixture1.Body;
                     if (body.BodyType == BodyType.DynamicBody)
                     {
-                        bool inside = fixture1.TestPoint(p);
+                        var inside = fixture1.TestPoint(p);
                         if (inside)
                         {
                             fixture = fixture1;
@@ -448,6 +537,52 @@ namespace Box2DSharp
             }
 
             SpawnBomb(MouseWorld);
+        }
+
+        private void OnDestroy()
+        {
+            FrameManager.Dispose();
+            World = null;
+        }
+
+        public virtual void JointDestroyed(Joint joint)
+        { }
+
+        /// Random number in range [-1,1]
+        public float RandomFloat()
+        {
+            float r = _random.Next() & RandomLimit;
+            r /= RandomLimit;
+            r = 2.0f * r - 1.0f;
+            return r;
+        }
+
+        /// Random floating point number in range [lo, hi]
+        public float RandomFloat(float lo, float hi)
+        {
+            float r = _random.Next() & RandomLimit;
+            r /= RandomLimit;
+            r = (hi - lo) * r + lo;
+            return r;
+        }
+
+        public struct ContactPoint
+        {
+            public Fixture FixtureA;
+
+            public Fixture FixtureB;
+
+            public Vector2 Normal;
+
+            public Vector2 Position;
+
+            public PointState State;
+
+            public float NormalImpulse;
+
+            public float TangentImpulse;
+
+            public float Separation;
         }
 
         #region Bomb
@@ -514,14 +649,14 @@ namespace Box2DSharp
 
         #endregion
 
-        #region DrawString
+        #region Drawing
 
         private Rect _rect;
 
         private GUIStyle _style;
 
         /// <summary>
-        /// Display Physic Frame
+        ///     Display Physic Frame
         /// </summary>
         protected virtual void OnGUI()
         {
@@ -542,124 +677,17 @@ namespace Box2DSharp
             _stringBuilder.AppendLine(text);
         }
 
+        public void DrawAABB(AABB aabb, Color color)
+        {
+            var vs = new Vector2 [4];
+            vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
+            vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
+            vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
+            vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y);
+
+            Drawer.DrawPolygon(vs, 4, color);
+        }
+
         #endregion
-
-        private readonly ContactPoint[] _points = new ContactPoint[2048];
-
-        private int _pointsCount = 0;
-
-        /// <inheritdoc />
-        public void BeginContact(Contact contact)
-        { }
-
-        /// <inheritdoc />
-        public void EndContact(Contact contact)
-        { }
-
-        /// <inheritdoc />
-        public virtual void PreSolve(Contact contact, in Manifold oldManifold)
-        {
-            ref readonly var manifold = ref contact.GetManifold();
-
-            if (manifold.PointCount == 0)
-            {
-                return;
-            }
-
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
-
-            var state1 = new PointState [Settings.MaxManifoldPoints];
-            var state2 = new PointState [Settings.MaxManifoldPoints];
-            CollisionUtils.GetPointStates(state1, state2, oldManifold, manifold);
-
-            contact.GetWorldManifold(out var worldManifold);
-
-            for (var i = 0; i < manifold.PointCount && _pointsCount < _points.Length; ++i)
-            {
-                var cp = new ContactPoint
-                {
-                    FixtureA = fixtureA, FixtureB = fixtureB,
-                    Position = worldManifold.Points[i], Normal = worldManifold.Normal,
-                    State = state2[i], NormalImpulse = manifold.Points[i].NormalImpulse,
-                    TangentImpulse = manifold.Points[i].TangentImpulse, Separation = worldManifold.Separations[i]
-                };
-                _points[_pointsCount] = cp;
-                ++_pointsCount;
-            }
-        }
-
-        /// <inheritdoc />
-        public virtual void PostSolve(Contact contact, in ContactImpulse impulse)
-        { }
-
-        private void OnDestroy()
-        {
-            FrameManager.Dispose();
-            World = null;
-        }
-
-        public virtual void JointDestroyed(Joint joint)
-        { }
-
-        /// <inheritdoc />
-        public void SayGoodbye(Joint joint)
-        {
-            if (MouseJoint == joint)
-            {
-                MouseJoint = null;
-            }
-            else
-            {
-                JointDestroyed(joint);
-            }
-        }
-
-        /// <inheritdoc />
-        public void SayGoodbye(Fixture fixture)
-        {
-            /* Do nothing */
-        }
-
-        public const int RandomLimit = 32767;
-
-        private readonly Random _random = new Random();
-
-        /// Random number in range [-1,1]
-        public float RandomFloat()
-        {
-            float r = (_random.Next() & (RandomLimit));
-            r /= RandomLimit;
-            r = 2.0f * r - 1.0f;
-            return r;
-        }
-
-        /// Random floating point number in range [lo, hi]
-        public float RandomFloat(float lo, float hi)
-        {
-            float r = (_random.Next() & (RandomLimit));
-            r /= RandomLimit;
-            r = (hi - lo) * r + lo;
-            return r;
-        }
-
-        private struct ContactPoint
-        {
-            public Fixture FixtureA;
-
-            public Fixture FixtureB;
-
-            public Vector2 Normal;
-
-            public Vector2 Position;
-
-            public PointState State;
-
-            public float NormalImpulse;
-
-            public float TangentImpulse;
-
-            public float Separation;
-        };
     }
 }

@@ -24,7 +24,7 @@ namespace Box2DSharp.Tests
 
         private PolygonShape Shape;
 
-        private void Start()
+        protected override void Create()
         {
             Generate();
             m_auto = false;
@@ -43,7 +43,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {

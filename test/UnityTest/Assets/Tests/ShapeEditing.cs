@@ -16,7 +16,7 @@ namespace Box2DSharp.Tests
 
         private bool _sensor;
 
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();
@@ -42,7 +42,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             DrawString("Press: (c) create a shape, (d) destroy a shape. (s) set sensor");
             DrawString($"sensor = {_sensor}");

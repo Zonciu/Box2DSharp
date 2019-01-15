@@ -21,7 +21,7 @@ namespace Box2DSharp.Tests
 
         private float _radiusB;
 
-        private void Start()
+        protected override void Create()
         {
             _vAs[0].Set(-0.5f, 1.0f);
             _vAs[1].Set(0.5f, 1.0f);

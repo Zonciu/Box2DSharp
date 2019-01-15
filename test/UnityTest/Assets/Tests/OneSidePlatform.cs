@@ -17,7 +17,7 @@ namespace Box2DSharp.Tests
 
         private float _top;
 
-        private void Start()
+        protected override void Create()
         {
             // Ground
             {

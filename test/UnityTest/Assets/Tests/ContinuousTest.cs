@@ -66,7 +66,7 @@ namespace Box2DSharp.Tests
             set => TimeOfImpact.ToiMaxTime = value;
         }
 
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();

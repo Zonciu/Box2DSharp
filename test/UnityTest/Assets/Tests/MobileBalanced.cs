@@ -10,7 +10,7 @@ namespace Box2DSharp.Tests
     {
         private const int e_depth = 4;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
 

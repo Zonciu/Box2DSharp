@@ -13,7 +13,7 @@ namespace Box2DSharp.Tests
 
         private RevoluteJoint m_joint;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {

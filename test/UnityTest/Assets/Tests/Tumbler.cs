@@ -14,9 +14,9 @@ namespace Box2DSharp.Tests
 
         private int _count;
 
-        private void Start()
+        protected override void Create()
         {
-            Body ground = null;
+            Body ground;
             {
                 var bd = new BodyDef();
                 ground = World.CreateBody(bd);

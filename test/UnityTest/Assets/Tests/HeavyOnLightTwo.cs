@@ -9,7 +9,7 @@ namespace Box2DSharp.Tests
     {
         private Body _heavy;
 
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();
@@ -59,7 +59,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.H))
             {
@@ -68,7 +68,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnLateUpdate()
+        protected override void PreLateUpdate()
         {
             DrawString("Press H to place heavy body");
         }

@@ -8,9 +8,9 @@ namespace Box2DSharp.Tests
 {
     public class BasicSliderCrank : TestBase
     {
-        private void Start()
+        protected override void Create()
         {
-            Body ground = null;
+            Body ground;
             {
                 var bd = new BodyDef {Position = new Vector2(0.0f, 17.0f)};
                 ground = World.CreateBody(bd);

@@ -30,7 +30,7 @@ namespace Box2DSharp.Tests
 
         private int _bodyIndex;
 
-        private void Start()
+        protected override void Create()
         {
             var fixtureCount = 0;
             var timer = Stopwatch.StartNew();

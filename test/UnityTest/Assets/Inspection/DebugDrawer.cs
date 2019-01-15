@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Debug = System.Diagnostics.Debug;
 
 namespace Box2DSharp.Inspection
 {

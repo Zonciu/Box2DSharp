@@ -7,7 +7,7 @@ namespace Box2DSharp.Tests
 {
     public class EdgeTest : TestBase
     {
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();

@@ -10,7 +10,7 @@ namespace Box2DSharp.Tests
     {
         private const int Count = 8;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {

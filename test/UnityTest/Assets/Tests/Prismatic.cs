@@ -11,7 +11,7 @@ namespace Box2DSharp.Tests
     {
         private PrismaticJoint _joint;
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {

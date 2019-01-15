@@ -8,7 +8,7 @@ namespace Box2DSharp.Tests
 {
     public class Chain : TestBase
     {
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {

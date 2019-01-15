@@ -10,7 +10,7 @@ namespace Box2DSharp.Tests
 
         private readonly Body[] _bodies = new Body[Count];
 
-        private void Start()
+        protected override void Create()
         {
             {
                 var bd = new BodyDef();

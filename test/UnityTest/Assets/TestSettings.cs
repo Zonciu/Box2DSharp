@@ -66,6 +66,10 @@ namespace Box2DSharp
         public int PositionIteration = 3;
 
         public int VelocityIteration = 8;
+
+        public bool ShowControlPanel;
+
+        public bool EnableMouseAction;
     }
 
     [AttributeUsage(AttributeTargets.Field)]

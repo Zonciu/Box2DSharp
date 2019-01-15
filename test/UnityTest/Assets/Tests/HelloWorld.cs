@@ -9,7 +9,7 @@ namespace Box2DSharp.Tests
     {
         private Body _body;
 
-        private void Start()
+        protected override void Create()
         {
             var groundBodyDef = new BodyDef {BodyType = BodyType.StaticBody};
             groundBodyDef.Position.Set(0.0f, -10.0f);

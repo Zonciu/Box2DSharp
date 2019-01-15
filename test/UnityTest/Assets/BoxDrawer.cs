@@ -129,6 +129,6 @@ namespace Box2DSharp
         public void DrawPoint(in Vector2 p, float size, in Color color)
         {
             Drawer.PostPoint((p.ToUnityVector3(), size / 100, color.ToUnityColor()));
-        }
+        } 
     }
 }

@@ -14,7 +14,7 @@ namespace Box2DSharp.Tests
 
         private readonly Joint[] _joints = new Joint[8];
 
-        private void Start()
+        protected override void Create()
         {
             Body ground;
             {
@@ -141,7 +141,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.B))
             {

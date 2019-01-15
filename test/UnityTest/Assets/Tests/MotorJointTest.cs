@@ -17,9 +17,9 @@ namespace Box2DSharp.Tests
 
         private MotorJoint _joint;
 
-        private void Start()
+        protected override void Create()
         {
-            Body ground = null;
+            Body ground;
             {
                 var bd = new BodyDef();
                 ground = World.CreateBody(bd);

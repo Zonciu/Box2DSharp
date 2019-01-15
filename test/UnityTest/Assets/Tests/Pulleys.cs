@@ -10,7 +10,7 @@ namespace Box2DSharp.Tests
     {
         private PulleyJoint _joint1;
 
-        private void Start()
+        protected override void Create()
         {
             var y = 16.0f;
             var L = 12.0f;

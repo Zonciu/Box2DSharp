@@ -10,7 +10,7 @@ namespace Box2DSharp.Tests
     {
         private Body _character;
 
-        private void Start()
+        protected override void Create()
         {
             // Ground body
             {

@@ -26,7 +26,7 @@ namespace Box2DSharp.Tests
 
         private float _zeta;
 
-        private void Start()
+        protected override void Create()
         {
             _hz = 4.0f;
             _zeta = 0.7f;
@@ -232,7 +232,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             DrawString("Keys: left = a, brake = s, right = d, hz down = q, hz up = e");
 

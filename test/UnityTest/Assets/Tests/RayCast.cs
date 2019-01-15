@@ -171,7 +171,7 @@ namespace Box2DSharp.Tests
 
         private Mode _mode;
 
-        private void Start()
+        protected override void Create()
         {
             // Ground body
             {
@@ -387,7 +387,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             var k = -1;
             if (Input.GetKeyDown(KeyCode.Alpha1))

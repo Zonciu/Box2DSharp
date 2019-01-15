@@ -13,9 +13,9 @@ namespace Box2DSharp.Tests
 
         private PrismaticJoint _joint2;
 
-        private void Start()
+        protected override void Create()
         {
-            Body ground = null;
+            Body ground;
             {
                 var bd = new BodyDef();
                 ground = World.CreateBody(bd);
@@ -107,7 +107,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnUpdate()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -123,7 +123,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void OnLateUpdate()
+        protected override void PreLateUpdate()
         {
             DrawString("Keys: F toggle friction, M toggle motor");
             var torque = _joint1.GetMotorTorque(TestSettings.Frequency);
