@@ -62,8 +62,8 @@ namespace Box2DSharp.Tests
         public override void PreSolve(Contact contact, in Manifold oldManifold)
         {
             base.PreSolve(contact, oldManifold);
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
 
             if (fixtureA != _platform && fixtureA != _character)
             {

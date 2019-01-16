@@ -66,15 +66,15 @@ namespace Box2DSharp
 
         public virtual void PreSolve(Contact contact, in Manifold oldManifold)
         {
-            ref readonly var manifold = ref contact.GetManifold();
+            ref readonly var manifold = ref contact.Manifold;
 
             if (manifold.PointCount == 0)
             {
                 return;
             }
 
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
 
             var state1 = new PointState [Settings.MaxManifoldPoints];
             var state2 = new PointState [Settings.MaxManifoldPoints];

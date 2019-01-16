@@ -70,7 +70,7 @@ namespace Box2DSharp.Tests
             }
 
             // Should the body break?
-            var count = contact.GetManifold().PointCount;
+            var count = contact.Manifold.PointCount;
 
             var maxImpulse = 0.0f;
             for (var i = 0; i < count; ++i)

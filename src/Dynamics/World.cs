@@ -686,7 +686,7 @@ namespace Box2DSharp.Dynamics
 
                         // Is this contact solid and touching?
                         // 接触点未启用或未接触,跳过
-                        if (contact.IsEnabled() == false || contact.IsTouching() == false)
+                        if (contact.IsEnabled == false || contact.IsTouching == false)
                         {
                             continue;
                         }
@@ -853,7 +853,7 @@ namespace Box2DSharp.Dynamics
                     contactNode = contactNode.Next;
 
                     // Is this contact disabled?
-                    if (c.IsEnabled() == false)
+                    if (c.IsEnabled == false)
                     {
                         continue;
                     }
@@ -872,8 +872,8 @@ namespace Box2DSharp.Dynamics
                     }
                     else
                     {
-                        var fA = c.GetFixtureA();
-                        var fB = c.GetFixtureB();
+                        var fA = c.FixtureA;
+                        var fB = c.FixtureB;
 
                         // Is there a sensor?
                         // 如果接触点的夹具是传感器,不参与TOI计算,跳过
@@ -924,8 +924,8 @@ namespace Box2DSharp.Dynamics
 
                         Debug.Assert(alpha0 < 1.0f);
 
-                        var indexA = c.GetChildIndexA();
-                        var indexB = c.GetChildIndexB();
+                        var indexA = c.ChildIndexA;
+                        var indexB = c.ChildIndexB;
 
                         // Compute the time of impact in interval [0, minTOI]
                         var input = new ToiInput();
@@ -961,8 +961,8 @@ namespace Box2DSharp.Dynamics
                 }
 
                 // Advance the bodies to the TOI.
-                var fixtureA = minContact.GetFixtureA();
-                var fixtureB = minContact.GetFixtureB();
+                var fixtureA = minContact.FixtureA;
+                var fixtureB = minContact.FixtureB;
                 var bodyA = fixtureA.Body;
                 var bodyB = fixtureB.Body;
 
@@ -978,7 +978,7 @@ namespace Box2DSharp.Dynamics
                 ++minContact.ToiCount;
 
                 // Is the contact solid?
-                if (minContact.IsEnabled() == false || minContact.IsTouching() == false)
+                if (minContact.IsEnabled == false || minContact.IsTouching == false)
                 {
                     // Restore the sweeps.
                     minContact.SetEnabled(false);
@@ -1065,7 +1065,7 @@ namespace Box2DSharp.Dynamics
                             contact.Update(ContactManager.ContactListener);
 
                             // Was the contact disabled by the user?
-                            if (contact.IsEnabled() == false)
+                            if (contact.IsEnabled == false)
                             {
                                 other.Sweep = backup;
                                 other.SynchronizeTransform();
@@ -1073,7 +1073,7 @@ namespace Box2DSharp.Dynamics
                             }
 
                             // Are there contact points?
-                            if (contact.IsTouching() == false)
+                            if (contact.IsTouching == false)
                             {
                                 other.Sweep = backup;
                                 other.SynchronizeTransform();
@@ -1285,11 +1285,11 @@ namespace Box2DSharp.Dynamics
                 {
                     var c = node.Value;
                     node = node.Next;
-                    var fixtureA = c.GetFixtureA();
-                    var fixtureB = c.GetFixtureB();
+                    var fixtureA = c.FixtureA;
+                    var fixtureB = c.FixtureB;
 
-                    var cA = fixtureA.GetAABB(c.GetChildIndexA()).GetCenter();
-                    var cB = fixtureB.GetAABB(c.GetChildIndexB()).GetCenter();
+                    var cA = fixtureA.GetAABB(c.ChildIndexA).GetCenter();
+                    var cB = fixtureB.GetAABB(c.ChildIndexB).GetCenter();
 
                     Drawer.DrawSegment(cA, cB, color);
                 }

@@ -11,22 +11,35 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public abstract class Contact
     {
-        // private static readonly Dictionary<(ShapeType, ShapeType), ContactRegister> _contactRegisters =
-        //     new Dictionary<(ShapeType, ShapeType), ContactRegister>();
+        /// <summary>
+        /// Get fixture A in this contact.
+        /// </summary>
+        public Fixture FixtureA;
 
-        internal Fixture FixtureA;
-
-        internal Fixture FixtureB;
+        /// <summary>
+        /// Get fixture B in this contact.
+        /// </summary>
+        public Fixture FixtureB;
 
         internal ContactFlag Flags;
 
         internal float Friction;
 
-        internal int IndexA;
+        /// <summary>
+        /// Get the child primitive index for fixture A.
+        /// </summary>
+        public int ChildIndexA;
 
-        internal int IndexB;
+        /// <summary>
+        /// Get the child primitive index for fixture B.
+        /// </summary>
+        public int ChildIndexB;
 
-        internal Manifold Manifold;
+        /// <summary>
+        /// Get the contact manifold. Do not modify the manifold unless you understand the
+        /// internals of Box2D.
+        /// </summary>
+        public Manifold Manifold;
 
         /// World pool and list pointers.
         /// Nodes for connecting bodies.
@@ -74,8 +87,8 @@ namespace Box2DSharp.Dynamics.Contacts
             FixtureA = fixtureA;
             FixtureB = fixtureB;
 
-            IndexA = indexA;
-            IndexB = indexB;
+            ChildIndexA = indexA;
+            ChildIndexB = indexB;
 
             ToiCount = 0;
 
@@ -137,8 +150,8 @@ namespace Box2DSharp.Dynamics.Contacts
             FixtureB = default;
             Flags = default;
             Friction = default;
-            IndexA = default;
-            IndexB = default;
+            ChildIndexA = default;
+            ChildIndexB = default;
             Manifold = default;
             Node = default;
             NodeA = default;
@@ -159,13 +172,6 @@ namespace Box2DSharp.Dynamics.Contacts
             return restitution1 > restitution2 ? restitution1 : restitution2;
         }
 
-        /// Get the contact manifold. Do not modify the manifold unless you understand the
-        /// internals of Box2D.
-        public ref readonly Manifold GetManifold()
-        {
-            return ref Manifold;
-        }
-
         /// Get the world manifold.
         public void GetWorldManifold(out WorldManifold worldManifold)
         {
@@ -183,10 +189,7 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Is this contact touching?
-        public bool IsTouching()
-        {
-            return HasFlag(ContactFlag.TouchingFlag);
-        }
+        public bool IsTouching => HasFlag(ContactFlag.TouchingFlag);
 
         /// Enable/disable this contact. This can be used inside the pre-solve
         /// contact listener. The contact is only disabled for the current
@@ -204,34 +207,7 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Has this contact been disabled?
-        public bool IsEnabled()
-        {
-            return HasFlag(ContactFlag.EnabledFlag);
-        }
-
-        /// Get fixture A in this contact.
-        public Fixture GetFixtureA()
-        {
-            return FixtureA;
-        }
-
-        /// Get the child primitive index for fixture A.
-        public int GetChildIndexA()
-        {
-            return IndexA;
-        }
-
-        /// Get fixture B in this contact.
-        public Fixture GetFixtureB()
-        {
-            return FixtureB;
-        }
-
-        /// Get the child primitive index for fixture B.
-        public int GetChildIndexB()
-        {
-            return IndexB;
-        }
+        public bool IsEnabled => HasFlag(ContactFlag.EnabledFlag);
 
         /// Override the default friction mixture. You can call this in b2ContactListener::PreSolve.
         /// This value persists until set or reset.
@@ -316,7 +292,7 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var shapeA = FixtureA.Shape;
                 var shapeB = FixtureB.Shape;
-                touching = CollisionUtils.TestOverlap(shapeA, IndexA, shapeB, IndexB, xfA, xfB);
+                touching = CollisionUtils.TestOverlap(shapeA, ChildIndexA, shapeB, ChildIndexB, xfA, xfB);
 
                 // Sensors don't generate manifolds.
                 Manifold.PointCount = 0;

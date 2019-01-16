@@ -48,52 +48,36 @@ namespace Box2DSharp.Dynamics
                 var contactEdge = node1.Value;
                 node1 = node1.Next;
 
-                var fA = contactEdge.Contact.GetFixtureA();
-                var fB = contactEdge.Contact.GetFixtureB();
-                var iA = contactEdge.Contact.GetChildIndexA();
-                var iB = contactEdge.Contact.GetChildIndexB();
-
-                if (fA == fixtureA && fB == fixtureB && iA == indexA && iB == indexB)
-                {
-                    // A contact already exists.
-                    return;
-                }
-
-                if (fA == fixtureB && fB == fixtureA && iA == indexB && iB == indexA)
+                if ((contactEdge.Contact.FixtureA == fixtureA
+                  && contactEdge.Contact.FixtureB == fixtureB
+                  && contactEdge.Contact.ChildIndexA == indexA
+                  && contactEdge.Contact.ChildIndexB == indexB)
+                 || (contactEdge.Contact.FixtureA == fixtureB
+                  && contactEdge.Contact.FixtureB == fixtureA
+                  && contactEdge.Contact.ChildIndexA == indexB
+                  && contactEdge.Contact.ChildIndexB == indexA))
                 {
                     // A contact already exists.
                     return;
                 }
             }
 
-            // Does a joint override collision? Is at least one body dynamic?
-            if (bodyB.ShouldCollide(bodyA) == false)
-            {
-                return;
-            }
-
-            // Check user filtering.
-            if (ContactFilter?.ShouldCollide(fixtureA, fixtureB) == false)
+            if (bodyB.ShouldCollide(bodyA) == false                        // Does a joint override collision? Is at least one body dynamic?
+             || ContactFilter?.ShouldCollide(fixtureA, fixtureB) == false) // Check user filtering.
             {
                 return;
             }
 
             // Call the factory.
-            var c = Contact.CreateContact(
-                fixtureA,
-                indexA,
-                fixtureB,
-                indexB);
+            var c = Contact.CreateContact(fixtureA, indexA, fixtureB, indexB);
             if (c == default)
             {
                 return;
             }
 
             // Contact creation may swap fixtures.
-            fixtureA = c.GetFixtureA();
-            fixtureB = c.GetFixtureB();
-            indexA = c.GetChildIndexA();
-            indexB = c.GetChildIndexB();
+            fixtureA = c.FixtureA;
+            fixtureB = c.FixtureB;
             bodyA = fixtureA.Body;
             bodyB = fixtureB.Body;
 
@@ -127,12 +111,12 @@ namespace Box2DSharp.Dynamics
 
         public void Destroy(Contact c)
         {
-            var fixtureA = c.GetFixtureA();
-            var fixtureB = c.GetFixtureB();
+            var fixtureA = c.FixtureA;
+            var fixtureB = c.FixtureB;
             var bodyA = fixtureA.Body;
             var bodyB = fixtureB.Body;
 
-            if (c.IsTouching()) // 存在接触监听器且当前接触点接触,则触发结束接触
+            if (c.IsTouching) // 存在接触监听器且当前接触点接触,则触发结束接触
             {
                 ContactListener?.EndContact(c);
             }
@@ -159,10 +143,10 @@ namespace Box2DSharp.Dynamics
             {
                 var c = node.Value;
                 node = node.Next;
-                var fixtureA = c.GetFixtureA();
-                var fixtureB = c.GetFixtureB();
-                var indexA = c.GetChildIndexA();
-                var indexB = c.GetChildIndexB();
+                var fixtureA = c.FixtureA;
+                var fixtureB = c.FixtureB;
+                var indexA = c.ChildIndexA;
+                var indexB = c.ChildIndexB;
                 var bodyA = fixtureA.Body;
                 var bodyB = fixtureB.Body;
 

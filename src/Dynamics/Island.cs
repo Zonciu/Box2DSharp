@@ -303,8 +303,8 @@ namespace Box2DSharp.Dynamics
             for (int i = 0; i < m_contactCount; ++i)
             {
                 var c = m_contacts[i];
-                var fA = c.GetFixtureA();
-                var fB = c.GetFixtureB();
+                var fA = c.FixtureA;
+                var fB = c.FixtureB;
 
                 var bA = fA.GetBody();
                 var bB = fB.GetBody();

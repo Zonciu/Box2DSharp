@@ -90,8 +90,8 @@ namespace Box2DSharp.Tests
         // Implement contact listener.
         public override void BeginContact(Contact contact)
         {
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
 
             if (fixtureA == _sensor)
             {
@@ -117,8 +117,8 @@ namespace Box2DSharp.Tests
         // Implement contact listener.
         public override void EndContact(Contact contact)
         {
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
 
             if (fixtureA == _sensor)
             {

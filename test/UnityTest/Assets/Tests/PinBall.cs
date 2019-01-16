@@ -11,7 +11,7 @@ namespace Box2DSharp.Tests
     {
         private Body _ball;
 
-        private bool _button;
+        public bool _button;
 
         private RevoluteJoint _leftJoint;
 

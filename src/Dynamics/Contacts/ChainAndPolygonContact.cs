@@ -30,7 +30,7 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             var chain = (ChainShape) FixtureA.Shape;
 
-            chain.GetChildEdge(out var edge, IndexA);
+            chain.GetChildEdge(out var edge, ChildIndexA);
             CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
         }
     }

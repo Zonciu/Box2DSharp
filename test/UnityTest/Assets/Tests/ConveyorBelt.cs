@@ -57,8 +57,8 @@ namespace Box2DSharp.Tests
         {
             base.PreSolve(contact, in oldManifold);
 
-            var fixtureA = contact.GetFixtureA();
-            var fixtureB = contact.GetFixtureB();
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
 
             if (fixtureA == _platform)
             {
