@@ -186,14 +186,11 @@ namespace Box2DSharp.Collision
             return _treeNodes[proxyId].AABB;
         }
 
-        private static readonly Stack<int> _queryStack = new Stack<int>(256);
-
         /// Query an AABB for overlapping proxies. The callback class
         /// is called for each proxy that overlaps the supplied AABB.
         public void Query(InternalQueryCallback callback, in AABB aabb)
         {
-            _queryStack.Clear();
-            var stack = _queryStack;
+            var stack = new Stack<int>(256);
             stack.Push(_root);
 
             while (stack.Count > 0)
