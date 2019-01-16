@@ -39,3 +39,5 @@ test/UnityTest/Assets/Box2D/Dynamics
 test/UnityTest/Assets/Box2D/*.meta
 src/**/*.meta
 
+
+/test/UnityTest/Assets/Plugins/Editor/JetBrains
