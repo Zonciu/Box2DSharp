@@ -261,17 +261,12 @@ namespace Box2DSharp.Tests
 
             if (Input.GetKeyDown(KeyCode.A))
             {
-                var j = 0;
                 for (var i = 0; i < MaxBodies; i += 2)
                 {
                     if (_bodies[i] != null)
                     {
-                        ++j;
-                        Debug.Log($"Deactive {j}");
-
                         var active = _bodies[i].IsActive;
                         _bodies[i].IsActive = !active;
-                        Debug.Log($"Deactived {j}");
                     }
                 }
             }
