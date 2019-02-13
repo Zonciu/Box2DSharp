@@ -1160,30 +1160,30 @@ namespace Box2DSharp.Dynamics
         {
             var bodyIndex = IslandIndex;
 
-            Logger.Log("{");
-            Logger.Log("  b2BodyDef bd;");
-            Logger.Log($"  bd.type = b2BodyType({_type});");
-            Logger.Log($"  bd.position.Set({Transform.Position.X}, {Transform.Position.Y});");
-            Logger.Log($"  bd.angle = {Sweep.A};");
-            Logger.Log($"  bd.linearVelocity.Set({LinearVelocity.X}, {LinearVelocity.Y});");
-            Logger.Log($"  bd.angularVelocity = {AngularVelocity};");
-            Logger.Log($"  bd.linearDamping = {_linearDamping};");
-            Logger.Log($"  bd.angularDamping = {_angularDamping};");
-            Logger.Log($"  bd.allowSleep = bool({HasFlag(BodyFlags.AutoSleep)});");
-            Logger.Log($"  bd.awake = bool({HasFlag(BodyFlags.IsAwake)});");
-            Logger.Log($"  bd.fixedRotation = bool({HasFlag(BodyFlags.FixedRotation)});");
-            Logger.Log($"  bd.bullet = bool({HasFlag(BodyFlags.IsBullet)});");
-            Logger.Log($"  bd.active = bool({HasFlag(BodyFlags.IsActive)});");
-            Logger.Log($"  bd.gravityScale = {GravityScale};");
-            Logger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
+            DumpLogger.Log("{");
+            DumpLogger.Log("  b2BodyDef bd;");
+            DumpLogger.Log($"  bd.type = b2BodyType({_type});");
+            DumpLogger.Log($"  bd.position.Set({Transform.Position.X}, {Transform.Position.Y});");
+            DumpLogger.Log($"  bd.angle = {Sweep.A};");
+            DumpLogger.Log($"  bd.linearVelocity.Set({LinearVelocity.X}, {LinearVelocity.Y});");
+            DumpLogger.Log($"  bd.angularVelocity = {AngularVelocity};");
+            DumpLogger.Log($"  bd.linearDamping = {_linearDamping};");
+            DumpLogger.Log($"  bd.angularDamping = {_angularDamping};");
+            DumpLogger.Log($"  bd.allowSleep = bool({HasFlag(BodyFlags.AutoSleep)});");
+            DumpLogger.Log($"  bd.awake = bool({HasFlag(BodyFlags.IsAwake)});");
+            DumpLogger.Log($"  bd.fixedRotation = bool({HasFlag(BodyFlags.FixedRotation)});");
+            DumpLogger.Log($"  bd.bullet = bool({HasFlag(BodyFlags.IsBullet)});");
+            DumpLogger.Log($"  bd.active = bool({HasFlag(BodyFlags.IsActive)});");
+            DumpLogger.Log($"  bd.gravityScale = {GravityScale};");
+            DumpLogger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
             foreach (var f in Fixtures)
             {
-                Logger.Log("  {");
+                DumpLogger.Log("  {");
                 f.Dump(bodyIndex);
-                Logger.Log("  }");
+                DumpLogger.Log("  }");
             }
 
-            Logger.Log("}");
+            DumpLogger.Log("}");
         }
 
         /// <summary>

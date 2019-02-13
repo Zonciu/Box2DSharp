@@ -227,65 +227,65 @@ namespace Box2DSharp.Dynamics
         /// Dump this fixture to the log file.
         public void Dump(int bodyIndex)
         {
-            Logger.Log("    b2FixtureDef fd;");
-            Logger.Log($"    fd.friction = {Friction};");
-            Logger.Log($"    fd.restitution = {Restitution};");
-            Logger.Log($"    fd.density = {Density};");
-            Logger.Log($"    fd.isSensor = bool({IsSensor});");
-            Logger.Log($"    fd.filter.categoryBits = uint16({Filter.CategoryBits});");
-            Logger.Log($"    fd.filter.maskBits = uint16({Filter.MaskBits});");
-            Logger.Log($"    fd.filter.groupIndex = int16({Filter.GroupIndex});");
+            DumpLogger.Log("    b2FixtureDef fd;");
+            DumpLogger.Log($"    fd.friction = {Friction};");
+            DumpLogger.Log($"    fd.restitution = {Restitution};");
+            DumpLogger.Log($"    fd.density = {Density};");
+            DumpLogger.Log($"    fd.isSensor = bool({IsSensor});");
+            DumpLogger.Log($"    fd.filter.categoryBits = uint16({Filter.CategoryBits});");
+            DumpLogger.Log($"    fd.filter.maskBits = uint16({Filter.MaskBits});");
+            DumpLogger.Log($"    fd.filter.groupIndex = int16({Filter.GroupIndex});");
 
             switch (Shape)
             {
             case CircleShape s:
             {
-                Logger.Log("    b2CircleShape shape;");
-                Logger.Log($"    shape.m_radius = {s.Radius};");
-                Logger.Log($"    shape.m_p.Set({s.Position.X}, {s.Position.Y});");
+                DumpLogger.Log("    b2CircleShape shape;");
+                DumpLogger.Log($"    shape.m_radius = {s.Radius};");
+                DumpLogger.Log($"    shape.m_p.Set({s.Position.X}, {s.Position.Y});");
             }
                 break;
 
             case EdgeShape s:
             {
-                Logger.Log("    b2EdgeShape shape;");
-                Logger.Log($"    shape.m_radius = {s.Radius};");
-                Logger.Log($"    shape.m_vertex0.Set({s.Vertex0.X}, {s.Vertex0.Y});");
-                Logger.Log($"    shape.m_vertex1.Set({s.Vertex1.X}, {s.Vertex1.Y});");
-                Logger.Log($"    shape.m_vertex2.Set({s.Vertex2.X}, {s.Vertex2.Y});");
-                Logger.Log($"    shape.m_vertex3.Set({s.Vertex3.X}, {s.Vertex3.Y});");
-                Logger.Log($"    shape.m_hasVertex0 = bool({s.HasVertex0});");
-                Logger.Log($"    shape.m_hasVertex3 = bool({s.HasVertex3});");
+                DumpLogger.Log("    b2EdgeShape shape;");
+                DumpLogger.Log($"    shape.m_radius = {s.Radius};");
+                DumpLogger.Log($"    shape.m_vertex0.Set({s.Vertex0.X}, {s.Vertex0.Y});");
+                DumpLogger.Log($"    shape.m_vertex1.Set({s.Vertex1.X}, {s.Vertex1.Y});");
+                DumpLogger.Log($"    shape.m_vertex2.Set({s.Vertex2.X}, {s.Vertex2.Y});");
+                DumpLogger.Log($"    shape.m_vertex3.Set({s.Vertex3.X}, {s.Vertex3.Y});");
+                DumpLogger.Log($"    shape.m_hasVertex0 = bool({s.HasVertex0});");
+                DumpLogger.Log($"    shape.m_hasVertex3 = bool({s.HasVertex3});");
             }
                 break;
 
             case PolygonShape s:
             {
-                Logger.Log("    b2PolygonShape shape;");
-                Logger.Log($"    b2Vec2 vs[{Settings.MaxPolygonVertices}];");
+                DumpLogger.Log("    b2PolygonShape shape;");
+                DumpLogger.Log($"    b2Vec2 vs[{Settings.MaxPolygonVertices}];");
                 for (var i = 0; i < s.Count; ++i)
                 {
-                    Logger.Log($"    vs[{i}].Set({s.Vertices[i]}, {s.Vertices[i].Y});");
+                    DumpLogger.Log($"    vs[{i}].Set({s.Vertices[i]}, {s.Vertices[i].Y});");
                 }
 
-                Logger.Log($"    shape.Set(vs, {s.Count});");
+                DumpLogger.Log($"    shape.Set(vs, {s.Count});");
             }
                 break;
 
             case ChainShape s:
             {
-                Logger.Log("    b2ChainShape shape;");
-                Logger.Log($"    b2Vec2 vs[{s.Count}];");
+                DumpLogger.Log("    b2ChainShape shape;");
+                DumpLogger.Log($"    b2Vec2 vs[{s.Count}];");
                 for (var i = 0; i < s.Count; ++i)
                 {
-                    Logger.Log($"    vs[{i}].Set({s.Vertices[i]}, {s.Vertices[i].Y});");
+                    DumpLogger.Log($"    vs[{i}].Set({s.Vertices[i]}, {s.Vertices[i].Y});");
                 }
 
-                Logger.Log($"    shape.CreateChain(vs, {s.Count});");
-                Logger.Log($"    shape.m_prevVertex.Set({s.PrevVertex.X}, {s.PrevVertex.Y});");
-                Logger.Log($"    shape.m_nextVertex.Set({s.NextVertex.X}, {s.NextVertex.Y});");
-                Logger.Log($"    shape.m_hasPrevVertex = bool({s.HasPrevVertex});");
-                Logger.Log($"    shape.m_hasNextVertex = bool({s.HasNextVertex});");
+                DumpLogger.Log($"    shape.CreateChain(vs, {s.Count});");
+                DumpLogger.Log($"    shape.m_prevVertex.Set({s.PrevVertex.X}, {s.PrevVertex.Y});");
+                DumpLogger.Log($"    shape.m_nextVertex.Set({s.NextVertex.X}, {s.NextVertex.Y});");
+                DumpLogger.Log($"    shape.m_hasPrevVertex = bool({s.HasPrevVertex});");
+                DumpLogger.Log($"    shape.m_hasNextVertex = bool({s.HasNextVertex});");
             }
                 break;
 
@@ -293,10 +293,10 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            Logger.Log("");
-            Logger.Log("    fd.shape = &shape;");
-            Logger.Log("");
-            Logger.Log($"    bodies[{bodyIndex}].CreateFixture(&fd);");
+            DumpLogger.Log("");
+            DumpLogger.Log("    fd.shape = &shape;");
+            DumpLogger.Log("");
+            DumpLogger.Log($"    bodies[{bodyIndex}].CreateFixture(&fd);");
         }
 
         /// <summary>

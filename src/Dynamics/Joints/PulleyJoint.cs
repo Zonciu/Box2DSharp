@@ -352,18 +352,18 @@ namespace Box2DSharp.Dynamics.Joints
             var indexA = BodyA.IslandIndex;
             var indexB = BodyB.IslandIndex;
 
-            Logger.Log("  b2PulleyJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log($"  jd.groundAnchorA.Set({_groundAnchorA.X}, {_groundAnchorA.Y});");
-            Logger.Log($"  jd.groundAnchorB.Set({_groundAnchorB.X}, {_groundAnchorB.Y});");
-            Logger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            Logger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            Logger.Log($"  jd.lengthA = {_lengthA};");
-            Logger.Log($"  jd.lengthB = {_lengthB};");
-            Logger.Log($"  jd.ratio = {_ratio};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2PulleyJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log($"  jd.groundAnchorA.Set({_groundAnchorA.X}, {_groundAnchorA.Y});");
+            DumpLogger.Log($"  jd.groundAnchorB.Set({_groundAnchorB.X}, {_groundAnchorB.Y});");
+            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
+            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
+            DumpLogger.Log($"  jd.lengthA = {_lengthA};");
+            DumpLogger.Log($"  jd.lengthB = {_lengthB};");
+            DumpLogger.Log($"  jd.ratio = {_ratio};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />

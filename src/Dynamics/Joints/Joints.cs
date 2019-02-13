@@ -167,7 +167,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Dump this joint to the log file.
         public virtual void Dump()
         {
-            Logger.Log("// Dump is not supported for this joint type.\n");
+            DumpLogger.Log("// Dump is not supported for this joint type.\n");
         }
 
         /// Shift the origin for any points stored in world coordinates.

@@ -147,7 +147,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// The mouse joint does not support dumping.
         public override void Dump()
         {
-            Logger.Log("Mouse joint dumping is not supported.");
+            DumpLogger.Log("Mouse joint dumping is not supported.");
         }
 
         /// <inheritdoc />

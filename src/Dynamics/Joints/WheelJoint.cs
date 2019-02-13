@@ -276,19 +276,19 @@ namespace Box2DSharp.Dynamics.Joints
             var indexA = BodyA.IslandIndex;
             var indexB = BodyB.IslandIndex;
 
-            Logger.Log("  b2WheelJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            Logger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            Logger.Log($"  jd.localAxisA.Set({_localXAxisA.X}, {_localXAxisA.Y});");
-            Logger.Log($"  jd.enableMotor = bool({_enableMotor});");
-            Logger.Log($"  jd.motorSpeed = {_motorSpeed};");
-            Logger.Log($"  jd.maxMotorTorque = {_maxMotorTorque};");
-            Logger.Log($"  jd.frequencyHz = {_frequencyHz};");
-            Logger.Log($"  jd.dampingRatio = {_dampingRatio};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2WheelJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
+            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
+            DumpLogger.Log($"  jd.localAxisA.Set({_localXAxisA.X}, {_localXAxisA.Y});");
+            DumpLogger.Log($"  jd.enableMotor = bool({_enableMotor});");
+            DumpLogger.Log($"  jd.motorSpeed = {_motorSpeed};");
+            DumpLogger.Log($"  jd.maxMotorTorque = {_maxMotorTorque};");
+            DumpLogger.Log($"  jd.frequencyHz = {_frequencyHz};");
+            DumpLogger.Log($"  jd.dampingRatio = {_dampingRatio};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />

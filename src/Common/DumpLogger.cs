@@ -2,27 +2,22 @@ using System;
 
 namespace Box2DSharp.Common
 {
-    public static class Logger
+    public static class DumpLogger
     {
-        private static ILogger _logger = new InternalLogger();
-
-        public static void SetLogger(ILogger logger)
-        {
-            _logger = logger;
-        }
+        public static IDumpLogger Instance { get; set; } = new InternalDumpLogger();
 
         public static void Log(string message)
         {
-            _logger.Log(message);
+            Instance.Log(message);
         }
     }
 
-    public interface ILogger
+    public interface IDumpLogger
     {
         void Log(string message);
     }
 
-    public class InternalLogger : ILogger
+    public class InternalDumpLogger : IDumpLogger
     {
         /// <inheritdoc />
         public void Log(string message)

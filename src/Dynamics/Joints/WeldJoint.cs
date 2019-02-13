@@ -130,16 +130,16 @@ namespace Box2DSharp.Dynamics.Joints
             var indexA = BodyA.IslandIndex;
             var indexB = BodyB.IslandIndex;
 
-            Logger.Log("  b2WeldJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            Logger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            Logger.Log($"  jd.referenceAngle = {_referenceAngle};");
-            Logger.Log($"  jd.frequencyHz = {_frequencyHz};");
-            Logger.Log($"  jd.dampingRatio = {_dampingRatio};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2WeldJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
+            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
+            DumpLogger.Log($"  jd.referenceAngle = {_referenceAngle};");
+            DumpLogger.Log($"  jd.frequencyHz = {_frequencyHz};");
+            DumpLogger.Log($"  jd.dampingRatio = {_dampingRatio};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />

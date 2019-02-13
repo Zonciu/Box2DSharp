@@ -250,20 +250,20 @@ namespace Box2DSharp.Dynamics.Joints
             var indexA = BodyA.IslandIndex;
             var indexB = BodyB.IslandIndex;
 
-            Logger.Log("  b2RevoluteJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log($"  jd.localAnchorA.Set({LocalAnchorA.X}, {LocalAnchorA.Y});");
-            Logger.Log($"  jd.localAnchorB.Set({LocalAnchorB.X}, {LocalAnchorB.Y});");
-            Logger.Log($"  jd.referenceAngle = {ReferenceAngle};");
-            Logger.Log($"  jd.enableLimit = bool({_enableLimit});");
-            Logger.Log($"  jd.lowerAngle = {_lowerAngle};");
-            Logger.Log($"  jd.upperAngle = {_upperAngle};");
-            Logger.Log($"  jd.enableMotor = bool({_enableMotor});");
-            Logger.Log($"  jd.motorSpeed = {_motorSpeed};");
-            Logger.Log($"  jd.maxMotorTorque = {_maxMotorTorque};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2RevoluteJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log($"  jd.localAnchorA.Set({LocalAnchorA.X}, {LocalAnchorA.Y});");
+            DumpLogger.Log($"  jd.localAnchorB.Set({LocalAnchorB.X}, {LocalAnchorB.Y});");
+            DumpLogger.Log($"  jd.referenceAngle = {ReferenceAngle};");
+            DumpLogger.Log($"  jd.enableLimit = bool({_enableLimit});");
+            DumpLogger.Log($"  jd.lowerAngle = {_lowerAngle};");
+            DumpLogger.Log($"  jd.upperAngle = {_upperAngle};");
+            DumpLogger.Log($"  jd.enableMotor = bool({_enableMotor});");
+            DumpLogger.Log($"  jd.motorSpeed = {_motorSpeed};");
+            DumpLogger.Log($"  jd.maxMotorTorque = {_maxMotorTorque};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />

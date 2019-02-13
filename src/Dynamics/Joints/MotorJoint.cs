@@ -167,16 +167,16 @@ namespace Box2DSharp.Dynamics.Joints
             var indexA = BodyA.IslandIndex;
             var indexB = BodyB.IslandIndex;
 
-            Logger.Log("  b2MotorJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log($"  jd.linearOffset.Set({_linearOffset.X}, {_linearOffset.Y});");
-            Logger.Log($"  jd.angularOffset = {_angularOffset};");
-            Logger.Log($"  jd.maxForce = {_maxForce};");
-            Logger.Log($"  jd.maxTorque = {_maxTorque};");
-            Logger.Log($"  jd.correctionFactor = {_correctionFactor};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2MotorJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log($"  jd.linearOffset.Set({_linearOffset.X}, {_linearOffset.Y});");
+            DumpLogger.Log($"  jd.angularOffset = {_angularOffset};");
+            DumpLogger.Log($"  jd.maxForce = {_maxForce};");
+            DumpLogger.Log($"  jd.maxTorque = {_maxTorque};");
+            DumpLogger.Log($"  jd.correctionFactor = {_correctionFactor};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />

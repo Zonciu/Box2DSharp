@@ -1156,9 +1156,9 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            Logger.Log($"gravity = ({Gravity.X}, {Gravity.Y});");
-            Logger.Log($"bodies  = {BodyList.Count};");
-            Logger.Log($"joints  = {JointList.Count};");
+            DumpLogger.Log($"gravity = ({Gravity.X}, {Gravity.Y});");
+            DumpLogger.Log($"bodies  = {BodyList.Count};");
+            DumpLogger.Log($"joints  = {JointList.Count};");
             var i = 0;
             foreach (var b in BodyList)
             {
@@ -1182,9 +1182,9 @@ namespace Box2DSharp.Dynamics
                     continue;
                 }
 
-                Logger.Log("{");
+                DumpLogger.Log("{");
                 j.Dump();
-                Logger.Log("}");
+                DumpLogger.Log("}");
             }
 
             // Second pass on joints, only gear joints.
@@ -1195,9 +1195,9 @@ namespace Box2DSharp.Dynamics
                     continue;
                 }
 
-                Logger.Log("{");
+                DumpLogger.Log("{");
                 j.Dump();
-                Logger.Log("}");
+                DumpLogger.Log("}");
             }
         }
 

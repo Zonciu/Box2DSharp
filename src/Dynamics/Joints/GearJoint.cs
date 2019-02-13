@@ -190,14 +190,14 @@ namespace Box2DSharp.Dynamics.Joints
             var index1 = _joint1.Index;
             var index2 = _joint2.Index;
 
-            Logger.Log("  b2GearJointDef jd;");
-            Logger.Log($"  jd.bodyA = bodies[{indexA}];");
-            Logger.Log($"  jd.bodyB = bodies[{indexB}];");
-            Logger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            Logger.Log("  jd.joint1 = joints[index1];");
-            Logger.Log($"  jd.joint2 = joints[{index2}];");
-            Logger.Log($"  jd.ratio = {_ratio};");
-            Logger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            DumpLogger.Log("  b2GearJointDef jd;");
+            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
+            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
+            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
+            DumpLogger.Log("  jd.joint1 = joints[index1];");
+            DumpLogger.Log($"  jd.joint2 = joints[{index2}];");
+            DumpLogger.Log($"  jd.ratio = {_ratio};");
+            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
         }
 
         /// <inheritdoc />
