@@ -3,16 +3,26 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
     public class ChainAndPolygonContact : Contact
     {
-        private static readonly ObjectPool<ChainAndPolygonContact> _pool =
-            new DefaultObjectPool<ChainAndPolygonContact>(new ContactPoolPolicy<ChainAndPolygonContact>());
+        internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
+        {
+            var chain = (ChainShape) FixtureA.Shape;
 
-        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
+            chain.GetChildEdge(out var edge, ChildIndexA);
+            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
+        }
+    }
+
+    internal class ChainAndPolygonContactFactory : IContactFactory
+    {
+        private readonly ObjectPool<ChainAndPolygonContact> _pool =
+            new ObjectPool<ChainAndPolygonContact>(new ContactPoolPolicy<ChainAndPolygonContact>());
+
+        public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Debug.Assert(fixtureA.ShapeType == ShapeType.Chain);
             Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
@@ -21,17 +31,9 @@ namespace Box2DSharp.Dynamics.Contacts
             return contact;
         }
 
-        public static void Destroy(Contact contact)
+        public void Destroy(Contact contact)
         {
             _pool.Return((ChainAndPolygonContact) contact);
-        }
-
-        internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
-        {
-            var chain = (ChainShape) FixtureA.Shape;
-
-            chain.GetChildEdge(out var edge, ChildIndexA);
-            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
         }
     }
 }

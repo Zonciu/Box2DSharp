@@ -1,9 +1,30 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Box2DSharp.Collision;
+using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
 
 namespace Box2DSharp.Dynamics
 {
+    //internal delegate Contact CreateContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB, IObjectPool objectPool);
+
+    //internal delegate void DestroyContact(Contact contact, IObjectPool objectPool);
+
+    internal class ContactRegister
+    {
+        public readonly IContactFactory Factory;
+
+        public readonly bool Primary;
+
+        public ContactRegister(IContactFactory factory, bool primary)
+        {
+            Primary = primary;
+
+            Factory = factory;
+        }
+    }
+
     // Delegate of b2World.
     public class ContactManager
     {
@@ -17,7 +38,72 @@ namespace Box2DSharp.Dynamics
 
         public IContactListener ContactListener;
 
-        // Broad-phase callback.
+        private readonly ContactRegister[,] _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
+
+        public ContactManager()
+        {
+            Register(ShapeType.Circle, ShapeType.Circle, new CircleContactFactory());
+            Register(ShapeType.Polygon, ShapeType.Circle, new PolygonAndCircleContactFactory());
+            Register(ShapeType.Polygon, ShapeType.Polygon, new PolygonContactFactory());
+            Register(ShapeType.Edge, ShapeType.Circle, new EdgeAndCircleContactFactory());
+            Register(ShapeType.Edge, ShapeType.Polygon, new EdgeAndPolygonContactFactory());
+            Register(ShapeType.Chain, ShapeType.Circle, new ChainAndCircleContactFactory());
+            Register(ShapeType.Chain, ShapeType.Polygon, new ChainAndPolygonContactFactory());
+
+            void Register(ShapeType type1, ShapeType type2, IContactFactory factory)
+            {
+                Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
+                Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
+
+                _registers[(int) type1, (int) type2] = new ContactRegister(factory, true);
+                if (type1 != type2)
+                {
+                    _registers[(int) type2, (int) type1] = new ContactRegister(factory, false);
+                }
+            }
+        }
+
+        private Contact CreateContact(
+            Fixture fixtureA,
+            int indexA,
+            Fixture fixtureB,
+            int indexB)
+        {
+            var type1 = fixtureA.ShapeType;
+            var type2 = fixtureB.ShapeType;
+
+            Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
+            Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
+
+            var reg = _registers[(int) type1, (int) type2];
+            if (reg.Primary)
+            {
+                return reg.Factory.Create(fixtureA, indexA, fixtureB, indexB);
+            }
+
+            return reg.Factory.Create(fixtureB, indexB, fixtureA, indexA);
+        }
+
+        private void DestroyContact(Contact contact)
+        {
+            var fixtureA = contact.FixtureA;
+            var fixtureB = contact.FixtureB;
+
+            if (contact.Manifold.PointCount > 0 && fixtureA.IsSensor == false && fixtureB.IsSensor == false)
+            {
+                fixtureA.Body.IsAwake = true;
+                fixtureB.Body.IsAwake = true;
+            }
+
+            var typeA = fixtureA.ShapeType;
+            var typeB = fixtureB.ShapeType;
+
+            Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
+            Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
+            var reg = _registers[(int) typeA, (int) typeB];
+            reg.Factory.Destroy(contact);
+        }
+
         public void AddPair(object proxyUserDataA, object proxyUserDataB)
         {
             var proxyA = (FixtureProxy) proxyUserDataA;
@@ -67,7 +153,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // Call the factory.
-            var c = Contact.CreateContact(fixtureA, indexA, fixtureB, indexB);
+            var c = CreateContact(fixtureA, indexA, fixtureB, indexB);
             if (c == default)
             {
                 return;
@@ -129,7 +215,7 @@ namespace Box2DSharp.Dynamics
             bodyB.ContactEdges.Remove(c.NodeB.Node);
 
             // Call the factory.
-            Contact.DestroyContact(c);
+            DestroyContact(c);
         }
 
         public void Collide()

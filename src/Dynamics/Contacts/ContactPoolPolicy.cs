@@ -1,4 +1,4 @@
-using Microsoft.Extensions.ObjectPool;
+using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {

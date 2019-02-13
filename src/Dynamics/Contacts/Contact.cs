@@ -57,29 +57,6 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal int ToiCount;
 
-        static Contact()
-        {
-            Register(ShapeType.Circle, ShapeType.Circle, CircleContact.Create, CircleContact.Destroy);
-            Register(ShapeType.Polygon, ShapeType.Circle, PolygonAndCircleContact.Create, PolygonAndCircleContact.Destroy);
-            Register(ShapeType.Polygon, ShapeType.Polygon, PolygonContact.Create, PolygonContact.Destroy);
-            Register(ShapeType.Edge, ShapeType.Circle, EdgeAndCircleContact.Create, EdgeAndCircleContact.Destroy);
-            Register(ShapeType.Edge, ShapeType.Polygon, EdgeAndPolygonContact.Create, EdgeAndPolygonContact.Destroy);
-            Register(ShapeType.Chain, ShapeType.Circle, ChainAndCircleContact.Create, ChainAndCircleContact.Destroy);
-            Register(ShapeType.Chain, ShapeType.Polygon, ChainAndPolygonContact.Create, ChainAndPolygonContact.Destroy);
-
-            void Register(ShapeType type1, ShapeType type2, CreateContact createFunc, DestroyContact destroyFunc)
-            {
-                Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
-                Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
-
-                _registers[(int) type1, (int) type2] = new ContactRegister(createFunc, destroyFunc, true);
-                if (type1 != type2)
-                {
-                    _registers[(int) type2, (int) type1] = new ContactRegister(createFunc, destroyFunc, false);
-                }
-            }
-        }
-
         internal void Initialize(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Flags = ContactFlag.EnabledFlag;
@@ -98,50 +75,6 @@ namespace Box2DSharp.Dynamics.Contacts
             TangentSpeed = 0.0f;
 
             Manifold = new Manifold() {Points = FixedArray2<ManifoldPoint>.Create()};
-        }
-
-        private static readonly ContactRegister[,]
-            _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
-
-        internal static Contact CreateContact(
-            Fixture fixtureA,
-            int indexA,
-            Fixture fixtureB,
-            int indexB)
-        {
-            var type1 = fixtureA.ShapeType;
-            var type2 = fixtureB.ShapeType;
-
-            Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
-            Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
-
-            var reg = _registers[(int) type1, (int) type2];
-            if (reg.Primary)
-            {
-                return reg.CreateFunction(fixtureA, indexA, fixtureB, indexB);
-            }
-
-            return reg.CreateFunction(fixtureB, indexB, fixtureA, indexA);
-        }
-
-        internal static void DestroyContact(Contact contact)
-        {
-            var fixtureA = contact.FixtureA;
-            var fixtureB = contact.FixtureB;
-
-            if (contact.Manifold.PointCount > 0 && fixtureA.IsSensor == false && fixtureB.IsSensor == false)
-            {
-                fixtureA.Body.IsAwake = true;
-                fixtureB.Body.IsAwake = true;
-            }
-
-            var typeA = fixtureA.ShapeType;
-            var typeB = fixtureB.ShapeType;
-
-            Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
-            Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
-            var reg = _registers[(int) typeA, (int) typeB];
-            reg.DestroyFunction(contact);
         }
 
         internal virtual void Reset()
@@ -292,7 +225,14 @@ namespace Box2DSharp.Dynamics.Contacts
             {
                 var shapeA = FixtureA.Shape;
                 var shapeB = FixtureB.Shape;
-                touching = CollisionUtils.TestOverlap(shapeA, ChildIndexA, shapeB, ChildIndexB, xfA, xfB);
+                touching = CollisionUtils.TestOverlap(
+                    shapeA,
+                    ChildIndexA,
+                    shapeB,
+                    ChildIndexB,
+                    xfA,
+                    xfB,
+                    bodyA.World.GJkProfile);
 
                 // Sensors don't generate manifolds.
                 Manifold.PointCount = 0;
@@ -399,25 +339,5 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             Flags &= ~flag;
         }
-
-        private class ContactRegister
-        {
-            public readonly CreateContact CreateFunction;
-
-            public readonly DestroyContact DestroyFunction;
-
-            public readonly bool Primary;
-
-            public ContactRegister(CreateContact createFunction, DestroyContact destroyFunction, bool primary)
-            {
-                CreateFunction = createFunction;
-                DestroyFunction = destroyFunction;
-                Primary = primary;
-            }
-        }
     }
-
-    public delegate Contact CreateContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB);
-
-    public delegate void DestroyContact(Contact contact);
 }

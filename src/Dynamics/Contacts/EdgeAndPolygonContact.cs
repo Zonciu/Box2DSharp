@@ -3,7 +3,6 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -12,23 +11,6 @@ namespace Box2DSharp.Dynamics.Contacts
     /// </summary>
     public class EdgeAndPolygonContact : Contact
     {
-        private static readonly ObjectPool<EdgeAndPolygonContact> _pool =
-            new DefaultObjectPool<EdgeAndPolygonContact>(new ContactPoolPolicy<EdgeAndPolygonContact>());
-
-        internal static Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
-        {
-            Debug.Assert(fixtureA.ShapeType == ShapeType.Edge);
-            Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
-            var contact = _pool.Get();
-            contact.Initialize(fixtureA, 0, fixtureB, 0);
-            return contact;
-        }
-
-        public static void Destroy(Contact contact)
-        {
-            _pool.Return((EdgeAndPolygonContact) contact);
-        }
-
         /// <inheritdoc />
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
@@ -38,6 +20,26 @@ namespace Box2DSharp.Dynamics.Contacts
                 xfA,
                 (PolygonShape) FixtureB.Shape,
                 xfB);
+        }
+    }
+
+    internal class EdgeAndPolygonContactFactory : IContactFactory
+    {
+        private readonly ObjectPool<EdgeAndPolygonContact> _pool =
+            new ObjectPool<EdgeAndPolygonContact>(new ContactPoolPolicy<EdgeAndPolygonContact>());
+
+        public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
+        {
+            Debug.Assert(fixtureA.ShapeType == ShapeType.Edge);
+            Debug.Assert(fixtureB.ShapeType == ShapeType.Polygon);
+            var contact = _pool.Get();
+            contact.Initialize(fixtureA, 0, fixtureB, 0);
+            return contact;
+        }
+
+        public void Destroy(Contact contact)
+        {
+            _pool.Return((EdgeAndPolygonContact) contact);
         }
     }
 }
