@@ -12,12 +12,13 @@ namespace Box2DSharp.Tests
 
         private PolygonShape _shapeB = new PolygonShape();
 
-        public int ToiMaxIters => TimeOfImpact.ToiMaxIters;
+        public int ToiMaxIters => World.ToiProfile.ToiMaxIters;
 
-        public int ToiMaxRootIters => TimeOfImpact.ToiMaxRootIters;
+        public int ToiMaxRootIters => World.ToiProfile.ToiMaxRootIters;
 
         protected override void Create()
         {
+            World.ToiProfile = new ToiProfile();
             _shapeA.SetAsBox(25.0f, 5.0f);
             _shapeB.SetAsBox(2.5f, 2.5f);
         }

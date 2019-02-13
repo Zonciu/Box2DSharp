@@ -11,7 +11,6 @@ using Box2DSharp.Inspection;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
-using Logger = Box2DSharp.Common.Logger;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
 using Color = System.Drawing.Color;
@@ -139,7 +138,7 @@ namespace Box2DSharp
             World.DestructionListener = this;
             World.Drawer = TestSettings.WorldDrawer;
             Drawer = TestSettings.WorldDrawer;
-            Logger.SetLogger(new UnityLogger());
+            DumpLogger.Instance = new UnityLogger();
 
             // DrawString
             _rect = new Rect(0, 0, Screen.width, Screen.height * 2f / 100f);

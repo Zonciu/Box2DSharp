@@ -78,7 +78,14 @@ namespace Box2DSharp.Tests
             var body = fixture.Body;
             var shape = fixture.Shape;
 
-            var overlap = CollisionUtils.TestOverlap(shape, 0, Circle, 0, body.GetTransform(), Transform);
+            var overlap = CollisionUtils.TestOverlap(
+                shape,
+                0,
+                Circle,
+                0,
+                body.GetTransform(),
+                Transform,
+                fixture.Body.World.GJkProfile);
 
             if (overlap)
             {

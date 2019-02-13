@@ -14,65 +14,9 @@ namespace Box2DSharp.Tests
 
         private float _x;
 
-        public int GjkCalls
-        {
-            get => DistanceAlgorithm.GjkCalls;
-            set => DistanceAlgorithm.GjkCalls = value;
-        }
+        private GJkProfile _gJkProfile = new GJkProfile();
 
-        public int GjkIters
-        {
-            get => DistanceAlgorithm.GjkIters;
-            set => DistanceAlgorithm.GjkIters = value;
-        }
-
-        public int GjkMaxIters
-        {
-            get => DistanceAlgorithm.GjkMaxIters;
-            set => DistanceAlgorithm.GjkMaxIters = value;
-        }
-
-        public int ToiCalls
-        {
-            get => TimeOfImpact.ToiCalls;
-            set => TimeOfImpact.ToiCalls = value;
-        }
-
-        public int ToiIters
-        {
-            get => TimeOfImpact.ToiIters;
-            set => TimeOfImpact.ToiIters = value;
-        }
-
-        public int ToiRootIters
-        {
-            get => TimeOfImpact.ToiRootIters;
-            set => TimeOfImpact.ToiRootIters = value;
-        }
-
-        public int ToiMaxRootIters
-        {
-            get => TimeOfImpact.ToiMaxRootIters;
-            set => TimeOfImpact.ToiMaxRootIters = value;
-        }
-
-        public float ToiTime
-        {
-            get => TimeOfImpact.ToiTime;
-            set => TimeOfImpact.ToiTime = value;
-        }
-
-        public float ToiMaxTime
-        {
-            get => TimeOfImpact.ToiMaxTime;
-            set => TimeOfImpact.ToiMaxTime = value;
-        }
-
-        public int ToiMaxIters
-        {
-            get => TimeOfImpact.ToiMaxIters;
-            set => TimeOfImpact.ToiMaxIters = value;
-        }
+        private ToiProfile _toiProfile = new ToiProfile();
 
         protected override void Create()
         {
@@ -126,30 +70,23 @@ namespace Box2DSharp.Tests
             _bullet.SetTransform(new Vector2(_x, 10.0f), 0.0f);
             _bullet.SetLinearVelocity(new Vector2(0.0f, -50.0f));
             _bullet.SetAngularVelocity(0.0f);
-
-            GjkCalls = 0;
-            GjkIters = 0;
-            GjkMaxIters = 0;
-
-            ToiCalls = 0;
-            ToiIters = 0;
-            ToiMaxIters = 0;
-            ToiRootIters = 0;
-            ToiMaxRootIters = 0;
         }
 
         /// <inheritdoc />
         protected override void PostStep()
         {
-            if (GjkCalls > 0)
+            if (_gJkProfile.GjkCalls > 0)
             {
-                DrawString($"gjk calls = {GjkCalls}, ave gjk iters = {GjkIters / (float) GjkCalls}, max gjk iters = {GjkMaxIters}");
+                DrawString(
+                    $"gjk calls = {_gJkProfile.GjkCalls}, ave gjk iters = {_gJkProfile.GjkIters / (float) _gJkProfile.GjkCalls}, max gjk iters = {_gJkProfile.GjkMaxIters}");
             }
 
-            if (ToiCalls > 0)
+            if (_toiProfile.ToiCalls > 0)
             {
-                DrawString($"toi calls = {ToiCalls}, ave toi iters = {ToiIters / (float) ToiCalls}, max toi iters = {ToiMaxRootIters}");
-                DrawString($"ave toi root iters = {ToiRootIters / (float) ToiCalls}, max toi root iters = {ToiMaxRootIters}");
+                DrawString(
+                    $"toi calls = {_toiProfile.ToiCalls}, ave toi iters = {_toiProfile.ToiIters / (float) _toiProfile.ToiCalls}, max toi iters = {_toiProfile.ToiMaxRootIters}");
+                DrawString(
+                    $"ave toi root iters = {_toiProfile.ToiRootIters / (float) _toiProfile.ToiCalls}, max toi root iters = {_toiProfile.ToiMaxRootIters}");
             }
 
             if (FrameManager.FrameCount % 60 == 0)

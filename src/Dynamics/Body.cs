@@ -1196,9 +1196,9 @@ namespace Box2DSharp.Dynamics
             xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
 
             var broadPhase = _world.ContactManager.BroadPhase;
-            foreach (var b2Fixture in Fixtures)
+            for (var index = 0; index < Fixtures.Count; index++)
             {
-                b2Fixture.Synchronize(broadPhase, xf1, Transform);
+                Fixtures[index].Synchronize(broadPhase, xf1, Transform);
             }
         }
 

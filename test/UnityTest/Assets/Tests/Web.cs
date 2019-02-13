@@ -171,6 +171,19 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
+        public override void JointDestroyed(Joint joint)
+        {
+            for (var i = 0; i < 8; ++i)
+            {
+                if (_joints[i] == joint)
+                {
+                    _joints[i] = null;
+                    break;
+                }
+            }
+        }
+
+        /// <inheritdoc />
         protected override void PostStep()
         {
             DrawString("This demonstrates a soft distance joint.");

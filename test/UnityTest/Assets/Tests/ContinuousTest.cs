@@ -12,63 +12,15 @@ namespace Box2DSharp.Tests
 
         private Body _body;
 
-        public int GjkCalls
-        {
-            get => DistanceAlgorithm.GjkCalls;
-            set => DistanceAlgorithm.GjkCalls = value;
-        }
+        private GJkProfile _gJkProfile = new GJkProfile();
 
-        public int GjkIters
-        {
-            get => DistanceAlgorithm.GjkIters;
-            set => DistanceAlgorithm.GjkIters = value;
-        }
-
-        public int GjkMaxIters
-        {
-            get => DistanceAlgorithm.GjkMaxIters;
-            set => DistanceAlgorithm.GjkMaxIters = value;
-        }
-
-        public int ToiCalls
-        {
-            get => TimeOfImpact.ToiCalls;
-            set => TimeOfImpact.ToiCalls = value;
-        }
-
-        public int ToiIters
-        {
-            get => TimeOfImpact.ToiIters;
-            set => TimeOfImpact.ToiIters = value;
-        }
-
-        public int ToiRootIters
-        {
-            get => TimeOfImpact.ToiRootIters;
-            set => TimeOfImpact.ToiRootIters = value;
-        }
-
-        public int ToiMaxRootIters
-        {
-            get => TimeOfImpact.ToiMaxRootIters;
-            set => TimeOfImpact.ToiMaxRootIters = value;
-        }
-
-        public float ToiTime
-        {
-            get => TimeOfImpact.ToiTime;
-            set => TimeOfImpact.ToiTime = value;
-        }
-
-        public float ToiMaxTime
-        {
-            get => TimeOfImpact.ToiMaxTime;
-            set => TimeOfImpact.ToiMaxTime = value;
-        }
+        private ToiProfile _toiProfile = new ToiProfile();
 
         protected override void Create()
         {
             {
+                World.ToiProfile = _toiProfile;
+                World.GJkProfile = _gJkProfile;
                 var bd = new BodyDef();
                 bd.Position.Set(0.0f, 0.0f);
                 var body = World.CreateBody(bd);
@@ -102,32 +54,22 @@ namespace Box2DSharp.Tests
                 _body.SetLinearVelocity(new Vector2(0.0f, -100.0f));
                 _body.SetAngularVelocity(_angularVelocity);
             }
-
-            GjkCalls = 0;
-            GjkIters = 0;
-            GjkMaxIters = 0;
-            ToiCalls = 0;
-            ToiIters = 0;
-            ToiRootIters = 0;
-            ToiMaxRootIters = 0;
-            ToiTime = 0.0f;
-            ToiMaxTime = 0.0f;
         }
 
         private void Launch()
         {
-            GjkCalls = 0;
-            GjkIters = 0;
-            GjkMaxIters = 0;
+            _gJkProfile.GjkCalls = 0;
+            _gJkProfile.GjkIters = 0;
+            _gJkProfile.GjkMaxIters = 0;
 
-            ToiCalls = 0;
-            ToiIters = 0;
+            _toiProfile.ToiCalls = 0;
+            _toiProfile.ToiIters = 0;
 
-            ToiRootIters = 0;
-            ToiMaxRootIters = 0;
+            _toiProfile.ToiRootIters = 0;
+            _toiProfile.ToiMaxRootIters = 0;
 
-            ToiTime = 0.0f;
-            ToiMaxTime = 0.0f;
+            _toiProfile.ToiTime = 0.0f;
+            _toiProfile.ToiMaxTime = 0.0f;
 
             _body.SetTransform(new Vector2(0.0f, 20.0f), 0.0f);
 
@@ -141,21 +83,21 @@ namespace Box2DSharp.Tests
         /// <inheritdoc />
         protected override void PostStep()
         {
-            if (GjkCalls > 0)
+            if (_gJkProfile.GjkCalls > 0)
             {
                 DrawString(
-                    $"gjk calls = {GjkCalls}, ave gjk iters = {GjkIters / (float) GjkCalls}, max gjk iters = {GjkMaxIters}"
+                    $"gjk calls = {_gJkProfile.GjkCalls}, ave gjk iters = {_gJkProfile.GjkIters / (float) _gJkProfile.GjkCalls}, max gjk iters = {_gJkProfile.GjkMaxIters}"
                 );
             }
 
-            if (ToiCalls > 0)
+            if (_toiProfile.ToiCalls > 0)
             {
                 DrawString(
-                    $"toi calls = {ToiCalls}, ave [max] toi iters = {ToiIters / (float) ToiCalls} [{ToiMaxRootIters}]");
+                    $"toi calls = {_toiProfile.ToiCalls}, ave [max] toi iters = {_toiProfile.ToiIters / (float) _toiProfile.ToiCalls} [{_toiProfile.ToiMaxRootIters}]");
 
-                DrawString($"ave [max] toi root iters = {ToiRootIters / (float) ToiCalls} [ToiMaxRootIters]");
+                DrawString($"ave [max] toi root iters = {_toiProfile.ToiRootIters / (float) _toiProfile.ToiCalls} [ToiMaxRootIters]");
                 DrawString(
-                    $"ave [max] toi time = {1000.0f * ToiTime / (float) ToiCalls} [{1000.0f * ToiMaxTime}] (microseconds)");
+                    $"ave [max] toi time = {1000.0f * _toiProfile.ToiTime / (float) _toiProfile.ToiCalls} [{1000.0f * _toiProfile.ToiMaxTime}] (microseconds)");
             }
         }
     }

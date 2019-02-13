@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using ILogger = Box2DSharp.Common.ILogger;
+﻿using Box2DSharp.Common;
+using UnityEngine;
 
 namespace Box2DSharp
 {
-    public class UnityLogger : ILogger
+    public class UnityLogger : IDumpLogger
     {
         /// <inheritdoc />
         public void Log(string message)
