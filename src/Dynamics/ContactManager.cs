@@ -9,15 +9,13 @@ namespace Box2DSharp.Dynamics
     {
         public static readonly IContactFilter DefaultContactFilter = new DefaultContactFilter();
 
-        public static readonly IContactListener DefaultContactListener = new NullContactListener();
-
         public readonly BroadPhase BroadPhase = new BroadPhase();
 
         public IContactFilter ContactFilter = DefaultContactFilter;
 
         public readonly LinkedList<Contact> ContactList = new LinkedList<Contact>();
 
-        public IContactListener ContactListener = DefaultContactListener;
+        public IContactListener ContactListener;
 
         // Broad-phase callback.
         public void AddPair(object proxyUserDataA, object proxyUserDataB)
