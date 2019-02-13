@@ -108,7 +108,8 @@ namespace Box2DSharp.Collision
             Shape shapeB,
             int indexB,
             in Transform xfA,
-            in Transform xfB)
+            in Transform xfB,
+            GJkProfile gJkProfile)
         {
             var input = new DistanceInput();
             input.ProxyA.Set(shapeA, indexA);
@@ -119,7 +120,7 @@ namespace Box2DSharp.Collision
 
             var cache = SimplexCache.Create();
 
-            DistanceAlgorithm.Distance(out var output, ref cache, input);
+            DistanceAlgorithm.Distance(out var output, ref cache, input, gJkProfile);
             return output.Distance < 10.0f * Settings.Epsilon;
         }
 

@@ -110,6 +110,10 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         public Profile Profile;
 
+        public ToiProfile ToiProfile { get; set; } = null;
+
+        public GJkProfile GJkProfile { get; set; } = null;
+
         /// <summary>
         /// 接触点管理器
         /// </summary>
@@ -935,7 +939,7 @@ namespace Box2DSharp.Dynamics
                         input.SweepB = bB.Sweep;
                         input.Tmax = 1.0f;
 
-                        TimeOfImpact.ComputeTimeOfImpact(out var output, input);
+                        TimeOfImpact.ComputeTimeOfImpact(out var output, input, ToiProfile, GJkProfile);
 
                         // Beta is the fraction of the remaining portion of the .
                         var beta = output.Time;

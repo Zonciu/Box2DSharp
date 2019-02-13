@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
+using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Collision
 {
@@ -41,34 +42,42 @@ namespace Box2DSharp.Collision
         public float Time;
     }
 
+    public class ToiProfile
+    {
+        public float ToiTime;
+
+        public float ToiMaxTime;
+
+        public int ToiCalls;
+
+        public int ToiIters;
+
+        public int ToiMaxIters;
+
+        public int ToiRootIters;
+
+        public int ToiMaxRootIters;
+
+        public World World;
+    }
+
     public static class TimeOfImpact
     {
-        public static float ToiTime;
-
-        public static float ToiMaxTime;
-
-        public static int ToiCalls;
-
-        public static int ToiIters;
-
-        public static int ToiMaxIters;
-
-        public static int ToiRootIters;
-
-        public static int ToiMaxRootIters;
-
         /// Compute the upper bound on time before two shapes penetrate. Time is represented as
         /// a fraction between [0,tMax]. This uses a swept separating axis and may miss some intermediate,
         /// non-tunneling collisions. If you change the time interval, you should call this function
         /// again.
         /// Note: use b2Distance to compute the contact point and normal at the time of impact.
-        public static void ComputeTimeOfImpact(out ToiOutput output, in ToiInput input)
+        public static void ComputeTimeOfImpact(
+            out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
         {
             var timer = Stopwatch.StartNew();
             output = new ToiOutput();
 
-            // Todo 只在需要时收集该数据
-            ++ToiCalls;
+            if (toiProfile != null)
+            {
+                ++toiProfile.ToiCalls;
+            }
 
             output.State = ToiOutput.ToiState.Unknown;
             output.Time = input.Tmax;
@@ -114,7 +123,7 @@ namespace Box2DSharp.Collision
                 distanceInput.TransformA = xfA;
                 distanceInput.TransformB = xfB;
 
-                DistanceAlgorithm.Distance(out var distanceOutput, ref cache, distanceInput);
+                DistanceAlgorithm.Distance(out var distanceOutput, ref cache, distanceInput, gjkProfile);
 
                 // If the shapes are overlapped, we give up on continuous collision.
                 if (distanceOutput.Distance <= 0.0f)
@@ -142,33 +151,6 @@ namespace Box2DSharp.Collision
                     proxyB,
                     sweepB,
                     t1);
-
-                // #if 0
-                //
-                //                 // Dump the curve seen by the root finder
-                //                 {
-                //                     const int N  = 100;
-                //                     float     dx = 1.0f / N;
-                //                     float xs[N + 1];
-                //                     float fs[N + 1];
-                //
-                //                     float x = 0.0f;
-                //
-                //                     for (int i = 0; i <= N; ++i)
-                //                     {
-                //                         sweepA.GetTransform(&xfA, x);
-                //                         sweepB.GetTransform(&xfB, x);
-                //                         float f = fcn.Evaluate(xfA, xfB) - target;
-                //
-                //                         printf("%g %g\n", x, f);
-                //
-                //                         xs[i] = x;
-                //                         fs[i] = f;
-                //
-                //                         x += dx;
-                //                     }
-                //                 }
-                // #endif
 
                 // Compute the TOI on the separating axis. We do this by successively
                 // resolving the deepest point. This loop is bounded by the number of vertices.
@@ -241,7 +223,10 @@ namespace Box2DSharp.Collision
                         }
 
                         ++rootIterCount;
-                        ++ToiRootIters;
+                        if (toiProfile != null)
+                        {
+                            ++toiProfile.ToiRootIters;
+                        }
 
                         var s = fcn.Evaluate(indexA, indexB, t);
 
@@ -270,7 +255,10 @@ namespace Box2DSharp.Collision
                         }
                     }
 
-                    ToiMaxRootIters = Math.Max(ToiMaxRootIters, rootIterCount);
+                    if (toiProfile != null)
+                    {
+                        toiProfile.ToiMaxRootIters = Math.Max(toiProfile.ToiMaxRootIters, rootIterCount);
+                    }
 
                     ++pushBackIter;
 
@@ -281,7 +269,10 @@ namespace Box2DSharp.Collision
                 }
 
                 ++iter;
-                ++ToiIters;
+                if (toiProfile != null)
+                {
+                    ++toiProfile.ToiIters;
+                }
 
                 if (done)
                 {
@@ -297,11 +288,16 @@ namespace Box2DSharp.Collision
                 }
             }
 
-            ToiMaxIters = Math.Max(ToiMaxIters, iter);
             timer.Stop();
             float time = timer.ElapsedMilliseconds;
-            ToiMaxTime = Math.Max(ToiMaxTime, time);
-            ToiTime += time;
+            if (toiProfile == null)
+            {
+                return;
+            }
+
+            toiProfile.ToiMaxIters = Math.Max(toiProfile.ToiMaxIters, iter);
+            toiProfile.ToiMaxTime = Math.Max(toiProfile.ToiMaxTime, time);
+            toiProfile.ToiTime += time;
         }
     }
 
