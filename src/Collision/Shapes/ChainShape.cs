@@ -60,7 +60,7 @@ namespace Box2DSharp.Collision.Shapes
                 var v2 = vertices[i];
 
                 // If the code crashes here, it means your vertices are too close together.
-                Debug.Assert(MathUtils.DistanceSquared(v1, v2) > Settings.LinearSlop * Settings.LinearSlop);
+                Debug.Assert(Vector2.DistanceSquared(v1, v2) > Settings.LinearSlop * Settings.LinearSlop);
             }
 
             Count = count + 1;
@@ -85,7 +85,7 @@ namespace Box2DSharp.Collision.Shapes
             {
                 // If the code crashes here, it means your vertices are too close together.
                 Debug.Assert(
-                    MathUtils.DistanceSquared(vertices[i - 1], vertices[i])
+                    Vector2.DistanceSquared(vertices[i - 1], vertices[i])
                   > Settings.LinearSlop * Settings.LinearSlop);
             }
 

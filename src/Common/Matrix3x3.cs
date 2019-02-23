@@ -30,16 +30,16 @@ namespace Box2DSharp.Common
         /// than computing the inverse in one-shot cases.
         public Vector3 Solve33(in Vector3 b)
         {
-            var det = MathUtils.Dot(Ex, MathUtils.Cross(Ey, Ez));
+            var det = Vector3.Dot(Ex, Vector3.Cross(Ey, Ez));
             if (!det.Equals(0.0f))
             {
                 det = 1.0f / det;
             }
 
             Vector3 x;
-            x.X = det * MathUtils.Dot(b, MathUtils.Cross(Ey, Ez));
-            x.Y = det * MathUtils.Dot(Ex, MathUtils.Cross(b, Ez));
-            x.Z = det * MathUtils.Dot(Ex, MathUtils.Cross(Ey, b));
+            x.X = det * Vector3.Dot(b, Vector3.Cross(Ey, Ez));
+            x.Y = det * Vector3.Dot(Ex, Vector3.Cross(b, Ez));
+            x.Z = det * Vector3.Dot(Ex, Vector3.Cross(Ey, b));
             return x;
         }
 
@@ -91,7 +91,7 @@ namespace Box2DSharp.Common
         /// Returns the zero matrix if singular.
         public void GetSymInverse33(ref Matrix3x3 matrix3x3)
         {
-            var det = MathUtils.Dot(Ex, MathUtils.Cross(Ey, Ez));
+            var det = Vector3.Dot(Ex, Vector3.Cross(Ey, Ez));
             if (!det.Equals(0.0f))
             {
                 det = 1.0f / det;

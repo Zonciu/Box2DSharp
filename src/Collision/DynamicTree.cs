@@ -276,7 +276,7 @@ namespace Box2DSharp.Collision
                 // |dot(v, p1 - c)| > dot(|v|, h)
                 var c = node.AABB.GetCenter();
                 var h = node.AABB.GetExtents();
-                var separation = Math.Abs(MathUtils.Dot(v, p1 - c)) - MathUtils.Dot(abs_v, h);
+                var separation = Math.Abs(Vector2.Dot(v, p1 - c)) - Vector2.Dot(abs_v, h);
                 if (separation > 0.0f)
                 {
                     continue;

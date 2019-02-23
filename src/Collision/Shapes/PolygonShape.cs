@@ -83,7 +83,7 @@ namespace Box2DSharp.Collision.Shapes
                 var unique = true;
                 for (var j = 0; j < tempCount; ++j)
                 {
-                    if (MathUtils.DistanceSquared(v, ps[j])
+                    if (Vector2.DistanceSquared(v, ps[j])
                       < 0.5f * Settings.LinearSlop * (0.5f * Settings.LinearSlop))
                     {
                         unique = false;
@@ -234,7 +234,7 @@ namespace Box2DSharp.Collision.Shapes
 
             for (var i = 0; i < Count; ++i)
             {
-                var dot = MathUtils.Dot(Normals[i], pLocal - Vertices[i]);
+                var dot = Vector2.Dot(Normals[i], pLocal - Vertices[i]);
                 if (dot > 0.0f)
                 {
                     return false;
@@ -267,8 +267,8 @@ namespace Box2DSharp.Collision.Shapes
                 // p = p1 + a * d
                 // dot(normal, p - v) = 0
                 // dot(normal, p1 - v) + a * dot(normal, d) = 0
-                var numerator = MathUtils.Dot(Normals[i], Vertices[i] - p1);
-                var denominator = MathUtils.Dot(Normals[i], d);
+                var numerator = Vector2.Dot(Normals[i], Vertices[i] - p1);
+                var denominator = Vector2.Dot(Normals[i], d);
 
                 if (denominator.Equals(0.0f))
                 {
@@ -422,8 +422,8 @@ namespace Box2DSharp.Collision.Shapes
 
             // Shift to center of mass then to original body origin.
             massData.RotationInertia += massData.Mass
-                                      * (MathUtils.Dot(massData.Center, massData.Center)
-                                       - MathUtils.Dot(center, center));
+                                      * (Vector2.Dot(massData.Center, massData.Center)
+                                       - Vector2.Dot(center, center));
         }
 
         /// Validate convexity. This is a very time consuming operation.

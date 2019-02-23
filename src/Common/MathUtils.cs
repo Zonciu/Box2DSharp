@@ -6,14 +6,6 @@ namespace Box2DSharp.Common
 {
     public static class MathUtils
     {
-        /// Perform the dot product on two vectors.
-        /// 点积,a·b=|a||b|·cosθ
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Dot(in Vector2 a, in Vector2 b)
-        {
-            return a.X * b.X + a.Y * b.Y;
-        }
-
         /// Perform the cross product on two vectors. In 2D this produces a scalar.
         /// 叉积,axb=|a||b|·sinθ 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,34 +43,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 MulT(in Matrix2x2 m, in Vector2 v)
         {
-            return new Vector2(Dot(v, m.Ex), Dot(v, m.Ey));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Distance(in Vector2 a, in Vector2 b)
-        {
-            return (a - b).Length();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float DistanceSquared(in Vector2 a, in Vector2 b)
-        {
-            var c = a - b;
-            return Dot(c, c);
-        }
-
-        /// Perform the dot product on two vectors.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Dot(in Vector3 a, in Vector3 b)
-        {
-            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
-        }
-
-        /// Perform the cross product on two vectors.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Cross(in Vector3 a, in Vector3 b)
-        {
-            return new Vector3(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
+            return new Vector2(Vector2.Dot(v, m.Ex), Vector2.Dot(v, m.Ey));
         }
 
         // A * B
@@ -92,7 +57,9 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix2x2 MulT(in Matrix2x2 a, in Matrix2x2 b)
         {
-            return new Matrix2x2(new Vector2(Dot(a.Ex, b.Ex), Dot(a.Ey, b.Ex)), new Vector2(Dot(a.Ex, b.Ey), Dot(a.Ey, b.Ey)));
+            return new Matrix2x2(
+                new Vector2(Vector2.Dot(a.Ex, b.Ex), Vector2.Dot(a.Ey, b.Ex)),
+                new Vector2(Vector2.Dot(a.Ex, b.Ey), Vector2.Dot(a.Ey, b.Ey)));
         }
 
         /// Multiply a matrix times a vector.
@@ -117,7 +84,7 @@ namespace Box2DSharp.Common
             // [qs  qc]   [rs  rc]   [qs*rc+qc*rs -qs*rs+qc*rc]
             // s = qs * rc + qc * rs
             // c = qc * rc - qs * rs
-            return new Rotation {Sin = q.Sin * r.Cos + q.Cos * r.Sin, Cos = q.Cos * r.Cos - q.Sin * r.Sin};
+            return new Rotation(q.Sin * r.Cos + q.Cos * r.Sin, q.Cos * r.Cos - q.Sin * r.Sin);
         }
 
         /// Transpose multiply two rotations: qT * r
@@ -128,7 +95,7 @@ namespace Box2DSharp.Common
             // [-qs qc]   [rs  rc]   [-qs*rc+qc*rs qs*rs+qc*rc]
             // s = qc * rs - qs * rc
             // c = qc * rc + qs * rs
-            return new Rotation {Sin = q.Cos * r.Sin - q.Sin * r.Cos, Cos = q.Cos * r.Cos + q.Sin * r.Sin};
+            return new Rotation(q.Cos * r.Sin - q.Sin * r.Cos, q.Cos * r.Cos + q.Sin * r.Sin);
         }
 
         /// Rotate a vector
@@ -166,11 +133,7 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Transform Mul(in Transform A, in Transform B)
         {
-            return new Transform
-            {
-                Rotation = Mul(A.Rotation, B.Rotation),
-                Position = Mul(A.Rotation, B.Position) + A.Position
-            };
+            return new Transform(Mul(A.Rotation, B.Position) + A.Position, Mul(A.Rotation, B.Rotation));
         }
 
         // v2 = A.q' * (B.q * v1 + B.p - A.p)
@@ -178,23 +141,13 @@ namespace Box2DSharp.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Transform MulT(in Transform A, in Transform B)
         {
-            return new Transform
-            {
-                Rotation = MulT(A.Rotation, B.Rotation),
-                Position = MulT(A.Rotation, B.Position - A.Position)
-            };
+            return new Transform(MulT(A.Rotation, B.Position - A.Position), MulT(A.Rotation, B.Rotation));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Clamp(float a, float low, float high)
         {
             return a < low ? low : a > high ? high : a;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 Clamp(in Vector2 a, in Vector2 low, in Vector2 high)
-        {
-            return Vector2.Max(low, Vector2.Min(a, high));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

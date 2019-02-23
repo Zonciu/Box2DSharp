@@ -138,7 +138,7 @@ namespace Box2DSharp.Tests
                 // Clamp onto a square to help create collinearities.
                 // This will stress the convex hull algorithm.
                 var v = new Vector2(x, y);
-                v = MathUtils.Clamp(v, lowerBound, upperBound);
+                v = Vector2.Clamp(v, lowerBound, upperBound);
                 m_points[i] = v;
             }
 

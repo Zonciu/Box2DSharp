@@ -35,7 +35,7 @@ namespace Box2DSharp.Collision.Shapes
         {
             var center = transform.Position + MathUtils.Mul(transform.Rotation, Position);
             var d = p - center;
-            return MathUtils.Dot(d, d) <= Radius * Radius;
+            return Vector2.Dot(d, d) <= Radius * Radius;
         }
 
         /// Implement b2Shape.
@@ -48,12 +48,12 @@ namespace Box2DSharp.Collision.Shapes
             output = default;
             var position = transform.Position + MathUtils.Mul(transform.Rotation, Position);
             var s = input.P1 - position;
-            var b = MathUtils.Dot(s, s) - Radius * Radius;
+            var b = Vector2.Dot(s, s) - Radius * Radius;
 
             // Solve quadratic equation.
             var r = input.P2 - input.P1;
-            var c = MathUtils.Dot(s, r);
-            var rr = MathUtils.Dot(r, r);
+            var c = Vector2.Dot(s, r);
+            var rr = Vector2.Dot(r, r);
             var sigma = c * c - rr * b;
 
             // Check for negative discriminant and short segment.
@@ -98,7 +98,7 @@ namespace Box2DSharp.Collision.Shapes
             massData.Center = Position;
 
             // inertia about the local origin
-            massData.RotationInertia = massData.Mass * (0.5f * Radius * Radius + MathUtils.Dot(Position, Position));
+            massData.RotationInertia = massData.Mass * (0.5f * Radius * Radius + Vector2.Dot(Position, Position));
         }
     }
 }

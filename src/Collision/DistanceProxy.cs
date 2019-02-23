@@ -83,10 +83,10 @@ namespace Box2DSharp.Collision
         public int GetSupport(in Vector2 d)
         {
             var bestIndex = 0;
-            var bestValue = MathUtils.Dot(Vertices[0], d);
+            var bestValue = Vector2.Dot(Vertices[0], d);
             for (var i = 1; i < Count; ++i)
             {
-                var value = MathUtils.Dot(Vertices[i], d);
+                var value = Vector2.Dot(Vertices[i], d);
                 if (value > bestValue)
                 {
                     bestIndex = i;
@@ -101,10 +101,10 @@ namespace Box2DSharp.Collision
         public ref readonly Vector2 GetSupportVertex(in Vector2 d)
         {
             var bestIndex = 0;
-            var bestValue = MathUtils.Dot(Vertices[0], d);
+            var bestValue = Vector2.Dot(Vertices[0], d);
             for (var i = 1; i < Count; ++i)
             {
-                var value = MathUtils.Dot(Vertices[i], d);
+                var value = Vector2.Dot(Vertices[i], d);
                 if (value > bestValue)
                 {
                     bestIndex = i;

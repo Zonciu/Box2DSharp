@@ -31,7 +31,7 @@ namespace Box2DSharp.Collision.Collider
                 Normal.Set(1.0f, 0.0f);
                 var pointA = MathUtils.Mul(xfA, manifold.LocalPoint);
                 var pointB = MathUtils.Mul(xfB, manifold.Points.Values[0].LocalPoint);
-                if (MathUtils.DistanceSquared(pointA, pointB) > Settings.Epsilon * Settings.Epsilon)
+                if (Vector2.DistanceSquared(pointA, pointB) > Settings.Epsilon * Settings.Epsilon)
                 {
                     Normal = pointB - pointA;
                     Normal = Vector2.Normalize(Normal);
@@ -40,7 +40,7 @@ namespace Box2DSharp.Collision.Collider
                 var cA = pointA + radiusA * Normal;
                 var cB = pointB - radiusB * Normal;
                 Points.Values[0] = 0.5f * (cA + cB);
-                Separations.Values[0] = MathUtils.Dot(cB - cA, Normal);
+                Separations.Values[0] = Vector2.Dot(cB - cA, Normal);
             }
                 break;
 
@@ -52,10 +52,10 @@ namespace Box2DSharp.Collision.Collider
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfB, manifold.Points.Values[i].LocalPoint);
-                    var cA = clipPoint + (radiusA - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cA = clipPoint + (radiusA - Vector2.Dot(clipPoint - planePoint, Normal)) * Normal;
                     var cB = clipPoint - radiusB * Normal;
                     Points.Values[i] = 0.5f * (cA + cB);
-                    Separations.Values[i] = MathUtils.Dot(cB - cA, Normal);
+                    Separations.Values[i] = Vector2.Dot(cB - cA, Normal);
                 }
             }
                 break;
@@ -68,10 +68,10 @@ namespace Box2DSharp.Collision.Collider
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
                     var clipPoint = MathUtils.Mul(xfA, manifold.Points.Values[i].LocalPoint);
-                    var cB = clipPoint + (radiusB - MathUtils.Dot(clipPoint - planePoint, Normal)) * Normal;
+                    var cB = clipPoint + (radiusB - Vector2.Dot(clipPoint - planePoint, Normal)) * Normal;
                     var cA = clipPoint - radiusA * Normal;
                     Points.Values[i] = 0.5f * (cA + cB);
-                    Separations.Values[i] = MathUtils.Dot(cA - cB, Normal);
+                    Separations.Values[i] = Vector2.Dot(cA - cB, Normal);
                 }
 
                 // Ensure normal points from A to B.

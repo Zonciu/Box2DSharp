@@ -88,8 +88,8 @@ namespace Box2DSharp.Collision.Shapes
             // q = p1 + t * d
             // dot(normal, q - v1) = 0
             // dot(normal, p1 - v1) + t * dot(normal, d) = 0
-            var numerator = MathUtils.Dot(normal, v1 - p1);
-            var denominator = MathUtils.Dot(normal, d);
+            var numerator = Vector2.Dot(normal, v1 - p1);
+            var denominator = Vector2.Dot(normal, d);
 
             if (denominator.Equals(0.0f))
             {
@@ -107,13 +107,13 @@ namespace Box2DSharp.Collision.Shapes
             // q = v1 + s * r
             // s = dot(q - v1, r) / dot(r, r)
             var r = v2 - v1;
-            var rr = MathUtils.Dot(r, r);
+            var rr = Vector2.Dot(r, r);
             if (rr.Equals(0.0f))
             {
                 return false;
             }
 
-            var s = MathUtils.Dot(q - v1, r) / rr;
+            var s = Vector2.Dot(q - v1, r) / rr;
             if (s < 0.0f || 1.0f < s)
             {
                 return false;

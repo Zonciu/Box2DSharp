@@ -145,7 +145,7 @@ namespace Box2DSharp.Collision
 
             // Prepare output.
             simplex.GetWitnessPoints(out output.PointA, out output.PointB);
-            output.Distance = MathUtils.Distance(output.PointA, output.PointB);
+            output.Distance = Vector2.Distance(output.PointA, output.PointB);
             output.Iterations = iter;
 
             // Cache the simplex.
@@ -241,8 +241,8 @@ namespace Box2DSharp.Collision
                 v = Vector2.Normalize(v);
 
                 // Intersect ray with plane
-                var vp = MathUtils.Dot(v, p);
-                var vr = MathUtils.Dot(v, r);
+                var vp = Vector2.Dot(v, p);
+                var vr = Vector2.Dot(v, r);
                 if (vp - sigma > lambda * vr)
                 {
                     if (vr <= 0.0f)

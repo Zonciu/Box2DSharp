@@ -255,7 +255,7 @@ namespace Box2DSharp.Dynamics.Joints
             var vpA = vA + MathUtils.Cross(wA, _rA);
             var vpB = vB + MathUtils.Cross(wB, _rB);
 
-            var Cdot = -MathUtils.Dot(_uA, vpA) - _ratio * MathUtils.Dot(_uB, vpB);
+            var Cdot = -Vector2.Dot(_uA, vpA) - _ratio * Vector2.Dot(_uB, vpB);
             var impulse = -_mass * Cdot;
             _impulse += impulse;
 

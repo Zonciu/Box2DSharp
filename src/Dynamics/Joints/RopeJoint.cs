@@ -228,7 +228,7 @@ namespace Box2DSharp.Dynamics.Joints
             var vpA = vA + MathUtils.Cross(wA, _rA);
             var vpB = vB + MathUtils.Cross(wB, _rB);
             var C = _length - _maxLength;
-            var cdot = MathUtils.Dot(_u, vpB - vpA);
+            var cdot = Vector2.Dot(_u, vpB - vpA);
 
             // Predictive constraint.
             if (C < 0.0f)

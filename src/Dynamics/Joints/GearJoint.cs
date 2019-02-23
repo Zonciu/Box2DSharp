@@ -113,7 +113,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var pA = MathUtils.MulT(
                     xfC.Rotation,
                     MathUtils.Mul(xfA.Rotation, _localAnchorA) + (xfA.Position - xfC.Position));
-                coordinateA = MathUtils.Dot(pA - pC, _localAxisC);
+                coordinateA = Vector2.Dot(pA - pC, _localAxisC);
             }
 
             _bodyD = _joint2.BodyA;
@@ -147,7 +147,7 @@ namespace Box2DSharp.Dynamics.Joints
                 var pB = MathUtils.MulT(
                     xfD.Rotation,
                     MathUtils.Mul(xfB.Rotation, _localAnchorB) + (xfB.Position - xfD.Position));
-                coordinateB = MathUtils.Dot(pB - pD, _localAxisD);
+                coordinateB = Vector2.Dot(pB - pD, _localAxisD);
             }
 
             _ratio = def.Ratio;
@@ -343,7 +343,7 @@ namespace Box2DSharp.Dynamics.Joints
             var vD = data.Velocities[_indexD].V;
             var wD = data.Velocities[_indexD].W;
 
-            var Cdot = MathUtils.Dot(_jvAc, vA - vC) + MathUtils.Dot(_jvBd, vB - vD);
+            var Cdot = Vector2.Dot(_jvAc, vA - vC) + Vector2.Dot(_jvBd, vB - vD);
             Cdot += _jwA * wA - _jwC * wC + (_jwB * wB - _jwD * wD);
 
             var impulse = -_mass * Cdot;
@@ -415,7 +415,7 @@ namespace Box2DSharp.Dynamics.Joints
 
                 var pC = _localAnchorC - _lcC;
                 var pA = MathUtils.MulT(qC, rA + (cA - cC));
-                coordinateA = MathUtils.Dot(pA - pC, _localAxisC);
+                coordinateA = Vector2.Dot(pA - pC, _localAxisC);
             }
 
             if (_typeB == JointType.RevoluteJoint)
@@ -439,7 +439,7 @@ namespace Box2DSharp.Dynamics.Joints
 
                 var pD = _localAnchorD - _lcD;
                 var pB = MathUtils.MulT(qD, rB + (cB - cD));
-                coordinateB = MathUtils.Dot(pB - pD, _localAxisD);
+                coordinateB = Vector2.Dot(pB - pD, _localAxisD);
             }
 
             var C = coordinateA + _ratio * coordinateB - _constant;

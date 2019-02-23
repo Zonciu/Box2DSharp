@@ -37,8 +37,8 @@ namespace Box2DSharp.Collision
 
             // Barycentric coordinates
             // 质心坐标
-            var u = MathUtils.Dot(e, B - Q);
-            var v = MathUtils.Dot(e, Q - A);
+            var u = Vector2.Dot(e, B - Q);
+            var v = Vector2.Dot(e, Q - A);
 
             var radius = edgeA.Radius + circleB.Radius;
 
@@ -49,7 +49,7 @@ namespace Box2DSharp.Collision
             {
                 var P = A;
                 var d = Q - P;
-                var dd = MathUtils.Dot(d, d);
+                var dd = Vector2.Dot(d, d);
                 if (dd > radius * radius)
                 {
                     return;
@@ -61,7 +61,7 @@ namespace Box2DSharp.Collision
                     var A1 = edgeA.Vertex0;
                     var B1 = A;
                     var e1 = B1 - A1;
-                    var u1 = MathUtils.Dot(e1, B1 - Q);
+                    var u1 = Vector2.Dot(e1, B1 - Q);
 
                     // Is the circle in Region AB of the previous edge?
                     if (u1 > 0.0f)
@@ -88,7 +88,7 @@ namespace Box2DSharp.Collision
             {
                 var P = B;
                 var d = Q - P;
-                var dd = MathUtils.Dot(d, d);
+                var dd = Vector2.Dot(d, d);
                 if (dd > radius * radius)
                 {
                     return;
@@ -100,7 +100,7 @@ namespace Box2DSharp.Collision
                     var B2 = edgeA.Vertex3;
                     var A2 = B;
                     var e2 = B2 - A2;
-                    var v2 = MathUtils.Dot(e2, Q - A2);
+                    var v2 = Vector2.Dot(e2, Q - A2);
 
                     // Is the circle in Region AB of the next edge?
                     if (v2 > 0.0f)
@@ -124,18 +124,18 @@ namespace Box2DSharp.Collision
 
             {
                 // Region AB
-                var den = MathUtils.Dot(e, e);
+                var den = Vector2.Dot(e, e);
                 Debug.Assert(den > 0.0f);
                 var P = 1.0f / den * (u * A + v * B);
                 var d = Q - P;
-                var dd = MathUtils.Dot(d, d);
+                var dd = Vector2.Dot(d, d);
                 if (dd > radius * radius)
                 {
                     return;
                 }
 
                 var n = new Vector2(-e.Y, e.X);
-                if (MathUtils.Dot(n, Q - A) < 0.0f)
+                if (Vector2.Dot(n, Q - A) < 0.0f)
                 {
                     n.Set(-n.X, -n.Y);
                 }
@@ -288,7 +288,7 @@ namespace Box2DSharp.Collision
                 var edge1 = V2 - V1;
                 edge1 = Vector2.Normalize(edge1);
                 Normal1.Set(edge1.Y, -edge1.X);
-                var offset1 = MathUtils.Dot(Normal1, CentroidB - V1);
+                var offset1 = Vector2.Dot(Normal1, CentroidB - V1);
                 float offset0 = 0.0f, offset2 = 0.0f;
                 bool convex1 = false, convex2 = false;
 
@@ -299,7 +299,7 @@ namespace Box2DSharp.Collision
                     edge0 = Vector2.Normalize(edge0);
                     Normal0.Set(edge0.Y, -edge0.X);
                     convex1 = MathUtils.Cross(edge0, edge1) >= 0.0f;
-                    offset0 = MathUtils.Dot(Normal0, CentroidB - V0);
+                    offset0 = Vector2.Dot(Normal0, CentroidB - V0);
                 }
 
                 // Is there a following edge?
@@ -309,7 +309,7 @@ namespace Box2DSharp.Collision
                     edge2 = Vector2.Normalize(edge2);
                     Normal2.Set(edge2.Y, -edge2.X);
                     convex2 = MathUtils.Cross(edge1, edge2) > 0.0f;
-                    offset2 = MathUtils.Dot(Normal2, CentroidB - V2);
+                    offset2 = Vector2.Dot(Normal2, CentroidB - V2);
                 }
 
                 // Determine front or back  Determine collision normal limits.
@@ -524,10 +524,10 @@ namespace Box2DSharp.Collision
 
                     // Search for the polygon normal that is most anti-parallel to the edge normal.
                     var bestIndex = 0;
-                    var bestValue = MathUtils.Dot(Normal, PolygonB.Normals[0]);
+                    var bestValue = Vector2.Dot(Normal, PolygonB.Normals[0]);
                     for (var i = 1; i < PolygonB.Count; ++i)
                     {
-                        var value = MathUtils.Dot(Normal, PolygonB.Normals[i]);
+                        var value = Vector2.Dot(Normal, PolygonB.Normals[i]);
                         if (value < bestValue)
                         {
                             bestValue = value;
@@ -592,8 +592,8 @@ namespace Box2DSharp.Collision
 
                 rf.SideNormal1.Set(rf.Normal.Y, -rf.Normal.X);
                 rf.SideNormal2 = -rf.SideNormal1;
-                rf.SideOffset1 = MathUtils.Dot(rf.SideNormal1, rf.V1);
-                rf.SideOffset2 = MathUtils.Dot(rf.SideNormal2, rf.V2);
+                rf.SideOffset1 = Vector2.Dot(rf.SideNormal1, rf.V1);
+                rf.SideOffset2 = Vector2.Dot(rf.SideNormal2, rf.V2);
 
                 // Clip incident edge against extruded edge1 side edges.
                 var clipPoints1 = new ClipVertex[2];
@@ -641,7 +641,7 @@ namespace Box2DSharp.Collision
                 var pointCount = 0;
                 for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
                 {
-                    var separation = MathUtils.Dot(rf.Normal, clipPoints2[i].Vector - rf.V1);
+                    var separation = Vector2.Dot(rf.Normal, clipPoints2[i].Vector - rf.V1);
 
                     if (separation <= Radius)
                     {
@@ -677,7 +677,7 @@ namespace Box2DSharp.Collision
 
                 for (var i = 0; i < PolygonB.Count; ++i)
                 {
-                    var s = MathUtils.Dot(Normal, PolygonB.Vertices[i] - V1);
+                    var s = Vector2.Dot(Normal, PolygonB.Vertices[i] - V1);
                     if (s < axis.Separation)
                     {
                         axis.Separation = s;
@@ -700,8 +700,8 @@ namespace Box2DSharp.Collision
                 {
                     var n = -PolygonB.Normals[i];
 
-                    var s1 = MathUtils.Dot(n, PolygonB.Vertices[i] - V1);
-                    var s2 = MathUtils.Dot(n, PolygonB.Vertices[i] - V2);
+                    var s1 = Vector2.Dot(n, PolygonB.Vertices[i] - V1);
+                    var s2 = Vector2.Dot(n, PolygonB.Vertices[i] - V2);
                     var s = Math.Min(s1, s2);
 
                     if (s > Radius)
@@ -714,16 +714,16 @@ namespace Box2DSharp.Collision
                     }
 
                     // Adjacency
-                    if (MathUtils.Dot(n, perp) >= 0.0f)
+                    if (Vector2.Dot(n, perp) >= 0.0f)
                     {
-                        if (MathUtils.Dot(n - UpperLimit, Normal) < -Settings.AngularSlop)
+                        if (Vector2.Dot(n - UpperLimit, Normal) < -Settings.AngularSlop)
                         {
                             continue;
                         }
                     }
                     else
                     {
-                        if (MathUtils.Dot(n - LowerLimit, Normal) < -Settings.AngularSlop)
+                        if (Vector2.Dot(n - LowerLimit, Normal) < -Settings.AngularSlop)
                         {
                             continue;
                         }

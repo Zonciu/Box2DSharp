@@ -318,7 +318,7 @@ namespace Box2DSharp.Dynamics
 
         /// Get the rotational inertia of the body about the local origin.
         /// @return the rotational inertia, usually in kg-m^2.
-        public float Inertia => _inertia + _mass * MathUtils.Dot(Sweep.LocalCenter, Sweep.LocalCenter);
+        public float Inertia => _inertia + _mass * Vector2.Dot(Sweep.LocalCenter, Sweep.LocalCenter);
 
         /// Get/Set the linear damping of the body.
         public float LinearDamping
@@ -608,7 +608,7 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            if (MathUtils.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
+            if (Vector2.Dot(value, value) > 0.0f) // 点积大于0时唤醒本物体
             {
                 IsAwake = true;
             }
@@ -981,7 +981,7 @@ namespace Box2DSharp.Dynamics
             data = new MassData
             {
                 Mass = _mass,
-                RotationInertia = _inertia + _mass * MathUtils.Dot(Sweep.LocalCenter, Sweep.LocalCenter),
+                RotationInertia = _inertia + _mass * Vector2.Dot(Sweep.LocalCenter, Sweep.LocalCenter),
                 Center = Sweep.LocalCenter
             };
         }
@@ -1018,7 +1018,7 @@ namespace Box2DSharp.Dynamics
 
             if (massData.RotationInertia > 0.0f && !HasFlag(BodyFlags.FixedRotation)) // 存在转动惯量且物体可旋转
             {
-                _inertia = massData.RotationInertia - _mass * MathUtils.Dot(massData.Center, massData.Center);
+                _inertia = massData.RotationInertia - _mass * Vector2.Dot(massData.Center, massData.Center);
                 Debug.Assert(_inertia > 0.0f);
                 InverseInertia = 1.0f / _inertia;
             }
@@ -1088,7 +1088,7 @@ namespace Box2DSharp.Dynamics
             if (_inertia > 0.0f && !HasFlag(BodyFlags.FixedRotation)) // 存在转动惯量且物体可旋转
             {
                 // Center the inertia about the center of mass.
-                _inertia -= _mass * MathUtils.Dot(localCenter, localCenter);
+                _inertia -= _mass * Vector2.Dot(localCenter, localCenter);
                 Debug.Assert(_inertia > 0.0f);
                 InverseInertia = 1.0f / _inertia;
             }

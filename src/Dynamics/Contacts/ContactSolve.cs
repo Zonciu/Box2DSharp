@@ -190,7 +190,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
                     // Setup a velocity bias for restitution.
                     vcp.VelocityBias = 0.0f;
-                    var vRel = MathUtils.Dot(
+                    var vRel = Vector2.Dot(
                         vc.Normal,
                         vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra));
                     if (vRel < -Settings.VelocityThreshold)
@@ -308,7 +308,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
 
                     // Compute tangent force
-                    var vt = MathUtils.Dot(dv, tangent) - vc.TangentSpeed;
+                    var vt = Vector2.Dot(dv, tangent) - vc.TangentSpeed;
                     var lambda = vcp.TangentMass * -vt;
 
                     // MathUtils.b2Clamp the accumulated force
@@ -338,7 +338,7 @@ namespace Box2DSharp.Dynamics.Contacts
                         var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
 
                         // Compute normal impulse
-                        var vn = MathUtils.Dot(dv, normal);
+                        var vn = Vector2.Dot(dv, normal);
                         var lambda = -vcp.NormalMass * (vn - vcp.VelocityBias);
 
                         // MathUtils.b2Clamp the accumulated impulse
@@ -401,8 +401,8 @@ namespace Box2DSharp.Dynamics.Contacts
                     var dv2 = vB + MathUtils.Cross(wB, cp2.Rb) - vA - MathUtils.Cross(wA, cp2.Ra);
 
                     // Compute normal velocity
-                    var vn1 = MathUtils.Dot(dv1, normal);
-                    var vn2 = MathUtils.Dot(dv2, normal);
+                    var vn1 = Vector2.Dot(dv1, normal);
+                    var vn2 = Vector2.Dot(dv2, normal);
 
                     var b = new Vector2 {X = vn1 - cp1.VelocityBias, Y = vn2 - cp2.VelocityBias};
 
@@ -447,8 +447,8 @@ namespace Box2DSharp.Dynamics.Contacts
                             dv2 = vB + MathUtils.Cross(wB, cp2.rB) - vA - MathUtils.Cross(wA, cp2.rA);
 
                             // Compute normal velocity
-                            vn1 = MathUtils.Dot(dv1, normal);
-                            vn2 = MathUtils.Dot(dv2, normal);
+                            vn1 = Vector2.Dot(dv1, normal);
+                            vn2 = Vector2.Dot(dv2, normal);
 
                             Debug.Assert(Math.Abs(vn1 - cp1.velocityBias) < k_errorTol);
                             Debug.Assert(Math.Abs(vn2 - cp2.velocityBias) < k_errorTol);
@@ -489,7 +489,7 @@ namespace Box2DSharp.Dynamics.Contacts
                             dv1 = vB + MathUtils.Cross(wB, cp1.rB) - vA - MathUtils.Cross(wA, cp1.rA);
 
                             // Compute normal velocity
-                            vn1 = MathUtils.Dot(dv1, normal);
+                            vn1 = Vector2.Dot(dv1, normal);
 
                             Debug.Assert(Math.Abs(vn1 - cp1.velocityBias) < k_errorTol);
 #endif
@@ -530,7 +530,7 @@ namespace Box2DSharp.Dynamics.Contacts
                             dv2 = vB + MathUtils.Cross(wB, cp2.rB) - vA - MathUtils.Cross(wA, cp2.rA);
 
                             // Compute normal velocity
-                            vn2 = MathUtils.Dot(dv2, normal);
+                            vn2 = Vector2.Dot(dv2, normal);
 
                             Debug.Assert(Math.Abs(vn2 - cp2.velocityBias) < k_errorTol);
 #endif

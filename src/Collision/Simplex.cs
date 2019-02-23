@@ -170,7 +170,7 @@ namespace Box2DSharp.Collision
                 return 0.0f;
 
             case 2:
-                return MathUtils.Distance(Vertices.Value0.W, Vertices.Value1.W);
+                return Vector2.Distance(Vertices.Value0.W, Vertices.Value1.W);
 
             case 3:
                 return MathUtils.Cross(Vertices.Value1.W - Vertices.Value0.W, Vertices.Value2.W - Vertices.Value0.W);
@@ -212,7 +212,7 @@ namespace Box2DSharp.Collision
             var e12 = w2 - w1;
 
             // w1 region
-            var d12_2 = -MathUtils.Dot(w1, e12);
+            var d12_2 = -Vector2.Dot(w1, e12);
             if (d12_2 <= 0.0f)
             {
                 // a2 <= 0, so we clamp it to 0
@@ -222,7 +222,7 @@ namespace Box2DSharp.Collision
             }
 
             // w2 region
-            var d12_1 = MathUtils.Dot(w2, e12);
+            var d12_1 = Vector2.Dot(w2, e12);
             if (d12_1 <= 0.0f)
             {
                 // a1 <= 0, so we clamp it to 0
@@ -258,8 +258,8 @@ namespace Box2DSharp.Collision
             // [w1.e12 w2.e12][a2] = [0]
             // a3 = 0
             var e12 = w2 - w1;
-            var w1e12 = MathUtils.Dot(w1, e12);
-            var w2e12 = MathUtils.Dot(w2, e12);
+            var w1e12 = Vector2.Dot(w1, e12);
+            var w2e12 = Vector2.Dot(w2, e12);
             var d12_1 = w2e12;
             var d12_2 = -w1e12;
 
@@ -268,8 +268,8 @@ namespace Box2DSharp.Collision
             // [w1.e13 w3.e13][a3] = [0]
             // a2 = 0
             var e13 = w3 - w1;
-            var w1e13 = MathUtils.Dot(w1, e13);
-            var w3e13 = MathUtils.Dot(w3, e13);
+            var w1e13 = Vector2.Dot(w1, e13);
+            var w3e13 = Vector2.Dot(w3, e13);
             var d13_1 = w3e13;
             var d13_2 = -w1e13;
 
@@ -278,8 +278,8 @@ namespace Box2DSharp.Collision
             // [w2.e23 w3.e23][a3] = [0]
             // a1 = 0
             var e23 = w3 - w2;
-            var w2e23 = MathUtils.Dot(w2, e23);
-            var w3e23 = MathUtils.Dot(w3, e23);
+            var w2e23 = Vector2.Dot(w2, e23);
+            var w3e23 = Vector2.Dot(w3, e23);
             var d23_1 = w3e23;
             var d23_2 = -w2e23;
 

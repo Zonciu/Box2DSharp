@@ -39,7 +39,7 @@ namespace Box2DSharp.Collision
                 var si = Settings.MaxFloat;
                 for (var j = 0; j < count2; ++j)
                 {
-                    //var sij = MathUtils.Dot(n, v2s[j] - v1);
+                    //var sij = Vector2.Dot(n, v2s[j] - v1);
                     ref readonly var v2sj = ref v2s[j];
                     var sij = n.X * (v2sj.X - v1.X) + n.Y * (v2sj.Y - v1.Y);
                     if (sij < si)
@@ -82,7 +82,7 @@ namespace Box2DSharp.Collision
             var minDot = Settings.MaxFloat;
             for (var i = 0; i < count2; ++i)
             {
-                var dot = MathUtils.Dot(normal1, normals2[i]);
+                var dot = Vector2.Dot(normal1, normals2[i]);
                 if (dot < minDot)
                 {
                     minDot = dot;
@@ -199,11 +199,11 @@ namespace Box2DSharp.Collision
             v12 = MathUtils.Mul(xf1, v12);
 
             // Face offset.
-            var frontOffset = MathUtils.Dot(normal, v11);
+            var frontOffset = Vector2.Dot(normal, v11);
 
             // Side offsets, extended by polytope skin thickness.
-            var sideOffset1 = -MathUtils.Dot(tangent, v11) + totalRadius;
-            var sideOffset2 = MathUtils.Dot(tangent, v12) + totalRadius;
+            var sideOffset1 = -Vector2.Dot(tangent, v11) + totalRadius;
+            var sideOffset2 = Vector2.Dot(tangent, v12) + totalRadius;
 
             // Clip incident edge against extruded edge1 side edges.
             var clipPoints1 = new ClipVertex[2];
@@ -242,7 +242,7 @@ namespace Box2DSharp.Collision
             var pointCount = 0;
             for (var i = 0; i < Settings.MaxManifoldPoints; ++i)
             {
-                var separation = MathUtils.Dot(normal, clipPoints2[i].Vector) - frontOffset;
+                var separation = Vector2.Dot(normal, clipPoints2[i].Vector) - frontOffset;
 
                 if (separation <= totalRadius)
                 {

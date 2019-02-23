@@ -187,7 +187,7 @@ namespace Box2DSharp.Dynamics.Joints
             var d = pB - pA;
             var axis = BodyA.GetWorldVector(LocalXAxisA);
 
-            var translation = MathUtils.Dot(d, axis);
+            var translation = Vector2.Dot(d, axis);
             return translation;
         }
 
@@ -209,8 +209,8 @@ namespace Box2DSharp.Dynamics.Joints
             var wA = bA.AngularVelocity;
             var wB = bB.AngularVelocity;
 
-            var speed = MathUtils.Dot(d, MathUtils.Cross(wA, axis))
-                      + MathUtils.Dot(axis, vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA));
+            var speed = Vector2.Dot(d, MathUtils.Cross(wA, axis))
+                      + Vector2.Dot(axis, vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA));
             return speed;
         }
 
@@ -415,7 +415,7 @@ namespace Box2DSharp.Dynamics.Joints
             // Compute motor and limit terms.
             if (_enableLimit)
             {
-                var jointTranslation = MathUtils.Dot(_axis, d);
+                var jointTranslation = Vector2.Dot(_axis, d);
                 if (Math.Abs(_upperTranslation - _lowerTranslation) < 2.0f * Settings.LinearSlop)
                 {
                     _limitState = LimitState.EqualLimits;
@@ -494,7 +494,7 @@ namespace Box2DSharp.Dynamics.Joints
             // Solve linear motor constraint.
             if (_enableMotor && _limitState != LimitState.EqualLimits)
             {
-                var Cdot = MathUtils.Dot(_axis, vB - vA) + _a2 * wB - _a1 * wA;
+                var Cdot = Vector2.Dot(_axis, vB - vA) + _a2 * wB - _a1 * wA;
                 var impulse = _motorMass * (_motorSpeed - Cdot);
                 var oldImpulse = _motorImpulse;
                 var maxImpulse = data.Step.Dt * _maxMotorForce;
@@ -513,14 +513,14 @@ namespace Box2DSharp.Dynamics.Joints
             }
 
             Vector2 Cdot1;
-            Cdot1.X = MathUtils.Dot(_perp, vB - vA) + _s2 * wB - _s1 * wA;
+            Cdot1.X = Vector2.Dot(_perp, vB - vA) + _s2 * wB - _s1 * wA;
             Cdot1.Y = wB - wA;
 
             if (_enableLimit && _limitState != LimitState.InactiveLimit)
             {
                 // Solve prismatic and limit constraint in block form.
                 float Cdot2;
-                Cdot2 = MathUtils.Dot(_axis, vB - vA) + _a2 * wB - _a1 * wA;
+                Cdot2 = Vector2.Dot(_axis, vB - vA) + _a2 * wB - _a1 * wA;
                 var Cdot = new Vector3(Cdot1.X, Cdot1.Y, Cdot2);
 
                 var f1 = _impulse;
@@ -613,7 +613,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             var impulse = new Vector3();
             var C1 = new Vector2();
-            C1.X = MathUtils.Dot(perp, d);
+            C1.X = Vector2.Dot(perp, d);
             C1.Y = aB - aA - ReferenceAngle;
 
             var linearError = Math.Abs(C1.X);
@@ -623,7 +623,7 @@ namespace Box2DSharp.Dynamics.Joints
             var C2 = 0.0f;
             if (_enableLimit)
             {
-                var translation = MathUtils.Dot(axis, d);
+                var translation = Vector2.Dot(axis, d);
                 if (Math.Abs(_upperTranslation - _lowerTranslation) < 2.0f * Settings.LinearSlop)
                 {
                     // Prevent large angular corrections

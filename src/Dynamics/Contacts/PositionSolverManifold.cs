@@ -28,7 +28,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 Normal = pointB - pointA;
                 Normal = Vector2.Normalize(Normal);
                 Point = 0.5f * (pointA + pointB);
-                Separation = MathUtils.Dot(pointB - pointA, Normal) - pc.RadiusA - pc.RadiusB;
+                Separation = Vector2.Dot(pointB - pointA, Normal) - pc.RadiusA - pc.RadiusB;
             }
                 break;
 
@@ -38,7 +38,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 var planePoint = MathUtils.Mul(xfA, pc.LocalPoint);
 
                 var clipPoint = MathUtils.Mul(xfB, pc.LocalPoints[index]);
-                Separation = MathUtils.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
+                Separation = Vector2.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
                 Point = clipPoint;
             }
                 break;
@@ -49,7 +49,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 var planePoint = MathUtils.Mul(xfB, pc.LocalPoint);
 
                 var clipPoint = MathUtils.Mul(xfA, pc.LocalPoints[index]);
-                Separation = MathUtils.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
+                Separation = Vector2.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
                 Point = clipPoint;
 
                 // Ensure normal points from A to B

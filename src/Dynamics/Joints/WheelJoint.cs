@@ -125,7 +125,7 @@ namespace Box2DSharp.Dynamics.Joints
             var d = pB - pA;
             var axis = bA.GetWorldVector(_localXAxisA);
 
-            var translation = MathUtils.Dot(d, axis);
+            var translation = Vector2.Dot(d, axis);
             return translation;
         }
 
@@ -147,8 +147,8 @@ namespace Box2DSharp.Dynamics.Joints
             var wA = bA.AngularVelocity;
             var wB = bB.AngularVelocity;
 
-            var speed = MathUtils.Dot(d, MathUtils.Cross(wA, axis))
-                      + MathUtils.Dot(axis, vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA));
+            var speed = Vector2.Dot(d, MathUtils.Cross(wA, axis))
+                      + Vector2.Dot(axis, vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA));
             return speed;
         }
 
@@ -354,7 +354,7 @@ namespace Box2DSharp.Dynamics.Joints
                 {
                     _springMass = 1.0f / invMass;
 
-                    var C = MathUtils.Dot(d, _ax);
+                    var C = Vector2.Dot(d, _ax);
 
                     // Frequency
                     var omega = 2.0f * Settings.Pi * _frequencyHz;
@@ -445,7 +445,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve spring constraint
             {
-                var Cdot = MathUtils.Dot(_ax, vB - vA) + _sBx * wB - _sAx * wA;
+                var Cdot = Vector2.Dot(_ax, vB - vA) + _sBx * wB - _sAx * wA;
                 var impulse = -_springMass * (Cdot + _bias + _gamma * _springImpulse);
                 _springImpulse += impulse;
 
@@ -476,7 +476,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             // Solve point to line constraint
             {
-                var Cdot = MathUtils.Dot(_ay, vB - vA) + _sBy * wB - _sAy * wA;
+                var Cdot = Vector2.Dot(_ay, vB - vA) + _sBy * wB - _sAy * wA;
                 var impulse = -_mass * Cdot;
                 _impulse += impulse;
 
@@ -517,7 +517,7 @@ namespace Box2DSharp.Dynamics.Joints
             var sAy = MathUtils.Cross(d + rA, ay);
             var sBy = MathUtils.Cross(rB, ay);
 
-            var C = MathUtils.Dot(d, ay);
+            var C = Vector2.Dot(d, ay);
 
             var k = _invMassA + _invMassB + _invIa * _sAy * _sAy + _invIb * _sBy * _sBy;
 

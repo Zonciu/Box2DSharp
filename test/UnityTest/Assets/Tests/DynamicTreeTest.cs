@@ -206,7 +206,7 @@ namespace Box2DSharp.Tests
             min.Set(-_worldExtent, 0.0f);
             var max = new Vector2();
             max.Set(_worldExtent, 2.0f * _worldExtent);
-            var c = MathUtils.Clamp(c0, min, max);
+            var c = Vector2.Clamp(c0, min, max);
 
             aabb.LowerBound += c - c0;
             aabb.UpperBound += c - c0;

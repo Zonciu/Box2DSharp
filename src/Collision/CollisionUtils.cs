@@ -69,8 +69,8 @@ namespace Box2DSharp.Collision
             var numOut = 0;
 
             // Calculate the distance of end points to the line
-            var distance0 = MathUtils.Dot(normal, vIn[0].Vector) - offset;
-            var distance1 = MathUtils.Dot(normal, vIn[1].Vector) - offset;
+            var distance0 = Vector2.Dot(normal, vIn[0].Vector) - offset;
+            var distance1 = Vector2.Dot(normal, vIn[1].Vector) - offset;
 
             // If the points are behind the plane
             if (distance0 <= 0.0f)

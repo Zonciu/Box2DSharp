@@ -12,6 +12,12 @@ namespace Box2DSharp.Common
 
         public float Cos;
 
+        public Rotation(float sin, float cos)
+        {
+            Sin = sin;
+            Cos = cos;
+        }
+
         /// Initialize from an angle in radians
         public Rotation(float angle)
         {

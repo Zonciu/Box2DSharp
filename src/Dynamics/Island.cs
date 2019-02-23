@@ -160,7 +160,7 @@ namespace Box2DSharp.Dynamics
 
                 // Check for large velocities
                 var translation = h * v;
-                if (MathUtils.Dot(translation, translation) > Settings.MaxTranslationSquared)
+                if (Vector2.Dot(translation, translation) > Settings.MaxTranslationSquared)
                 {
                     var ratio = Settings.MaxTranslation / translation.Length();
                     v *= ratio;
@@ -240,7 +240,7 @@ namespace Box2DSharp.Dynamics
 
                     if (!b.HasFlag(BodyFlags.AutoSleep)                                // 不允许休眠
                      || b.AngularVelocity * b.AngularVelocity > angTolSqr              // 或 角速度大于最小值
-                     || MathUtils.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr) // 或 线速度大于最小值
+                     || Vector2.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr) // 或 线速度大于最小值
                     {
                         b.SleepTime = 0.0f;
                         minSleepTime = 0.0f;
@@ -361,7 +361,7 @@ namespace Box2DSharp.Dynamics
 
                 // Check for large velocities
                 var translation = h * v;
-                if (MathUtils.Dot(translation, translation) > Settings.MaxTranslationSquared)
+                if (Vector2.Dot(translation, translation) > Settings.MaxTranslationSquared)
                 {
                     var ratio = Settings.MaxTranslation / translation.Length();
                     v *= ratio;
