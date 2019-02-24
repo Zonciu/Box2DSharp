@@ -105,7 +105,7 @@ namespace Box2DSharp.Collision
             var iter = 0;
 
             // Prepare input for distance query.
-            var cache = SimplexCache.Create();
+            var cache = new SimplexCache();
             DistanceInput distanceInput;
             distanceInput.ProxyA = input.ProxyA;
             distanceInput.ProxyB = input.ProxyB;

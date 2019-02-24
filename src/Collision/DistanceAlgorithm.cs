@@ -14,7 +14,7 @@ namespace Box2DSharp.Collision
         /// <param name="cache"></param>
         /// <param name="input"></param>
         /// <param name="gJkProfile"></param>
-        public static void Distance(
+        public static unsafe void Distance(
             out DistanceOutput output,
             ref SimplexCache cache,
             in DistanceInput input,
@@ -33,7 +33,7 @@ namespace Box2DSharp.Collision
             var transformB = input.TransformB;
 
             // Initialize the simplex.
-            var simplex = Simplex.Create();
+            var simplex = new Simplex();
             simplex.ReadCache(
                 ref cache,
                 proxyA,
@@ -204,7 +204,7 @@ namespace Box2DSharp.Collision
             var lambda = 0.0f;
 
             // Initial simplex
-            var simplex = Simplex.Create();
+            var simplex = new Simplex();
 
             // Get simplex vertices as an array.
             // ref var vertices = ref simplex.Vertices;
@@ -264,13 +264,17 @@ namespace Box2DSharp.Collision
                 // Shift by lambda * r because we want the closest point to the current clip point.
                 // Note that the support point p is not shifted because we want the plane equation
                 // to be formed in unshifted space.
-                ref var vertex = ref simplex.Vertices.Values[simplex.Count];
-                vertex.IndexA = indexB;
-                vertex.Wa = wB + lambda * r;
-                vertex.IndexB = indexA;
-                vertex.Wb = wA;
-                vertex.W = vertex.Wb - vertex.Wa;
-                vertex.A = 1.0f;
+                unsafe
+                {
+                    ref var vertex = ref simplex.Vertices.Values[simplex.Count];
+                    vertex.IndexA = indexB;
+                    vertex.Wa = wB + lambda * r;
+                    vertex.IndexB = indexA;
+                    vertex.Wb = wA;
+                    vertex.W = vertex.Wb - vertex.Wa;
+                    vertex.A = 1.0f;
+                }
+
                 simplex.Count += 1;
 
                 switch (simplex.Count)

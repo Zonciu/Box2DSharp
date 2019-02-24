@@ -73,7 +73,7 @@ namespace Box2DSharp.Tests
 
             _transformB.Set(_positionB, _angleB);
             var manifold = new Manifold();
-            manifold.Initialize();
+
             CollisionUtils.CollidePolygons(ref manifold, _polygonA, _transformA, _polygonB, _transformB);
             var worldManifold = new WorldManifold();
             worldManifold.Initialize(manifold, _transformA, _polygonA.Radius, _transformB, _polygonB.Radius);

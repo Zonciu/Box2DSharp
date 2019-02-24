@@ -21,7 +21,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
         private readonly Velocity[] _velocities;
 
-        public ContactSolver(in ContactSolverDef def)
+        public unsafe ContactSolver(in ContactSolverDef def)
         {
             var step = def.Step;
             _contactCount = def.ContactCount;
@@ -51,7 +51,6 @@ namespace Box2DSharp.Dynamics.Contacts
                 Debug.Assert(pointCount > 0);
 
                 ref var vc = ref VelocityConstraints[i];
-                vc.Initialize();
                 vc.Friction = contact.Friction;
                 vc.Restitution = contact.Restitution;
                 vc.TangentSpeed = contact.TangentSpeed;
@@ -67,7 +66,6 @@ namespace Box2DSharp.Dynamics.Contacts
                 vc.NormalMass.SetZero();
 
                 ref var pc = ref _positionConstraints[i];
-                pc.Initialize();
                 pc.IndexA = bodyA.IslandIndex;
                 pc.IndexB = bodyB.IslandIndex;
                 pc.InvMassA = bodyA.InvMass;
@@ -83,10 +81,11 @@ namespace Box2DSharp.Dynamics.Contacts
                 pc.RadiusB = radiusB;
                 pc.Type = manifold.Type;
 
+
                 for (var j = 0; j < pointCount; ++j)
                 {
                     var cp = manifold.Points.Values[j];
-                    ref var vcp = ref vc.Points[j];
+                    ref var vcp = ref vc.Points.Values[j];
 
                     if (step.WarmStarting)
                     {
@@ -169,45 +168,49 @@ namespace Box2DSharp.Dynamics.Contacts
                 vc.Normal = worldManifold.Normal;
 
                 var pointCount = vc.PointCount;
-                for (var j = 0; j < pointCount; ++j)
+
+                unsafe
                 {
-                    ref var vcp = ref vc.Points[j];
-
-                    vcp.Ra = worldManifold.Points.Values[j] - cA;
-                    vcp.Rb = worldManifold.Points.Values[j] - cB;
-
-                    var rnA = MathUtils.Cross(vcp.Ra, vc.Normal);
-                    var rnB = MathUtils.Cross(vcp.Rb, vc.Normal);
-
-                    var kNormal = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
-
-                    vcp.NormalMass = kNormal > 0.0f ? 1.0f / kNormal : 0.0f;
-
-                    var tangent = MathUtils.Cross(vc.Normal, 1.0f);
-
-                    var rtA = MathUtils.Cross(vcp.Ra, tangent);
-                    var rtB = MathUtils.Cross(vcp.Rb, tangent);
-
-                    var kTangent = mA + mB + iA * rtA * rtA + iB * rtB * rtB;
-
-                    vcp.TangentMass = kTangent > 0.0f ? 1.0f / kTangent : 0.0f;
-
-                    // Setup a velocity bias for restitution.
-                    vcp.VelocityBias = 0.0f;
-                    var vRel = Vector2.Dot(
-                        vc.Normal,
-                        vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra));
-                    if (vRel < -Settings.VelocityThreshold)
+                    for (var j = 0; j < pointCount; ++j)
                     {
-                        vcp.VelocityBias = -vc.Restitution * vRel;
+                        ref var vcp = ref vc.Points.Values[j];
+
+                        vcp.Ra = worldManifold.Points.Values[j] - cA;
+                        vcp.Rb = worldManifold.Points.Values[j] - cB;
+
+                        var rnA = MathUtils.Cross(vcp.Ra, vc.Normal);
+                        var rnB = MathUtils.Cross(vcp.Rb, vc.Normal);
+
+                        var kNormal = mA + mB + iA * rnA * rnA + iB * rnB * rnB;
+
+                        vcp.NormalMass = kNormal > 0.0f ? 1.0f / kNormal : 0.0f;
+
+                        var tangent = MathUtils.Cross(vc.Normal, 1.0f);
+
+                        var rtA = MathUtils.Cross(vcp.Ra, tangent);
+                        var rtB = MathUtils.Cross(vcp.Rb, tangent);
+
+                        var kTangent = mA + mB + iA * rtA * rtA + iB * rtB * rtB;
+
+                        vcp.TangentMass = kTangent > 0.0f ? 1.0f / kTangent : 0.0f;
+
+                        // Setup a velocity bias for restitution.
+                        vcp.VelocityBias = 0.0f;
+                        var vRel = Vector2.Dot(
+                            vc.Normal,
+                            vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra));
+                        if (vRel < -Settings.VelocityThreshold)
+                        {
+                            vcp.VelocityBias = -vc.Restitution * vRel;
+                        }
                     }
                 }
 
                 // If we have two points, then prepare the block solver.
                 if (vc.PointCount == 2)
                 {
-                    ref var vcp1 = ref vc.Points[0];
-                    ref var vcp2 = ref vc.Points[1];
+                    ref var vcp1 = ref vc.Points.Value0;
+                    ref var vcp2 = ref vc.Points.Value1;
 
                     var rn1A = MathUtils.Cross(vcp1.Ra, vc.Normal);
                     var rn1B = MathUtils.Cross(vcp1.Rb, vc.Normal);
@@ -237,7 +240,7 @@ namespace Box2DSharp.Dynamics.Contacts
             }
         }
 
-        public void WarmStart()
+        public unsafe void WarmStart()
         {
             // Warm start.
             for (var i = 0; i < _contactCount; ++i)
@@ -262,7 +265,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
                 for (var j = 0; j < pointCount; ++j)
                 {
-                    ref var vcp = ref vc.Points[j];
+                    ref var vcp = ref vc.Points.Values[j];
                     var P = vcp.NormalImpulse * normal + vcp.TangentImpulse * tangent;
                     wA -= iA * MathUtils.Cross(vcp.Ra, P);
                     vA -= mA * P;
@@ -277,7 +280,7 @@ namespace Box2DSharp.Dynamics.Contacts
             }
         }
 
-        public void SolveVelocityConstraints()
+        public unsafe void SolveVelocityConstraints()
         {
             for (var i = 0; i < _contactCount; ++i)
             {
@@ -306,7 +309,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 // than friction.
                 for (var j = 0; j < pointCount; ++j)
                 {
-                    ref var vcp = ref vc.Points[j];
+                    ref var vcp = ref vc.Points.Values[j];
 
                     // Relative velocity at contact
                     var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
@@ -336,7 +339,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 {
                     for (var j = 0; j < pointCount; ++j)
                     {
-                        ref var vcp = ref vc.Points[j];
+                        ref var vcp = ref vc.Points.Values[j];
 
                         // Relative velocity at contact
                         var dv = vB + MathUtils.Cross(wB, vcp.Rb) - vA - MathUtils.Cross(wA, vcp.Ra);
@@ -394,8 +397,8 @@ namespace Box2DSharp.Dynamics.Contacts
                     //    = A * x + b'
                     // b' = b - A * a;
 
-                    ref var cp1 = ref vc.Points[0];
-                    ref var cp2 = ref vc.Points[1];
+                    ref var cp1 = ref vc.Points.Values[0];
+                    ref var cp2 = ref vc.Points.Values[1];
 
                     var a = new Vector2(cp1.NormalImpulse, cp2.NormalImpulse);
                     Debug.Assert(a.X >= 0.0f && a.Y >= 0.0f);
@@ -584,16 +587,19 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public void StoreImpulses()
         {
-            for (var i = 0; i < _contactCount; ++i)
+            unsafe
             {
-                ref var vc = ref VelocityConstraints[i];
-                ref var manifold = ref _contacts[vc.ContactIndex].Manifold;
-
-                for (var j = 0; j < vc.PointCount; ++j)
+                for (var i = 0; i < _contactCount; ++i)
                 {
-                    ref var point = ref manifold.Points.Values[j];
-                    point.NormalImpulse = vc.Points[j].NormalImpulse;
-                    point.TangentImpulse = vc.Points[j].TangentImpulse;
+                    ref var vc = ref VelocityConstraints[i];
+                    ref var manifold = ref _contacts[vc.ContactIndex].Manifold;
+
+                    for (var j = 0; j < vc.PointCount; ++j)
+                    {
+                        ref var point = ref manifold.Points.Values[j];
+                        point.NormalImpulse = vc.Points[j].NormalImpulse;
+                        point.TangentImpulse = vc.Points[j].TangentImpulse;
+                    }
                 }
             }
         }

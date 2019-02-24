@@ -36,10 +36,5 @@ namespace Box2DSharp.Collision.Collider
 
         /// the number of manifold points
         public int PointCount;
-
-        public void Initialize()
-        {
-            Points = FixedArray2<ManifoldPoint>.Create();
-        }
     }
 }

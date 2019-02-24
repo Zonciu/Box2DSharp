@@ -11,16 +11,7 @@ namespace Box2DSharp.Collision
 
         public int Count;
 
-        public static Simplex Create(int count = 0)
-        {
-            return new Simplex()
-            {
-                Count = count,
-                Vertices = FixedArray3<SimplexVertex>.Create()
-            };
-        }
-
-        public void ReadCache(
+        public unsafe void ReadCache(
             ref SimplexCache cache,
             in DistanceProxy proxyA,
             in Transform transformA,
@@ -77,7 +68,7 @@ namespace Box2DSharp.Collision
             }
         }
 
-        public void WriteCache(ref SimplexCache cache)
+        public unsafe void WriteCache(ref SimplexCache cache)
         {
             cache.Metric = GetMetric();
             cache.Count = (ushort) Count;
@@ -203,7 +194,7 @@ namespace Box2DSharp.Collision
         // Solution
         // a1 = d12_1 / d12
         // a2 = d12_2 / d12
-        public void Solve2()
+        public unsafe void Solve2()
         {
             ref var v0 = ref Vertices.Values[0];
             ref var v1 = ref Vertices.Values[1];
@@ -244,7 +235,7 @@ namespace Box2DSharp.Collision
         // - edge points[0]-points[2]
         // - edge points[1]-points[2]
         // - inside the triangle
-        public void Solve3()
+        public unsafe void Solve3()
         {
             ref var v0 = ref Vertices.Values[0];
             ref var v1 = ref Vertices.Values[1];

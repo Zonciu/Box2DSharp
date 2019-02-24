@@ -68,7 +68,7 @@ namespace Box2DSharp.Tests
             };
             distanceInput.ProxyA.Set(_vAs, _countA, _radiusA);
             distanceInput.ProxyB.Set(_vBs, _countB, _radiusB);
-            var simplexCache = SimplexCache.Create();
+            var simplexCache = new SimplexCache();
 
             DistanceAlgorithm.Distance(out var distanceOutput, ref simplexCache, distanceInput);
 

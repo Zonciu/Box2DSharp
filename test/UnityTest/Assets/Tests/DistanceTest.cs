@@ -80,8 +80,7 @@ namespace Box2DSharp.Tests
             input.TransformA = _transformA;
             input.TransformB = _transformB;
             input.UseRadii = true;
-            var cache = SimplexCache.Create();
-            cache.Count = 0;
+            var cache = new SimplexCache();
             DistanceAlgorithm.Distance(out var output, ref cache, input);
 
             DrawString($"distance = {output.Distance}");

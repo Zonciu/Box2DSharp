@@ -10,7 +10,7 @@ namespace Box2DSharp.Collision
     {
         /// Compute the point states given two manifolds. The states pertain to the transition from manifold1
         /// to manifold2. So state1 is either persist or remove while state2 is either add or persist.
-        public static void GetPointStates(
+        public static unsafe void GetPointStates(
             in PointState[] state1,
             in PointState[] state2,
             in Manifold manifold1,
@@ -118,8 +118,7 @@ namespace Box2DSharp.Collision
             input.TransformB = xfB;
             input.UseRadii = true;
 
-            var cache = SimplexCache.Create();
-
+            var cache = new SimplexCache();
             DistanceAlgorithm.Distance(out var output, ref cache, input, gJkProfile);
             return output.Distance < 10.0f * Settings.Epsilon;
         }

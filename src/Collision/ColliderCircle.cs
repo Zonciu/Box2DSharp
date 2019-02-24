@@ -35,13 +35,17 @@ namespace Box2DSharp.Collision
             manifold.LocalPoint = circleA.Position;
             manifold.LocalNormal.SetZero();
             manifold.PointCount = 1;
-            ref var point = ref manifold.Points.Values[0];
-            point.LocalPoint = circleB.Position;
-            point.Id.Key = 0;
+
+            unsafe
+            {
+                ref var point = ref manifold.Points.Values[0];
+                point.LocalPoint = circleB.Position;
+                point.Id.Key = 0;
+            }
         }
 
         /// Compute the collision manifold between a polygon and a circle.
-        public static void CollidePolygonAndCircle(
+        public static unsafe void CollidePolygonAndCircle(
             ref Manifold manifold,
             PolygonShape polygonA,
             in Transform xfA,

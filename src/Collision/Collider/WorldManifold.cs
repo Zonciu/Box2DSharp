@@ -10,7 +10,7 @@ namespace Box2DSharp.Collision.Collider
         /// modest motion from the original state. This does not change the
         /// point count, impulses, etc. The radii must come from the shapes
         /// that generated the manifold.
-        public void Initialize(
+        public unsafe void Initialize(
             in Manifold manifold,
             in Transform xfA,
             float radiusA,
@@ -22,8 +22,6 @@ namespace Box2DSharp.Collision.Collider
                 return;
             }
 
-            Points.Values = new Vector2[2];
-            Separations.Values = new float[2];
             switch (manifold.Type)
             {
             case ManifoldType.Circles:

@@ -76,10 +76,15 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint = P;
-                ref var point = ref manifold.Points.Values[0];
-                point.Id.Key = 0;
-                point.Id.ContactFeature = cf;
-                point.LocalPoint = circleB.Position;
+
+                unsafe
+                {
+                    ref var point = ref manifold.Points.Values[0];
+                    point.Id.Key = 0;
+                    point.Id.ContactFeature = cf;
+                    point.LocalPoint = circleB.Position;
+                }
+
                 return;
             }
 
@@ -115,10 +120,15 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint = P;
-                ref var point = ref manifold.Points.Values[0];
-                point.Id.Key = 0;
-                point.Id.ContactFeature = cf;
-                point.LocalPoint = circleB.Position;
+
+                unsafe
+                {
+                    ref var point = ref manifold.Points.Values[0];
+                    point.Id.Key = 0;
+                    point.Id.ContactFeature = cf;
+                    point.LocalPoint = circleB.Position;
+                }
+
                 return;
             }
 
@@ -148,10 +158,14 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = n;
                 manifold.LocalPoint = A;
-                ref var point = ref manifold.Points.Values[0];
-                point.Id.Key = 0;
-                point.Id.ContactFeature = cf;
-                point.LocalPoint = circleB.Position;
+
+                unsafe
+                {
+                    ref var point = ref manifold.Points.Values[0];
+                    point.Id.Key = 0;
+                    point.Id.ContactFeature = cf;
+                    point.LocalPoint = circleB.Position;
+                }
             }
         }
 
@@ -193,18 +207,17 @@ namespace Box2DSharp.Collision
         // This holds polygon B expressed in frame A.
         public struct TempPolygon
         {
-            public Vector2[] Vertices;
+            /// <summary>
+            /// Size Settings.MaxPolygonVertices
+            /// </summary>
+            public FixedArray8<Vector2> Vertices;
 
-            public Vector2[] Normals;
+            /// <summary>
+            /// Size Settings.MaxPolygonVertices
+            /// </summary>
+            public FixedArray8<Vector2> Normals;
 
             public int Count;
-
-            public TempPolygon(int count)
-            {
-                Count = count;
-                Vertices = new Vector2[Settings.MaxPolygonVertices];
-                Normals = new Vector2[Settings.MaxPolygonVertices];
-            }
         }
 
         // Reference face used for clipping
@@ -468,7 +481,7 @@ namespace Box2DSharp.Collision
                 }
 
                 // Get polygonB in frameA
-                PolygonB = new TempPolygon(polygonB.Count);
+                PolygonB = new TempPolygon {Count = polygonB.Count};
                 for (var i = 0; i < polygonB.Count; ++i)
                 {
                     PolygonB.Vertices[i] = MathUtils.Mul(Transform, polygonB.Vertices[i]);

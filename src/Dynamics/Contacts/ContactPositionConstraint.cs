@@ -6,7 +6,10 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public struct ContactPositionConstraint
     {
-        public Vector2[] LocalPoints;
+        /// <summary>
+        /// Size <see cref="Settings.MaxManifoldPoints"/>
+        /// </summary>
+        public FixedArray2<Vector2> LocalPoints;
 
         public int IndexA;
 
@@ -27,10 +30,5 @@ namespace Box2DSharp.Dynamics.Contacts
         public float RadiusA, RadiusB;
 
         public ManifoldType Type;
-
-        public void Initialize()
-        {
-            LocalPoints = new Vector2[Settings.MaxManifoldPoints];
-        }
     }
 }
