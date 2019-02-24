@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
@@ -6,40 +7,33 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public struct ContactSolver
+    public ref struct ContactSolver
     {
-        private static readonly bool BlockSolve = true;
-
         private readonly Contact[] _contacts;
 
-        private readonly int _count;
+        private readonly int _contactCount;
 
-        private readonly ContactPositionConstraint[] _positionConstraints;
+        private ContactPositionConstraint[] _positionConstraints;
+
+        internal ContactVelocityConstraint[] VelocityConstraints;
 
         private readonly Position[] _positions;
 
         private readonly Velocity[] _velocities;
 
-        internal readonly ContactVelocityConstraint[] VelocityConstraints;
-
-        public ContactSolver(ContactSolverDef def)
+        public ContactSolver(in ContactSolverDef def)
         {
             var step = def.Step;
-            _count = def.Count;
-            _positionConstraints = new ContactPositionConstraint[_count];
-            VelocityConstraints = new ContactVelocityConstraint[_count];
-            for (var i = 0; i < _count; i++)
-            {
-                _positionConstraints[i].Initialize();
-                VelocityConstraints[i].Initialize();
-            }
+            _contactCount = def.ContactCount;
+            _positionConstraints = ArrayPool<ContactPositionConstraint>.Shared.Rent(_contactCount);
+            VelocityConstraints = ArrayPool<ContactVelocityConstraint>.Shared.Rent(_contactCount);
 
             _positions = def.Positions;
             _velocities = def.Velocities;
             _contacts = def.Contacts;
 
             // Initialize position independent portions of the constraints.
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 var contact = _contacts[i];
 
@@ -57,6 +51,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 Debug.Assert(pointCount > 0);
 
                 ref var vc = ref VelocityConstraints[i];
+                vc.Initialize();
                 vc.Friction = contact.Friction;
                 vc.Restitution = contact.Restitution;
                 vc.TangentSpeed = contact.TangentSpeed;
@@ -72,6 +67,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 vc.NormalMass.SetZero();
 
                 ref var pc = ref _positionConstraints[i];
+                pc.Initialize();
                 pc.IndexA = bodyA.IslandIndex;
                 pc.IndexB = bodyB.IslandIndex;
                 pc.InvMassA = bodyA.InvMass;
@@ -114,9 +110,17 @@ namespace Box2DSharp.Dynamics.Contacts
             }
         }
 
+        public void Reset()
+        {
+            ArrayPool<ContactPositionConstraint>.Shared.Return(_positionConstraints);
+            _positionConstraints = null;
+            ArrayPool<ContactVelocityConstraint>.Shared.Return(VelocityConstraints);
+            VelocityConstraints = null;
+        }
+
         public void InitializeVelocityConstraints()
         {
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var vc = ref VelocityConstraints[i];
                 ref var pc = ref _positionConstraints[i];
@@ -200,7 +204,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 }
 
                 // If we have two points, then prepare the block solver.
-                if (vc.PointCount == 2 && BlockSolve)
+                if (vc.PointCount == 2)
                 {
                     ref var vcp1 = ref vc.Points[0];
                     ref var vcp2 = ref vc.Points[1];
@@ -236,7 +240,7 @@ namespace Box2DSharp.Dynamics.Contacts
         public void WarmStart()
         {
             // Warm start.
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var vc = ref VelocityConstraints[i];
 
@@ -275,7 +279,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public void SolveVelocityConstraints()
         {
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var vc = ref VelocityConstraints[i];
 
@@ -328,7 +332,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 }
 
                 // Solve normal constraints
-                if (pointCount == 1 || BlockSolve == false)
+                if (pointCount == 1)
                 {
                     for (var j = 0; j < pointCount; ++j)
                     {
@@ -580,7 +584,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public void StoreImpulses()
         {
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var vc = ref VelocityConstraints[i];
                 ref var manifold = ref _contacts[vc.ContactIndex].Manifold;
@@ -598,7 +602,7 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             var minSeparation = 0.0f;
 
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var pc = ref _positionConstraints[i];
 
@@ -680,7 +684,7 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             var minSeparation = 0.0f;
 
-            for (var i = 0; i < _count; ++i)
+            for (var i = 0; i < _contactCount; ++i)
             {
                 ref var pc = ref _positionConstraints[i];
 

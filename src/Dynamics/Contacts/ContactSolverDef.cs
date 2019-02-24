@@ -1,15 +1,26 @@
+using System;
+
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public class ContactSolverDef
+    public ref struct ContactSolverDef
     {
-        public Contact[] Contacts;
+        public readonly TimeStep Step;
 
-        public int Count;
+        public readonly int ContactCount;
 
-        public Position[] Positions;
+        public readonly Contact[] Contacts;
 
-        public TimeStep Step;
+        public readonly Position[] Positions;
 
-        public Velocity[] Velocities;
+        public readonly Velocity[] Velocities;
+
+        public ContactSolverDef(in TimeStep step, int contactCount, Contact[] contacts, Position[] positions, Velocity[] velocities)
+        {
+            Step = step;
+            Contacts = contacts;
+            ContactCount = contactCount;
+            Positions = positions;
+            Velocities = velocities;
+        }
     }
 }

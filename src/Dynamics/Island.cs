@@ -1,6 +1,9 @@
 using System;
+using System.Buffers;
+using System.Collections;
 using System.Diagnostics;
 using System.Numerics;
+using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
@@ -8,7 +11,7 @@ using Box2DSharp.Dynamics.Joints;
 namespace Box2DSharp.Dynamics
 {
     /// This is an internal class.
-    public struct Island
+    public ref struct Island
     {
         internal Body[] Bodies;
 
@@ -40,12 +43,29 @@ namespace Box2DSharp.Dynamics
 
             ContactListener = contactListener;
 
-            Bodies = new Body[bodyCapacity];
-            Contacts = new Contact[contactCapacity];
-            Joints = new Joint[jointCapacity];
+            Bodies = ArrayPool<Body>.Shared.Rent(bodyCapacity);
+            Contacts = ArrayPool<Contact>.Shared.Rent(contactCapacity);
+            Joints = ArrayPool<Joint>.Shared.Rent(jointCapacity);
+            Positions = ArrayPool<Position>.Shared.Rent(bodyCapacity);  //new Position[bodyCapacity];
+            Velocities = ArrayPool<Velocity>.Shared.Rent(bodyCapacity); // new Velocity[bodyCapacity];
+        }
 
-            Velocities = new Velocity[bodyCapacity];
-            Positions = new Position[bodyCapacity];
+        internal void Reset()
+        {
+            ArrayPool<Body>.Shared.Return(Bodies);
+            Bodies = null;
+
+            ArrayPool<Contact>.Shared.Return(Contacts);
+            Contacts = null;
+
+            ArrayPool<Joint>.Shared.Return(Joints);
+            Joints = null;
+
+            ArrayPool<Position>.Shared.Return(Positions);
+            Positions = null;
+
+            ArrayPool<Velocity>.Shared.Return(Velocities);
+            Velocities = null;
         }
 
         internal void Clear()
@@ -102,24 +122,12 @@ namespace Box2DSharp.Dynamics
             timer.Restart();
 
             // Solver data
-            var solverData = new SolverData
-            {
-                Step = step,
-                Positions = Positions,
-                Velocities = Velocities
-            };
+            var solverData = new SolverData(in step, Positions, Velocities);
 
             // Initialize velocity constraints.
-            var contactSolverDef = new ContactSolverDef
-            {
-                Step = step,
-                Contacts = Contacts,
-                Count = ContactCount,
-                Positions = Positions,
-                Velocities = Velocities
-            };
+            var contactSolverDef = new ContactSolverDef(in step, ContactCount, Contacts, Positions, Velocities);
 
-            var contactSolver = new ContactSolver(contactSolverDef);
+            var contactSolver = new ContactSolver(in contactSolverDef);
             contactSolver.InitializeVelocityConstraints();
 
             if (step.WarmStarting)
@@ -129,7 +137,7 @@ namespace Box2DSharp.Dynamics
 
             for (var i = 0; i < JointCount; ++i)
             {
-                Joints[i].InitVelocityConstraints(solverData);
+                Joints[i].InitVelocityConstraints(in solverData);
             }
 
             profile.SolveInit = timer.ElapsedMilliseconds;
@@ -140,7 +148,7 @@ namespace Box2DSharp.Dynamics
             {
                 for (var j = 0; j < JointCount; ++j)
                 {
-                    Joints[j].SolveVelocityConstraints(solverData);
+                    Joints[j].SolveVelocityConstraints(in solverData);
                 }
 
                 contactSolver.SolveVelocityConstraints();
@@ -238,8 +246,8 @@ namespace Box2DSharp.Dynamics
                         continue;
                     }
 
-                    if (!b.HasFlag(BodyFlags.AutoSleep)                                // 不允许休眠
-                     || b.AngularVelocity * b.AngularVelocity > angTolSqr              // 或 角速度大于最小值
+                    if (!b.HasFlag(BodyFlags.AutoSleep)                              // 不允许休眠
+                     || b.AngularVelocity * b.AngularVelocity > angTolSqr            // 或 角速度大于最小值
                      || Vector2.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr) // 或 线速度大于最小值
                     {
                         b.SleepTime = 0.0f;
@@ -261,6 +269,8 @@ namespace Box2DSharp.Dynamics
                     }
                 }
             }
+
+            contactSolver.Reset();
         }
 
         internal void SolveTOI(in TimeStep subStep, int toiIndexA, int toiIndexB)
@@ -278,14 +288,7 @@ namespace Box2DSharp.Dynamics
                 Velocities[i].W = b.AngularVelocity;
             }
 
-            var contactSolverDef = new ContactSolverDef
-            {
-                Contacts = Contacts,
-                Count = ContactCount,
-                Step = subStep,
-                Positions = Positions,
-                Velocities = Velocities
-            };
+            var contactSolverDef = new ContactSolverDef(in subStep, ContactCount, Contacts, Positions, Velocities);
             var contactSolver = new ContactSolver(contactSolverDef);
 
             // Solve position constraints.
@@ -393,6 +396,7 @@ namespace Box2DSharp.Dynamics
             }
 
             Report(contactSolver.VelocityConstraints);
+            contactSolver.Reset();
         }
 
         internal void Add(Body body)

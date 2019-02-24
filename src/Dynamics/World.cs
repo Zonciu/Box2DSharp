@@ -804,6 +804,7 @@ namespace Box2DSharp.Dynamics
                 timer.Stop();
                 Profile.Broadphase = timer.ElapsedMilliseconds;
             }
+            island.Reset();
         }
 
         /// <summary>
@@ -1149,6 +1150,8 @@ namespace Box2DSharp.Dynamics
                     break;
                 }
             }
+
+            island.Reset();
         }
 
         /// Dump the world into the log file.
