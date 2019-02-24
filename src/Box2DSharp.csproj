@@ -13,6 +13,7 @@
         <RepositoryUrl>https://github.com/Zonciu/Box2DSharp</RepositoryUrl>
         <Copyright>Copyright © Zonciu Liang 2018</Copyright>
         <Description>A C# port of Box2D</Description>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

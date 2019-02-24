@@ -58,9 +58,9 @@ namespace Box2DSharp.Collision
         }
 
         /// Clipping for contact manifolds.
-        public static int ClipSegmentToLine(
-            ref ClipVertex[] vOut,
-            in ClipVertex[] vIn,
+        public static unsafe int ClipSegmentToLine(
+            ClipVertex* vOut,
+            ClipVertex* vIn,
             in Vector2 normal,
             float offset,
             int vertexIndexA)

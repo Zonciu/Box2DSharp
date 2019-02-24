@@ -59,8 +59,8 @@ namespace Box2DSharp.Collision
             return maxSeparation;
         }
 
-        public static void FindIncidentEdge(
-            ref ClipVertex[] c,
+        public static unsafe void FindIncidentEdge(
+            ClipVertex* c,
             PolygonShape poly1,
             in Transform xf1,
             int edge1,
@@ -114,7 +114,7 @@ namespace Box2DSharp.Collision
 
         // The normal points from 1 to 2
         /// Compute the collision manifold between two polygons.
-        public static void CollidePolygons(
+        public static unsafe void CollidePolygons(
             ref Manifold manifold,
             PolygonShape polyA,
             in Transform xfA,
@@ -174,8 +174,8 @@ namespace Box2DSharp.Collision
                 flip = 0;
             }
 
-            var incidentEdge = new ClipVertex[2];
-            FindIncidentEdge(ref incidentEdge, poly1, xf1, edge1, poly2, xf2);
+            var incidentEdge = stackalloc ClipVertex[2];
+            FindIncidentEdge(incidentEdge, poly1, xf1, edge1, poly2, xf2);
 
             var count1 = poly1.Count;
             var vertices1 = poly1.Vertices;
@@ -206,12 +206,12 @@ namespace Box2DSharp.Collision
             var sideOffset2 = Vector2.Dot(tangent, v12) + totalRadius;
 
             // Clip incident edge against extruded edge1 side edges.
-            var clipPoints1 = new ClipVertex[2];
-            var clipPoints2 = new ClipVertex[2];
+            var clipPoints1 = stackalloc ClipVertex[2];
+            var clipPoints2 = stackalloc ClipVertex[2];
 
             // Clip to box side 1
             var np = ClipSegmentToLine(
-                ref clipPoints1,
+                clipPoints1,
                 incidentEdge,
                 -tangent,
                 sideOffset1,
@@ -224,7 +224,7 @@ namespace Box2DSharp.Collision
 
             // Clip to negative box side 1
             np = ClipSegmentToLine(
-                ref clipPoints2,
+                clipPoints2,
                 clipPoints1,
                 tangent,
                 sideOffset2,
