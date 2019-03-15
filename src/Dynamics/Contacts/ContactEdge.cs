@@ -7,7 +7,7 @@ namespace Box2DSharp.Dynamics.Contacts
     /// is an edge. A contact edge belongs to a doubly linked list
     /// maintained in each attached body. Each contact has two contact
     /// nodes, one for each attached body.
-    public struct ContactEdge
+    public class ContactEdge
     {
         /// provides quick access to the other body attached.
         public Body Other;

@@ -154,10 +154,7 @@ namespace Box2DSharp.Dynamics
 
             // Call the factory.
             var c = CreateContact(fixtureA, indexA, fixtureB, indexB);
-            if (c == default)
-            {
-                return;
-            }
+            Debug.Assert(c != default, "Get null contact!");
 
             // Contact creation may swap fixtures.
             fixtureA = c.FixtureA;
@@ -166,19 +163,22 @@ namespace Box2DSharp.Dynamics
             bodyB = fixtureB.Body;
 
             // Insert into the world.
-            c.Node = ContactList.AddFirst(c);
+            c.Node = LinkedListNodePool<Contact>.Shared.Get(c);
+            ContactList.AddFirst(c.Node);
 
             // Connect to island graph.
 
             // Connect to body A
             c.NodeA.Contact = c;
             c.NodeA.Other = bodyB;
-            c.NodeA.Node = bodyA.ContactEdges.AddFirst(c.NodeA);
+            c.NodeA.Node = LinkedListNodePool<ContactEdge>.Shared.Get(c.NodeA);
+            bodyA.ContactEdges.AddFirst(c.NodeA.Node);
 
             // Connect to body B
             c.NodeB.Contact = c;
             c.NodeB.Other = bodyA;
-            c.NodeB.Node = bodyB.ContactEdges.AddFirst(c.NodeB);
+            c.NodeB.Node = LinkedListNodePool<ContactEdge>.Shared.Get(c.NodeB);
+            bodyB.ContactEdges.AddFirst(c.NodeB.Node);
 
             // Wake up the bodies
             if (fixtureA.IsSensor == false && fixtureB.IsSensor == false)
@@ -207,12 +207,15 @@ namespace Box2DSharp.Dynamics
 
             // Remove from the world.
             ContactList.Remove(c.Node);
+            LinkedListNodePool<Contact>.Shared.Return(c.Node);
 
             // Remove from body 1
             bodyA.ContactEdges.Remove(c.NodeA.Node);
+            LinkedListNodePool<ContactEdge>.Shared.Return(c.NodeA.Node);
 
             // Remove from body 2
             bodyB.ContactEdges.Remove(c.NodeB.Node);
+            LinkedListNodePool<ContactEdge>.Shared.Return(c.NodeB.Node);
 
             // Call the factory.
             DestroyContact(c);

@@ -26,7 +26,14 @@ namespace Box2DSharp.Dynamics.Contacts
     internal class EdgeAndPolygonContactFactory : IContactFactory
     {
         private readonly ObjectPool<EdgeAndPolygonContact> _pool =
-            new ObjectPool<EdgeAndPolygonContact>(new ContactPoolPolicy<EdgeAndPolygonContact>());
+            new ObjectPool<EdgeAndPolygonContact>(
+                () => new EdgeAndPolygonContact(),
+                contact =>
+                {
+                    contact.Reset();
+                    return true;
+                }
+            );
 
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {

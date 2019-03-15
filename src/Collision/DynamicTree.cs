@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -190,7 +191,7 @@ namespace Box2DSharp.Collision
         /// is called for each proxy that overlaps the supplied AABB.
         public void Query(InternalQueryCallback callback, in AABB aabb)
         {
-            var stack = new Stack<int>(256);
+            var stack = SimpleObjectPool<Stack<int>>.Shared.Get();
             stack.Push(_root);
 
             while (stack.Count > 0)
@@ -220,6 +221,9 @@ namespace Box2DSharp.Collision
                     }
                 }
             }
+
+            stack.Clear();
+            SimpleObjectPool<Stack<int>>.Shared.Return(stack);
         }
 
         /// Ray-cast against the proxies in the tree. This relies on the callback
@@ -254,7 +258,7 @@ namespace Box2DSharp.Collision
                 segmentAABB.UpperBound = Vector2.Max(p1, t);
             }
 
-            var stack = new Stack<int>(256);
+            var stack = SimpleObjectPool<Stack<int>>.Shared.Get();
             stack.Push(_root);
 
             while (stack.Count > 0)
@@ -314,6 +318,9 @@ namespace Box2DSharp.Collision
                     stack.Push(node.Child2);
                 }
             }
+
+            stack.Clear();
+            SimpleObjectPool<Stack<int>>.Shared.Return(stack);
         }
 
         /// Validate this tree. For testing.

@@ -23,7 +23,14 @@ namespace Box2DSharp.Dynamics.Contacts
     internal class PolygonContactFactory : IContactFactory
     {
         private readonly ObjectPool<PolygonContact> _pool =
-            new ObjectPool<PolygonContact>(new ContactPoolPolicy<PolygonContact>());
+            new ObjectPool<PolygonContact>(
+                () => new PolygonContact(),
+                contact =>
+                {
+                    contact.Reset();
+                    return true;
+                }
+            );
 
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -576,6 +577,8 @@ namespace Box2DSharp.Dynamics
             ContactManager.BroadPhase.ShiftOrigin(newOrigin);
         }
 
+        private readonly Stack<Body> _solveStack = new Stack<Body>(256);
+
         /// <summary>
         /// Find islands, integrate and solve constraints, solve position constraints
         /// 找出岛屿,迭代求解约束,求解位置约束(岛屿用来对物理空间进行物体分组求解,提高效率)
@@ -619,8 +622,8 @@ namespace Box2DSharp.Dynamics
             }
 
             // Build and simulate all awake islands.
-            var stackSize = BodyList.Count;
-            var stack = new Stack<Body>(stackSize);
+            var stack = _solveStack;
+            stack.Clear();
 
             bodyNode = BodyList.First;
             while (bodyNode != null)
@@ -1008,11 +1011,10 @@ namespace Box2DSharp.Dynamics
                 minContact.Flags |= Contact.ContactFlag.IslandFlag;
 
                 // Get contacts on bodyA and bodyB.
-                var bodies = new Body[2]
-                {
-                    bodyA,
-                    bodyB
-                };
+                var bodies = ArrayPool<Body>.Shared.Rent(2);
+                bodies[0] = bodyA;
+                bodies[1] = bodyB;
+
                 for (var i = 0; i < 2; ++i)
                 {
                     var body = bodies[i];
@@ -1108,6 +1110,7 @@ namespace Box2DSharp.Dynamics
                     }
                 }
 
+                ArrayPool<Body>.Shared.Return(bodies, true);
                 var dt = (1.0f - minAlpha) * step.Dt;
                 var subStep = new TimeStep
                 {

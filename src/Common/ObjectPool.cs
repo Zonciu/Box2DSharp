@@ -1,89 +1,73 @@
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
-using System.Numerics;
 
 namespace Box2DSharp.Common
 {
-    internal class ObjectPool<T>
-        where T : new()
+    public class ObjectPool<T>
     {
-        private readonly IPooledObjectPolicy<T> _policy;
+        private readonly Func<T> _create;
 
-        private readonly ConcurrentBag<T> _objects;
+        private readonly Func<T, bool> _destroy;
+
+        private readonly ConcurrentBag<T> _objects = new ConcurrentBag<T>();
 
         private readonly int _maximumRetained;
 
-        public static ObjectPool<T> Shared = new ObjectPool<T>(new DefaultPoolPolicy<T>());
-
-        public ObjectPool(IPooledObjectPolicy<T> policy) : this(policy, Environment.ProcessorCount * 2)
-        { }
-
-        public ObjectPool(IPooledObjectPolicy<T> policy, int maximumRetained)
+        public ObjectPool(Func<T> create, Func<T, bool> destroy, int maximumRetained = 1024)
         {
-            _policy = policy;
-            _objects = new ConcurrentBag<T>();
+            _create = create;
+            _destroy = destroy;
             _maximumRetained = maximumRetained;
         }
 
         public T Get()
         {
-            return _objects.TryTake(out var item) ? item : _policy.Create();
+            return _objects.TryTake(out var item) ? item : _create();
         }
 
         public void Return(T item)
         {
-            if (_policy.Return(item) && _objects.Count < _maximumRetained)
+            if (_destroy(item) && _objects.Count < _maximumRetained)
             {
                 _objects.Add(item);
             }
         }
     }
 
-    public interface IPooledObjectPolicy<T>
-    {
-        T Create();
-
-        bool Return(T obj);
-    }
-
-    public class ActionPoolPolicy<T> : IPooledObjectPolicy<T>
+    public class SimpleObjectPool<T>
         where T : new()
     {
-        private readonly Action<T> _getAction;
+        private readonly Func<T> _create;
 
-        private readonly Func<T, bool> _returnAction;
+        private readonly Func<T, bool> _destroy;
 
-        public ActionPoolPolicy(Action<T> getAction = null, Func<T, bool> returnAction = null)
+        private readonly ConcurrentBag<T> _objects = new ConcurrentBag<T>();
+
+        private readonly int _maximumRetained;
+
+        public static readonly SimpleObjectPool<T> Shared = new SimpleObjectPool<T>(() => new T(), null);
+
+        public SimpleObjectPool(Func<T> create, Func<T, bool> destroy, int maximumRetained = 1024)
         {
-            _getAction = getAction;
-            _returnAction = returnAction;
+            _create = create;
+            if (_create == null)
+            { }
+
+            _destroy = destroy;
+            _maximumRetained = maximumRetained;
         }
 
-        public T Create()
+        public T Get()
         {
-            var obj = new T();
-            _getAction?.Invoke(obj);
-            return obj;
+            return _objects.TryTake(out var item) ? item : _create();
         }
 
-        public bool Return(T obj)
+        public void Return(T item)
         {
-            return _returnAction == null || _returnAction.Invoke(obj);
-        }
-    }
-
-    public class DefaultPoolPolicy<T> : IPooledObjectPolicy<T>
-        where T : new()
-    {
-        public T Create()
-        {
-            return new T();
-        }
-
-        public bool Return(T obj)
-        {
-            return true;
+            if (_objects.Count < _maximumRetained && (_destroy == null || _destroy.Invoke(item)))
+            {
+                _objects.Add(item);
+            }
         }
     }
 }

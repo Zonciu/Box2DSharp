@@ -52,20 +52,20 @@ namespace Box2DSharp.Dynamics
 
         internal void Reset()
         {
-            ArrayPool<Body>.Shared.Return(Bodies);
-            Bodies = null;
+            ArrayPool<Body>.Shared.Return(Bodies, true);
+            Bodies = default;
 
-            ArrayPool<Contact>.Shared.Return(Contacts);
-            Contacts = null;
+            ArrayPool<Contact>.Shared.Return(Contacts, true);
+            Contacts = default;
 
-            ArrayPool<Joint>.Shared.Return(Joints);
-            Joints = null;
+            ArrayPool<Joint>.Shared.Return(Joints, true);
+            Joints = default;
 
-            ArrayPool<Position>.Shared.Return(Positions);
-            Positions = null;
+            ArrayPool<Position>.Shared.Return(Positions, true);
+            Positions = default;
 
-            ArrayPool<Velocity>.Shared.Return(Velocities);
-            Velocities = null;
+            ArrayPool<Velocity>.Shared.Return(Velocities, true);
+            Velocities = default;
         }
 
         internal void Clear()

@@ -9,15 +9,15 @@ namespace Box2DSharp.Dynamics.Contacts
 {
     public ref struct ContactSolver
     {
-        private readonly Contact[] _contacts;
+        private Contact[] _contacts;
 
-        private readonly int _contactCount;
+        private int _contactCount;
 
         private ContactPositionConstraint[] _positionConstraints;
 
         internal ContactVelocityConstraint[] VelocityConstraints;
 
-        private readonly Position[] _positions;
+        private Position[] _positions;
 
         private readonly Velocity[] _velocities;
 
@@ -81,7 +81,6 @@ namespace Box2DSharp.Dynamics.Contacts
                 pc.RadiusB = radiusB;
                 pc.Type = manifold.Type;
 
-
                 for (var j = 0; j < pointCount; ++j)
                 {
                     var cp = manifold.Points.Values[j];
@@ -111,9 +110,9 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public void Reset()
         {
-            ArrayPool<ContactPositionConstraint>.Shared.Return(_positionConstraints);
+            ArrayPool<ContactPositionConstraint>.Shared.Return(_positionConstraints, true);
             _positionConstraints = null;
-            ArrayPool<ContactVelocityConstraint>.Shared.Return(VelocityConstraints);
+            ArrayPool<ContactVelocityConstraint>.Shared.Return(VelocityConstraints, true);
             VelocityConstraints = null;
         }
 

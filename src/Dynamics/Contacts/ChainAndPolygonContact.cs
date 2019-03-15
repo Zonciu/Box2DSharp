@@ -20,7 +20,13 @@ namespace Box2DSharp.Dynamics.Contacts
     internal class ChainAndPolygonContactFactory : IContactFactory
     {
         private readonly ObjectPool<ChainAndPolygonContact> _pool =
-            new ObjectPool<ChainAndPolygonContact>(new ContactPoolPolicy<ChainAndPolygonContact>());
+            new ObjectPool<ChainAndPolygonContact>(
+                () => new ChainAndPolygonContact(),
+                contact =>
+                {
+                    contact.Reset();
+                    return true;
+                });
 
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
