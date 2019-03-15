@@ -27,5 +27,5 @@ namespace Box2DSharp.Dynamics.Internal
 
     public delegate bool InternalQueryCallback(int proxyId);
 
-    public delegate float InternalRayCastCallback(in RayCastInput input, int proxyId);
+    public delegate float InternalRayCastCallback(ref RayCastInput input, int proxyId);
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -291,7 +291,7 @@ namespace Box2DSharp.Collision
                         MaxFraction = maxFraction
                     };
 
-                    var value = inputCallback(subInput, nodeId);
+                    var value = inputCallback(ref subInput, nodeId);
 
                     if (value.Equals(0.0f))
                     {

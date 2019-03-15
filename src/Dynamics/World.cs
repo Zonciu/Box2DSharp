@@ -524,7 +524,7 @@ namespace Box2DSharp.Dynamics
             };
 
             ContactManager.BroadPhase.RayCast(
-                (in RayCastInput subInput, int proxyId) =>
+                (ref RayCastInput subInput, int proxyId) =>
                 {
                     var userData = ContactManager.BroadPhase.GetUserData(proxyId);
                     var proxy = (FixtureProxy) userData;

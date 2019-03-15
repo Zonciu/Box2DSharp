@@ -163,7 +163,7 @@ namespace Box2DSharp.Tests
             return true;
         }
 
-        private float RayCastCallback(in RayCastInput input, int proxyId)
+        private float RayCastCallback(ref RayCastInput input, int proxyId)
         {
             var actor = (Actor) _tree.GetUserData(proxyId);
             var hit = actor.AABB.RayCast(out var output, input);
