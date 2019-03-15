@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Box2DSharp.Common
@@ -12,6 +13,7 @@ namespace Box2DSharp.Common
 
         public unsafe T* Values
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 fixed (T* ptr = &Value0)
@@ -23,7 +25,9 @@ namespace Box2DSharp.Common
 
         public unsafe T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Values[index];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => Values[index] = value;
         }
     }
@@ -40,6 +44,7 @@ namespace Box2DSharp.Common
 
         public unsafe T* Values
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 fixed (T* ptr = &Value0)
@@ -51,7 +56,9 @@ namespace Box2DSharp.Common
 
         public unsafe T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Values[index];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => Values[index] = value;
         }
     }
@@ -70,6 +77,7 @@ namespace Box2DSharp.Common
 
         public unsafe T* Values
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 fixed (T* ptr = &Value0)
@@ -81,7 +89,9 @@ namespace Box2DSharp.Common
 
         public unsafe T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Values[index];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => Values[index] = value;
         }
     }
@@ -108,6 +118,7 @@ namespace Box2DSharp.Common
 
         public unsafe T* Values
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 fixed (T* ptr = &Value0)
@@ -119,7 +130,9 @@ namespace Box2DSharp.Common
 
         public unsafe T this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Values[index];
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => Values[index] = value;
         }
     }

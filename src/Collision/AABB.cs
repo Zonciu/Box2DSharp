@@ -67,7 +67,7 @@ namespace Box2DSharp.Collision
             return wx + wx + wy + wy;
         }
 
-        public bool RayCast(out RayCastOutput output, RayCastInput input)
+        public bool RayCast(out RayCastOutput output, in RayCastInput input)
         {
             output = default;
             var tmin = -Settings.MaxFloat;
@@ -214,71 +214,6 @@ namespace Box2DSharp.Collision
                 && LowerBound.Y <= aabb.LowerBound.Y
                 && aabb.UpperBound.X <= UpperBound.X
                 && aabb.UpperBound.Y <= UpperBound.Y;
-        }
-
-        public bool RayCast(out RayCastOutput output, in RayCastInput input)
-        {
-            output = default;
-            var tmin = -Settings.MaxFloat;
-            var tmax = Settings.MaxFloat;
-
-            var p = input.P1;
-            var d = input.P2 - input.P1;
-            var absD = Vector2.Abs(d);
-
-            var normal = new Vector2();
-
-            if (absD.X < Settings.Epsilon)
-            {
-                // Parallel.
-                if (p.X < LowerBound.X || UpperBound.X < p.X)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                var inv_d = 1.0f / d.X;
-                var t1 = (LowerBound.X - p.X) * inv_d;
-                var t2 = (UpperBound.X - p.X) * inv_d;
-
-                // Sign of the normal vector.
-                var s = -1.0f;
-
-                if (t1 > t2)
-                {
-                    MathUtils.Swap(ref t1, ref t2);
-                    s = 1.0f;
-                }
-
-                // Push the min up
-                if (t1 > tmin)
-                {
-                    normal.SetZero();
-                    normal.X = s;
-                    tmin = t1;
-                }
-
-                // Pull the max down
-                tmax = Math.Min(tmax, t2);
-
-                if (tmin > tmax)
-                {
-                    return false;
-                }
-            }
-
-            // Does the ray start inside the box?
-            // Does the ray intersect beyond the max fraction?
-            if (tmin < 0.0f || input.MaxFraction < tmin)
-            {
-                return false;
-            }
-
-            // Intersection.
-            output.Fraction = tmin;
-            output.Normal = normal;
-            return true;
         }
     }
 }

@@ -201,7 +201,7 @@ namespace Box2DSharp.Dynamics
                 var jointsOkay = true;
                 for (var j = 0; j < JointCount; ++j)
                 {
-                    var jointOkay = Joints[j].SolvePositionConstraints(solverData);
+                    var jointOkay = Joints[j].SolvePositionConstraints(in solverData);
                     jointsOkay = jointsOkay && jointOkay;
                 }
 

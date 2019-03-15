@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
@@ -181,11 +182,13 @@ namespace Box2DSharp.Dynamics
             bodyB.ContactEdges.AddFirst(c.NodeB.Node);
 
             // Wake up the bodies
-            if (fixtureA.IsSensor == false && fixtureB.IsSensor == false)
+            if (fixtureA.IsSensor || fixtureB.IsSensor)
             {
-                bodyA.IsAwake = true;
-                bodyB.IsAwake = true;
+                return;
             }
+
+            bodyA.IsAwake = true;
+            bodyB.IsAwake = true;
         }
 
         public void FindNewContacts()

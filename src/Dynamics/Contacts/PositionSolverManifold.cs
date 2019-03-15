@@ -24,7 +24,7 @@ namespace Box2DSharp.Dynamics.Contacts
             case ManifoldType.Circles:
             {
                 var pointA = MathUtils.Mul(xfA, pc.LocalPoint);
-                var pointB = MathUtils.Mul(xfB, pc.LocalPoints[0]);
+                var pointB = MathUtils.Mul(xfB, pc.LocalPoints.Value0);
                 Normal = pointB - pointA;
                 Normal = Vector2.Normalize(Normal);
                 Point = 0.5f * (pointA + pointB);

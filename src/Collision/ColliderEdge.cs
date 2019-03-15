@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
@@ -76,15 +77,10 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint = P;
-
-                unsafe
-                {
-                    ref var point = ref manifold.Points.Values[0];
-                    point.Id.Key = 0;
-                    point.Id.ContactFeature = cf;
-                    point.LocalPoint = circleB.Position;
-                }
-
+                ref var point = ref manifold.Points.Value0;
+                point.Id.Key = 0;
+                point.Id.ContactFeature = cf;
+                point.LocalPoint = circleB.Position;
                 return;
             }
 
@@ -120,15 +116,10 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.Circles;
                 manifold.LocalNormal.SetZero();
                 manifold.LocalPoint = P;
-
-                unsafe
-                {
-                    ref var point = ref manifold.Points.Values[0];
-                    point.Id.Key = 0;
-                    point.Id.ContactFeature = cf;
-                    point.LocalPoint = circleB.Position;
-                }
-
+                ref var point = ref manifold.Points.Value0;
+                point.Id.Key = 0;
+                point.Id.ContactFeature = cf;
+                point.LocalPoint = circleB.Position;
                 return;
             }
 
@@ -158,14 +149,10 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = n;
                 manifold.LocalPoint = A;
-
-                unsafe
-                {
-                    ref var point = ref manifold.Points.Values[0];
-                    point.Id.Key = 0;
-                    point.Id.ContactFeature = cf;
-                    point.LocalPoint = circleB.Position;
-                }
+                ref var point = ref manifold.Points.Value0;
+                point.Id.Key = 0;
+                point.Id.ContactFeature = cf;
+                point.LocalPoint = circleB.Position;
             }
         }
 

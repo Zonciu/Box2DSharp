@@ -36,18 +36,17 @@ namespace Box2DSharp.Collision
             {
                 Debug.Assert(0 <= index && index < chain.Count);
                 Count = 2;
-                Buffer = new Vector2[Count];
-                Buffer[0] = chain.Vertices[index];
+                Vertices = new Vector2[Count];
+                Vertices[0] = chain.Vertices[index];
                 if (index + 1 < chain.Count)
                 {
-                    Buffer[1] = chain.Vertices[index + 1];
+                    Vertices[1] = chain.Vertices[index + 1];
                 }
                 else
                 {
-                    Buffer[1] = chain.Vertices[0];
+                    Vertices[1] = chain.Vertices[0];
                 }
 
-                Vertices = Buffer;
                 Radius = chain.Radius;
             }
                 break;
@@ -127,11 +126,6 @@ namespace Box2DSharp.Collision
             Debug.Assert(0 <= index && index < Count);
             return ref Vertices[index];
         }
-
-        /// <summary>
-        /// Size = 2
-        /// </summary>
-        public Vector2[] Buffer;
 
         public Vector2[] Vertices;
 

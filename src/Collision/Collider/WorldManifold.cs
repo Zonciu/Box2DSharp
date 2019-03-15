@@ -28,7 +28,7 @@ namespace Box2DSharp.Collision.Collider
             {
                 Normal.Set(1.0f, 0.0f);
                 var pointA = MathUtils.Mul(xfA, manifold.LocalPoint);
-                var pointB = MathUtils.Mul(xfB, manifold.Points.Values[0].LocalPoint);
+                var pointB = MathUtils.Mul(xfB, manifold.Points.Value0.LocalPoint);
                 if (Vector2.DistanceSquared(pointA, pointB) > Settings.Epsilon * Settings.Epsilon)
                 {
                     Normal = pointB - pointA;
@@ -37,8 +37,8 @@ namespace Box2DSharp.Collision.Collider
 
                 var cA = pointA + radiusA * Normal;
                 var cB = pointB - radiusB * Normal;
-                Points.Values[0] = 0.5f * (cA + cB);
-                Separations.Values[0] = Vector2.Dot(cB - cA, Normal);
+                Points.Value0 = 0.5f * (cA + cB);
+                Separations.Value0 = Vector2.Dot(cB - cA, Normal);
             }
                 break;
 

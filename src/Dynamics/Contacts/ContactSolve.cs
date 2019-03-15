@@ -396,8 +396,8 @@ namespace Box2DSharp.Dynamics.Contacts
                     //    = A * x + b'
                     // b' = b - A * a;
 
-                    ref var cp1 = ref vc.Points.Values[0];
-                    ref var cp2 = ref vc.Points.Values[1];
+                    ref var cp1 = ref vc.Points.Value0;
+                    ref var cp2 = ref vc.Points.Value1;
 
                     var a = new Vector2(cp1.NormalImpulse, cp2.NormalImpulse);
                     Debug.Assert(a.X >= 0.0f && a.Y >= 0.0f);
