@@ -81,10 +81,13 @@ namespace Box2DSharp.Tests
                 DestroyProxy();
             }
 
-            if (Input.GetKeyDown(KeyCode.M))
+            if (Input.GetKey(KeyCode.M))
             {
                 MoveProxy();
             }
+
+            DrawString("Keys: a: automate, c: create, d: destroy, m: move");
+            DrawString("Blue: overlap\nGreen: ray actor\nRed: ray actor & overlap");
 
             _rayActor = null;
             for (var i = 0; i < ActorCount; ++i)
