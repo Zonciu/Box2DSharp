@@ -8,25 +8,16 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    internal class EdgeShapesCallback
+    internal class EdgeShapesCallback : IRayCastCallback
     {
-        public RayCastCallback Callback;
-
         public Fixture Fixture;
 
         public Vector2 Normal;
 
         public Vector2 Point;
 
-        public EdgeShapesCallback()
-        {
-            Fixture = null;
-            Callback = ReportFixture;
-        }
-
-        private float ReportFixture(
-            Fixture fixture, Vector2 point,
-            Vector2 normal, float fraction)
+        /// <inheritdoc />
+        public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float fraction)
         {
             Fixture = fixture;
             Point = point;
@@ -226,7 +217,7 @@ namespace Box2DSharp.Tests
 
             var callback = new EdgeShapesCallback();
 
-            World.RayCast(callback.Callback, point1, point2);
+            World.RayCast(callback, point1, point2);
 
             if (callback.Fixture != null)
             {

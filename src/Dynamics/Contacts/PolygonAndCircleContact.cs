@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -11,7 +12,7 @@ namespace Box2DSharp.Dynamics.Contacts
     /// </summary>
     public class PolygonAndCircleContact : Contact
     {
-        /// <inheritdoc />
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
             CollisionUtils.CollidePolygonAndCircle(
@@ -35,6 +36,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 }
             );
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
         {
             Debug.Assert(fixtureA.ShapeType == ShapeType.Polygon);
@@ -44,6 +46,7 @@ namespace Box2DSharp.Dynamics.Contacts
             return contact;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Destroy(Contact contact)
         {
             _pool.Return((PolygonAndCircleContact) contact);

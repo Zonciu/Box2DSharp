@@ -2,6 +2,7 @@ using System;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
+using Box2DSharp.Dynamics.Internal;
 using UnityEngine;
 using Color = System.Drawing.Color;
 using Random = System.Random;
@@ -9,7 +10,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class DynamicTreeTest : TestBase
+    public class DynamicTreeTest : TestBase, ITreeQueryCallback, ITreeRayCastCallback
     {
         private const int ActorCount = 128;
 
@@ -159,14 +160,14 @@ namespace Box2DSharp.Tests
             ++_stepCount;
         }
 
-        private bool QueryCallback(int proxyId)
+        public bool QueryCallback(int proxyId)
         {
             var actor = (Actor) _tree.GetUserData(proxyId);
             actor.Overlap = CollisionUtils.TestOverlap(_queryAABB, actor.AABB);
             return true;
         }
 
-        private float RayCastCallback(ref RayCastInput input, int proxyId)
+        public float RayCastCallback(in RayCastInput input, int proxyId)
         {
             var actor = (Actor) _tree.GetUserData(proxyId);
             var hit = actor.AABB.RayCast(out var output, input);
@@ -286,7 +287,7 @@ namespace Box2DSharp.Tests
 
         private void Query()
         {
-            _tree.Query(QueryCallback, _queryAABB);
+            _tree.Query(this, _queryAABB);
 
             for (var i = 0; i < ActorCount; ++i)
             {
@@ -308,7 +309,7 @@ namespace Box2DSharp.Tests
             var input = _rayCastInput;
 
             // Ray cast against the dynamic tree.
-            _tree.RayCast(RayCastCallback, input);
+            _tree.RayCast(this, input);
 
             // Brute force ray cast.
             Actor bruteActor = null;

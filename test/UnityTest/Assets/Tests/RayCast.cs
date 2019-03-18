@@ -8,10 +8,8 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class RayCastClosestCallback
+    public class RayCastClosestCallback : IRayCastCallback
     {
-        public readonly RayCastCallback Callback;
-
         public bool Hit;
 
         public Vector2 Normal;
@@ -21,10 +19,9 @@ namespace Box2DSharp.Tests
         public RayCastClosestCallback()
         {
             Hit = false;
-            Callback = ReportFixture;
         }
 
-        private float ReportFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction)
+        public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float fraction)
         {
             var body = fixture.Body;
             var userData = body.UserData;
@@ -50,10 +47,8 @@ namespace Box2DSharp.Tests
         }
     }
 
-    public class RayCastAnyCallback
+    public class RayCastAnyCallback : IRayCastCallback
     {
-        public readonly RayCastCallback Callback;
-
         public bool Hit;
 
         public Vector2 Normal;
@@ -63,10 +58,9 @@ namespace Box2DSharp.Tests
         public RayCastAnyCallback()
         {
             Hit = false;
-            Callback = ReportFixture;
         }
 
-        private float ReportFixture(Fixture fixture, Vector2 point, Vector2 normal, float _)
+        public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float _)
         {
             var body = fixture.Body;
             var userData = body.UserData;
@@ -94,11 +88,9 @@ namespace Box2DSharp.Tests
     // This ray cast collects multiple hits along the ray. Polygon 0 is filtered.
     // The fixtures are not necessary reported in order, so we might not capture
     // the closest fixture.
-    public class RayCastMultipleCallback
+    public class RayCastMultipleCallback : IRayCastCallback
     {
         public const int MaxCount = 3;
-
-        public readonly RayCastCallback Callback;
 
         public readonly Vector2[] Normals = new Vector2[MaxCount];
 
@@ -109,10 +101,9 @@ namespace Box2DSharp.Tests
         public RayCastMultipleCallback()
         {
             Count = 0;
-            Callback = ReportFixture;
         }
 
-        private float ReportFixture(Fixture fixture, Vector2 point, Vector2 normal, float _)
+        public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float _)
         {
             var body = fixture.Body;
             var userData = body.UserData;
@@ -269,7 +260,7 @@ namespace Box2DSharp.Tests
             case Mode.Closest:
             {
                 var callback = new RayCastClosestCallback();
-                World.RayCast(callback.Callback, point1, point2);
+                World.RayCast(callback, point1, point2);
 
                 if (callback.Hit)
                 {
@@ -288,7 +279,7 @@ namespace Box2DSharp.Tests
             case Mode.Any:
             {
                 var callback = new RayCastAnyCallback();
-                World.RayCast(callback.Callback, point1, point2);
+                World.RayCast(callback, point1, point2);
 
                 if (callback.Hit)
                 {
@@ -307,7 +298,7 @@ namespace Box2DSharp.Tests
             case Mode.Multiple:
             {
                 var callback = new RayCastMultipleCallback();
-                World.RayCast(callback.Callback, point1, point2);
+                World.RayCast(callback, point1, point2);
                 Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
 
                 for (var i = 0; i < callback.Count; ++i)

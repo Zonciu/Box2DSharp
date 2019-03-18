@@ -23,8 +23,6 @@ namespace Box2DSharp.Collision
             // Copy data from cache.
             Count = cache.Count;
 
-            //Vertices = new SimplexVertex[3];
-
             //ref b2SimplexVertex vertices = ref m_v1;
             for (var i = 0; i < Count; ++i)
             {

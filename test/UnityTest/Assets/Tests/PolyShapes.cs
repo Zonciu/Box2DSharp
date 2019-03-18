@@ -10,13 +10,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    internal class PolyShapesCallback
+    internal class PolyShapesCallback : IQueryCallback
     {
         private const int MaxCount = 4;
 
         private readonly IDrawer _drawer;
-
-        public QueryCallback Callback;
 
         public CircleShape Circle = new CircleShape();
 
@@ -28,7 +26,6 @@ namespace Box2DSharp.Tests
         {
             _drawer = drawer;
             Count = 0;
-            Callback = ReportFixture;
         }
 
         private void DrawFixture(Fixture fixture)
@@ -68,7 +65,7 @@ namespace Box2DSharp.Tests
 
         /// Called for each fixture found in the query AABB.
         /// @return false to terminate the query.
-        private bool ReportFixture(Fixture fixture)
+        public bool QueryCallback(Fixture fixture)
         {
             if (Count == MaxCount)
             {
@@ -291,7 +288,7 @@ namespace Box2DSharp.Tests
             callback.Circle.ComputeAABB(out var aabb, callback.Transform, 0);
             callback.Transform.SetIdentity();
 
-            World.QueryAABB(callback.Callback, aabb);
+            World.QueryAABB(callback, aabb);
 
             var color = Color.FromArgb(102, 178, 204);
             Drawer.DrawCircle(callback.Circle.Position, callback.Circle.Radius, color);

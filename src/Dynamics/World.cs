@@ -9,11 +9,12 @@ using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
+using Box2DSharp.Dynamics.Internal;
 using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Dynamics
 {
-    public class World
+    public class World : IDisposable
     {
         /// <summary>
         /// This is used to compute the time step ratio to
@@ -152,6 +153,8 @@ namespace Box2DSharp.Dynamics
         /// The minimum is 1.
         public float TreeQuality => ContactManager.BroadPhase.GetTreeQuality();
 
+        public bool Disposed { get; private set; }
+
         public World() : this(new Vector2(0, -10))
         { }
 
@@ -168,6 +171,22 @@ namespace Box2DSharp.Dynamics
             IsAutoClearForces = true;
             _invDt0 = 0.0f;
             Profile = new Profile();
+        }
+
+        ~World()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Disposed = true;
+            ContactManager.Dispose();
         }
 
         internal void NotifyNewFixture()
@@ -383,6 +402,10 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private readonly Stopwatch _stepTimer = new Stopwatch();
+
+        private readonly Stopwatch _timer = new Stopwatch();
+
         /// <summary>
         /// Take a time step. This performs collision detection, integration, and constraint solution.
         /// </summary>
@@ -392,7 +415,7 @@ namespace Box2DSharp.Dynamics
         public void Step(float timeStep, int velocityIterations, int positionIterations)
         {
             // profile 计时
-            var stepTimer = Stopwatch.StartNew();
+            _stepTimer.Restart();
 
             // If new fixtures were added, we need to find the new contacts.
             // 如果存在新增夹具,则需要找到新接触点
@@ -428,34 +451,34 @@ namespace Box2DSharp.Dynamics
             step.DtRatio = _invDt0 * timeStep;
 
             step.WarmStarting = WarmStarting;
-            var timer = Stopwatch.StartNew();
+            _timer.Restart();
 
             // Update contacts. This is where some contacts are destroyed.
             // 更新接触点
             {
                 ContactManager.Collide();
-                timer.Stop();
-                Profile.Collide = timer.ElapsedMilliseconds;
+                _timer.Stop();
+                Profile.Collide = _timer.ElapsedMilliseconds;
             }
 
             // Integrate velocities, solve velocity constraints, and integrate positions.
             // 对速度进行积分，求解速度约束，整合位置
             if (_stepComplete && step.Dt > 0.0f)
             {
-                timer.Restart();
+                _timer.Restart();
                 Solve(step);
-                timer.Stop();
-                Profile.Solve = timer.ElapsedMilliseconds;
+                _timer.Stop();
+                Profile.Solve = _timer.ElapsedMilliseconds;
             }
 
             // Handle TOI events.
             // 处理碰撞时间
             if (ContinuousPhysics && step.Dt > 0.0f)
             {
-                timer.Restart();
+                _timer.Restart();
                 SolveTOI(step);
-                timer.Stop();
-                Profile.SolveTOI = timer.ElapsedMilliseconds;
+                _timer.Stop();
+                Profile.SolveTOI = _timer.ElapsedMilliseconds;
             }
 
             if (step.Dt > 0.0f)
@@ -471,8 +494,8 @@ namespace Box2DSharp.Dynamics
 
             // 时间步完成,解锁世界
             IsLocked = false;
-            stepTimer.Stop();
-            Profile.Step = stepTimer.ElapsedMilliseconds;
+            _stepTimer.Stop();
+            Profile.Step = _stepTimer.ElapsedMilliseconds;
         }
 
         /// Manually clear the force buffer on all bodies. By default, forces are cleared automatically
@@ -494,20 +517,82 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private class TreeQueryCallback : ITreeQueryCallback
+        {
+            public ContactManager ContactManager { get; private set; }
+
+            public IQueryCallback Callback { get; private set; }
+
+            public void Set(ContactManager contactManager, in IQueryCallback callback)
+            {
+                ContactManager = contactManager;
+                Callback = callback;
+            }
+
+            public void Reset()
+            {
+                ContactManager = default;
+                Callback = default;
+            }
+
+            /// <inheritdoc />
+            public bool QueryCallback(int proxyId)
+            {
+                var proxy = (FixtureProxy) ContactManager
+                                          .BroadPhase.GetUserData(proxyId);
+                return Callback.QueryCallback(proxy.Fixture);
+            }
+        }
+
         /// Query the world for all fixtures that potentially overlap the
         /// provided AABB.
         /// @param callback a user implemented callback class.
         /// @param aabb the query box.
-        public void QueryAABB(QueryCallback callback, in AABB aabb)
+        public void QueryAABB(in IQueryCallback callback, in AABB aabb)
         {
-            ContactManager.BroadPhase.Query(
-                proxyId =>
+            var cb = SimpleObjectPool<TreeQueryCallback>.Shared.Get();
+            cb.Set(ContactManager, in callback);
+            ContactManager.BroadPhase.Query(cb, aabb);
+            cb.Reset();
+            SimpleObjectPool<TreeQueryCallback>.Shared.Return(cb);
+        }
+
+        private class InternalRayCastCallback : ITreeRayCastCallback
+        {
+            public ContactManager ContactManager { get; private set; }
+
+            public IRayCastCallback Callback { get; private set; }
+
+            public void Set(ContactManager contactManager, in IRayCastCallback callback)
+            {
+                ContactManager = contactManager;
+                Callback = callback;
+            }
+
+            public void Reset()
+            {
+                ContactManager = default;
+                Callback = default;
+            }
+
+            public float RayCastCallback(in RayCastInput input, int proxyId)
+            {
+                var userData = ContactManager.BroadPhase.GetUserData(proxyId);
+                var proxy = (FixtureProxy) userData;
+                var fixture = proxy.Fixture;
+                var index = proxy.ChildIndex;
+
+                var hit = fixture.RayCast(out var output, input, index);
+
+                if (!hit)
                 {
-                    var proxy = (FixtureProxy) ContactManager
-                                              .BroadPhase.GetUserData(proxyId);
-                    return callback(proxy.Fixture);
-                },
-                aabb);
+                    return input.MaxFraction;
+                }
+
+                var fraction = output.Fraction;
+                var point = (1.0f - fraction) * input.P1 + fraction * input.P2;
+                return Callback.RayCastCallback(fixture, point, output.Normal, fraction);
+            }
         }
 
         /// Ray-cast the world for all fixtures in the path of the ray. Your callback
@@ -516,34 +601,18 @@ namespace Box2DSharp.Dynamics
         /// @param callback a user implemented callback class.
         /// @param point1 the ray starting point
         /// @param point2 the ray ending point
-        public void RayCast(RayCastCallback callback, in Vector2 point1, in Vector2 point2)
+        public void RayCast(in IRayCastCallback callback, in Vector2 point1, in Vector2 point2)
         {
             var input = new RayCastInput
             {
                 MaxFraction = 1.0f, P1 = point1,
                 P2 = point2
             };
-
-            ContactManager.BroadPhase.RayCast(
-                (ref RayCastInput subInput, int proxyId) =>
-                {
-                    var userData = ContactManager.BroadPhase.GetUserData(proxyId);
-                    var proxy = (FixtureProxy) userData;
-                    var fixture = proxy.Fixture;
-                    var index = proxy.ChildIndex;
-
-                    var hit = fixture.RayCast(out var output, input, index);
-
-                    if (hit)
-                    {
-                        var fraction = output.Fraction;
-                        var point = (1.0f - fraction) * input.P1 + fraction * input.P2;
-                        return callback(fixture, point, output.Normal, fraction);
-                    }
-
-                    return input.MaxFraction;
-                },
-                input);
+            var cb = SimpleObjectPool<InternalRayCastCallback>.Shared.Get();
+            cb.Set(ContactManager, in callback);
+            ContactManager.BroadPhase.RayCast(cb, input);
+            cb.Reset();
+            SimpleObjectPool<InternalRayCastCallback>.Shared.Return(cb);
         }
 
         /// Shift the world origin. Useful for large worlds.
@@ -578,6 +647,8 @@ namespace Box2DSharp.Dynamics
         }
 
         private readonly Stack<Body> _solveStack = new Stack<Body>(256);
+
+        private readonly Stopwatch _solveTimer = new Stopwatch();
 
         /// <summary>
         /// Find islands, integrate and solve constraints, solve position constraints
@@ -778,7 +849,7 @@ namespace Box2DSharp.Dynamics
             }
 
             {
-                var timer = Stopwatch.StartNew();
+                _solveTimer.Restart();
 
                 // Synchronize fixtures, check for out of range bodies.
                 bodyNode = BodyList.First;
@@ -804,8 +875,8 @@ namespace Box2DSharp.Dynamics
 
                 // Look for new contacts.
                 ContactManager.FindNewContacts();
-                timer.Stop();
-                Profile.Broadphase = timer.ElapsedMilliseconds;
+                _solveTimer.Stop();
+                Profile.Broadphase = _solveTimer.ElapsedMilliseconds;
             }
             island.Reset();
         }
@@ -1011,13 +1082,101 @@ namespace Box2DSharp.Dynamics
                 minContact.Flags |= Contact.ContactFlag.IslandFlag;
 
                 // Get contacts on bodyA and bodyB.
-                var bodies = ArrayPool<Body>.Shared.Rent(2);
-                bodies[0] = bodyA;
-                bodies[1] = bodyB;
-
-                for (var i = 0; i < 2; ++i)
                 {
-                    var body = bodies[i];
+                    var body = bodyA;
+                    if (body.BodyType == BodyType.DynamicBody)
+                    {
+                        var node = body.ContactEdges.First;
+                        while (node != null)
+                        {
+                            var contactEdge = node.Value;
+                            node = node.Next;
+
+                            if (island.BodyCount == island.Bodies.Length)
+                            {
+                                break;
+                            }
+
+                            if (island.ContactCount == island.Contacts.Length)
+                            {
+                                break;
+                            }
+
+                            var contact = contactEdge.Contact;
+
+                            // Has this contact already been added to the island?
+                            if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
+                            {
+                                continue;
+                            }
+
+                            // Only add static, kinematic, or bullet bodies.
+                            var other = contactEdge.Other;
+                            if (other.BodyType == BodyType.DynamicBody
+                             && body.IsBullet == false
+                             && other.IsBullet == false)
+                            {
+                                continue;
+                            }
+
+                            // Skip sensors.
+                            var sensorA = contact.FixtureA.IsSensor;
+                            var sensorB = contact.FixtureB.IsSensor;
+                            if (sensorA || sensorB)
+                            {
+                                continue;
+                            }
+
+                            // Tentatively advance the body to the TOI.
+                            var backup = other.Sweep;
+                            if (!other.HasFlag(BodyFlags.Island))
+                            {
+                                other.Advance(minAlpha);
+                            }
+
+                            // Update the contact points
+                            contact.Update(ContactManager.ContactListener);
+
+                            // Was the contact disabled by the user?
+                            if (contact.IsEnabled == false)
+                            {
+                                other.Sweep = backup;
+                                other.SynchronizeTransform();
+                                continue;
+                            }
+
+                            // Are there contact points?
+                            if (contact.IsTouching == false)
+                            {
+                                other.Sweep = backup;
+                                other.SynchronizeTransform();
+                                continue;
+                            }
+
+                            // Add the contact to the island
+                            contact.Flags |= Contact.ContactFlag.IslandFlag;
+                            island.Add(contact);
+
+                            // Has the other body already been added to the island?
+                            if (other.HasFlag(BodyFlags.Island))
+                            {
+                                continue;
+                            }
+
+                            // Add the other body to the island.
+                            other.SetFlag(BodyFlags.Island);
+
+                            if (other.BodyType != BodyType.StaticBody)
+                            {
+                                other.IsAwake = true;
+                            }
+
+                            island.Add(other);
+                        }
+                    }
+                }
+                {
+                    var body = bodyB;
                     if (body.BodyType == BodyType.DynamicBody)
                     {
                         var node = body.ContactEdges.First;
@@ -1110,7 +1269,6 @@ namespace Box2DSharp.Dynamics
                     }
                 }
 
-                ArrayPool<Body>.Shared.Return(bodies, true);
                 var dt = (1.0f - minAlpha) * step.Dt;
                 var subStep = new TimeStep
                 {

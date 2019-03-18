@@ -93,9 +93,7 @@ namespace Box2DSharp.Collision.Shapes
         /// @see b2Shape::ComputeMass
         public override void ComputeMass(out MassData massData, float density)
         {
-            massData = new MassData();
-            massData.Mass = density * Settings.Pi * Radius * Radius;
-            massData.Center = Position;
+            massData = new MassData {Mass = density * Settings.Pi * Radius * Radius, Center = Position};
 
             // inertia about the local origin
             massData.RotationInertia = massData.Mass * (0.5f * Radius * Radius + Vector2.Dot(Position, Position));

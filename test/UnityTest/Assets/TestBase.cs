@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -56,6 +57,13 @@ namespace Box2DSharp
         public World World;
 
         public BoxDrawer Drawer { get; private set; }
+
+        public readonly string TestName;
+
+        protected TestBase()
+        {
+            TestName = Regex.Replace(GetType().Name, @"(\B[A-Z])", " $1");
+        }
 
         public virtual void BeginContact(Contact contact)
         { }
@@ -141,7 +149,7 @@ namespace Box2DSharp
             DumpLogger.Instance = new UnityLogger();
 
             // DrawString
-            _rect = new Rect(0, 0, Screen.width, Screen.height * 2f / 100f);
+            _rect = new Rect(20, 20, Screen.width, Screen.height * 2f / 100f);
             _style = new GUIStyle
             {
                 alignment = TextAnchor.UpperLeft, fontSize = Screen.height * 2 / 100,
@@ -204,6 +212,7 @@ namespace Box2DSharp
 
         protected void Update()
         {
+            DrawString(TestName);
             PreUpdate();
 
             // FPS
@@ -463,6 +472,41 @@ namespace Box2DSharp
             }
         }
 
+        class MouseQueryCallback : IQueryCallback
+        {
+            public Fixture QueryFixture;
+
+            public Vector2 Point;
+
+            public void Reset(in Vector2 point)
+            {
+                QueryFixture = null;
+                Point = point;
+            }
+
+            /// <inheritdoc />
+            public bool QueryCallback(Fixture fixture1)
+            {
+                var body = fixture1.Body;
+                if (body.BodyType == BodyType.DynamicBody)
+                {
+                    var inside = fixture1.TestPoint(Point);
+                    if (inside)
+                    {
+                        QueryFixture = fixture1;
+
+                        // We are done, terminate the query.
+                        return false;
+                    }
+                }
+
+                // Continue the query.
+                return true;
+            }
+        }
+
+        private readonly MouseQueryCallback _callback = new MouseQueryCallback();
+
         public void MouseDown()
         {
             if (MouseJoint != null)
@@ -479,31 +523,11 @@ namespace Box2DSharp
             aabb.UpperBound = p + d;
 
             // Query the world for overlapping shapes.
-            Fixture fixture = null;
-            World.QueryAABB(
-                fixture1 =>
-                {
-                    var body = fixture1.Body;
-                    if (body.BodyType == BodyType.DynamicBody)
-                    {
-                        var inside = fixture1.TestPoint(p);
-                        if (inside)
-                        {
-                            fixture = fixture1;
-
-                            // We are done, terminate the query.
-                            return false;
-                        }
-                    }
-
-                    // Continue the query.
-                    return true;
-                },
-                aabb);
-
-            if (fixture != null)
+            _callback.Reset(p);
+            World.QueryAABB(_callback, aabb);
+            if (_callback.QueryFixture != null)
             {
-                var body = fixture.Body;
+                var body = _callback.QueryFixture.Body;
                 var md = new MouseJointDef
                 {
                     BodyA = GroundBody, BodyB = body,

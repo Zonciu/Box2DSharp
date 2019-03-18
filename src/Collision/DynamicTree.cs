@@ -10,7 +10,7 @@ using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Collision
 {
-    public class DynamicTree
+    public class DynamicTree : IDisposable
     {
         public const int NullNode = -1;
 
@@ -24,19 +24,24 @@ namespace Box2DSharp.Collision
 
         private TreeNode[] _treeNodes;
 
+        public bool Disposed { get; private set; }
+
         public DynamicTree()
         {
             _root = NullNode;
 
             _nodeCapacity = 16;
             _nodeCount = 0;
-            _treeNodes = new TreeNode[_nodeCapacity];
+            _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
 
             // Build a linked list for the free list.
             // 节点数组初始化
             for (var i = 0; i < _nodeCapacity; ++i)
             {
-                _treeNodes[i] = new TreeNode {Next = i + 1, Height = -1};
+                var node = SimpleObjectPool<TreeNode>.Shared.Get();
+                node.Next = i + 1;
+                node.Height = -1;
+                _treeNodes[i] = node;
             }
 
             // 最后一个节点Next为null
@@ -44,6 +49,25 @@ namespace Box2DSharp.Collision
             _treeNodes[_nodeCapacity - 1].Height = -1;
 
             _freeList = 0;
+        }
+
+        ~DynamicTree()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Disposed = true;
+            var nodes = _treeNodes;
+            _treeNodes = null;
+            SimpleObjectPool<TreeNode>.Shared.Return(nodes);
+            ArrayPool<TreeNode>.Shared.Return(nodes, true);
         }
 
         private int AllocateNode()
@@ -58,14 +82,18 @@ namespace Box2DSharp.Collision
                 var oldNodes = _treeNodes;
                 _nodeCapacity *= 2;
 
-                _treeNodes = new TreeNode[_nodeCapacity];
+                _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
                 Array.Copy(oldNodes, _treeNodes, _nodeCount);
+                ArrayPool<TreeNode>.Shared.Return(oldNodes, true);
 
                 // Build a linked list for the free list. The parent
                 // pointer becomes the "next" pointer.
                 for (var i = _nodeCount; i < _nodeCapacity; ++i)
                 {
-                    _treeNodes[i] = new TreeNode {Next = i + 1, Height = -1};
+                    var node = SimpleObjectPool<TreeNode>.Shared.Get();
+                    node.Next = i + 1;
+                    node.Height = -1;
+                    _treeNodes[i] = node;
                 }
 
                 _treeNodes[_nodeCapacity - 1].Next = NullNode;
@@ -189,7 +217,7 @@ namespace Box2DSharp.Collision
 
         /// Query an AABB for overlapping proxies. The callback class
         /// is called for each proxy that overlaps the supplied AABB.
-        public void Query(InternalQueryCallback callback, in AABB aabb)
+        public void Query(in ITreeQueryCallback callback, in AABB aabb)
         {
             var stack = SimpleObjectPool<Stack<int>>.Shared.Get();
             stack.Push(_root);
@@ -208,7 +236,7 @@ namespace Box2DSharp.Collision
                 {
                     if (node.IsLeaf())
                     {
-                        var proceed = callback(nodeId);
+                        var proceed = callback.QueryCallback(nodeId);
                         if (proceed == false)
                         {
                             return;
@@ -233,7 +261,7 @@ namespace Box2DSharp.Collision
         /// number of proxies in the tree.
         /// @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
         /// @param callback a callback class that is called for each proxy that is hit by the ray.
-        public void RayCast(InternalRayCastCallback inputCallback, in RayCastInput input)
+        public void RayCast(in ITreeRayCastCallback inputCallback, in RayCastInput input)
         {
             var p1 = input.P1;
             var p2 = input.P2;
@@ -295,7 +323,7 @@ namespace Box2DSharp.Collision
                         MaxFraction = maxFraction
                     };
 
-                    var value = inputCallback(ref subInput, nodeId);
+                    var value = inputCallback.RayCastCallback(subInput, nodeId);
 
                     if (value.Equals(0.0f))
                     {
@@ -411,7 +439,7 @@ namespace Box2DSharp.Collision
         /// Build an optimal tree. Very expensive. For testing.
         public void RebuildBottomUp()
         {
-            var nodes = new int[_nodeCount];
+            var nodes = ArrayPool<int>.Shared.Rent(_nodeCount);
             var count = 0;
 
             // Build array of leaves. Free the rest.
@@ -483,6 +511,7 @@ namespace Box2DSharp.Collision
             // b2Free(nodes);
 
             Validate();
+            ArrayPool<int>.Shared.Return(nodes, true);
         }
 
         /// Shift the world origin. Useful for large worlds.

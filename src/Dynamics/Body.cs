@@ -1232,12 +1232,9 @@ namespace Box2DSharp.Dynamics
             {
                 var joint = node.Value;
                 node = node.Next;
-                if (joint.Other == other)
+                if (joint.Other == other && joint.Joint.CollideConnected == false)
                 {
-                    if (joint.Joint.CollideConnected == false)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 

@@ -53,7 +53,7 @@ namespace Box2DSharp.Collision.Shapes
         /// @warning the points may be re-ordered, even if they form a convex polygon
         /// @warning collinear points are handled but not removed. Collinear points
         /// may lead to poor stacking behavior.
-        public void Set(Vector2[] vertices, int count = -1)
+        public unsafe void Set(Vector2[] vertices, int count = -1)
         {
             if (count == -1)
             {
@@ -73,7 +73,7 @@ namespace Box2DSharp.Collision.Shapes
             var n = Math.Min(count, MaxPolygonVertices);
 
             // Perform welding and copy vertices into local buffer.
-            var ps = new Vector2[MaxPolygonVertices];
+            var ps = stackalloc Vector2[MaxPolygonVertices];
 
             var tempCount = 0;
             for (var i = 0; i < n; ++i)
@@ -121,7 +121,7 @@ namespace Box2DSharp.Collision.Shapes
                 }
             }
 
-            var hull = new int[MaxPolygonVertices];
+            var hull = stackalloc int[MaxPolygonVertices];
             var m = 0;
             var ih = i0;
 

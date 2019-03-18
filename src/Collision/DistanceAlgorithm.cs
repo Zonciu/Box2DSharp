@@ -47,17 +47,16 @@ namespace Box2DSharp.Collision
 
             // These store the vertices of the last simplex so that we
             // can check for duplicates and prevent cycling.
-            var saveA = new int[3];
-            var saveB = new int[3];
-            var saveCount = 0;
+            var saveA = stackalloc int[3];
+            var saveB = stackalloc int[3];
 
             // Main iteration loop.
             var iter = 0;
             while (iter < maxIters)
             {
                 // Copy simplex so we can identify duplicates.
-                saveCount = simplex.Count;
-                for (var i = 0; i < saveCount; ++i)
+                var saveCount = simplex.Count;
+                for (var i = 0; i < simplex.Count; ++i)
                 {
                     saveA[i] = vertices.Values[i].IndexA;
                     saveB[i] = vertices.Values[i].IndexB;

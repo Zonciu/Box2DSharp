@@ -46,8 +46,8 @@ namespace Box2DSharp.Dynamics
             Bodies = ArrayPool<Body>.Shared.Rent(bodyCapacity);
             Contacts = ArrayPool<Contact>.Shared.Rent(contactCapacity);
             Joints = ArrayPool<Joint>.Shared.Rent(jointCapacity);
-            Positions = ArrayPool<Position>.Shared.Rent(bodyCapacity);  //new Position[bodyCapacity];
-            Velocities = ArrayPool<Velocity>.Shared.Rent(bodyCapacity); // new Velocity[bodyCapacity];
+            Positions = ArrayPool<Position>.Shared.Rent(bodyCapacity);
+            Velocities = ArrayPool<Velocity>.Shared.Rent(bodyCapacity);
         }
 
         internal void Reset()
@@ -78,7 +78,8 @@ namespace Box2DSharp.Dynamics
         internal void Solve(out Profile profile, in TimeStep step, in Vector2 gravity, bool allowSleep)
         {
             profile = new Profile();
-            var timer = Stopwatch.StartNew();
+            var timer = SimpleObjectPool<Stopwatch>.Shared.Get();
+            timer.Restart();
 
             var h = step.Dt;
 
@@ -271,6 +272,7 @@ namespace Box2DSharp.Dynamics
             }
 
             contactSolver.Reset();
+            SimpleObjectPool<Stopwatch>.Shared.Return(timer);
         }
 
         internal void SolveTOI(in TimeStep subStep, int toiIndexA, int toiIndexB)
@@ -419,7 +421,7 @@ namespace Box2DSharp.Dynamics
             Joints[JointCount++] = joint;
         }
 
-        internal void Report(ContactVelocityConstraint[] constraints)
+        private void Report(ContactVelocityConstraint[] constraints)
         {
             if (ContactListener == null)
             {
@@ -432,12 +434,14 @@ namespace Box2DSharp.Dynamics
 
                 var vc = constraints[i];
 
-                var impulse = ContactImpulse.Create();
-                impulse.Count = vc.PointCount;
-                for (var j = 0; j < vc.PointCount; ++j)
+                var impulse = new ContactImpulse {Count = vc.PointCount};
+                unsafe
                 {
-                    impulse.NormalImpulses[j] = vc.Points[j].NormalImpulse;
-                    impulse.TangentImpulses[j] = vc.Points[j].TangentImpulse;
+                    for (var j = 0; j < vc.PointCount; ++j)
+                    {
+                        impulse.NormalImpulses.Values[j] = vc.Points[j].NormalImpulse;
+                        impulse.TangentImpulses.Values[j] = vc.Points[j].TangentImpulse;
+                    }
                 }
 
                 ContactListener.PostSolve(c, impulse);

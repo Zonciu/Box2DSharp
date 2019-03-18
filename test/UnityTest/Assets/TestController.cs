@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Box2DSharp.Dynamics;
 using Box2DSharp.Inspection;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using MathUtils = Box2DSharp.Common.MathUtils;
 
 namespace Box2DSharp
 {
@@ -175,7 +171,6 @@ namespace Box2DSharp
         private void OnTestSelect(int i)
         {
             var test = _testTypes[i];
-            Debug.Log($"Select {test.TestName} Test");
             SetTest(test.TestType);
         }
 

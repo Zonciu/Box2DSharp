@@ -68,10 +68,11 @@ namespace Box2DSharp.Collision
         /// non-tunneling collisions. If you change the time interval, you should call this function
         /// again.
         /// Note: use b2Distance to compute the contact point and normal at the time of impact.
-        public static void ComputeTimeOfImpact(
-            out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
+        public static void ComputeTimeOfImpact(out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
         {
-            var timer = Stopwatch.StartNew();
+            var timer = SimpleObjectPool<Stopwatch>.Shared.Get();
+            timer.Restart();
+
             output = new ToiOutput();
 
             if (toiProfile != null)
@@ -144,13 +145,7 @@ namespace Box2DSharp.Collision
 
                 // Initialize the separating axis.
                 var fcn = new SeparationFunction();
-                fcn.Initialize(
-                    ref cache,
-                    proxyA,
-                    sweepA,
-                    proxyB,
-                    sweepB,
-                    t1);
+                fcn.Initialize(ref cache, proxyA, sweepA, proxyB, sweepB, t1);
 
                 // Compute the TOI on the separating axis. We do this by successively
                 // resolving the deepest point. This loop is bounded by the number of vertices.

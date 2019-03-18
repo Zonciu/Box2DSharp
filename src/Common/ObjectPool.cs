@@ -1,5 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Box2DSharp.Common
 {
@@ -20,11 +24,13 @@ namespace Box2DSharp.Common
             _maximumRetained = maximumRetained;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get()
         {
             return _objects.TryTake(out var item) ? item : _create();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(T item)
         {
             if (_destroy(item) && _objects.Count < _maximumRetained)
@@ -57,16 +63,30 @@ namespace Box2DSharp.Common
             _maximumRetained = maximumRetained;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get()
         {
             return _objects.TryTake(out var item) ? item : _create();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(T item)
         {
             if (_objects.Count < _maximumRetained && (_destroy == null || _destroy.Invoke(item)))
             {
                 _objects.Add(item);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Return(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                if (_objects.Count < _maximumRetained && (_destroy == null || _destroy.Invoke(item)))
+                {
+                    _objects.Add(item);
+                }
             }
         }
     }

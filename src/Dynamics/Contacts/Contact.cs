@@ -125,11 +125,17 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Is this contact touching?
-        public bool IsTouching => HasFlag(ContactFlag.TouchingFlag);
+
+        public bool IsTouching
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => HasFlag(ContactFlag.TouchingFlag);
+        }
 
         /// Enable/disable this contact. This can be used inside the pre-solve
         /// contact listener. The contact is only disabled for the current
         /// time step (or sub-step in continuous collisions).
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetEnabled(bool flag)
         {
             if (flag)
@@ -143,7 +149,11 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Has this contact been disabled?
-        public bool IsEnabled => HasFlag(ContactFlag.EnabledFlag);
+        public bool IsEnabled
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => HasFlag(ContactFlag.EnabledFlag);
+        }
 
         /// Override the default friction mixture. You can call this in b2ContactListener::PreSolve.
         /// This value persists until set or reset.
@@ -196,9 +206,11 @@ namespace Box2DSharp.Dynamics.Contacts
         }
 
         /// Evaluate this contact with your own manifold and transforms.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal abstract void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB);
 
         /// Flag this contact for filtering. Filtering will occur the next time step.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void FlagForFiltering()
         {
             Flags |= ContactFlag.FilterFlag;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -5,13 +6,10 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Contacts;
+using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Dynamics
 {
-    //internal delegate Contact CreateContact(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB, IObjectPool objectPool);
-
-    //internal delegate void DestroyContact(Contact contact, IObjectPool objectPool);
-
     internal class ContactRegister
     {
         public readonly IContactFactory Factory;
@@ -27,7 +25,7 @@ namespace Box2DSharp.Dynamics
     }
 
     // Delegate of b2World.
-    public class ContactManager
+    public class ContactManager : IAddPairCallback, IDisposable
     {
         public static readonly IContactFilter DefaultContactFilter = new DefaultContactFilter();
 
@@ -39,9 +37,9 @@ namespace Box2DSharp.Dynamics
 
         public IContactListener ContactListener;
 
-        private readonly ContactRegister[,] _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
+        private static readonly ContactRegister[,] _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
 
-        public ContactManager()
+        static ContactManager()
         {
             Register(ShapeType.Circle, ShapeType.Circle, new CircleContactFactory());
             Register(ShapeType.Polygon, ShapeType.Circle, new PolygonAndCircleContactFactory());
@@ -62,6 +60,19 @@ namespace Box2DSharp.Dynamics
                     _registers[(int) type2, (int) type1] = new ContactRegister(factory, false);
                 }
             }
+        }
+
+        public bool Disposed { get; private set; }
+
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+
+            Disposed = true;
+            BroadPhase.Dispose();
         }
 
         private Contact CreateContact(
@@ -105,7 +116,7 @@ namespace Box2DSharp.Dynamics
             reg.Factory.Destroy(contact);
         }
 
-        public void AddPair(object proxyUserDataA, object proxyUserDataB)
+        public void AddPairCallback(object proxyUserDataA, object proxyUserDataB)
         {
             var proxyA = (FixtureProxy) proxyUserDataA;
             var proxyB = (FixtureProxy) proxyUserDataB;
@@ -193,7 +204,7 @@ namespace Box2DSharp.Dynamics
 
         public void FindNewContacts()
         {
-            BroadPhase.UpdatePairs(AddPair);
+            BroadPhase.UpdatePairs(this);
         }
 
         public void Destroy(Contact c)
