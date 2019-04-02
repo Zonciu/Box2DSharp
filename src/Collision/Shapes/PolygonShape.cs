@@ -217,6 +217,7 @@ namespace Box2DSharp.Collision.Shapes
         public void SetAsBox(float hx, float hy, in Vector2 center, float angle)
         {
             SetAsBox(hx, hy);
+            Centroid = center;
             var transform = new Transform(in center, angle);
 
             // Transform vertices and normals.
