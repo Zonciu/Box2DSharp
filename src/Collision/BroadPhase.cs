@@ -45,11 +45,6 @@ namespace Box2DSharp.Collision
             _moveBuffer = ArrayPool<int>.Shared.Rent(_moveCapacity);
         }
 
-        ~BroadPhase()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             if (Disposed)

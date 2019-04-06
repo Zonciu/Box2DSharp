@@ -173,11 +173,6 @@ namespace Box2DSharp.Dynamics
             Profile = new Profile();
         }
 
-        ~World()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             if (Disposed)

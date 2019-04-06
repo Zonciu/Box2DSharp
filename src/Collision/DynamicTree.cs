@@ -51,11 +51,6 @@ namespace Box2DSharp.Collision
             _freeList = 0;
         }
 
-        ~DynamicTree()
-        {
-            Dispose();
-        }
-
         public void Dispose()
         {
             if (Disposed)

@@ -298,11 +298,6 @@ namespace Box2DSharp.Dynamics
             UserData = def.UserData;
         }
 
-        ~Body()
-        {
-            Dispose();
-        }
-
         public float AngularDamping
         {
             get => _angularDamping;
