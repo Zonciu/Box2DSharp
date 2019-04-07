@@ -3,6 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
@@ -23,8 +25,6 @@ namespace Box2DSharp.Collision
         private int _root;
 
         private TreeNode[] _treeNodes;
-
-        public bool Disposed { get; private set; }
 
         public DynamicTree()
         {
@@ -51,17 +51,22 @@ namespace Box2DSharp.Collision
             _freeList = 0;
         }
 
+        private const int DisposedFalse = 0;
+
+        private const int DisposedTrue = 1;
+
+        private int _disposed = DisposedFalse;
+
         public void Dispose()
         {
-            if (Disposed)
+            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
             {
                 return;
             }
 
-            Disposed = true;
             var nodes = _treeNodes;
             _treeNodes = null;
-            SimpleObjectPool<TreeNode>.Shared.Return(nodes);
+            SimpleObjectPool<TreeNode>.Shared.Return(nodes, true);
             ArrayPool<TreeNode>.Shared.Return(nodes, true);
         }
 
@@ -954,7 +959,7 @@ namespace Box2DSharp.Collision
         }
     }
 
-    public class TreeNode
+    public class TreeNode : IDisposable
     {
         /// Enlarged AABB
         public AABB AABB;
@@ -981,6 +986,17 @@ namespace Box2DSharp.Collision
         public bool IsLeaf()
         {
             return Child1 == DynamicTree.NullNode;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            AABB = default;
+            Child1 = default;
+            Child2 = default;
+            Height = default;
+            UserData = default;
+            Parent = default;
         }
     }
 }

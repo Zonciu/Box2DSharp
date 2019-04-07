@@ -64,8 +64,8 @@ namespace Box2DSharp.Dynamics.Contacts
             FixtureA = fixtureA;
             FixtureB = fixtureB;
 
-            NodeA = SimpleObjectPool<ContactEdge>.Shared.Get();
-            NodeB = SimpleObjectPool<ContactEdge>.Shared.Get();
+            NodeA = ContactEdge.Pool.Get();
+            NodeB = ContactEdge.Pool.Get();
 
             ChildIndexA = indexA;
             ChildIndexB = indexB;
@@ -88,8 +88,8 @@ namespace Box2DSharp.Dynamics.Contacts
             ChildIndexB = default;
             Manifold = default;
             Node = default;
-            SimpleObjectPool<ContactEdge>.Shared.Return(NodeA);
-            SimpleObjectPool<ContactEdge>.Shared.Return(NodeB);
+            ContactEdge.Pool.Return(NodeA);
+            ContactEdge.Pool.Return(NodeB);
             NodeA = default;
             NodeB = default;
             Restitution = default;

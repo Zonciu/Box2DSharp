@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
@@ -17,11 +18,14 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public LinkedListNode<ContactEdge> Node;
 
-        //
-        // /// the previous contact edge in the body's contact list
-        // public b2ContactEdge prev;
-        //
-        // /// the next contact edge in the body's contact list
-        // public b2ContactEdge next;
+        internal static readonly ObjectPool<ContactEdge> Pool = new ObjectPool<ContactEdge>(
+            () => new ContactEdge(),
+            c =>
+            {
+                c.Other = default;
+                c.Contact = default;
+                c.Node = default;
+                return true;
+            });
     }
 }

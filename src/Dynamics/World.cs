@@ -1,9 +1,9 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using System.Threading;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Collision.Shapes;
@@ -119,17 +119,17 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 接触点管理器
         /// </summary>
-        public ContactManager ContactManager { get; } = new ContactManager();
+        public ContactManager ContactManager { get; private set; } = new ContactManager();
 
         /// <summary>
         /// 物体链表
         /// </summary>
-        public LinkedList<Body> BodyList { get; } = new LinkedList<Body>();
+        public LinkedList<Body> BodyList { get; private set; } = new LinkedList<Body>();
 
         /// <summary>
         /// 关节链表
         /// </summary>
-        public LinkedList<Joint> JointList { get; } = new LinkedList<Joint>();
+        public LinkedList<Joint> JointList { get; private set; } = new LinkedList<Joint>();
 
         /// Get the number of broad-phase proxies.
         public int ProxyCount => ContactManager.BroadPhase.GetProxyCount();
@@ -153,8 +153,6 @@ namespace Box2DSharp.Dynamics
         /// The minimum is 1.
         public float TreeQuality => ContactManager.BroadPhase.GetTreeQuality();
 
-        public bool Disposed { get; private set; }
-
         public World() : this(new Vector2(0, -10))
         { }
 
@@ -173,15 +171,39 @@ namespace Box2DSharp.Dynamics
             Profile = new Profile();
         }
 
+        ~World()
+        {
+            Dispose();
+        }
+
+        private const int DisposedFalse = 0;
+
+        private const int DisposedTrue = 1;
+
+        private int _disposed = DisposedFalse;
+
         public void Dispose()
         {
-            if (Disposed)
+            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
             {
                 return;
             }
 
-            Disposed = true;
-            ContactManager.Dispose();
+            var bodyNode = BodyList.First;
+            while (bodyNode != default)
+            {
+                var body = bodyNode.Value;
+                bodyNode = bodyNode.Next;
+                DestroyBody(body);
+            }
+
+            Debug.Assert(BodyList.Count == 0, "BodyList.Count == 0");
+            Debug.Assert(JointList.Count == 0, "JointList.Count == 0");
+            Debug.Assert(ContactManager.ContactCount == 0, "ContactManager.Count == 0");
+            BodyList = null;
+            JointList = null;
+            ContactManager?.Dispose();
+            ContactManager = null;
         }
 
         internal void NotifyNewFixture()
@@ -357,6 +379,7 @@ namespace Box2DSharp.Dynamics
         public void DestroyJoint(Joint joint)
         {
             Debug.Assert(IsLocked == false);
+            Debug.Assert(JointList.Count > 0);
             if (IsLocked)
             {
                 return;
@@ -371,13 +394,15 @@ namespace Box2DSharp.Dynamics
             // Wake up connected bodies.
             var bodyA = joint.BodyA;
             bodyA.IsAwake = true;
+            Debug.Assert(bodyA.JointEdges.Count > 0);
             bodyA.JointEdges.Remove(joint.EdgeA.Node);
+            joint.EdgeA.Dispose();
 
             var bodyB = joint.BodyB;
             bodyB.IsAwake = true;
+            Debug.Assert(bodyB.JointEdges.Count > 0);
             bodyB.JointEdges.Remove(joint.EdgeB.Node);
-
-            Debug.Assert(JointList.Count > 0);
+            joint.EdgeB.Dispose();
 
             // If the joint prevents collisions, then flag any contacts for filtering.
             if (collideConnected == false)
@@ -512,7 +537,7 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        private class TreeQueryCallback : ITreeQueryCallback
+        private class TreeQueryCallback : ITreeQueryCallback, IDisposable
         {
             public ContactManager ContactManager { get; private set; }
 
@@ -524,7 +549,7 @@ namespace Box2DSharp.Dynamics
                 Callback = callback;
             }
 
-            public void Reset()
+            public void Dispose()
             {
                 ContactManager = default;
                 Callback = default;
@@ -548,11 +573,10 @@ namespace Box2DSharp.Dynamics
             var cb = SimpleObjectPool<TreeQueryCallback>.Shared.Get();
             cb.Set(ContactManager, in callback);
             ContactManager.BroadPhase.Query(cb, aabb);
-            cb.Reset();
-            SimpleObjectPool<TreeQueryCallback>.Shared.Return(cb);
+            SimpleObjectPool<TreeQueryCallback>.Shared.Return(cb, true);
         }
 
-        private class InternalRayCastCallback : ITreeRayCastCallback
+        private class InternalRayCastCallback : ITreeRayCastCallback, IDisposable
         {
             public ContactManager ContactManager { get; private set; }
 
@@ -564,7 +588,7 @@ namespace Box2DSharp.Dynamics
                 Callback = callback;
             }
 
-            public void Reset()
+            public void Dispose()
             {
                 ContactManager = default;
                 Callback = default;
@@ -606,8 +630,7 @@ namespace Box2DSharp.Dynamics
             var cb = SimpleObjectPool<InternalRayCastCallback>.Shared.Get();
             cb.Set(ContactManager, in callback);
             ContactManager.BroadPhase.RayCast(cb, input);
-            cb.Reset();
-            SimpleObjectPool<InternalRayCastCallback>.Shared.Return(cb);
+            SimpleObjectPool<InternalRayCastCallback>.Shared.Return(cb, true);
         }
 
         /// Shift the world origin. Useful for large worlds.

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Numerics;
+using System.Threading;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
@@ -12,7 +13,7 @@ namespace Box2DSharp.Collision
     {
         public const int NullProxy = -1;
 
-        private readonly DynamicTree _tree;
+        private DynamicTree _tree;
 
         private int _proxyCount;
 
@@ -30,8 +31,6 @@ namespace Box2DSharp.Collision
 
         private int _queryProxyId;
 
-        public bool Disposed { get; private set; }
-
         /// <inheritdoc />
         public BroadPhase()
         {
@@ -45,20 +44,28 @@ namespace Box2DSharp.Collision
             _moveBuffer = ArrayPool<int>.Shared.Rent(_moveCapacity);
         }
 
+        private const int DisposedFalse = 0;
+
+        private const int DisposedTrue = 1;
+
+        private int _disposed = DisposedFalse;
+
         public void Dispose()
         {
-            if (Disposed)
+            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
             {
                 return;
             }
 
-            Disposed = true;
             var buffer = _pairBuffer;
             _pairBuffer = null;
             ArrayPool<Pair>.Shared.Return(buffer, true);
             var moveBuffer = _moveBuffer;
             _moveBuffer = null;
             ArrayPool<int>.Shared.Return(moveBuffer, true);
+
+            _tree?.Dispose();
+            _tree = null;
         }
 
         /// Create a proxy with an initial AABB. Pairs are not reported until

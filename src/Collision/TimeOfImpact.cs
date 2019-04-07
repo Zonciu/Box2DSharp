@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Timers;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
@@ -70,8 +71,8 @@ namespace Box2DSharp.Collision
         /// Note: use b2Distance to compute the contact point and normal at the time of impact.
         public static void ComputeTimeOfImpact(out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
         {
-            var timer = SimpleObjectPool<Stopwatch>.Shared.Get();
-            timer.Restart();
+            var timer = toiProfile == null ? null : SimpleObjectPool<Stopwatch>.Shared.Get();
+            timer?.Restart();
 
             output = new ToiOutput();
 
@@ -283,12 +284,13 @@ namespace Box2DSharp.Collision
                 }
             }
 
-            timer.Stop();
-            float time = timer.ElapsedMilliseconds;
-            if (toiProfile == null)
+            if (timer == null)
             {
                 return;
             }
+
+            timer.Stop();
+            float time = timer.ElapsedMilliseconds;
 
             toiProfile.ToiMaxIters = Math.Max(toiProfile.ToiMaxIters, iter);
             toiProfile.ToiMaxTime = Math.Max(toiProfile.ToiMaxTime, time);

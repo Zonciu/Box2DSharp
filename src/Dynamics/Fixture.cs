@@ -1,3 +1,6 @@
+using System;
+using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision;
@@ -12,14 +15,8 @@ namespace Box2DSharp.Dynamics
     /// such as friction, collision filters, etc.
     /// Fixtures are created via b2Body::CreateFixture.
     /// @warning you cannot reuse fixtures.
-    public class Fixture
+    public class Fixture : IDisposable
     {
-        private float _density;
-
-        private Filter _filter;
-
-        private bool _isSensor;
-
         /// <summary>
         /// the coefficient of restitution. This will _not_ change the restitution of existing contacts.
         /// </summary>
@@ -42,6 +39,8 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private float _density;
+
         /// Get the child shape. You can modify the child shape, however you should not change the
         /// number of vertices because this will crash some collision caching mechanisms.
         /// Manipulating the shape may lead to non-physical behavior.
@@ -57,6 +56,8 @@ namespace Box2DSharp.Dynamics
                 Refilter();
             }
         }
+
+        private Filter _filter;
 
         /// <summary>
         /// the coefficient of friction. This will _not_ change the friction of existing contacts.
@@ -76,9 +77,11 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private bool _isSensor;
+
         public FixtureProxy[] Proxies { get; private set; }
 
-        public int ProxyCount { get; private set; }
+        public int ProxyCount { get; internal set; }
 
         public Shape Shape { get; private set; }
 
@@ -91,28 +94,46 @@ namespace Box2DSharp.Dynamics
         /// @return the shape type.
         public ShapeType ShapeType => Shape.ShapeType;
 
+        private static readonly ObjectPool<Fixture> _pool = new ObjectPool<Fixture>(
+            () => new Fixture(),
+            fixture =>
+            {
+                fixture.Density = default;
+                fixture.Filter = default;
+                fixture.IsSensor = default;
+                fixture.Friction = default;
+                fixture.Restitution = default;
+                fixture.Body = default;
+                fixture.Shape = default;
+                fixture.UserData = default;
+
+                fixture.ProxyCount = default;
+                var proxies = fixture.Proxies;
+                fixture.Proxies = default;
+                ArrayPool<FixtureProxy>.Shared.Return(proxies, true);
+
+                return true;
+            });
+
         /// We need separation create/destroy functions from the constructor/destructor because
         /// the destructor cannot access the allocator (no destructor arguments allowed by C++).
         internal static Fixture Create(Body body, in FixtureDef def)
         {
             var childCount = def.Shape.GetChildCount();
 
-            var fixture = new Fixture
-            {
-                UserData = def.UserData,
-                Friction = def.Friction,
-                Restitution = def.Restitution,
-                Body = body,
-                Filter = def.Filter,
-                IsSensor = def.IsSensor,
-                Shape = def.Shape.Clone(),
-                ProxyCount = 0,
-                Density = def.Density,
-                Proxies = new FixtureProxy[childCount]
-            };
+            var fixture = _pool.Get();
+            fixture.UserData = def.UserData;
+            fixture.Friction = def.Friction;
+            fixture.Restitution = def.Restitution;
+            fixture.Body = body;
+            fixture.Filter = def.Filter;
+            fixture.IsSensor = def.IsSensor;
+            fixture.Shape = def.Shape.Clone();
+            fixture.ProxyCount = 0;
+            fixture.Density = def.Density;
+            fixture.Proxies = ArrayPool<FixtureProxy>.Shared.Rent(childCount);
 
             // Reserve proxy space
-
             for (var i = 0; i < childCount; ++i)
             {
                 fixture.Proxies[i] = new FixtureProxy();
@@ -125,7 +146,7 @@ namespace Box2DSharp.Dynamics
         {
             // The proxies must be destroyed before calling this.
             Debug.Assert(fixture.ProxyCount == 0);
-            fixture.Proxies = null;
+            _pool.Return(fixture);
         }
 
         // These support body activation/deactivation.
@@ -327,6 +348,12 @@ namespace Box2DSharp.Dynamics
 
                 broadPhase.MoveProxy(proxy.ProxyId, proxy.AABB, displacement);
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Body = null;
         }
     }
 

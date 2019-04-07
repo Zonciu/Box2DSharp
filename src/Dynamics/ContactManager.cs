@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
@@ -29,13 +30,15 @@ namespace Box2DSharp.Dynamics
     {
         public static readonly IContactFilter DefaultContactFilter = new DefaultContactFilter();
 
-        public readonly BroadPhase BroadPhase = new BroadPhase();
+        public BroadPhase BroadPhase { get; private set; } = new BroadPhase();
 
         public IContactFilter ContactFilter = DefaultContactFilter;
 
-        public readonly LinkedList<Contact> ContactList = new LinkedList<Contact>();
+        public LinkedList<Contact> ContactList { get; private set; } = new LinkedList<Contact>();
 
         public IContactListener ContactListener;
+
+        public int ContactCount => ContactList.Count;
 
         private static readonly ContactRegister[,] _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
 
@@ -62,17 +65,26 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        public bool Disposed { get; private set; }
+        private const int DisposedFalse = 0;
+
+        private const int DisposedTrue = 1;
+
+        private int _disposed = DisposedFalse;
 
         public void Dispose()
         {
-            if (Disposed)
+            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
             {
                 return;
             }
 
-            Disposed = true;
-            BroadPhase.Dispose();
+            BroadPhase?.Dispose();
+            BroadPhase = null;
+            ContactList?.Clear();
+            ContactList = null;
+
+            ContactFilter = null;
+            ContactListener = null;
         }
 
         private Contact CreateContact(
@@ -209,6 +221,7 @@ namespace Box2DSharp.Dynamics
 
         public void Destroy(Contact c)
         {
+            Debug.Assert(ContactCount > 0);
             var fixtureA = c.FixtureA;
             var fixtureB = c.FixtureB;
             var bodyA = fixtureA.Body;

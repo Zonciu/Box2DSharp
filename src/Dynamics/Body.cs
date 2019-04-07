@@ -116,17 +116,17 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 接触边缘列表
         /// </summary>
-        internal readonly LinkedList<ContactEdge> ContactEdges;
+        internal LinkedList<ContactEdge> ContactEdges { get; private set; }
 
         /// <summary>
         /// 夹具列表
         /// </summary>
-        internal readonly List<Fixture> Fixtures;
+        internal List<Fixture> Fixtures { get; private set; }
 
         /// <summary>
         /// 关节边缘列表
         /// </summary>
-        internal readonly LinkedList<JointEdge> JointEdges;
+        internal LinkedList<JointEdge> JointEdges { get; private set; }
 
         /// <summary>
         /// Get/Set the angular damping of the body.
@@ -576,9 +576,18 @@ namespace Box2DSharp.Dynamics
         /// <inheritdoc />
         public void Dispose()
         {
-            ContactEdges.Clear();
-            JointEdges.Clear();
-            Fixtures.Clear();
+            _world = null;
+            Debug.Assert(ContactEdges.Count == 0, "ContactEdges.Count == 0");
+            Debug.Assert(JointEdges.Count == 0, "JointEdges.Count == 0");
+            ContactEdges?.Clear();
+            ContactEdges = null;
+
+            JointEdges?.Clear();
+            JointEdges = null;
+
+            Fixtures?.Clear();
+            Fixtures = null;
+            GC.SuppressFinalize(this);
         }
 
         public void SetAngularVelocity(float value)

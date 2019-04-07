@@ -272,6 +272,7 @@ namespace Box2DSharp.Dynamics
             }
 
             contactSolver.Reset();
+            timer.Reset();
             SimpleObjectPool<Stopwatch>.Shared.Return(timer);
         }
 

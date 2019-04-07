@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Xml.XPath;
 using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Joints
@@ -49,7 +50,7 @@ namespace Box2DSharp.Dynamics.Joints
     /// is an edge. A joint edge belongs to a doubly linked list
     /// maintained in each attached body. Each joint has two joint
     /// nodes, one for each attached body.
-    public struct JointEdge
+    public struct JointEdge : IDisposable
     {
         /// provides quick access to the other body attached.
         public Body Other;
@@ -58,10 +59,18 @@ namespace Box2DSharp.Dynamics.Joints
         public Joint Joint;
 
         public LinkedListNode<JointEdge> Node;
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Other = null;
+            Joint = null;
+            Node = null;
+        }
     }
 
     /// Joint definitions are used to construct joints.
-    public class JointDef
+    public class JointDef : IDisposable
     {
         /// The first attached body.
         public Body BodyA;
@@ -77,6 +86,14 @@ namespace Box2DSharp.Dynamics.Joints
 
         /// Use this to attach application specific data to your joints.
         public object UserData;
+
+        /// <inheritdoc />
+        public virtual void Dispose()
+        {
+            BodyA = null;
+            BodyB = null;
+            UserData = null;
+        }
     }
 
     public abstract class Joint
