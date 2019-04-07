@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Box2DSharp.Common
 
         public ObjectPool(Func<T> create, Func<T, bool> destroy, int maximumRetained = 1024)
         {
-            _create = create;
+            _create = create ?? throw new NullReferenceException(nameof(create));
             _destroy = destroy;
             _maximumRetained = maximumRetained;
         }
@@ -55,36 +56,62 @@ namespace Box2DSharp.Common
 
         public SimpleObjectPool(Func<T> create, Func<T, bool> destroy, int maximumRetained = 1024)
         {
-            _create = create;
-            if (_create == null)
-            { }
-
+            _create = create ?? throw new NullReferenceException(nameof(create));
             _destroy = destroy;
+            if (maximumRetained < 0)
+            {
+                throw new InvalidOperationException("maximumRetained must be greater than 0");
+            }
+
             _maximumRetained = maximumRetained;
         }
 
+        /// <summary>
+        /// Rent a object
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get()
         {
             return _objects.TryTake(out var item) ? item : _create();
         }
 
+        /// <summary>
+        /// Return object, call <see cref="IDisposable.Dispose"/> if "dispose" is true
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="dispose">Call Dispose if "dispose == true" and item implements IDisposable</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(T item)
+        public void Return(T item, bool dispose = false)
         {
             if (_objects.Count < _maximumRetained && (_destroy == null || _destroy.Invoke(item)))
             {
+                if (dispose && item is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+
                 _objects.Add(item);
             }
         }
 
+        /// <summary>
+        /// Return objects, call <see cref="IDisposable.Dispose"/> if <see cref="dispose"/> is true
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="dispose">Call Dispose if "<see cref="dispose"/> == true" and item implements <see cref="IDisposable"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Return(IEnumerable<T> items)
+        public void Return(IEnumerable<T> items, bool dispose = false)
         {
             foreach (var item in items)
             {
                 if (_objects.Count < _maximumRetained && (_destroy == null || _destroy.Invoke(item)))
                 {
+                    if (dispose && item is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+
                     _objects.Add(item);
                 }
             }
