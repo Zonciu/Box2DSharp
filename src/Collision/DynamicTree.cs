@@ -1,8 +1,10 @@
 using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Box2DSharp.Collision.Collider;
@@ -12,7 +14,7 @@ using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Collision
 {
-    public class DynamicTree : IDisposable
+    public class DynamicTree
     {
         public const int NullNode = -1;
 
@@ -32,16 +34,13 @@ namespace Box2DSharp.Collision
 
             _nodeCapacity = 16;
             _nodeCount = 0;
-            _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
+            _treeNodes = new TreeNode[_nodeCapacity];
 
             // Build a linked list for the free list.
             // 节点数组初始化
             for (var i = 0; i < _nodeCapacity; ++i)
             {
-                var node = SimpleObjectPool<TreeNode>.Shared.Get();
-                node.Next = i + 1;
-                node.Height = -1;
-                _treeNodes[i] = node;
+                _treeNodes[i] = new TreeNode {Next = i + 1, Height = -1};
             }
 
             // 最后一个节点Next为null
@@ -49,25 +48,6 @@ namespace Box2DSharp.Collision
             _treeNodes[_nodeCapacity - 1].Height = -1;
 
             _freeList = 0;
-        }
-
-        private const int DisposedFalse = 0;
-
-        private const int DisposedTrue = 1;
-
-        private int _disposed = DisposedFalse;
-
-        public void Dispose()
-        {
-            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
-            {
-                return;
-            }
-
-            var nodes = _treeNodes;
-            _treeNodes = null;
-            SimpleObjectPool<TreeNode>.Shared.Return(nodes, true);
-            ArrayPool<TreeNode>.Shared.Return(nodes, true);
         }
 
         private int AllocateNode()
@@ -82,18 +62,15 @@ namespace Box2DSharp.Collision
                 var oldNodes = _treeNodes;
                 _nodeCapacity *= 2;
 
-                _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
+                _treeNodes = new TreeNode[_nodeCapacity];
                 Array.Copy(oldNodes, _treeNodes, _nodeCount);
-                ArrayPool<TreeNode>.Shared.Return(oldNodes, true);
+                Array.Clear(oldNodes, 0, oldNodes.Length);
 
                 // Build a linked list for the free list. The parent
                 // pointer becomes the "next" pointer.
                 for (var i = _nodeCount; i < _nodeCapacity; ++i)
                 {
-                    var node = SimpleObjectPool<TreeNode>.Shared.Get();
-                    node.Next = i + 1;
-                    node.Height = -1;
-                    _treeNodes[i] = node;
+                    _treeNodes[i] = new TreeNode {Next = i + 1, Height = -1};
                 }
 
                 _treeNodes[_nodeCapacity - 1].Next = NullNode;
@@ -117,8 +94,10 @@ namespace Box2DSharp.Collision
         {
             Debug.Assert(0 <= nodeId && nodeId < _nodeCapacity);
             Debug.Assert(0 < _nodeCount);
-            _treeNodes[nodeId].Next = _freeList;
-            _treeNodes[nodeId].Height = -1;
+            var freeNode = _treeNodes[nodeId];
+            freeNode.Reset();
+            freeNode.Next = _freeList;
+            freeNode.Height = -1;
             _freeList = nodeId;
             --_nodeCount;
         }
@@ -439,7 +418,7 @@ namespace Box2DSharp.Collision
         /// Build an optimal tree. Very expensive. For testing.
         public void RebuildBottomUp()
         {
-            var nodes = ArrayPool<int>.Shared.Rent(_nodeCount);
+            var nodes = new int[_nodeCount];
             var count = 0;
 
             // Build array of leaves. Free the rest.
@@ -507,11 +486,7 @@ namespace Box2DSharp.Collision
             }
 
             _root = nodes[0];
-
-            // b2Free(nodes);
-
             Validate();
-            ArrayPool<int>.Shared.Return(nodes, true);
         }
 
         /// Shift the world origin. Useful for large worlds.
@@ -959,7 +934,7 @@ namespace Box2DSharp.Collision
         }
     }
 
-    public class TreeNode : IDisposable
+    public class TreeNode
     {
         /// Enlarged AABB
         public AABB AABB;
@@ -988,8 +963,8 @@ namespace Box2DSharp.Collision
             return Child1 == DynamicTree.NullNode;
         }
 
-        /// <inheritdoc />
-        public void Dispose()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Reset()
         {
             AABB = default;
             Child1 = default;

@@ -71,9 +71,7 @@ namespace Box2DSharp.Collision
         /// Note: use b2Distance to compute the contact point and normal at the time of impact.
         public static void ComputeTimeOfImpact(out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
         {
-            var timer = toiProfile == null ? null : SimpleObjectPool<Stopwatch>.Shared.Get();
-            timer?.Restart();
-
+            var timer = toiProfile == null ? null : Stopwatch.StartNew();
             output = new ToiOutput();
 
             if (toiProfile != null)

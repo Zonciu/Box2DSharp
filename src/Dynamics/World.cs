@@ -110,7 +110,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 性能统计
         /// </summary>
-        public Profile Profile;
+        public Profile Profile { get; private set; }
 
         public ToiProfile ToiProfile { get; set; } = null;
 
@@ -189,21 +189,19 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            var bodyNode = BodyList.First;
-            while (bodyNode != default)
-            {
-                var body = bodyNode.Value;
-                bodyNode = bodyNode.Next;
-                DestroyBody(body);
-            }
-
-            Debug.Assert(BodyList.Count == 0, "BodyList.Count == 0");
-            Debug.Assert(JointList.Count == 0, "JointList.Count == 0");
-            Debug.Assert(ContactManager.ContactCount == 0, "ContactManager.Count == 0");
+            BodyList?.Clear();
             BodyList = null;
+            JointList?.Clear();
             JointList = null;
             ContactManager?.Dispose();
             ContactManager = null;
+
+            DestructionListener = null;
+            Drawer = null;
+
+            Profile = null;
+            ToiProfile = null;
+            GJkProfile = null;
         }
 
         internal void NotifyNewFixture()

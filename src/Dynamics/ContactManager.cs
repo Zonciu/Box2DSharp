@@ -78,7 +78,6 @@ namespace Box2DSharp.Dynamics
                 return;
             }
 
-            BroadPhase?.Dispose();
             BroadPhase = null;
             ContactList?.Clear();
             ContactList = null;

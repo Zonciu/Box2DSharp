@@ -9,7 +9,7 @@ using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Collision
 {
-    public class BroadPhase : ITreeQueryCallback, IDisposable
+    public class BroadPhase : ITreeQueryCallback
     {
         public const int NullProxy = -1;
 
@@ -38,34 +38,15 @@ namespace Box2DSharp.Collision
             _tree = new DynamicTree();
             _pairCapacity = 16;
             _pairCount = 0;
-            _pairBuffer = ArrayPool<Pair>.Shared.Rent(_pairCapacity);
-            _moveCapacity = 16;
-            _moveCount = 0;
-            _moveBuffer = ArrayPool<int>.Shared.Rent(_moveCapacity);
-        }
-
-        private const int DisposedFalse = 0;
-
-        private const int DisposedTrue = 1;
-
-        private int _disposed = DisposedFalse;
-
-        public void Dispose()
-        {
-            if (Interlocked.Exchange(ref _disposed, DisposedTrue) == DisposedTrue)
+            _pairBuffer = new Pair[_pairCapacity];
+            for (var i = 0; i < _pairBuffer.Length; i++)
             {
-                return;
+                _pairBuffer[i] = new Pair();
             }
 
-            var buffer = _pairBuffer;
-            _pairBuffer = null;
-            ArrayPool<Pair>.Shared.Return(buffer, true);
-            var moveBuffer = _moveBuffer;
-            _moveBuffer = null;
-            ArrayPool<int>.Shared.Return(moveBuffer, true);
-
-            _tree?.Dispose();
-            _tree = null;
+            _moveCapacity = 16;
+            _moveCount = 0;
+            _moveBuffer = new int[_moveCapacity];
         }
 
         /// Create a proxy with an initial AABB. Pairs are not reported until
@@ -235,9 +216,8 @@ namespace Box2DSharp.Collision
             {
                 var oldBuffer = _moveBuffer;
                 _moveCapacity *= 2;
-                _moveBuffer = ArrayPool<int>.Shared.Rent(_moveCapacity);
+                _moveBuffer = new int[_moveCapacity];
                 Array.Copy(oldBuffer, _moveBuffer, _moveCount);
-                ArrayPool<int>.Shared.Return(oldBuffer, true);
             }
 
             _moveBuffer[_moveCount] = proxyId;
@@ -268,9 +248,14 @@ namespace Box2DSharp.Collision
             {
                 var oldBuffer = _pairBuffer;
                 _pairCapacity *= 2;
-                _pairBuffer = ArrayPool<Pair>.Shared.Rent(_pairCapacity);
+                _pairBuffer = new Pair[_pairCapacity];
                 Array.Copy(oldBuffer, _pairBuffer, _pairCount);
-                ArrayPool<Pair>.Shared.Return(oldBuffer, true);
+                for (var i = _pairCount; i < _pairCapacity; i++)
+                {
+                    _pairBuffer[i] = new Pair();
+                }
+
+                Array.Clear(oldBuffer, 0, oldBuffer.Length);
             }
 
             _pairBuffer[_pairCount].ProxyIdA = Math.Min(proxyId, _queryProxyId);
@@ -281,7 +266,7 @@ namespace Box2DSharp.Collision
         }
     }
 
-    public struct Pair : IComparable<Pair>
+    public class Pair : IComparable<Pair>
     {
         public int ProxyIdA;
 

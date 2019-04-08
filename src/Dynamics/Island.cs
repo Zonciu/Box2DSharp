@@ -52,6 +52,10 @@ namespace Box2DSharp.Dynamics
 
         internal void Reset()
         {
+            BodyCount = 0;
+            ContactCount = 0;
+            JointCount = 0;
+
             ArrayPool<Body>.Shared.Return(Bodies, true);
             Bodies = default;
 
@@ -78,8 +82,7 @@ namespace Box2DSharp.Dynamics
         internal void Solve(out Profile profile, in TimeStep step, in Vector2 gravity, bool allowSleep)
         {
             profile = new Profile();
-            var timer = SimpleObjectPool<Stopwatch>.Shared.Get();
-            timer.Restart();
+            var timer = Stopwatch.StartNew();
 
             var h = step.Dt;
 
@@ -157,6 +160,7 @@ namespace Box2DSharp.Dynamics
 
             // Store impulses for warm starting
             contactSolver.StoreImpulses();
+            timer.Stop();
             profile.SolveVelocity = timer.ElapsedMilliseconds;
 
             // Integrate positions
@@ -225,6 +229,7 @@ namespace Box2DSharp.Dynamics
                 body.SynchronizeTransform();
             }
 
+            timer.Stop();
             profile.SolvePosition = timer.ElapsedMilliseconds;
 
             Report(contactSolver.VelocityConstraints);
@@ -272,8 +277,6 @@ namespace Box2DSharp.Dynamics
             }
 
             contactSolver.Reset();
-            timer.Reset();
-            SimpleObjectPool<Stopwatch>.Shared.Return(timer);
         }
 
         internal void SolveTOI(in TimeStep subStep, int toiIndexA, int toiIndexB)

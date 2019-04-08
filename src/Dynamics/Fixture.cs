@@ -94,44 +94,25 @@ namespace Box2DSharp.Dynamics
         /// @return the shape type.
         public ShapeType ShapeType => Shape.ShapeType;
 
-        private static readonly ObjectPool<Fixture> _pool = new ObjectPool<Fixture>(
-            () => new Fixture(),
-            fixture =>
-            {
-                fixture.Density = default;
-                fixture.Filter = default;
-                fixture.IsSensor = default;
-                fixture.Friction = default;
-                fixture.Restitution = default;
-                fixture.Body = default;
-                fixture.Shape = default;
-                fixture.UserData = default;
-
-                fixture.ProxyCount = default;
-                var proxies = fixture.Proxies;
-                fixture.Proxies = default;
-                ArrayPool<FixtureProxy>.Shared.Return(proxies, true);
-
-                return true;
-            });
-
         /// We need separation create/destroy functions from the constructor/destructor because
         /// the destructor cannot access the allocator (no destructor arguments allowed by C++).
         internal static Fixture Create(Body body, in FixtureDef def)
         {
             var childCount = def.Shape.GetChildCount();
 
-            var fixture = _pool.Get();
-            fixture.UserData = def.UserData;
-            fixture.Friction = def.Friction;
-            fixture.Restitution = def.Restitution;
-            fixture.Body = body;
-            fixture.Filter = def.Filter;
-            fixture.IsSensor = def.IsSensor;
-            fixture.Shape = def.Shape.Clone();
-            fixture.ProxyCount = 0;
-            fixture.Density = def.Density;
-            fixture.Proxies = ArrayPool<FixtureProxy>.Shared.Rent(childCount);
+            var fixture = new Fixture
+            {
+                UserData = def.UserData,
+                Friction = def.Friction,
+                Restitution = def.Restitution,
+                Body = body,
+                Filter = def.Filter,
+                IsSensor = def.IsSensor,
+                Shape = def.Shape.Clone(),
+                ProxyCount = 0,
+                Density = def.Density,
+                Proxies = new FixtureProxy[childCount]
+            };
 
             // Reserve proxy space
             for (var i = 0; i < childCount; ++i)
@@ -146,7 +127,7 @@ namespace Box2DSharp.Dynamics
         {
             // The proxies must be destroyed before calling this.
             Debug.Assert(fixture.ProxyCount == 0);
-            _pool.Return(fixture);
+            fixture.Dispose();
         }
 
         // These support body activation/deactivation.
@@ -353,6 +334,8 @@ namespace Box2DSharp.Dynamics
         /// <inheritdoc />
         public void Dispose()
         {
+            Array.Clear(Proxies, 0, Proxies.Length);
+            Proxies = null;
             Body = null;
         }
     }

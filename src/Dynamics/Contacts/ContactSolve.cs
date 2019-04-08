@@ -111,9 +111,10 @@ namespace Box2DSharp.Dynamics.Contacts
         public void Reset()
         {
             ArrayPool<ContactPositionConstraint>.Shared.Return(_positionConstraints, true);
-            _positionConstraints = null;
+            _positionConstraints = default;
             ArrayPool<ContactVelocityConstraint>.Shared.Return(VelocityConstraints, true);
-            VelocityConstraints = null;
+            VelocityConstraints = default;
+            _contactCount = 0;
         }
 
         public void InitializeVelocityConstraints()
