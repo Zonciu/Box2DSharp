@@ -49,7 +49,7 @@ namespace Box2DSharp.Common
 
         /// Convert this vector into a unit vector. Returns the length.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Normalize2(ref this Vector2 vector2)
+        public static float Normalize(ref this Vector2 vector2)
         {
             var length = vector2.Length();
             if (length < Settings.Epsilon)
