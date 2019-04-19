@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
@@ -26,7 +27,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 var pointA = MathUtils.Mul(xfA, pc.LocalPoint);
                 var pointB = MathUtils.Mul(xfB, pc.LocalPoints.Value0);
                 Normal = pointB - pointA;
-                Normal = Vector2.Normalize(Normal);
+                Normal.Normalize();
                 Point = 0.5f * (pointA + pointB);
                 Separation = Vector2.Dot(pointB - pointA, Normal) - pc.RadiusA - pc.RadiusB;
             }
