@@ -121,6 +121,17 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 夹具列表
         /// </summary>
+        public IReadOnlyList<Fixture> FixtureList
+        {
+            get
+            {
+                return Fixtures;
+            }
+        }
+
+        /// <summary>
+        /// 夹具列表
+        /// </summary>
         internal List<Fixture> Fixtures { get; private set; }
 
         /// <summary>
