@@ -14,17 +14,10 @@ namespace Box2DSharp.Collision.Shapes
         /// making rounded polygons.
         public float Radius;
 
-        public ShapeType ShapeType;
+        public ShapeType ShapeType { get; internal set; }
 
         /// Clone the concrete shape using the provided allocator.
         public abstract Shape Clone();
-
-        /// Get the type of this shape. You can use this to down cast to the concrete shape.
-        /// @return the shape type.
-        public ShapeType GetShapeType()
-        {
-            return ShapeType;
-        }
 
         /// Get the number of child primitives.
         public abstract int GetChildCount();

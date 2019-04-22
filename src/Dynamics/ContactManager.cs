@@ -98,7 +98,8 @@ namespace Box2DSharp.Dynamics
             Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
             Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-            var reg = _registers[(int) type1, (int) type2];
+            var reg = _registers[(int) type1, (int) type2]
+                   ?? throw new NullReferenceException($"{type1.ToString()} can not contact to {type2.ToString()}");
             if (reg.Primary)
             {
                 return reg.Factory.Create(fixtureA, indexA, fixtureB, indexB);
