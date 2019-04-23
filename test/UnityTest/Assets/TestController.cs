@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -49,6 +50,8 @@ namespace Box2DSharp
         private Type _currentTest;
 
         private (string TestName, Type TestType)[] _testTypes;
+
+        public string StartTest;
 
         private void Awake()
         {
@@ -137,7 +140,7 @@ namespace Box2DSharp
 
         private void Start()
         {
-            var tilesIndex = Array.FindIndex(_testTypes, t => t.TestName == "Tiles");
+            var tilesIndex = Array.FindIndex(_testTypes, t => t.TestName == StartTest);
             Dropdown.value = tilesIndex;
         }
 

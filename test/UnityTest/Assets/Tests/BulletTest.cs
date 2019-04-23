@@ -89,7 +89,7 @@ namespace Box2DSharp.Tests
                     $"ave toi root iters = {_toiProfile.ToiRootIters / (float) _toiProfile.ToiCalls}, max toi root iters = {_toiProfile.ToiMaxRootIters}");
             }
 
-            if (FrameManager.FrameCount % 60 == 0)
+            if (FixedUpdate.TickCount % 60 == 0)
             {
                 Launch();
             }

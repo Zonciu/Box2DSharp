@@ -99,7 +99,7 @@ namespace Box2DSharp.Tests
             FixtureCount = fixtureCount;
         }
 
-        protected override void PreStep()
+        protected override void PreUpdate()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {

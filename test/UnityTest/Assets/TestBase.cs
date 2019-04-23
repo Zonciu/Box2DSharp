@@ -10,7 +10,7 @@ using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
 using Box2DSharp.Inspection;
 using UnityEngine;
-using UnityEngine.Experimental.UIElements;
+using UnityEngine.UIElements;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
@@ -34,13 +34,11 @@ namespace Box2DSharp
 
         public bool Drag;
 
-        public FrameManager FrameManager;
-
         public Body GroundBody;
 
         public Camera MainCamera;
 
-        public Profile MaxProfile;
+        public Profile MaxProfile = new Profile();
 
         public MouseJoint MouseJoint;
 
@@ -52,13 +50,17 @@ namespace Box2DSharp
 
         public TestSettings TestSettings;
 
-        public Profile TotalProfile;
+        public Profile TotalProfile = new Profile();
 
         public World World;
 
         public BoxDrawer Drawer { get; private set; }
 
         public readonly string TestName;
+
+        public FixedUpdate FixedUpdate;
+
+        public FpsCounter FpsCounter;
 
         protected TestBase()
         {
@@ -137,18 +139,15 @@ namespace Box2DSharp
             MainCamera = Camera.main;
             World = new World(new Vector2(0, -10));
             GroundBody = World.CreateBody(new BodyDef());
-            FrameManager = new FrameManager
-            {
-                Job = Tick,
-                Interval = 1 / TestSettings.Frequency
-            };
+            FixedUpdate = new FixedUpdate(TimeSpan.FromSeconds(1f / TestSettings.Frequency), Tick);
+            FpsCounter = new FpsCounter();
             World.SetContactListener(this);
             World.DestructionListener = this;
             World.Drawer = TestSettings.WorldDrawer;
             Drawer = TestSettings.WorldDrawer;
             DumpLogger.Instance = new UnityLogger();
 
-            // DrawString
+            // DrawString1
             _rect = new Rect(20, 20, Screen.width, Screen.height * 2f / 100f);
             _style = new GUIStyle
             {
@@ -160,6 +159,7 @@ namespace Box2DSharp
         private void Start()
         {
             Create();
+            FixedUpdate.Start();
         }
 
         protected virtual void Create()
@@ -207,25 +207,28 @@ namespace Box2DSharp
             }
 
             World.Step(timeStep, TestSettings.VelocityIteration, TestSettings.PositionIteration);
+            FpsCounter.SetFps();
             PostStep();
         }
 
         protected void Update()
         {
-            DrawString(TestName);
             PreUpdate();
+            FixedUpdate.Update();
+
+            DrawString(TestName);
 
             // FPS
             {
-                var msec = _deltaTime * 1000.0f;
-                var fps = 1.0f / _deltaTime;
-                var text = $"{msec:0.0} ms ({fps:0.} fps)";
+                //var msec = _deltaTime * 1000.0f;
+                //var fps = 1.0f / _deltaTime;
+                var text = $"{FpsCounter.Ms:0.0} ms ({FpsCounter.Fps:F1} fps)";
                 DrawString(text);
             }
 
             // Frame
             {
-                DrawString($"{FrameManager.FrameCount} Frames");
+                DrawString($"{FixedUpdate.TickCount} Frames");
             }
 
             // Launch Bomb
@@ -233,8 +236,6 @@ namespace Box2DSharp
             {
                 LaunchBomb();
             }
-
-            FrameManager.Tick();
 
             // Mouse left drag
             MouseWorld = MainCamera.ScreenToWorldPoint(Input.mousePosition).ToVector2();
@@ -382,9 +383,9 @@ namespace Box2DSharp
                 TotalProfile.Broadphase += p.Broadphase;
 
                 var aveProfile = new Profile();
-                if (FrameManager.FrameCount > 0)
+                if (FixedUpdate.TickCount > 0)
                 {
-                    var scale = 1.0f / FrameManager.FrameCount;
+                    var scale = 1.0f / FixedUpdate.TickCount;
                     aveProfile.Step = scale * TotalProfile.Step;
                     aveProfile.Collide = scale * TotalProfile.Collide;
                     aveProfile.Solve = scale * TotalProfile.Solve;
@@ -564,7 +565,6 @@ namespace Box2DSharp
 
         private void OnDestroy()
         {
-            FrameManager.Dispose();
             World = null;
         }
 
