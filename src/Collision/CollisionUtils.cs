@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Box2DSharp.Collision.Collider;
@@ -10,7 +11,7 @@ namespace Box2DSharp.Collision
     {
         /// Compute the point states given two manifolds. The states pertain to the transition from manifold1
         /// to manifold2. So state1 is either persist or remove while state2 is either add or persist.
-        public static unsafe void GetPointStates(
+        public static void GetPointStates(
             in PointState[] state1,
             in PointState[] state2,
             in Manifold manifold1,
@@ -25,13 +26,13 @@ namespace Box2DSharp.Collision
             // Detect persists and removes.
             for (var i = 0; i < manifold1.PointCount; ++i)
             {
-                var id = manifold1.Points.Values[i].Id;
+                var id = manifold1.Points[i].Id;
 
                 state1[i] = PointState.RemoveState;
 
                 for (var j = 0; j < manifold2.PointCount; ++j)
                 {
-                    if (manifold2.Points.Values[j].Id.Key == id.Key)
+                    if (manifold2.Points[j].Id.Key == id.Key)
                     {
                         state1[i] = PointState.PersistState;
                         break;
@@ -42,13 +43,13 @@ namespace Box2DSharp.Collision
             // Detect persists and adds.
             for (var i = 0; i < manifold2.PointCount; ++i)
             {
-                var id = manifold2.Points.Values[i].Id;
+                var id = manifold2.Points[i].Id;
 
                 state2[i] = PointState.AddState;
 
                 for (var j = 0; j < manifold1.PointCount; ++j)
                 {
-                    if (manifold1.Points.Values[j].Id.Key == id.Key)
+                    if (manifold1.Points[j].Id.Key == id.Key)
                     {
                         state2[i] = PointState.PersistState;
                         break;
@@ -58,9 +59,9 @@ namespace Box2DSharp.Collision
         }
 
         /// Clipping for contact manifolds.
-        public static unsafe int ClipSegmentToLine(
-            ClipVertex* vOut,
-            ClipVertex* vIn,
+        public static int ClipSegmentToLine(
+            in Span<ClipVertex> vOut,
+            in Span<ClipVertex> vIn,
             in Vector2 normal,
             float offset,
             int vertexIndexA)

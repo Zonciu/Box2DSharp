@@ -10,7 +10,7 @@ namespace Box2DSharp.Collision.Collider
         /// modest motion from the original state. This does not change the
         /// point count, impulses, etc. The radii must come from the shapes
         /// that generated the manifold.
-        public unsafe void Initialize(
+        public void Initialize(
             in Manifold manifold,
             in Transform xfA,
             float radiusA,
@@ -49,11 +49,11 @@ namespace Box2DSharp.Collision.Collider
 
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
-                    var clipPoint = MathUtils.Mul(xfB, manifold.Points.Values[i].LocalPoint);
+                    var clipPoint = MathUtils.Mul(xfB, manifold.Points[i].LocalPoint);
                     var cA = clipPoint + (radiusA - Vector2.Dot(clipPoint - planePoint, Normal)) * Normal;
                     var cB = clipPoint - radiusB * Normal;
-                    Points.Values[i] = 0.5f * (cA + cB);
-                    Separations.Values[i] = Vector2.Dot(cB - cA, Normal);
+                    Points[i] = 0.5f * (cA + cB);
+                    Separations[i] = Vector2.Dot(cB - cA, Normal);
                 }
             }
                 break;
@@ -65,11 +65,11 @@ namespace Box2DSharp.Collision.Collider
 
                 for (var i = 0; i < manifold.PointCount; ++i)
                 {
-                    var clipPoint = MathUtils.Mul(xfA, manifold.Points.Values[i].LocalPoint);
+                    var clipPoint = MathUtils.Mul(xfA, manifold.Points[i].LocalPoint);
                     var cB = clipPoint + (radiusB - Vector2.Dot(clipPoint - planePoint, Normal)) * Normal;
                     var cA = clipPoint - radiusA * Normal;
-                    Points.Values[i] = 0.5f * (cA + cB);
-                    Separations.Values[i] = Vector2.Dot(cA - cB, Normal);
+                    Points[i] = 0.5f * (cA + cB);
+                    Separations[i] = Vector2.Dot(cA - cB, Normal);
                 }
 
                 // Ensure normal points from A to B.

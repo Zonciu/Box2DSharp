@@ -11,7 +11,7 @@ namespace Box2DSharp.Collision
 
         public int Count;
 
-        public unsafe void ReadCache(
+        public void ReadCache(
             ref SimplexCache cache,
             in DistanceProxy proxyA,
             in Transform transformA,
@@ -26,9 +26,9 @@ namespace Box2DSharp.Collision
             //ref b2SimplexVertex vertices = ref m_v1;
             for (var i = 0; i < Count; ++i)
             {
-                ref var v = ref Vertices.Values[i];
-                v.IndexA = cache.IndexA.Values[i];
-                v.IndexB = cache.IndexB.Values[i];
+                ref var v = ref Vertices[i];
+                v.IndexA = cache.IndexA[i];
+                v.IndexB = cache.IndexB[i];
                 var wALocal = proxyA.GetVertex(v.IndexA);
                 var wBLocal = proxyB.GetVertex(v.IndexB);
                 v.Wa = MathUtils.Mul(transformA, wALocal);
@@ -53,7 +53,7 @@ namespace Box2DSharp.Collision
             // If the cache is empty or invalid ...
             if (Count == 0)
             {
-                ref var v = ref Vertices.Values[0];
+                ref var v = ref Vertices[0];
                 v.IndexA = 0;
                 v.IndexB = 0;
                 var wALocal = proxyA.GetVertex(0);
@@ -66,14 +66,14 @@ namespace Box2DSharp.Collision
             }
         }
 
-        public unsafe void WriteCache(ref SimplexCache cache)
+        public void WriteCache(ref SimplexCache cache)
         {
             cache.Metric = GetMetric();
             cache.Count = (ushort) Count;
             for (var i = 0; i < Count; ++i)
             {
-                cache.IndexA.Values[i] = (byte) Vertices.Values[i].IndexA;
-                cache.IndexB.Values[i] = (byte) Vertices.Values[i].IndexB;
+                cache.IndexA[i] = (byte) Vertices[i].IndexA;
+                cache.IndexB[i] = (byte) Vertices[i].IndexB;
             }
         }
 
@@ -192,10 +192,10 @@ namespace Box2DSharp.Collision
         // Solution
         // a1 = d12_1 / d12
         // a2 = d12_2 / d12
-        public unsafe void Solve2()
+        public void Solve2()
         {
-            ref var v0 = ref Vertices.Values[0];
-            ref var v1 = ref Vertices.Values[1];
+            ref var v0 = ref Vertices.Value0;
+            ref var v1 = ref Vertices.Value1;
             var w1 = v0.W;
             var w2 = v1.W;
             var e12 = w2 - w1;
@@ -233,11 +233,11 @@ namespace Box2DSharp.Collision
         // - edge points[0]-points[2]
         // - edge points[1]-points[2]
         // - inside the triangle
-        public unsafe void Solve3()
+        public void Solve3()
         {
-            ref var v0 = ref Vertices.Values[0];
-            ref var v1 = ref Vertices.Values[1];
-            ref var v2 = ref Vertices.Values[2];
+            ref var v0 = ref Vertices.Value0;
+            ref var v1 = ref Vertices.Value1;
+            ref var v2 = ref Vertices.Value2;
             var w1 = v0.W;
             var w2 = v1.W;
             var w3 = v2.W;

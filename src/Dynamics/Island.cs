@@ -439,13 +439,10 @@ namespace Box2DSharp.Dynamics
                 var vc = constraints[i];
 
                 var impulse = new ContactImpulse {Count = vc.PointCount};
-                unsafe
+                for (var j = 0; j < vc.PointCount; ++j)
                 {
-                    for (var j = 0; j < vc.PointCount; ++j)
-                    {
-                        impulse.NormalImpulses.Values[j] = vc.Points[j].NormalImpulse;
-                        impulse.TangentImpulses.Values[j] = vc.Points[j].TangentImpulse;
-                    }
+                    impulse.NormalImpulses[j] = vc.Points[j].NormalImpulse;
+                    impulse.TangentImpulses[j] = vc.Points[j].TangentImpulse;
                 }
 
                 ContactListener.PostSolve(c, impulse);

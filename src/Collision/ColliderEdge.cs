@@ -266,7 +266,7 @@ namespace Box2DSharp.Collision
             // 6. Visit each separating axes, only accept axes within the range
             // 7. Return if _any_ axis indicates separation
             // 8. Clip
-            public unsafe void Collide(
+            public void Collide(
                 ref Manifold manifold,
                 ref EdgeShape edgeA,
                 in Transform xfA,
@@ -516,7 +516,7 @@ namespace Box2DSharp.Collision
                     primaryAxis = edgeAxis;
                 }
 
-                var ie = stackalloc ClipVertex[2];
+                Span<ClipVertex> ie = stackalloc ClipVertex[2];
                 var rf = new ReferenceFace();
                 if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                 {
@@ -596,8 +596,8 @@ namespace Box2DSharp.Collision
                 rf.SideOffset2 = Vector2.Dot(rf.SideNormal2, rf.V2);
 
                 // Clip incident edge against extruded edge1 side edges.
-                var clipPoints1 = stackalloc ClipVertex[2];
-                var clipPoints2 = stackalloc ClipVertex[2];
+                Span<ClipVertex> clipPoints1 = stackalloc ClipVertex[2];
+                Span<ClipVertex> clipPoints2 = stackalloc ClipVertex[2];
                 int np;
 
                 // Clip to box side 1
@@ -645,7 +645,7 @@ namespace Box2DSharp.Collision
 
                     if (separation <= Radius)
                     {
-                        ref var cp = ref manifold.Points.Values[pointCount];
+                        ref var cp = ref manifold.Points[pointCount];
 
                         if (primaryAxis.Type == EPAxis.EPAxisType.EdgeA)
                         {

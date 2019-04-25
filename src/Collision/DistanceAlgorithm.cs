@@ -14,7 +14,7 @@ namespace Box2DSharp.Collision
         /// <param name="cache"></param>
         /// <param name="input"></param>
         /// <param name="gJkProfile"></param>
-        public static unsafe void Distance(
+        public static void Distance(
             out DistanceOutput output,
             ref SimplexCache cache,
             in DistanceInput input,
@@ -47,8 +47,8 @@ namespace Box2DSharp.Collision
 
             // These store the vertices of the last simplex so that we
             // can check for duplicates and prevent cycling.
-            var saveA = stackalloc int[3];
-            var saveB = stackalloc int[3];
+            Span<int> saveA = stackalloc int[3];
+            Span<int> saveB = stackalloc int[3];
 
             // Main iteration loop.
             var iter = 0;
@@ -58,8 +58,8 @@ namespace Box2DSharp.Collision
                 var saveCount = simplex.Count;
                 for (var i = 0; i < simplex.Count; ++i)
                 {
-                    saveA[i] = vertices.Values[i].IndexA;
-                    saveB[i] = vertices.Values[i].IndexB;
+                    saveA[i] = vertices[i].IndexA;
+                    saveB[i] = vertices[i].IndexB;
                 }
 
                 switch (simplex.Count)
@@ -101,7 +101,7 @@ namespace Box2DSharp.Collision
                 }
 
                 // Compute a tentative new simplex vertex using support points.
-                ref var vertex = ref vertices.Values[simplex.Count];
+                ref var vertex = ref vertices[simplex.Count];
                 vertex.IndexA = proxyA.GetSupport(MathUtils.MulT(transformA.Rotation, -d));
                 vertex.Wa = MathUtils.Mul(transformA, proxyA.GetVertex(vertex.IndexA));
 
@@ -263,16 +263,13 @@ namespace Box2DSharp.Collision
                 // Shift by lambda * r because we want the closest point to the current clip point.
                 // Note that the support point p is not shifted because we want the plane equation
                 // to be formed in unshifted space.
-                unsafe
-                {
-                    ref var vertex = ref simplex.Vertices.Values[simplex.Count];
-                    vertex.IndexA = indexB;
-                    vertex.Wa = wB + lambda * r;
-                    vertex.IndexB = indexA;
-                    vertex.Wb = wA;
-                    vertex.W = vertex.Wb - vertex.Wa;
-                    vertex.A = 1.0f;
-                }
+                ref var vertex = ref simplex.Vertices[simplex.Count];
+                vertex.IndexA = indexB;
+                vertex.Wa = wB + lambda * r;
+                vertex.IndexB = indexA;
+                vertex.Wb = wA;
+                vertex.W = vertex.Wb - vertex.Wa;
+                vertex.A = 1.0f;
 
                 simplex.Count += 1;
 

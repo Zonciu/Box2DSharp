@@ -97,6 +97,8 @@ namespace Box2DSharp
             }
 
             Drawer.PostLines(lines, color.ToUnityColor());
+            var p = center + radius * axis;
+            DrawSegment(center, p, color);
         }
 
         /// <inheritdoc />
@@ -129,6 +131,6 @@ namespace Box2DSharp
         public void DrawPoint(in Vector2 p, float size, in Color color)
         {
             Drawer.PostPoint((p.ToUnityVector3(), size / 100, color.ToUnityColor()));
-        } 
+        }
     }
 }

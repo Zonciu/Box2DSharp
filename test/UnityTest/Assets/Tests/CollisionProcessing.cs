@@ -143,7 +143,7 @@ namespace Box2DSharp.Tests
             }
 
             // Sort the nuke array to group duplicates.
-            Array.Sort(nuke, 0, nukeCount);
+            Array.Sort(nuke, 0, nukeCount, new BodyComparer());
 
             // Destroy the bodies, skipping duplicates.
             {
@@ -162,6 +162,15 @@ namespace Box2DSharp.Tests
                     }
                 }
             }
+        }
+    }
+
+    struct BodyComparer : IComparer<Body>
+    {
+        /// <inheritdoc />
+        public int Compare(Body x, Body y)
+        {
+            return x.GetHashCode() - y.GetHashCode();
         }
     }
 }

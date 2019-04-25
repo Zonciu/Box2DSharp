@@ -260,25 +260,22 @@ namespace Box2DSharp.Dynamics.Contacts
                 // Match old contact ids to new contact ids and copy the
                 // stored impulses to warm start the solver.
 
-                unsafe
+                for (var i = 0; i < Manifold.PointCount; ++i)
                 {
-                    for (var i = 0; i < Manifold.PointCount; ++i)
+                    ref var mp2 = ref Manifold.Points[i];
+                    mp2.NormalImpulse = 0.0f;
+                    mp2.TangentImpulse = 0.0f;
+                    var id2 = mp2.Id;
+
+                    for (var j = 0; j < oldManifold.PointCount; ++j)
                     {
-                        var mp2 = Manifold.Points.Values[i];
-                        mp2.NormalImpulse = 0.0f;
-                        mp2.TangentImpulse = 0.0f;
-                        var id2 = mp2.Id;
+                        ref readonly var mp1 = ref oldManifold.Points[j];
 
-                        for (var j = 0; j < oldManifold.PointCount; ++j)
+                        if (mp1.Id.Key == id2.Key)
                         {
-                            var mp1 = oldManifold.Points.Values[j];
-
-                            if (mp1.Id.Key == id2.Key)
-                            {
-                                mp2.NormalImpulse = mp1.NormalImpulse;
-                                mp2.TangentImpulse = mp1.TangentImpulse;
-                                break;
-                            }
+                            mp2.NormalImpulse = mp1.NormalImpulse;
+                            mp2.TangentImpulse = mp1.TangentImpulse;
+                            break;
                         }
                     }
                 }

@@ -152,7 +152,7 @@ namespace Box2DSharp
             _style = new GUIStyle
             {
                 alignment = TextAnchor.UpperLeft, fontSize = Screen.height * 2 / 100,
-                normal = {textColor = new UnityEngine.Color(0.0f, 0.0f, 0.5f, 1.0f)}
+                normal = {textColor = new UnityEngine.Color(230f / 255f, 153f / 255f, 153f / 255f, 1.0f)}
             };
         }
 

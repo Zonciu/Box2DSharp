@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -11,24 +12,24 @@ namespace Box2DSharp.Common
 
         public T Value1;
 
-        public unsafe T* Values
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                fixed (T* ptr = &Value0)
+                if (index > -1 && index < 2)
                 {
-                    return ptr;
+                    unsafe
+                    {
+                        fixed (T* ptr = &Value0)
+                        {
+                            return ref *(ptr + index);
+                        }
+                    }
                 }
-            }
-        }
 
-        public unsafe T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Values[index];
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => Values[index] = value;
+                throw new IndexOutOfRangeException($"{nameof(FixedArray2<T>)} index can't be {index}");
+            }
         }
     }
 
@@ -42,24 +43,24 @@ namespace Box2DSharp.Common
 
         public T Value2;
 
-        public unsafe T* Values
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                fixed (T* ptr = &Value0)
+                if (index > -1 && index < 3)
                 {
-                    return ptr;
+                    unsafe
+                    {
+                        fixed (T* ptr = &Value0)
+                        {
+                            return ref *(ptr + index);
+                        }
+                    }
                 }
-            }
-        }
 
-        public unsafe T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Values[index];
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => Values[index] = value;
+                throw new IndexOutOfRangeException($"{nameof(FixedArray3<T>)} index can't be {index}");
+            }
         }
     }
 
@@ -75,24 +76,24 @@ namespace Box2DSharp.Common
 
         public T Value3;
 
-        public unsafe T* Values
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                fixed (T* ptr = &Value0)
+                if (index > -1 && index < 4)
                 {
-                    return ptr;
+                    unsafe
+                    {
+                        fixed (T* ptr = &Value0)
+                        {
+                            return ref *(ptr + index);
+                        }
+                    }
                 }
-            }
-        }
 
-        public unsafe T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Values[index];
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => Values[index] = value;
+                throw new IndexOutOfRangeException($"{nameof(FixedArray4<T>)} index can't be {index}");
+            }
         }
     }
 
@@ -116,24 +117,24 @@ namespace Box2DSharp.Common
 
         public T Value7;
 
-        public unsafe T* Values
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                fixed (T* ptr = &Value0)
+                if (index > -1 && index < 8)
                 {
-                    return ptr;
+                    unsafe
+                    {
+                        fixed (T* ptr = &Value0)
+                        {
+                            return ref *(ptr + index);
+                        }
+                    }
                 }
-            }
-        }
 
-        public unsafe T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Values[index];
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => Values[index] = value;
+                throw new IndexOutOfRangeException($"{nameof(FixedArray8<T>)} index can't be {index}");
+            }
         }
     }
 }

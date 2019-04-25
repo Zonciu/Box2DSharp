@@ -36,16 +36,12 @@ namespace Box2DSharp.Collision
             manifold.LocalNormal.SetZero();
             manifold.PointCount = 1;
 
-            unsafe
-            {
-                ref var point = ref manifold.Points.Values[0];
-                point.LocalPoint = circleB.Position;
-                point.Id.Key = 0;
-            }
+            manifold.Points.Value0.LocalPoint = circleB.Position;
+            manifold.Points.Value0.Id.Key = 0;
         }
 
         /// Compute the collision manifold between a polygon and a circle.
-        public static unsafe void CollidePolygonAndCircle(
+        public static void CollidePolygonAndCircle(
             ref Manifold manifold,
             PolygonShape polygonA,
             in Transform xfA,
@@ -96,9 +92,9 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = normals[normalIndex];
                 manifold.LocalPoint = 0.5f * (v1 + v2);
-                ref var point = ref manifold.Points.Values[0];
-                point.LocalPoint = circleB.Position;
-                point.Id.Key = 0;
+
+                manifold.Points.Value0.LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key = 0;
                 return;
             }
 
@@ -117,9 +113,9 @@ namespace Box2DSharp.Collision
                 manifold.LocalNormal = cLocal - v1;
                 manifold.LocalNormal = Vector2.Normalize(manifold.LocalNormal);
                 manifold.LocalPoint = v1;
-                ref var point = ref manifold.Points.Values[0];
-                point.LocalPoint = circleB.Position;
-                point.Id.Key = 0;
+
+                manifold.Points.Value0.LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key = 0;
             }
             else if (u2 <= 0.0f)
             {
@@ -133,9 +129,9 @@ namespace Box2DSharp.Collision
                 manifold.LocalNormal = cLocal - v2;
                 manifold.LocalNormal = Vector2.Normalize(manifold.LocalNormal);
                 manifold.LocalPoint = v2;
-                ref var point = ref manifold.Points.Values[0];
-                point.LocalPoint = circleB.Position;
-                point.Id.Key = 0;
+
+                manifold.Points.Value0.LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key = 0;
             }
             else
             {
@@ -150,9 +146,9 @@ namespace Box2DSharp.Collision
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = normals[vertIndex1];
                 manifold.LocalPoint = faceCenter;
-                ref var point = ref manifold.Points.Values[0];
-                point.LocalPoint = circleB.Position;
-                point.Id.Key = 0;
+
+                manifold.Points.Value0.LocalPoint = circleB.Position;
+                manifold.Points.Value0.Id.Key = 0;
             }
         }
     }

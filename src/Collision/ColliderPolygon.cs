@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
@@ -59,8 +60,8 @@ namespace Box2DSharp.Collision
             return maxSeparation;
         }
 
-        public static unsafe void FindIncidentEdge(
-            ClipVertex* c,
+        public static void FindIncidentEdge(
+            in Span<ClipVertex> c,
             PolygonShape poly1,
             in Transform xf1,
             int edge1,
@@ -114,7 +115,7 @@ namespace Box2DSharp.Collision
 
         // The normal points from 1 to 2
         /// Compute the collision manifold between two polygons.
-        public static unsafe void CollidePolygons(
+        public static void CollidePolygons(
             ref Manifold manifold,
             PolygonShape polyA,
             in Transform xfA,
@@ -174,8 +175,8 @@ namespace Box2DSharp.Collision
                 flip = 0;
             }
 
-            var incidentEdge = stackalloc ClipVertex[2];
-            FindIncidentEdge(incidentEdge, poly1, xf1, edge1, poly2, xf2);
+            Span<ClipVertex> incidentEdge = stackalloc ClipVertex[2];
+            FindIncidentEdge(in incidentEdge, poly1, xf1, edge1, poly2, xf2);
 
             var count1 = poly1.Count;
             var vertices1 = poly1.Vertices;
@@ -206,8 +207,8 @@ namespace Box2DSharp.Collision
             var sideOffset2 = Vector2.Dot(tangent, v12) + totalRadius;
 
             // Clip incident edge against extruded edge1 side edges.
-            var clipPoints1 = stackalloc ClipVertex[2];
-            var clipPoints2 = stackalloc ClipVertex[2];
+            Span<ClipVertex> clipPoints1 = stackalloc ClipVertex[2];
+            Span<ClipVertex> clipPoints2 = stackalloc ClipVertex[2];
 
             // Clip to box side 1
             var np = ClipSegmentToLine(
@@ -246,7 +247,7 @@ namespace Box2DSharp.Collision
 
                 if (separation <= totalRadius)
                 {
-                    ref var cp = ref manifold.Points.Values[pointCount];
+                    ref var cp = ref manifold.Points[pointCount];
                     cp.LocalPoint = MathUtils.MulT(xf2, clipPoints2[i].Vector);
                     cp.Id = clipPoints2[i].Id;
                     if (flip != default)
