@@ -11,9 +11,13 @@ namespace Box2DSharp.Collision.Shapes
         /// The vertex count.
         public int Count;
 
-        public bool HasPrevVertex, HasNextVertex;
+        public bool HasPrevVertex;
 
-        public Vector2 PrevVertex, NextVertex;
+        public bool HasNextVertex;
+
+        public Vector2 PrevVertex;
+
+        public Vector2 NextVertex;
 
         /// The vertices. Owned by this class.
         public Vector2[] Vertices;
@@ -26,6 +30,19 @@ namespace Box2DSharp.Collision.Shapes
             Count = 0;
             HasPrevVertex = false;
             HasNextVertex = false;
+        }
+
+        /// Implement b2Shape. Vertices are cloned using b2Alloc.
+        public override Shape Clone()
+        {
+            var clone = new ChainShape();
+            Array.Copy(Vertices, clone.Vertices, Vertices.Length);
+            clone.Count = Count;
+            clone.PrevVertex = PrevVertex;
+            clone.NextVertex = NextVertex;
+            clone.HasPrevVertex = HasPrevVertex;
+            clone.HasNextVertex = HasNextVertex;
+            return clone;
         }
 
         /// <summary>
@@ -114,18 +131,6 @@ namespace Box2DSharp.Collision.Shapes
         {
             NextVertex = nextVertex;
             HasNextVertex = true;
-        }
-
-        /// Implement b2Shape. Vertices are cloned using b2Alloc.
-        public override Shape Clone()
-        {
-            var clone = new ChainShape();
-            clone.CreateChain(Vertices);
-            clone.PrevVertex = PrevVertex;
-            clone.NextVertex = NextVertex;
-            clone.HasPrevVertex = HasPrevVertex;
-            clone.HasNextVertex = HasNextVertex;
-            return clone;
         }
 
         /// @see b2Shape::GetChildCount

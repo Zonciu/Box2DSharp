@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
@@ -6,7 +7,9 @@ namespace Box2DSharp.Collision.Shapes
 {
     public class EdgeShape : Shape
     {
-        public bool HasVertex0, HasVertex3;
+        public bool HasVertex0;
+
+        public bool HasVertex3;
 
         /// Optional adjacent vertices. These are used for smooth collision.
         public Vector2 Vertex0;
@@ -24,12 +27,6 @@ namespace Box2DSharp.Collision.Shapes
         {
             ShapeType = ShapeType.Edge;
             Radius = Settings.PolygonRadius;
-            Vertex0.X = 0.0f;
-            Vertex0.Y = 0.0f;
-            Vertex3.X = 0.0f;
-            Vertex3.Y = 0.0f;
-            HasVertex0 = false;
-            HasVertex3 = false;
         }
 
         public void Set(in Vector2 v1, in Vector2 v2)
@@ -45,8 +42,10 @@ namespace Box2DSharp.Collision.Shapes
         {
             var clone = new EdgeShape
             {
+                Vertex0 = Vertex0,
                 Vertex1 = Vertex1,
                 Vertex2 = Vertex2,
+                Vertex3 = Vertex3,
                 HasVertex0 = HasVertex0,
                 HasVertex3 = HasVertex3
             };
@@ -83,7 +82,7 @@ namespace Box2DSharp.Collision.Shapes
             var v2 = Vertex2;
             var e = v2 - v1;
             var normal = new Vector2(e.Y, -e.X);
-            normal = Vector2.Normalize(normal);
+            normal.Normalize();
 
             // q = p1 + t * d
             // dot(normal, q - v1) = 0
@@ -91,7 +90,7 @@ namespace Box2DSharp.Collision.Shapes
             var numerator = Vector2.Dot(normal, v1 - p1);
             var denominator = Vector2.Dot(normal, d);
 
-            if (denominator.Equals(0.0f))
+            if (Math.Abs(denominator) < float.Epsilon)
             {
                 return false;
             }
@@ -108,7 +107,7 @@ namespace Box2DSharp.Collision.Shapes
             // s = dot(q - v1, r) / dot(r, r)
             var r = v2 - v1;
             var rr = Vector2.Dot(r, r);
-            if (rr.Equals(0.0f))
+            if (Math.Abs(rr) < float.Epsilon)
             {
                 return false;
             }

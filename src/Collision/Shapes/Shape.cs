@@ -12,7 +12,7 @@ namespace Box2DSharp.Collision.Shapes
     {
         /// Radius of a shape. For polygonal shapes this must be b2_polygonRadius. There is no support for
         /// making rounded polygons.
-        public float Radius;
+        public float Radius { get; internal set; }
 
         public ShapeType ShapeType { get; internal set; }
 

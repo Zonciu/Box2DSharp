@@ -10,6 +10,12 @@ namespace Box2DSharp.Collision.Shapes
         /// Position
         public Vector2 Position;
 
+        public new float Radius
+        {
+            get => base.Radius;
+            set => base.Radius = value;
+        }
+
         public CircleShape()
         {
             ShapeType = ShapeType.Circle;

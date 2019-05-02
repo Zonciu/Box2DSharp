@@ -25,12 +25,7 @@ namespace Box2DSharp.Collision.Shapes
         public PolygonShape()
         {
             ShapeType = ShapeType.Polygon;
-
             Radius = Settings.PolygonRadius;
-
-            Count = 0;
-
-            Centroid.SetZero();
         }
 
         /// Implement b2Shape.
