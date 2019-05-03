@@ -35,7 +35,7 @@ namespace Box2DSharp.Collision.Shapes
         /// Implement b2Shape. Vertices are cloned using b2Alloc.
         public override Shape Clone()
         {
-            var clone = new ChainShape();
+            var clone = new ChainShape {Vertices = new Vector2[Vertices.Length]};
             Array.Copy(Vertices, clone.Vertices, Vertices.Length);
             clone.Count = Count;
             clone.PrevVertex = PrevVertex;
