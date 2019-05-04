@@ -86,6 +86,7 @@ namespace NETCoreTest
                 }
 
                 timer.Stop();
+                Console.WriteLine($"{timer.ElapsedMilliseconds} ms");
             }
             else
             {
