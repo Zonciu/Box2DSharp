@@ -162,7 +162,7 @@ namespace Box2DSharp.Collision
                     // Move the witness points to the outer surface.
                     output.Distance -= rA + rB;
                     var normal = output.PointB - output.PointA;
-                    normal = Vector2.Normalize(normal);
+                    normal.Normalize();
                     output.PointA += rA * normal;
                     output.PointB -= rB * normal;
                 }
@@ -237,7 +237,7 @@ namespace Box2DSharp.Collision
                 var p = wA - wB;
 
                 // -v is a normal at p
-                v = Vector2.Normalize(v);
+                v.Normalize();
 
                 // Intersect ray with plane
                 var vp = Vector2.Dot(v, p);
@@ -312,7 +312,7 @@ namespace Box2DSharp.Collision
             if (v.LengthSquared() > 0.0f)
             {
                 n = -v;
-                n = Vector2.Normalize(n);
+                n.Normalize();
             }
 
             output.Point = pointA + radiusA * n;

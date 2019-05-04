@@ -188,7 +188,7 @@ namespace Box2DSharp.Collision
             var v12 = vertices1[iv2];
 
             var localTangent = v12 - v11;
-            localTangent = Vector2.Normalize(localTangent);
+            localTangent.Normalize();
 
             var localNormal = MathUtils.Cross(localTangent, 1.0f);
             var planePoint = 0.5f * (v11 + v12);

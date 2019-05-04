@@ -268,8 +268,7 @@ namespace Box2DSharp.Dynamics.Joints
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
             var u = cB + rB - cA - rA;
 
-            var length = u.Length();
-            u = Vector2.Normalize(u);
+            var length = u.Normalize();
             var C = length - _maxLength;
 
             C = MathUtils.Clamp(C, 0.0f, Settings.MaxLinearCorrection);

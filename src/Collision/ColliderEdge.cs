@@ -141,7 +141,7 @@ namespace Box2DSharp.Collision
                     n.Set(-n.X, -n.Y);
                 }
 
-                n = Vector2.Normalize(n);
+                n.Normalize();
 
                 cf.IndexA = 0;
                 cf.TypeA = (byte) ContactFeature.FeatureType.Face;
@@ -286,7 +286,7 @@ namespace Box2DSharp.Collision
                 var hasVertex3 = edgeA.HasVertex3;
 
                 var edge1 = V2 - V1;
-                edge1 = Vector2.Normalize(edge1);
+                edge1.Normalize();
                 Normal1.Set(edge1.Y, -edge1.X);
                 var offset1 = Vector2.Dot(Normal1, CentroidB - V1);
                 float offset0 = 0.0f, offset2 = 0.0f;
@@ -296,7 +296,7 @@ namespace Box2DSharp.Collision
                 if (hasVertex0)
                 {
                     var edge0 = V1 - V0;
-                    edge0 = Vector2.Normalize(edge0);
+                    edge0.Normalize();
                     Normal0.Set(edge0.Y, -edge0.X);
                     convex1 = MathUtils.Cross(edge0, edge1) >= 0.0f;
                     offset0 = Vector2.Dot(Normal0, CentroidB - V0);
@@ -306,7 +306,7 @@ namespace Box2DSharp.Collision
                 if (hasVertex3)
                 {
                     var edge2 = V3 - V2;
-                    edge2 = Vector2.Normalize(edge2);
+                    edge2.Normalize();
                     Normal2.Set(edge2.Y, -edge2.X);
                     convex2 = MathUtils.Cross(edge1, edge2) > 0.0f;
                     offset2 = Vector2.Dot(Normal2, CentroidB - V2);

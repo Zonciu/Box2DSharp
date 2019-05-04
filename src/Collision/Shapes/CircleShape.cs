@@ -76,7 +76,7 @@ namespace Box2DSharp.Collision.Shapes
             {
                 a /= rr;
                 output = new RayCastOutput {Fraction = a, Normal = s + a * r};
-                output.Normal = Vector2.Normalize(output.Normal);
+                output.Normal.Normalize();
                 return true;
             }
 

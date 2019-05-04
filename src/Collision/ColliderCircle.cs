@@ -111,7 +111,7 @@ namespace Box2DSharp.Collision
                 manifold.PointCount = 1;
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = cLocal - v1;
-                manifold.LocalNormal = Vector2.Normalize(manifold.LocalNormal);
+                manifold.LocalNormal.Normalize();
                 manifold.LocalPoint = v1;
 
                 manifold.Points.Value0.LocalPoint = circleB.Position;
@@ -127,7 +127,7 @@ namespace Box2DSharp.Collision
                 manifold.PointCount = 1;
                 manifold.Type = ManifoldType.FaceA;
                 manifold.LocalNormal = cLocal - v2;
-                manifold.LocalNormal = Vector2.Normalize(manifold.LocalNormal);
+                manifold.LocalNormal.Normalize();
                 manifold.LocalPoint = v2;
 
                 manifold.Points.Value0.LocalPoint = circleB.Position;

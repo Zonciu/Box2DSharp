@@ -236,7 +236,7 @@ namespace Box2DSharp.Dynamics.Joints
 
                 if (_linearImpulse.LengthSquared() > maxImpulse * maxImpulse)
                 {
-                    _linearImpulse = Vector2.Normalize(_linearImpulse);
+                    _linearImpulse.Normalize();
                     _linearImpulse *= maxImpulse;
                 }
 

@@ -354,8 +354,7 @@ namespace Box2DSharp.Collision
                 var pointA = MathUtils.Mul(xfA, localPointA);
                 var pointB = MathUtils.Mul(xfB, localPointB);
                 Axis = pointB - pointA;
-                var s = Axis.Length();
-                Axis = Vector2.Normalize(Axis);
+                var s = Axis.Normalize();
                 return s;
             }
 
@@ -367,7 +366,7 @@ namespace Box2DSharp.Collision
                 var localPointB2 = proxyB.GetVertex(bv1);
 
                 Axis = MathUtils.Cross(localPointB2 - localPointB1, 1.0f);
-                Axis = Vector2.Normalize(Axis);
+                Axis.Normalize();
                 var normal = MathUtils.Mul(xfB.Rotation, Axis);
 
                 LocalPoint = 0.5f * (localPointB1 + localPointB2);
@@ -393,7 +392,7 @@ namespace Box2DSharp.Collision
                 var localPointA2 = ProxyA.GetVertex(av1);
 
                 Axis = MathUtils.Cross(localPointA2 - localPointA1, 1.0f);
-                Axis = Vector2.Normalize(Axis);
+                Axis.Normalize();
                 var normal = MathUtils.Mul(xfA.Rotation, Axis);
 
                 LocalPoint = 0.5f * (localPointA1 + localPointA2);

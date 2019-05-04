@@ -32,7 +32,7 @@ namespace Box2DSharp.Collision.Collider
                 if (Vector2.DistanceSquared(pointA, pointB) > Settings.Epsilon * Settings.Epsilon)
                 {
                     Normal = pointB - pointA;
-                    Normal = Vector2.Normalize(Normal);
+                    Normal.Normalize();
                 }
 
                 var cA = pointA + radiusA * Normal;
