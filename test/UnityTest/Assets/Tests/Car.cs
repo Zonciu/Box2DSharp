@@ -8,7 +8,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Car : TestBase
+    public class Car : Test
     {
         private Body _car;
 
@@ -26,7 +26,7 @@ namespace Box2DSharp.Tests
 
         private float _zeta;
 
-        protected override void Create()
+        public Car()
         {
             _hz = 4.0f;
             _zeta = 0.7f;
@@ -231,16 +231,11 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
-            DrawString("Keys: left = a, brake = s, right = d, hz down = q, hz up = e");
-
-            DrawString($"frequency = {_hz} hz, damping ratio = {_zeta}");
-
-            var p = MainCamera.transform.position;
+            var p = TestSettings.Camera.transform.position;
             p.x = _car.GetPosition().X;
-            MainCamera.transform.position = p;
+            TestSettings.Camera.transform.position = p;
             if (Input.GetKeyDown(KeyCode.A))
             {
                 _spring1.SetMotorSpeed(_speed);
@@ -269,6 +264,13 @@ namespace Box2DSharp.Tests
                 _spring1.SetSpringFrequencyHz(_hz);
                 _spring2.SetSpringFrequencyHz(_hz);
             }
+        }
+
+        public override void OnRender()
+        {
+            DrawString("Keys: left = a, brake = s, right = d, hz down = q, hz up = e");
+
+            DrawString($"frequency = {_hz} hz, damping ratio = {_zeta}");
         }
     }
 }

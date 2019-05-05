@@ -6,7 +6,7 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class BulletTest : TestBase
+    public class BulletTest : Test
     {
         private Body _body;
 
@@ -18,7 +18,7 @@ namespace Box2DSharp.Tests
 
         private ToiProfile _toiProfile = new ToiProfile();
 
-        protected override void Create()
+        public BulletTest()
         {
             {
                 var bd = new BodyDef();
@@ -72,8 +72,15 @@ namespace Box2DSharp.Tests
             _bullet.SetAngularVelocity(0.0f);
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
+        {
+            if (StepCount % 60 == 0)
+            {
+                Launch();
+            }
+        }
+
+        public override void OnRender()
         {
             if (_gJkProfile.GjkCalls > 0)
             {
@@ -87,11 +94,6 @@ namespace Box2DSharp.Tests
                     $"toi calls = {_toiProfile.ToiCalls}, ave toi iters = {_toiProfile.ToiIters / (float) _toiProfile.ToiCalls}, max toi iters = {_toiProfile.ToiMaxRootIters}");
                 DrawString(
                     $"ave toi root iters = {_toiProfile.ToiRootIters / (float) _toiProfile.ToiCalls}, max toi root iters = {_toiProfile.ToiMaxRootIters}");
-            }
-
-            if (FixedUpdate.TickCount % 60 == 0)
-            {
-                Launch();
             }
         }
     }

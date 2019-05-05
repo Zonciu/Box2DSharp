@@ -94,7 +94,7 @@ namespace Box2DSharp.Tests
         }
     }
 
-    public class PolyShapes : TestBase
+    public class PolyShapes : Test
     {
         private const int MaxBodies = 256;
 
@@ -112,7 +112,7 @@ namespace Box2DSharp.Tests
 
         private readonly CircleShape _circle = new CircleShape();
 
-        protected override void Create()
+        public PolyShapes()
         {
             // Ground body
             {
@@ -226,7 +226,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        public override void OnRender()
         {
             DrawString("Press 1-5 to drop stuff");
             DrawString("Press 'a' to (de)activate some bodies");
@@ -279,10 +279,7 @@ namespace Box2DSharp.Tests
             {
                 DestroyBody();
             }
-        }
 
-        protected override void PreLateUpdate()
-        {
             var callback = new PolyShapesCallback(Drawer) {Circle = {Radius = 2.0f}};
             callback.Circle.Position.Set(0.0f, 1.1f);
             callback.Circle.ComputeAABB(out var aabb, callback.Transform, 0);

@@ -136,7 +136,7 @@ namespace Box2DSharp.Tests
         }
     }
 
-    public class RayCast : TestBase
+    public class RayCast : Test
     {
         private const int MaxBodies = 256;
 
@@ -162,7 +162,7 @@ namespace Box2DSharp.Tests
 
         private Mode _mode;
 
-        protected override void Create()
+        public RayCast()
         {
             // Ground body
             {
@@ -228,7 +228,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             var advanceRay = TestSettings.Pause == false || TestSettings.SingleStep;
 
@@ -276,6 +276,7 @@ namespace Box2DSharp.Tests
 
                 break;
             }
+
             case Mode.Any:
             {
                 var callback = new RayCastAnyCallback();
@@ -295,6 +296,7 @@ namespace Box2DSharp.Tests
 
                 break;
             }
+
             case Mode.Multiple:
             {
                 var callback = new RayCastMultipleCallback();
@@ -377,8 +379,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             var k = -1;
             if (Input.GetKeyDown(KeyCode.Alpha1))

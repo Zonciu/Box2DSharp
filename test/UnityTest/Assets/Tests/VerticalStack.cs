@@ -7,7 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class VerticalStack : TestBase
+    public class VerticalStack : Test
     {
         private const int ColumnCount = 1;
 
@@ -19,7 +19,7 @@ namespace Box2DSharp.Tests
 
         private readonly int[] _indices = new int[RowCount * ColumnCount];
 
-        protected override void Create()
+        public VerticalStack()
         {
             {
                 var bd = new BodyDef();
@@ -74,7 +74,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -107,8 +107,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreLateUpdate()
+        public override void OnRender()
         {
             DrawString("Press F to launch a bullet");
         }

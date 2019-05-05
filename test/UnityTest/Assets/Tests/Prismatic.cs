@@ -7,11 +7,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Prismatic : TestBase
+    public class Prismatic : Test
     {
         private PrismaticJoint _joint;
 
-        protected override void Create()
+        public Prismatic()
         {
             Body ground;
             {
@@ -58,11 +58,11 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreStep()
+        public override void OnRender()
         {
             DrawString("Keys: (l) limits, (m) motors, (s) speed");
 
-            var force = _joint.GetMotorForce(TestSettings.Frequency);
+            var force = _joint.GetMotorForce(1 / TestSettings.Dt);
             DrawString($"Motor Force = {force}");
 
             if (Input.GetKeyDown(KeyCode.L))

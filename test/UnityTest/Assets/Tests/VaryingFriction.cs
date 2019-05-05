@@ -5,9 +5,9 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class VaryingFriction : TestBase
+    public class VaryingFriction : Test
     {
-        protected override void Create()
+        public VaryingFriction()
         {
             {
                 var bd = new BodyDef();

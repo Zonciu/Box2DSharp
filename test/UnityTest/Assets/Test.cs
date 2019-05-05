@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Box2DSharp.Collision;
@@ -18,25 +19,19 @@ using Color = System.Drawing.Color;
 
 namespace Box2DSharp
 {
-    public abstract class TestBase : MonoBehaviour, IContactListener, IDestructionListener
+    public abstract class Test : IContactListener, IDestructionListener, IDisposable
     {
+        public static readonly TestSettings TestSettings = new TestSettings();
+
         public const int RandomLimit = 32767;
 
         private readonly Random _random = new Random();
 
         public readonly ContactPoint[] Points = new ContactPoint[2048];
 
-        private float _deltaTime;
-
         public int PointsCount;
 
-        public Vector3 Diference;
-
-        public bool Drag;
-
         public Body GroundBody;
-
-        public Camera MainCamera;
 
         public Profile MaxProfile = new Profile();
 
@@ -44,27 +39,25 @@ namespace Box2DSharp
 
         public Vector2 MouseWorld;
 
-        public UnityEngine.Vector2 MouseWorlcPosition;
-
-        public Vector3 Origin;
-
-        public TestSettings TestSettings;
-
         public Profile TotalProfile = new Profile();
 
         public World World;
 
-        public BoxDrawer Drawer { get; private set; }
-
         public readonly string TestName;
 
-        public FixedUpdate FixedUpdate;
+        public int StepCount;
 
-        public FpsCounter FpsCounter;
+        public IDrawer Drawer => TestSettings.Drawer;
 
-        protected TestBase()
+        protected Test()
         {
             TestName = Regex.Replace(GetType().Name, @"(\B[A-Z])", " $1");
+            World = new World(new Vector2(0, -10));
+            World.SetContactListener(this);
+            World.DestructionListener = this;
+            World.Drawer = Drawer;
+            GroundBody = World.CreateBody(new BodyDef());
+            DumpLogger.Instance = new UnityLogger();
         }
 
         public virtual void BeginContact(Contact contact)
@@ -128,193 +121,143 @@ namespace Box2DSharp
             /* Do nothing */
         }
 
-        private void Awake()
+        /// <summary>
+        /// trigger on every game loop frame
+        /// </summary>
+        public virtual void Update()
+        { }
+
+        /// <summary>
+        /// draw string and draw shape in here
+        /// </summary>
+        public virtual void OnRender()
+        { }
+
+        private readonly StringBuilder _stringBuilder = new StringBuilder();
+
+        public string Text;
+
+        public void DrawString(string text)
         {
-            if (!Camera.main)
-            {
-                throw new NullReferenceException("Require Main Camera: Camera.main");
-            }
-
-            TestSettings = FindObjectOfType<TestSettings>();
-            MainCamera = Camera.main;
-            World = new World(new Vector2(0, -10));
-            GroundBody = World.CreateBody(new BodyDef());
-            FixedUpdate = new FixedUpdate(TimeSpan.FromSeconds(1f / TestSettings.Frequency), Tick);
-            FpsCounter = new FpsCounter();
-            World.SetContactListener(this);
-            World.DestructionListener = this;
-            World.Drawer = TestSettings.WorldDrawer;
-            Drawer = TestSettings.WorldDrawer;
-            DumpLogger.Instance = new UnityLogger();
-
-            // DrawString1
-            _rect = new Rect(20, 20, Screen.width, Screen.height * 2f / 100f);
-            _style = new GUIStyle
-            {
-                alignment = TextAnchor.UpperLeft, fontSize = Screen.height * 2 / 100,
-                normal = {textColor = new UnityEngine.Color(230f / 255f, 153f / 255f, 153f / 255f, 1.0f)}
-            };
+            _stringBuilder.AppendLine(text);
         }
 
-        private void Start()
+        /// <summary>
+        /// call GUI.Lable in here
+        /// </summary>
+        public virtual void OnGUI()
+        { }
+
+        /// <summary>
+        /// trigger on every fixed physic frame 
+        /// </summary>
+        protected virtual void OnStep()
+        { }
+
+        public void Step()
         {
-            Create();
-            FixedUpdate.Start();
-        }
-
-        protected virtual void Create()
-        { }
-
-        protected virtual void PreStep()
-        { }
-
-        protected virtual void PostStep()
-        { }
-
-        protected virtual void PreUpdate()
-        { }
-
-        protected virtual void PostUpdate()
-        { }
-
-        protected virtual void PreLateUpdate()
-        { }
-
-        protected virtual void PostLateUpdate()
-        { }
-
-        private void Tick()
-        {
-            PreStep();
-            PointsCount = 0;
-            World.AllowSleep = TestSettings.Sleep;
-            World.WarmStarting = TestSettings.WarmStarting;
-            World.ContinuousPhysics = TestSettings.TimeOfImpact;
-            World.SubStepping = TestSettings.SubStepping;
-            var timeStep = 1f / TestSettings.Frequency;
             if (TestSettings.Pause)
             {
                 if (TestSettings.SingleStep)
                 {
                     TestSettings.SingleStep = false;
+                    WorldStep();
                 }
-                else
-                {
-                    timeStep = 0.0f;
-                }
-
-                DrawString("****PAUSED****");
+            }
+            else
+            {
+                WorldStep();
             }
 
-            World.Step(timeStep, TestSettings.VelocityIteration, TestSettings.PositionIteration);
-            FpsCounter.SetFps();
-            PostStep();
+            void WorldStep()
+            {
+                World.AllowSleep = TestSettings.Sleep;
+                World.WarmStarting = TestSettings.WarmStarting;
+                World.ContinuousPhysics = TestSettings.TimeOfImpact;
+                World.SubStepping = TestSettings.SubStepping;
+
+                PointsCount = 0;
+
+                OnStep();
+                World.Step(TestSettings.Dt, TestSettings.VelocityIteration, TestSettings.PositionIteration);
+                PostStep();
+                ++StepCount;
+            }
         }
 
-        protected void Update()
+        protected virtual void PostStep()
+        { }
+
+        public void DrawTest()
         {
-            PreUpdate();
-            FixedUpdate.Update();
-
-            DrawString(TestName);
-
-            // FPS
+            // Statistics
+            if (TestSettings.Statistics)
             {
-                //var msec = _deltaTime * 1000.0f;
-                //var fps = 1.0f / _deltaTime;
-                var text = $"{FpsCounter.Ms:0.0} ms ({FpsCounter.Fps:F1} fps)";
-                DrawString(text);
+                DrawString($"bodies/contacts/joints = {World.BodyCount}/{World.ContactCount}/{World.JointCount}");
+                DrawString(
+                    $"proxies:{World.ProxyCount}/ height:{World.TreeHeight}/ balance: {World.TreeBalance} /quality: {World.TreeQuality}");
             }
 
-            // Frame
+            // Profile
+            if (TestSettings.Profile)
             {
-                DrawString($"{FixedUpdate.TickCount} Frames");
+                var p = World.Profile;
+
+                // Track maximum profile times
+                MaxProfile.Step = Math.Max(MaxProfile.Step, p.Step);
+                MaxProfile.Collide = Math.Max(MaxProfile.Collide, p.Collide);
+                MaxProfile.Solve = Math.Max(MaxProfile.Solve, p.Solve);
+                MaxProfile.SolveInit = Math.Max(MaxProfile.SolveInit, p.SolveInit);
+                MaxProfile.SolveVelocity = Math.Max(MaxProfile.SolveVelocity, p.SolveVelocity);
+                MaxProfile.SolvePosition = Math.Max(MaxProfile.SolvePosition, p.SolvePosition);
+                MaxProfile.SolveTOI = Math.Max(MaxProfile.SolveTOI, p.SolveTOI);
+                MaxProfile.Broadphase = Math.Max(MaxProfile.Broadphase, p.Broadphase);
+
+                TotalProfile.Step += p.Step;
+                TotalProfile.Collide += p.Collide;
+                TotalProfile.Solve += p.Solve;
+                TotalProfile.SolveInit += p.SolveInit;
+                TotalProfile.SolveVelocity += p.SolveVelocity;
+                TotalProfile.SolvePosition += p.SolvePosition;
+                TotalProfile.SolveTOI += p.SolveTOI;
+                TotalProfile.Broadphase += p.Broadphase;
+
+                var aveProfile = new Profile();
+                if (!TestSettings.Pause && StepCount > 0)
+                {
+                    var scale = 1.0f / StepCount;
+                    aveProfile.Step = scale * TotalProfile.Step;
+                    aveProfile.Collide = scale * TotalProfile.Collide;
+                    aveProfile.Solve = scale * TotalProfile.Solve;
+                    aveProfile.SolveInit = scale * TotalProfile.SolveInit;
+                    aveProfile.SolveVelocity = scale * TotalProfile.SolveVelocity;
+                    aveProfile.SolvePosition = scale * TotalProfile.SolvePosition;
+                    aveProfile.SolveTOI = scale * TotalProfile.SolveTOI;
+                    aveProfile.Broadphase = scale * TotalProfile.Broadphase;
+                }
+
+                DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({MaxProfile.Step})");
+                DrawString($"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({MaxProfile.Collide})");
+                DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({MaxProfile.Solve})");
+                DrawString($"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({MaxProfile.SolveInit})");
+                DrawString($"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({MaxProfile.SolveVelocity})");
+                DrawString($"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({MaxProfile.SolvePosition})");
+                DrawString($"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({MaxProfile.SolveTOI})");
+                DrawString($"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({MaxProfile.Broadphase})");
             }
 
-            // Launch Bomb
-            if (Input.GetKeyDown(KeyCode.Space))
+            OnRender();
+            DrawWorld();
+
+            if (_stringBuilder.Length > 0)
             {
-                LaunchBomb();
+                Text = _stringBuilder.ToString();
+                _stringBuilder.Clear();
             }
-
-            // Mouse left drag
-            MouseWorld = MainCamera.ScreenToWorldPoint(Input.mousePosition).ToVector2();
-            MouseJoint?.SetTarget(MouseWorld);
-
-            if (TestSettings.EnableMouseAction)
-            {
-                if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
-                {
-                    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                    {
-                        ShiftMouseDown();
-                    }
-                    else
-                    {
-                        MouseDown();
-                    }
-                }
-
-                if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
-                {
-                    MouseUp();
-                }
-
-                // Mouse right move camera
-                if (Input.GetMouseButton((int) MouseButton.RightMouse))
-                {
-                    Diference = MainCamera.ScreenToWorldPoint(Input.mousePosition) - MainCamera.transform.position;
-                    if (Drag == false)
-                    {
-                        Drag = true;
-                        Origin = MainCamera.ScreenToWorldPoint(Input.mousePosition);
-                    }
-                }
-                else
-                {
-                    Drag = false;
-                }
-
-                if (Drag)
-                {
-                    MainCamera.transform.position = Origin - Diference;
-                }
-
-                // Mouse wheel zoom
-                //Zoom out
-                if (Input.GetAxis("Mouse ScrollWheel") < 0)
-                {
-                    if (MainCamera.orthographicSize > 1)
-                    {
-                        MainCamera.orthographicSize += 1f;
-                    }
-                    else
-                    {
-                        MainCamera.orthographicSize += 0.1f;
-                    }
-                }
-
-                //Zoom in
-                if (Input.GetAxis("Mouse ScrollWheel") > 0)
-                {
-                    if (MainCamera.orthographicSize > 1)
-                    {
-                        MainCamera.orthographicSize -= 1f;
-                    }
-                    else if (MainCamera.orthographicSize > 0.2f)
-                    {
-                        MainCamera.orthographicSize -= 0.1f;
-                    }
-                }
-            }
-
-            _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
-            PostUpdate();
         }
 
-        private void LateUpdate()
+        private void DrawWorld()
         {
-            PreLateUpdate();
             DrawFlag flags = 0;
             if (TestSettings.Shape)
             {
@@ -346,114 +289,37 @@ namespace Box2DSharp
                 flags |= DrawFlag.DrawContactPoint;
             }
 
-            TestSettings.WorldDrawer.Flags = flags;
-            DrawWorld();
-
-            // Statistics
-            if (TestSettings.Statistics)
-            {
-                DrawString(
-                    $"bodies/contacts/joints = {World.BodyCount}/{World.ContactCount}/{World.JointCount}");
-                DrawString(
-                    $"proxies:{World.ProxyCount}/ height:{World.TreeHeight}/ balance: {World.TreeBalance} /quality: {World.TreeQuality}");
-            }
-
-            // Profile
-            if (TestSettings.Profile)
-            {
-                var p = World.Profile;
-
-                // Track maximum profile times
-                MaxProfile.Step = Math.Max(MaxProfile.Step, p.Step);
-                MaxProfile.Collide = Math.Max(MaxProfile.Collide, p.Collide);
-                MaxProfile.Solve = Math.Max(MaxProfile.Solve, p.Solve);
-                MaxProfile.SolveInit = Math.Max(MaxProfile.SolveInit, p.SolveInit);
-                MaxProfile.SolveVelocity = Math.Max(MaxProfile.SolveVelocity, p.SolveVelocity);
-                MaxProfile.SolvePosition = Math.Max(MaxProfile.SolvePosition, p.SolvePosition);
-                MaxProfile.SolveTOI = Math.Max(MaxProfile.SolveTOI, p.SolveTOI);
-                MaxProfile.Broadphase = Math.Max(MaxProfile.Broadphase, p.Broadphase);
-
-                TotalProfile.Step += p.Step;
-                TotalProfile.Collide += p.Collide;
-                TotalProfile.Solve += p.Solve;
-                TotalProfile.SolveInit += p.SolveInit;
-                TotalProfile.SolveVelocity += p.SolveVelocity;
-                TotalProfile.SolvePosition += p.SolvePosition;
-                TotalProfile.SolveTOI += p.SolveTOI;
-                TotalProfile.Broadphase += p.Broadphase;
-
-                var aveProfile = new Profile();
-                if (FixedUpdate.TickCount > 0)
-                {
-                    var scale = 1.0f / FixedUpdate.TickCount;
-                    aveProfile.Step = scale * TotalProfile.Step;
-                    aveProfile.Collide = scale * TotalProfile.Collide;
-                    aveProfile.Solve = scale * TotalProfile.Solve;
-                    aveProfile.SolveInit = scale * TotalProfile.SolveInit;
-                    aveProfile.SolveVelocity = scale * TotalProfile.SolveVelocity;
-                    aveProfile.SolvePosition = scale * TotalProfile.SolvePosition;
-                    aveProfile.SolveTOI = scale * TotalProfile.SolveTOI;
-                    aveProfile.Broadphase = scale * TotalProfile.Broadphase;
-                }
-
-                DrawString($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({MaxProfile.Step})");
-                DrawString(
-                    $"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({MaxProfile.Collide})");
-                DrawString($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({MaxProfile.Solve})");
-                DrawString(
-                    $"solve init [ave] (max) = {p.SolveInit} [{aveProfile.SolveInit}] ({MaxProfile.SolveInit})");
-                DrawString(
-                    $"solve velocity [ave] (max) = {p.SolveVelocity} [{aveProfile.SolveVelocity}] ({MaxProfile.SolveVelocity})");
-                DrawString(
-                    $"solve position [ave] (max) = {p.SolvePosition} [{aveProfile.SolvePosition}] ({MaxProfile.SolvePosition})");
-                DrawString(
-                    $"solveTOI [ave] (max) = {p.SolveTOI} [{aveProfile.SolveTOI}] ({MaxProfile.SolveTOI})");
-                DrawString(
-                    $"broad-phase [ave] (max) = {p.Broadphase} [{aveProfile.Broadphase}] ({MaxProfile.Broadphase})");
-            }
-
-            if (_stringBuilder.Length > 0)
-            {
-                _text = _stringBuilder.ToString();
-                _stringBuilder.Clear();
-            }
-
-            PostLateUpdate();
-        }
-
-        private void DrawWorld()
-        {
+            TestSettings.Drawer.Flags = flags;
             World.DrawDebugData();
             if (TestSettings.ContactPoint)
             {
                 const float impulseScale = 0.1f;
                 const float axisScale = 0.3f;
-                var debugDraw = TestSettings.WorldDrawer;
                 for (var i = 0; i < PointsCount; ++i)
                 {
                     var point = Points[i];
                     if (point.State == PointState.AddState)
                     {
                         // Add
-                        debugDraw.DrawPoint(point.Position, 10f, Color.FromArgb(77, 242, 77));
+                        TestSettings.Drawer.DrawPoint(point.Position, 10f, Color.FromArgb(77, 242, 77));
                     }
                     else if (point.State == PointState.PersistState)
                     {
                         // Persist
-                        debugDraw.DrawPoint(point.Position, 5f, Color.FromArgb(77, 77, 242));
+                        TestSettings.Drawer.DrawPoint(point.Position, 5f, Color.FromArgb(77, 77, 242));
                     }
 
                     if (TestSettings.ContactNormals)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + axisScale * point.Normal;
-                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 230));
+                        TestSettings.Drawer.DrawSegment(p1, p2, Color.FromArgb(230, 230, 230));
                     }
                     else if (TestSettings.ContactImpulse)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.NormalImpulse * point.Normal;
-                        debugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
+                        TestSettings.Drawer.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
                     }
 
                     if (TestSettings.FrictionImpulse)
@@ -461,15 +327,15 @@ namespace Box2DSharp
                         var tangent = MathUtils.Cross(point.Normal, 1.0f);
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.TangentImpulse * tangent;
-                        debugDraw.DrawSegment(p1, p2, System.Drawing.Color.FromArgb(230, 230, 77));
+                        TestSettings.Drawer.DrawSegment(p1, p2, System.Drawing.Color.FromArgb(230, 230, 77));
                     }
                 }
             }
 
             if (BombSpawning)
             {
-                Drawer.DrawPoint(BombSpawnPoint, 4.0f, System.Drawing.Color.Blue);
-                Drawer.DrawSegment(MouseWorld, BombSpawnPoint, System.Drawing.Color.FromArgb(203, 203, 203));
+                TestSettings.Drawer.DrawPoint(BombSpawnPoint, 4.0f, System.Drawing.Color.Blue);
+                TestSettings.Drawer.DrawSegment(MouseWorld, BombSpawnPoint, System.Drawing.Color.FromArgb(203, 203, 203));
             }
         }
 
@@ -561,11 +427,6 @@ namespace Box2DSharp
             }
 
             SpawnBomb(MouseWorld);
-        }
-
-        private void OnDestroy()
-        {
-            World = null;
         }
 
         public virtual void JointDestroyed(Joint joint)
@@ -672,45 +533,10 @@ namespace Box2DSharp
 
         #endregion
 
-        #region Drawing
-
-        private Rect _rect;
-
-        private GUIStyle _style;
-
-        /// <summary>
-        ///     Display Physic Frame
-        /// </summary>
-        protected virtual void OnGUI()
+        public void Dispose()
         {
-            DrawString();
+            World?.Dispose();
+            World = null;
         }
-
-        private readonly StringBuilder _stringBuilder = new StringBuilder();
-
-        private string _text;
-
-        private void DrawString()
-        {
-            GUI.Label(_rect, _text, _style);
-        }
-
-        public void DrawString(string text)
-        {
-            _stringBuilder.AppendLine(text);
-        }
-
-        public void DrawAABB(AABB aabb, Color color)
-        {
-            var vs = new Vector2 [4];
-            vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
-            vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
-            vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
-            vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y);
-
-            Drawer.DrawPolygon(vs, 4, color);
-        }
-
-        #endregion
     }
 }

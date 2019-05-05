@@ -7,11 +7,11 @@ using Box2DSharp.Dynamics.Contacts;
 
 namespace Box2DSharp.Tests
 {
-    public class ConveyorBelt : TestBase
+    public class ConveyorBelt : Test
     {
         private Fixture _platform;
 
-        protected override void Create()
+        public ConveyorBelt()
         {
             // Ground
             {

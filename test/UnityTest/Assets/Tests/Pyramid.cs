@@ -1,14 +1,15 @@
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class Pyramid : TestBase
+    public class Pyramid : Test
     {
         private const int Count = 20;
 
-        protected override void Create()
+        public Pyramid()
         {
             {
                 var bd = new BodyDef();

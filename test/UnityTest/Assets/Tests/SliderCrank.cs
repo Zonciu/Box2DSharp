@@ -7,13 +7,13 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class SliderCrank : TestBase
+    public class SliderCrank : Test
     {
         private RevoluteJoint _joint1;
 
         private PrismaticJoint _joint2;
 
-        protected override void Create()
+        public SliderCrank()
         {
             Body ground;
             {
@@ -107,7 +107,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.F))
             {
@@ -122,11 +122,10 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreLateUpdate()
+        public override void OnRender()
         {
             DrawString("Keys: F toggle friction, M toggle motor");
-            var torque = _joint1.GetMotorTorque(TestSettings.Frequency);
+            var torque = _joint1.GetMotorTorque(1 / TestSettings.Dt);
             DrawString($"Motor Torque = {torque}");
             DrawString($"Friction: {_joint2.IsMotorEnabled()}");
             DrawString($"Motor: {_joint1.IsMotorEnabled()}");

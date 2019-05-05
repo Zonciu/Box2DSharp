@@ -5,7 +5,12 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Box2DSharp.Inspection;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
+using Slider = UnityEngine.UI.Slider;
+using Toggle = UnityEngine.UI.Toggle;
 
 namespace Box2DSharp
 {
@@ -14,8 +19,6 @@ namespace Box2DSharp
         public GameObject ControlPanel { get; set; }
 
         public RectTransform Background;
-
-        public TestSettings Settings { get; set; }
 
         public Dropdown Dropdown { get; set; }
 
@@ -41,17 +44,25 @@ namespace Box2DSharp
 
         public Text HertzText { get; set; }
 
-        public GameObject TestObject { get; set; }
-
         public bool MouseInViewPort;
 
         public bool MouseInUI;
 
-        private Type _currentTest;
+        private int _testIndex = 0;
+
+        [HideInInspector]
+        public int CurrentTestIndex = -1;
+
+        [HideInInspector]
+        public Test CurrentTest;
 
         private (string TestName, Type TestType)[] _testTypes;
 
         public string StartTest;
+
+        public FpsCounter FpsCounter = new FpsCounter();
+
+        public FixedUpdate FixedUpdate;
 
         private void Awake()
         {
@@ -74,15 +85,14 @@ namespace Box2DSharp
             PauseButton.onClick.AddListener(Pause);
             QuitButton.onClick.AddListener(Application.Quit);
 
-            _testTypes = typeof(TestBase).Assembly.GetTypes()
-                                         .Where(e => e.BaseType == typeof(TestBase))
-                                         .Select(e => (e.GetCustomAttribute<TestNameAttribute>()?.Name ?? GetTestName(e), e))
-                                         .OrderBy(e => e.Item1)
-                                         .ToArray();
+            _testTypes = typeof(Test).Assembly.GetTypes()
+                                     .Where(e => e.BaseType == typeof(Test))
+                                     .Select(e => (e.GetCustomAttribute<TestNameAttribute>()?.Name ?? GetTestName(e), e))
+                                     .OrderBy(e => e.Item1)
+                                     .ToArray();
 
-            Settings = gameObject.GetComponent<TestSettings>() ?? gameObject.AddComponent<TestSettings>();
-            Settings.DebugDrawer = DebugDrawer.GetDrawer();
-            Settings.WorldDrawer = new BoxDrawer {Drawer = Settings.DebugDrawer};
+            Test.TestSettings.UnityDrawer = UnityDrawer.GetDrawer();
+            Test.TestSettings.Drawer = new BoxDrawer {Drawer = Test.TestSettings.UnityDrawer};
 
             Dropdown.ClearOptions();
             Dropdown.AddOptions(_testTypes.OrderBy(e => e.TestName).Select(e => e.TestName).ToList());
@@ -96,13 +106,13 @@ namespace Box2DSharp
                 var toggleObject = GameObject.Find(toggleName)
                                 ?? throw new NullReferenceException($"{toggleName} not found");
                 var toggle = toggleObject.GetComponent<Toggle>();
-                toggle.isOn = (bool) toggleField.GetValue(Settings);
-                toggle.onValueChanged.AddListener(value => { toggleField.SetValue(Settings, value); });
+                toggle.isOn = (bool) toggleField.GetValue(Test.TestSettings);
+                toggle.onValueChanged.AddListener(value => { toggleField.SetValue(Test.TestSettings, value); });
             }
 
             ShowToggle = GameObject.Find("ShowToggle").GetComponent<Toggle>();
             ShowToggle.onValueChanged.AddListener(ToggleControlPanel);
-            Settings.ShowControlPanel = ShowToggle.isOn;
+            Test.TestSettings.ShowControlPanel = ShowToggle.isOn;
 
             VelSlider = GameObject.Find("VelSlider").GetComponent<Slider>();
             VelText = GameObject.Find("VelText").GetComponent<Text>();
@@ -111,9 +121,9 @@ namespace Box2DSharp
                 {
                     var val = (int) v;
                     VelText.text = GetSliderText(VelText.text, val);
-                    Settings.VelocityIteration = val;
+                    Test.TestSettings.VelocityIteration = val;
                 });
-            VelText.text = GetSliderText(VelText.text, Settings.VelocityIteration);
+            VelText.text = GetSliderText(VelText.text, Test.TestSettings.VelocityIteration);
 
             PosSlider = GameObject.Find("PosSlider").GetComponent<Slider>();
             PosText = GameObject.Find("PosText").GetComponent<Text>();
@@ -122,9 +132,9 @@ namespace Box2DSharp
                 {
                     var val = (int) v;
                     PosText.text = GetSliderText(PosText.text, val);
-                    Settings.PositionIteration = val;
+                    Test.TestSettings.PositionIteration = val;
                 });
-            PosText.text = GetSliderText(PosText.text, Settings.PositionIteration);
+            PosText.text = GetSliderText(PosText.text, Test.TestSettings.PositionIteration);
 
             HertzSlider = GameObject.Find("HertzSlider").GetComponent<Slider>();
             HertzText = GameObject.Find("HertzText").GetComponent<Text>();
@@ -133,19 +143,58 @@ namespace Box2DSharp
                 {
                     var val = (int) v;
                     HertzText.text = GetSliderText(HertzText.text, val);
-                    Settings.Frequency = val;
+                    Test.TestSettings.Dt = 1 / (float) val;
                 });
-            HertzText.text = GetSliderText(HertzText.text, Settings.Frequency);
+            HertzText.text = GetSliderText(HertzText.text, (int) (1 / Test.TestSettings.Dt));
+
+            // DrawString
+            _rect = new Rect(20, 20, Screen.width, Screen.height * 2f / 100f);
+            _style = new GUIStyle
+            {
+                alignment = TextAnchor.UpperLeft, fontSize = Screen.height * 2 / 100,
+                normal = {textColor = new Color(230f / 255f, 153f / 255f, 153f / 255f, 1.0f)}
+            };
+
+            FixedUpdate = new FixedUpdate(TimeSpan.FromSeconds(1 / 60d), Tick);
+            MainCamera = Camera.main;
+            Test.TestSettings.Camera = MainCamera;
         }
 
         private void Start()
         {
-            var tilesIndex = Array.FindIndex(_testTypes, t => t.TestName == StartTest);
-            Dropdown.value = tilesIndex;
+            var index = Array.FindIndex(_testTypes, t => t.TestName == StartTest);
+            Dropdown.value = index;
+            SetTest(index);
+            FixedUpdate.Start();
         }
 
-        private void Update()
+        private void Tick()
         {
+            CurrentTest.Step();
+            FpsCounter.SetFps();
+        }
+
+        public Camera MainCamera;
+
+        public Vector3 Diference;
+
+        public Vector3 Origin;
+
+        public bool Drag;
+
+        public void Update()
+        {
+            if (CurrentTestIndex != _testIndex)
+            {
+                CurrentTestIndex = _testIndex;
+                CurrentTest?.Dispose();
+                CurrentTest = (Test) Activator.CreateInstance(_testTypes[CurrentTestIndex].TestType);
+                FixedUpdate.Reset();
+                FixedUpdate.Start();
+            }
+
+            CurrentTest.Update();
+            FixedUpdate.Update();
             var mousePosition = Input.mousePosition;
             var rect = Background.rect;
             MouseInViewPort = mousePosition.x > 0
@@ -153,7 +202,7 @@ namespace Box2DSharp
                            && mousePosition.y > 0
                            && mousePosition.y < Screen.height;
             MouseInUI = mousePosition.x > Screen.width - rect.width && mousePosition.y > Screen.height - rect.height;
-            Settings.EnableMouseAction = MouseInViewPort && (!Settings.ShowControlPanel || !MouseInUI);
+            Test.TestSettings.EnableMouseAction = MouseInViewPort && (!Test.TestSettings.ShowControlPanel || !MouseInUI);
 
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -169,12 +218,119 @@ namespace Box2DSharp
             {
                 SingleStep();
             }
+
+            // Launch Bomb
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                CurrentTest.LaunchBomb();
+            }
+
+            // Mouse left drag
+            CurrentTest.MouseWorld = MainCamera.ScreenToWorldPoint(Input.mousePosition).ToVector2();
+            CurrentTest.MouseJoint?.SetTarget(CurrentTest.MouseWorld);
+
+            if (Test.TestSettings.EnableMouseAction)
+            {
+                if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
+                {
+                    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                    {
+                        CurrentTest.ShiftMouseDown();
+                    }
+                    else
+                    {
+                        CurrentTest.MouseDown();
+                    }
+                }
+
+                if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
+                {
+                    CurrentTest.MouseUp();
+                }
+
+                // Mouse right move camera
+                if (Input.GetMouseButton((int) MouseButton.RightMouse))
+                {
+                    Diference = MainCamera.ScreenToWorldPoint(Input.mousePosition)
+                              - MainCamera.transform.position;
+                    if (Drag == false)
+                    {
+                        Drag = true;
+                        Origin = MainCamera.ScreenToWorldPoint(Input.mousePosition);
+                    }
+                }
+                else
+                {
+                    Drag = false;
+                }
+
+                if (Drag)
+                {
+                    MainCamera.transform.position = Origin - Diference;
+                }
+
+                // Mouse wheel zoom
+                //Zoom out
+                if (Input.GetAxis("Mouse ScrollWheel") < 0)
+                {
+                    if (MainCamera.orthographicSize > 1)
+                    {
+                        MainCamera.orthographicSize += 1f;
+                    }
+                    else
+                    {
+                        MainCamera.orthographicSize += 0.1f;
+                    }
+                }
+
+                //Zoom in
+                if (Input.GetAxis("Mouse ScrollWheel") > 0)
+                {
+                    if (MainCamera.orthographicSize > 1)
+                    {
+                        MainCamera.orthographicSize -= 1f;
+                    }
+                    else if (MainCamera.orthographicSize > 0.2f)
+                    {
+                        MainCamera.orthographicSize -= 0.1f;
+                    }
+                }
+            }
+
+            CurrentTest.DrawString(CurrentTest.TestName);
+            if (Test.TestSettings.Pause)
+            {
+                CurrentTest.DrawString("****PAUSED****");
+            }
+
+            // FPS
+            {
+                var text = $"{FpsCounter.Ms:0.0} ms ({FpsCounter.Fps:F1} fps)";
+                CurrentTest.DrawString(text);
+            }
+
+            // Step
+            {
+                CurrentTest.DrawString($"{CurrentTest.StepCount} Steps");
+            }
+            CurrentTest.DrawTest();
+        }
+
+        private Rect _rect;
+
+        private GUIStyle _style;
+
+        private void OnGUI()
+        {
+            GUI.Label(_rect, CurrentTest.Text, _style);
+            CurrentTest.OnGUI();
+
+      
         }
 
         private void OnTestSelect(int i)
         {
-            var test = _testTypes[i];
-            SetTest(test.TestType);
+            SetTest(i);
         }
 
         private string GetTestName(Type type)
@@ -184,36 +340,28 @@ namespace Box2DSharp
 
         private void Restart()
         {
-            SetTest(_currentTest);
+            CurrentTest = (Test) Activator.CreateInstance(CurrentTest.GetType());
         }
 
         private void Pause()
         {
-            Settings.Pause = !Settings.Pause;
+            Test.TestSettings.Pause = !Test.TestSettings.Pause;
         }
 
         private void SingleStep()
         {
-            Settings.SingleStep = true;
+            Test.TestSettings.SingleStep = true;
         }
 
-        private void SetTest(Type type)
+        private void SetTest(int index)
         {
-            if (TestObject)
-            {
-                var oldTest = TestObject;
-                Destroy(oldTest);
-            }
-
-            _currentTest = type;
-            TestObject = new GameObject(type.Name);
-            TestObject.AddComponent(type);
+            _testIndex = index;
         }
 
         public void ToggleControlPanel(bool isShow)
         {
             ControlPanel.SetActive(isShow);
-            Settings.ShowControlPanel = isShow;
+            Test.TestSettings.ShowControlPanel = isShow;
         }
 
         private string GetSliderText(string text, int value)

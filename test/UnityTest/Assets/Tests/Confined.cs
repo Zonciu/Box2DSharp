@@ -6,13 +6,13 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Confined : TestBase
+    public class Confined : Test
     {
         private readonly int e_columnCount = 0;
 
         private readonly int e_rowCount = 0;
 
-        protected override void Create()
+        public Confined()
         {
             {
                 var bd = new BodyDef();
@@ -86,7 +86,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.C))
             {
@@ -111,11 +111,7 @@ namespace Box2DSharp.Tests
             {
                 CreateCircle();
             }
-        }
 
-        /// <inheritdoc />
-        protected override void PostStep()
-        {
             foreach (var b in World.BodyList)
             {
                 if (b.BodyType != BodyType.DynamicBody)
@@ -127,9 +123,14 @@ namespace Box2DSharp.Tests
                 if (p.X <= -10.0f || 10.0f <= p.X || p.Y <= 0.0f || 20.0f <= p.Y)
                 {
                     p.X += 0.0f;
+
+                    // ToDo
                 }
             }
+        }
 
+        public override void OnRender()
+        {
             DrawString("Press 'c' to create a circle.");
         }
     }

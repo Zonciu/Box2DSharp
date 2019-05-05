@@ -6,7 +6,7 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Tests
 {
-    public class TimeOfImpactTest : TestBase
+    public class TimeOfImpactTest : Test
     {
         private PolygonShape _shapeA = new PolygonShape();
 
@@ -16,15 +16,14 @@ namespace Box2DSharp.Tests
 
         public int ToiMaxRootIters => World.ToiProfile.ToiMaxRootIters;
 
-        protected override void Create()
+        public TimeOfImpactTest()
         {
             World.ToiProfile = new ToiProfile();
             _shapeA.SetAsBox(25.0f, 5.0f);
             _shapeB.SetAsBox(2.5f, 2.5f);
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             var sweepA = new Sweep();
             sweepA.C0.Set(24.0f, -60.0f);

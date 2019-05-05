@@ -7,7 +7,7 @@ using Box2DSharp.Dynamics.Contacts;
 
 namespace Box2DSharp.Tests
 {
-    public class Breakable : TestBase
+    public class Breakable : Test
     {
         private float _angularVelocity;
 
@@ -27,7 +27,7 @@ namespace Box2DSharp.Tests
 
         private Vector2 _velocity;
 
-        protected override void Create()
+        public Breakable()
         {
             // Ground body
             {
@@ -117,8 +117,7 @@ namespace Box2DSharp.Tests
             body2.SetLinearVelocity(velocity2);
         }
 
-        /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
             if (_break)
             {

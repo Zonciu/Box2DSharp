@@ -8,13 +8,13 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Web : TestBase
+    public class Web : Test
     {
         private readonly Body[] _bodies = new Body[4];
 
         private readonly Joint[] _joints = new Joint[8];
 
-        protected override void Create()
+        public Web()
         {
             Body ground;
             {
@@ -141,7 +141,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.B))
             {
@@ -183,8 +183,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             DrawString("This demonstrates a soft distance joint.");
             DrawString("Press: (b) to delete a body, (j) to delete a joint");

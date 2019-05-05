@@ -7,7 +7,7 @@ using Box2DSharp.Dynamics.Contacts;
 
 namespace Box2DSharp.Tests
 {
-    public class OneSidePlatform : TestBase
+    public class OneSidePlatform : Test
     {
         private Fixture _character;
 
@@ -17,7 +17,7 @@ namespace Box2DSharp.Tests
 
         private float _top;
 
-        protected override void Create()
+        public OneSidePlatform()
         {
             // Ground
             {
@@ -83,22 +83,10 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
-            DrawString("Press: (c) create a shape, (d) destroy a shape.");
-
             var v = _character.Body.LinearVelocity;
             DrawString($"Character Linear Velocity: {v.Y}");
-        }
-
-        private enum State
-        {
-            Unknown,
-
-            Above,
-
-            Below
         }
     }
 }

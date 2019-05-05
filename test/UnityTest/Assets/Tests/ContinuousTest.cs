@@ -3,10 +3,11 @@ using Box2DSharp.Collision;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
+using UnityEditor;
 
 namespace Box2DSharp.Tests
 {
-    public class ContinuousTest : TestBase
+    public class ContinuousTest : Test
     {
         private float _angularVelocity;
 
@@ -16,7 +17,7 @@ namespace Box2DSharp.Tests
 
         private ToiProfile _toiProfile = new ToiProfile();
 
-        protected override void Create()
+        public ContinuousTest()
         {
             {
                 World.ToiProfile = _toiProfile;
@@ -80,8 +81,16 @@ namespace Box2DSharp.Tests
             _body.SetAngularVelocity(_angularVelocity);
         }
 
+        protected override void OnStep()
+        {
+            if (StepCount % 60 == 0)
+            {
+                Launch();
+            }
+        }
+
         /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             if (_gJkProfile.GjkCalls > 0)
             {

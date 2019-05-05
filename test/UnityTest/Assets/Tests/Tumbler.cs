@@ -6,7 +6,7 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Tumbler : TestBase
+    public class Tumbler : Test
     {
         private const int Count = 800;
 
@@ -14,7 +14,7 @@ namespace Box2DSharp.Tests
 
         private int _count;
 
-        protected override void Create()
+        public Tumbler()
         {
             Body ground;
             {
@@ -59,7 +59,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
         {
             if (_count < Count)
             {

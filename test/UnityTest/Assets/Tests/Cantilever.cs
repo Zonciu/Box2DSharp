@@ -6,11 +6,11 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Cantilever : TestBase
+    public class Cantilever : Test
     {
         private const int Count = 8;
 
-        protected override void Create()
+        public Cantilever()
         {
             Body ground;
             {

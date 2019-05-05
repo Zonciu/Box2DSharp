@@ -6,7 +6,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class ShapeEditing : TestBase
+    public class ShapeEditing : Test
     {
         private Body _body;
 
@@ -16,7 +16,7 @@ namespace Box2DSharp.Tests
 
         private bool _sensor;
 
-        protected override void Create()
+        public ShapeEditing()
         {
             {
                 var bd = new BodyDef();
@@ -42,7 +42,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        public override void OnRender()
         {
             DrawString("Press: (c) create a shape, (d) destroy a shape. (s) set sensor");
             DrawString($"sensor = {_sensor}");

@@ -6,9 +6,9 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Dominos : TestBase
+    public class Dominos : Test
     {
-        protected override void Create()
+        public Dominos()
         {
             Body b1;
 

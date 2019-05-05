@@ -9,7 +9,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class MotorJointTest : TestBase
+    public class MotorJointTest : Test
     {
         private bool _go;
 
@@ -17,7 +17,7 @@ namespace Box2DSharp.Tests
 
         private MotorJoint _joint;
 
-        protected override void Create()
+        public MotorJointTest()
         {
             Body ground;
             {
@@ -60,31 +60,36 @@ namespace Box2DSharp.Tests
             _time = 0.0f;
         }
 
-        /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
-            DrawString("Keys: (s) pause");
             if (Input.GetKeyDown(KeyCode.S))
             {
                 _go = !_go;
             }
 
-            if (_go && TestSettings.Frequency > 0.0f)
+            if (_go && TestSettings.Dt > 0.0f)
             {
-                _time += 1.0f / TestSettings.Frequency;
+                _time += TestSettings.Dt;
             }
 
-            var linearOffset = new Vector2
+            _linearOffset = new Vector2
             {
                 X = 6.0f * (float) Math.Sin(2.0f * _time), Y = 8.0f + 4.0f * (float) Math.Sin(1.0f * _time)
             };
 
             var angularOffset = 4.0f * _time;
 
-            _joint.SetLinearOffset(linearOffset);
+            _joint.SetLinearOffset(_linearOffset);
             _joint.SetAngularOffset(angularOffset);
+        }
 
-            Drawer.DrawPoint(linearOffset, 4.0f, Color.FromArgb(230, 230, 230));
+        private Vector2 _linearOffset;
+
+        public override void OnRender()
+        {
+            DrawString("Keys: (s) pause");
+
+            Drawer.DrawPoint(_linearOffset, 4.0f, Color.FromArgb(230, 230, 230));
         }
     }
 }

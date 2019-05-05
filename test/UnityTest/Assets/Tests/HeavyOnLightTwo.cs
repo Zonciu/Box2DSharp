@@ -5,11 +5,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class HeavyOnLightTwo : TestBase
+    public class HeavyOnLightTwo : Test
     {
         private Body _heavy;
 
-        protected override void Create()
+        public HeavyOnLightTwo()
         {
             {
                 var bd = new BodyDef();
@@ -58,8 +58,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.H))
             {
@@ -67,8 +66,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreLateUpdate()
+        public override void OnRender()
         {
             DrawString("Press H to place heavy body");
         }

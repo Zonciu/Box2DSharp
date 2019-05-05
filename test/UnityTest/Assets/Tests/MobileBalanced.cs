@@ -6,11 +6,11 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class MobileBalanced : TestBase
+    public class MobileBalanced : Test
     {
         private const int e_depth = 4;
 
-        protected override void Create()
+        public MobileBalanced()
         {
             Body ground;
 

@@ -8,7 +8,7 @@ namespace Box2DSharp.Inspection
     {
         private const string MainCameraTag = "MainCamera";
 
-        private DebugDrawer _debugDrawer;
+        private UnityDrawer _unityDrawer;
 
         /// <summary>
         /// Line color
@@ -33,12 +33,12 @@ namespace Box2DSharp.Inspection
                 return;
             }
 
-            if (_debugDrawer == default)
+            if (_unityDrawer == default)
             {
-                _debugDrawer = DebugDrawer.GetDrawer();
+                _unityDrawer = UnityDrawer.GetDrawer();
             }
 
-            _debugDrawer.PostLines(DrawLine(), Color);
+            _unityDrawer.PostLines(DrawLine(), Color);
         }
 
         protected abstract List<(Vector3 begin, Vector3 end)> DrawLine();

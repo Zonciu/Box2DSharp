@@ -10,7 +10,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class DynamicTreeTest : TestBase, ITreeQueryCallback, ITreeRayCastCallback
+    public class DynamicTreeTest : Test, ITreeQueryCallback, ITreeRayCastCallback
     {
         private const int ActorCount = 128;
 
@@ -30,13 +30,11 @@ namespace Box2DSharp.Tests
 
         private RayCastOutput _rayCastOutput;
 
-        private int _stepCount;
-
         private readonly DynamicTree _tree = new DynamicTree();
 
         private float _worldExtent;
 
-        protected override void Create()
+        public DynamicTreeTest()
         {
             _worldExtent = 15.0f;
             _proxyExtent = 0.5f;
@@ -48,8 +46,6 @@ namespace Box2DSharp.Tests
                 actor.ProxyId = _tree.CreateProxy(actor.AABB, actor);
             }
 
-            _stepCount = 0;
-
             var h = _worldExtent;
             _queryAABB.LowerBound.Set(-3.0f, -4.0f + h);
             _queryAABB.UpperBound.Set(5.0f, 6.0f + h);
@@ -57,15 +53,12 @@ namespace Box2DSharp.Tests
             _rayCastInput.P1.Set(-5.0f, 5.0f + h);
             _rayCastInput.P2.Set(7.0f, -4.0f + h);
 
-            //rayCastInput.P1.Set(0.0f, 2.0f + h);
-            //rayCastInput.P2.Set(0.0f, -2.0f + h);
             _rayCastInput.MaxFraction = 1.0f;
 
             _automated = false;
         }
 
-        /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -87,9 +80,6 @@ namespace Box2DSharp.Tests
                 MoveProxy();
             }
 
-            DrawString("Keys: a: automate, c: create, d: destroy, m: move");
-            DrawString("Blue: overlap\nGreen: ray actor\nRed: ray actor & overlap");
-
             _rayActor = null;
             for (var i = 0; i < ActorCount; ++i)
             {
@@ -109,6 +99,12 @@ namespace Box2DSharp.Tests
 
             Query();
             RayCast();
+        }
+
+        public override void OnRender()
+        {
+            DrawString("Keys: a: automate, c: create, d: destroy, m: move");
+            DrawString("Blue: overlap\nGreen: ray actor\nRed: ray actor & overlap");
             Color c;
             for (var i = 0; i < ActorCount; ++i)
             {
@@ -156,8 +152,17 @@ namespace Box2DSharp.Tests
                 var height = _tree.GetHeight();
                 DrawString($"dynamic tree height = {height}");
             }
+        }
 
-            ++_stepCount;
+        public void DrawAABB(AABB aabb, Color color)
+        {
+            var vs = new Vector2 [4];
+            vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
+            vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
+            vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
+            vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y);
+
+            Drawer.DrawPolygon(vs, 4, color);
         }
 
         public bool QueryCallback(int proxyId)

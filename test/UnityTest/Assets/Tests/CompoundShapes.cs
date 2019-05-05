@@ -5,9 +5,9 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class CompoundShapes : TestBase
+    public class CompoundShapes : Test
     {
-        protected override void Create()
+        public CompoundShapes()
         {
             {
                 var bd = new BodyDef();

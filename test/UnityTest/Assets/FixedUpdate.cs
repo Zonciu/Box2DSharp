@@ -9,20 +9,20 @@ namespace Box2DSharp
 
         public long Dt;
 
-        public long CurrentTime;
+        public long LastTime;
 
         public long Accumulator;
 
         public readonly long FixedTime = TimeSpan.FromSeconds(0.25d).Ticks;
 
-        public event Action Tick;
+        public readonly Action Tick;
 
         public long TickCount;
 
         public FixedUpdate(TimeSpan dt, Action action)
         {
             Dt = dt.Ticks;
-            Tick += action;
+            Tick = action;
         }
 
         public void SetDt(TimeSpan dt)
@@ -33,38 +33,33 @@ namespace Box2DSharp
         public void Start()
         {
             _gameTimer.Start();
-            CurrentTime = _gameTimer.ElapsedTicks;
+            LastTime = _gameTimer.ElapsedTicks;
         }
 
         public void Reset()
         {
-            CurrentTime = 0;
+            LastTime = 0;
             Accumulator = 0;
             TickCount = 0;
             _gameTimer.Reset();
         }
 
-        public void Update(TimeSpan? dt = default)
+        public void Update()
         {
-            var newTime = _gameTimer.ElapsedTicks;
-            var frameTime = newTime - CurrentTime;
+            var now = _gameTimer.ElapsedTicks;
+            var frameTime = now - LastTime;
             if (frameTime > FixedTime)
             {
                 frameTime = FixedTime;
             }
 
-            CurrentTime = newTime;
+            LastTime = now;
             Accumulator += frameTime;
-            var runDt = Dt;
-            if (dt.HasValue)
-            {
-                runDt = dt.Value.Ticks;
-            }
 
-            while (Accumulator >= runDt)
+            while (Accumulator >= Dt)
             {
-                Tick?.Invoke();
-                Accumulator -= runDt;
+                Tick.Invoke();
+                Accumulator -= Dt;
                 ++TickCount;
             }
         }

@@ -6,7 +6,7 @@ using Box2DSharp.Dynamics.Contacts;
 
 namespace Box2DSharp.Tests
 {
-    public class SensorTest : TestBase
+    public class SensorTest : Test
     {
         private const int Count = 7;
 
@@ -14,7 +14,7 @@ namespace Box2DSharp.Tests
 
         private Fixture _sensor;
 
-        protected override void Create()
+        public SensorTest()
         {
             {
                 var bd = new BodyDef();
@@ -55,7 +55,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
         {
             // Traverse the contact results. Apply a force on shapes
             // that overlap the sensor.

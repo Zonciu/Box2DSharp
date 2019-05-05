@@ -6,9 +6,9 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Chain : TestBase
+    public class Chain : Test
     {
-        protected override void Create()
+        public Chain()
         {
             Body ground;
             {

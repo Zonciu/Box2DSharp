@@ -8,7 +8,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class DistanceTest : TestBase
+    public class DistanceTest : Test
     {
         private float _angleB;
 
@@ -22,7 +22,7 @@ namespace Box2DSharp.Tests
 
         private Transform _transformB;
 
-        protected override void Create()
+        public DistanceTest()
         {
             {
                 _transformA.SetIdentity();
@@ -40,7 +40,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -73,7 +73,10 @@ namespace Box2DSharp.Tests
             }
 
             _transformB.Set(_positionB, _angleB);
+        }
 
+        public override void OnRender()
+        {
             var input = new DistanceInput();
             input.ProxyA.Set(_polygonA, 0);
             input.ProxyB.Set(_polygonB, 0);

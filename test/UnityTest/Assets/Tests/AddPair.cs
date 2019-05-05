@@ -6,9 +6,9 @@ using Box2DSharp.Dynamics;
 namespace Box2DSharp.Tests
 {
     [TestName("Add Pair Stress Test")]
-    public class AddPair : TestBase
+    public class AddPair : Test
     {
-        protected override void Create()
+        public AddPair()
         {
             World.Gravity = new Vector2(0.0f, 0.0f);
             {

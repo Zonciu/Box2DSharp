@@ -7,9 +7,9 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class CollisionProcessing : TestBase
+    public class CollisionProcessing : Test
     {
-        protected override void Create()
+        public CollisionProcessing()
         {
             // Ground body
             {

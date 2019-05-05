@@ -9,11 +9,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class ApplyForce : TestBase
+    public class ApplyForce : Test
     {
         private Body _body;
 
-        protected override void Create()
+        public ApplyForce()
         {
             World.Gravity = new Vector2(0.0f, 0.0f);
 
@@ -134,10 +134,8 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
-            DrawString("Press A,D,W to control");
             if (Input.GetKeyDown(KeyCode.W))
             {
                 var f = _body.GetWorldVector(new Vector2(0.0f, -200.0f));
@@ -154,6 +152,11 @@ namespace Box2DSharp.Tests
             {
                 _body.ApplyTorque(-50.0f, true);
             }
+        }
+
+        public override void OnRender()
+        {
+            DrawString("Press A,D,W to control");
         }
     }
 }

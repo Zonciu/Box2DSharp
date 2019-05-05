@@ -1,13 +1,14 @@
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class PositionTest : TestBase
+    public class PositionTest : Test
     {
         /// <inheritdoc />
-        protected override void Create()
+        public PositionTest()
         {
             var gshape = new EdgeShape();
             gshape.Set(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
@@ -20,8 +21,6 @@ namespace Box2DSharp.Tests
                     new BodyDef() {BodyType = BodyType.DynamicBody, Position = new Vector2(RandomFloat(0, 5), RandomFloat(0, 5))});
                 var shape = new CircleShape() {Radius = 1};
 
-                // var shape = new PolygonShape();
-                // shape.SetAsBox(0.125f, 0.125f);
                 b1.CreateFixture(shape, 1.0f);
             }
         }

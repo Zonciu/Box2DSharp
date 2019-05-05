@@ -1,12 +1,13 @@
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class HeavyOnLight : TestBase
+    public class HeavyOnLight : Test
     {
-        protected override void Create()
+        public HeavyOnLight()
         {
             {
                 var bd = new BodyDef();

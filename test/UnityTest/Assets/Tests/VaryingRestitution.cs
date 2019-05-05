@@ -5,9 +5,9 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class VaryingRestitution : TestBase
+    public class VaryingRestitution : Test
     {
-        protected override void Create()
+        public VaryingRestitution()
         {
             {
                 var bd = new BodyDef();

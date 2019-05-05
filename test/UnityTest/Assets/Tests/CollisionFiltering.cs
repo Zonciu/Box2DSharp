@@ -6,7 +6,7 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class CollisionFiltering : TestBase
+    public class CollisionFiltering : Test
     {
         private const short SmallGroup = 1;
 
@@ -26,7 +26,7 @@ namespace Box2DSharp.Tests
 
         private const ushort CircleMask = 0xFFFF;
 
-        protected override void Create()
+        public CollisionFiltering()
         {
             {
                 // Ground body

@@ -7,13 +7,13 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Revolute : TestBase
+    public class Revolute : Test
     {
         private Body m_ball;
 
         private RevoluteJoint m_joint;
 
-        protected override void Create()
+        public Revolute()
         {
             Body ground;
             {
@@ -118,9 +118,8 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
-            DrawString("Keys: (l) limits, (m) motor");
             if (Input.GetKeyDown(KeyCode.L))
             {
                 m_joint.EnableLimit(!m_joint.IsLimitEnabled());
@@ -130,6 +129,11 @@ namespace Box2DSharp.Tests
             {
                 m_joint.EnableMotor(!m_joint.IsMotorEnabled());
             }
+        }
+
+        public override void OnRender()
+        {
+            DrawString("Keys: (l) limits, (m) motor");
         }
     }
 }

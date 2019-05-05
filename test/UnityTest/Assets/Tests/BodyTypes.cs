@@ -7,7 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class BodyTypes : TestBase
+    public class BodyTypes : Test
     {
         private Body _attachment;
 
@@ -15,7 +15,7 @@ namespace Box2DSharp.Tests
 
         private float _speed;
 
-        protected override void Create()
+        public BodyTypes()
         {
             Body ground;
             {
@@ -98,9 +98,26 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        public override void OnRender()
         {
+            DrawString("Keys: (d) dynamic, (s) static, (k) kinematic");
+        }
+
+        protected override void OnStep()
+        {
+            // Drive the kinematic body.
+            if (_platform.BodyType == BodyType.KinematicBody)
+            {
+                var p = _platform.GetTransform().Position;
+                var v = _platform.LinearVelocity;
+
+                if (p.X < -10.0f && v.X < 0.0f || p.X > 10.0f && v.X > 0.0f)
+                {
+                    v.X = -v.X;
+                    _platform.SetLinearVelocity(v);
+                }
+            }
+
             if (Input.GetKeyDown(KeyCode.D))
             {
                 _platform.BodyType = BodyType.DynamicBody;
@@ -117,25 +134,6 @@ namespace Box2DSharp.Tests
                 _platform.SetLinearVelocity(new Vector2(-_speed, 0.0f));
                 _platform.SetAngularVelocity(0.0f);
             }
-        }
-
-        /// <inheritdoc />
-        protected override void PreStep()
-        {
-            // Drive the kinematic body.
-            if (_platform.BodyType == BodyType.KinematicBody)
-            {
-                var p = _platform.GetTransform().Position;
-                var v = _platform.LinearVelocity;
-
-                if (p.X < -10.0f && v.X < 0.0f || p.X > 10.0f && v.X > 0.0f)
-                {
-                    v.X = -v.X;
-                    _platform.SetLinearVelocity(v);
-                }
-            }
-
-            DrawString("Keys: (d) dynamic, (s) static, (k) kinematic");
         }
     }
 }

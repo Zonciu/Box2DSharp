@@ -12,7 +12,7 @@ namespace Box2DSharp
 {
     public class BoxDrawer : IDrawer
     {
-        public DebugDrawer Drawer;
+        public UnityDrawer Drawer;
 
         /// <inheritdoc />
         public DrawFlag Flags { get; set; }

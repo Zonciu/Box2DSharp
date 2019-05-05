@@ -6,13 +6,13 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Bridge : TestBase
+    public class Bridge : Test
     {
         public const int Count = 30;
 
         private Body _middle;
 
-        protected override void Create()
+        public Bridge()
         {
             Body ground;
             {

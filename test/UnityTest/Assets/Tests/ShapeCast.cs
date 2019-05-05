@@ -5,7 +5,7 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Tests
 {
-    public class ShapeCast : TestBase
+    public class ShapeCast : Test
     {
         private const int VertexCount = 8;
 
@@ -21,7 +21,7 @@ namespace Box2DSharp.Tests
 
         private float _radiusB;
 
-        protected override void Create()
+        public ShapeCast()
         {
             _vAs[0].Set(-0.5f, 1.0f);
             _vAs[1].Set(0.5f, 1.0f);
@@ -37,8 +37,7 @@ namespace Box2DSharp.Tests
             _radiusB = Settings.PolygonRadius;
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             var transformA = new Transform {Position = new Vector2(0.0f, 0.25f)};
             transformA.Rotation.SetIdentity();
@@ -52,7 +51,6 @@ namespace Box2DSharp.Tests
             input.TransformA = transformA;
             input.TransformB = transformB;
             input.TranslationB.Set(8.0f, 0.0f);
-
             var hit = DistanceAlgorithm.ShapeCast(out var output, input);
 
             var transformB2 = new Transform
@@ -71,7 +69,6 @@ namespace Box2DSharp.Tests
             var simplexCache = new SimplexCache();
 
             DistanceAlgorithm.Distance(out var distanceOutput, ref simplexCache, distanceInput);
-
             DrawString(
                 $"hit = {hit}, iters = {output.Iterations}, lambda = {output.Lambda}, distance = {distanceOutput.Distance}");
 

@@ -6,11 +6,11 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class CharacterCollision : TestBase
+    public class CharacterCollision : Test
     {
         private Body _character;
 
-        protected override void Create()
+        public CharacterCollision()
         {
             // Ground body
             {
@@ -217,18 +217,21 @@ namespace Box2DSharp.Tests
                 };
                 _character.CreateFixture(fd);
             }
-
-            DrawString("This tests various character collision shapes.");
-            DrawString("Limitation: square and hexagon can snag on aligned boxes.");
-            DrawString("Feature: edge chains have smooth collision inside and out.");
         }
 
         /// <inheritdoc />
-        protected override void PreStep()
+        protected override void OnStep()
         {
             var v = _character.LinearVelocity;
             v.X = -5.0f;
             _character.SetLinearVelocity(v);
+        }
+
+        public override void OnRender()
+        {
+            DrawString("This tests various character collision shapes.");
+            DrawString("Limitation: square and hexagon can snag on aligned boxes.");
+            DrawString("Feature: edge chains have smooth collision inside and out.");
         }
     }
 }

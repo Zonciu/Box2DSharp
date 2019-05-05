@@ -9,7 +9,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class PolyCollision : TestBase
+    public class PolyCollision : Test
     {
         private float _angleB;
 
@@ -23,7 +23,7 @@ namespace Box2DSharp.Tests
 
         private Transform _transformB;
 
-        protected override void Create()
+        public PolyCollision()
         {
             {
                 _polygonA.SetAsBox(0.2f, 0.4f);
@@ -38,8 +38,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -72,11 +71,15 @@ namespace Box2DSharp.Tests
             }
 
             _transformB.Set(_positionB, _angleB);
-            var manifold = new Manifold();
+        }
 
+        public override void OnRender()
+        {
+            var manifold = new Manifold();
             CollisionUtils.CollidePolygons(ref manifold, _polygonA, _transformA, _polygonB, _transformB);
             var worldManifold = new WorldManifold();
             worldManifold.Initialize(manifold, _transformA, _polygonA.Radius, _transformB, _polygonB.Radius);
+
             DrawString($"point count = {manifold.PointCount}");
             {
                 var color = Color.FromArgb(230, 230, 230);

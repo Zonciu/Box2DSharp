@@ -5,11 +5,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class HelloWorld : TestBase
+    public class HelloWorld : Test
     {
         private Body _body;
 
-        protected override void Create()
+        public HelloWorld()
         {
             var groundBodyDef = new BodyDef {BodyType = BodyType.StaticBody};
             groundBodyDef.Position.Set(0.0f, -10.0f);

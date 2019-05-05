@@ -6,11 +6,11 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Pulleys : TestBase
+    public class Pulleys : Test
     {
         private PulleyJoint _joint1;
 
-        protected override void Create()
+        public Pulleys()
         {
             var y = 16.0f;
             var L = 12.0f;
@@ -72,7 +72,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreStep()
+        public override void OnRender()
         {
             var ratio = _joint1.GetRatio();
             var L = _joint1.GetCurrentLengthA() + ratio * _joint1.GetCurrentLengthB();

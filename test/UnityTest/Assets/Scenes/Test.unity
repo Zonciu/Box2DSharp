@@ -1951,7 +1951,6 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420034}
-  - component: {fileID: 519420035}
   - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
@@ -2068,42 +2067,12 @@ MonoBehaviour:
   Background: {fileID: 0}
   MouseInViewPort: 0
   MouseInUI: 0
-  StartTest: Sphere Stack
---- !u!114 &519420035
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c4917ce337a4de799e890618e9be34b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DebugDrawer: {fileID: 0}
-  Sleep: 1
-  WarmStarting: 1
-  TimeOfImpact: 1
-  SubStepping: 0
-  Shape: 1
-  Joint: 1
-  AABB: 0
-  Pair: 0
-  CenterOfMass: 0
-  ContactPoint: 0
-  ContactNormals: 0
-  ContactImpulse: 0
-  FrictionImpulse: 0
-  Statistics: 0
-  Profile: 0
-  Pause: 0
-  SingleStep: 0
-  Frequency: 60
-  PositionIteration: 3
-  VelocityIteration: 8
-  ShowControlPanel: 0
-  EnableMouseAction: 0
+  CurrentTestIndex: 0
+  StartTest: Hello World
+  MainCamera: {fileID: 0}
+  Diference: {x: 0, y: 0, z: 0}
+  Origin: {x: 0, y: 0, z: 0}
+  Drag: 0
 --- !u!1 &526209576
 GameObject:
   m_ObjectHideFlags: 0

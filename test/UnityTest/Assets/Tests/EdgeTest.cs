@@ -5,9 +5,9 @@ using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class EdgeTest : TestBase
+    public class EdgeTest : Test
     {
-        protected override void Create()
+        public EdgeTest()
         {
             {
                 var bd = new BodyDef();

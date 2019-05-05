@@ -8,7 +8,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class Tiles : TestBase
+    public class Tiles : Test
     {
         [ShowOnly]
         public long CreateTime;
@@ -30,7 +30,7 @@ namespace Box2DSharp.Tests
 
         private int _bodyIndex;
 
-        protected override void Create()
+        public Tiles()
         {
             var fixtureCount = 0;
             var timer = Stopwatch.StartNew();
@@ -99,7 +99,7 @@ namespace Box2DSharp.Tests
             FixtureCount = fixtureCount;
         }
 
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -109,17 +109,16 @@ namespace Box2DSharp.Tests
                     if (_bodies[z] != null)
                     {
                         ++j;
-                        Console.WriteLine($"Deactive {j}");
 
                         var active = _bodies[z].IsActive;
                         _bodies[z].IsActive = !active;
-                        Console.WriteLine($"Deactived {j}");
                     }
                 }
             }
+        }
 
-            DrawString($"create time = {CreateTime} ms, fixture count = {FixtureCount}");
-            DrawString($"dynamic tree height = {DynamicTreeHeight}, min = {MinHeight}");
+        public override void OnRender()
+        {
             var cm = World.ContactManager;
             var height = cm.BroadPhase.GetTreeHeight();
             var leafCount = cm.BroadPhase.GetProxyCount();
@@ -127,6 +126,8 @@ namespace Box2DSharp.Tests
             var minimumHeight = (int) Math.Ceiling(Math.Log(minimumNodeCount) / Math.Log(2.0f));
             DynamicTreeHeight = height;
             MinHeight = minimumHeight;
+            DrawString($"create time = {CreateTime} ms, fixture count = {FixtureCount}");
+            DrawString($"dynamic tree height = {DynamicTreeHeight}, min = {MinHeight}");
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Box2DSharp.Tests
         }
     }
 
-    public class EdgeShapes : TestBase
+    public class EdgeShapes : Test
     {
         private const int MaxBodies = 256;
 
@@ -41,7 +41,7 @@ namespace Box2DSharp.Tests
 
         private CircleShape _circle = new CircleShape();
 
-        protected override void Create()
+        public EdgeShapes()
         {
             // Ground body
             {
@@ -166,8 +166,41 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
+        {
+            DrawString("Press 1-5 to drop stuff");
+
+            var advanceRay = TestSettings.Pause == false || TestSettings.SingleStep;
+
+            var L = 25.0f;
+            var point1 = new Vector2(0.0f, 10.0f);
+
+            var d = new Vector2(L * (float) Math.Cos(_angle), -L * (float) Math.Abs(Math.Sin(_angle)));
+            var point2 = point1 + d;
+
+            var callback = new EdgeShapesCallback();
+
+            World.RayCast(callback, point1, point2);
+
+            if (callback.Fixture != null)
+            {
+                Drawer.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
+                Drawer.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
+                var head = callback.Point + 0.5f * callback.Normal;
+                Drawer.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
+            }
+            else
+            {
+                Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
+            }
+
+            if (advanceRay)
+            {
+                _angle += 0.25f * Settings.Pi / 180.0f;
+            }
+        }
+
+        protected override void OnStep()
         {
             var k = -1;
             if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -203,37 +236,6 @@ namespace Box2DSharp.Tests
             if (Input.GetKeyDown(KeyCode.D))
             {
                 DestroyBody();
-            }
-
-            var advanceRay = TestSettings.Pause == false || TestSettings.SingleStep;
-
-            DrawString("Press 1-5 to drop stuff");
-
-            var L = 25.0f;
-            var point1 = new Vector2(0.0f, 10.0f);
-
-            var d = new Vector2(L * (float) Math.Cos(_angle), -L * (float) Math.Abs(Math.Sin(_angle)));
-            var point2 = point1 + d;
-
-            var callback = new EdgeShapesCallback();
-
-            World.RayCast(callback, point1, point2);
-
-            if (callback.Fixture != null)
-            {
-                Drawer.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
-                Drawer.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
-                var head = callback.Point + 0.5f * callback.Normal;
-                Drawer.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
-            }
-            else
-            {
-                Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
-            }
-
-            if (advanceRay)
-            {
-                _angle += 0.25f * Settings.Pi / 180.0f;
             }
         }
     }

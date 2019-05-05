@@ -1,16 +1,17 @@
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
+using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 
 namespace Box2DSharp.Tests
 {
-    public class SphereStack : TestBase
+    public class SphereStack : Test
     {
         private const int Count = 10;
 
         private readonly Body[] _bodies = new Body[Count];
 
-        protected override void Create()
+        public SphereStack()
         {
             {
                 var bd = new BodyDef();

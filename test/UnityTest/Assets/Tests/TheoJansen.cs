@@ -9,7 +9,7 @@ using Vector2 = System.Numerics.Vector2;
 namespace Box2DSharp.Tests
 {
     [TestName("Theo Jansen's Walker")]
-    public class TheoJansen : TestBase
+    public class TheoJansen : Test
     {
         private Body _chassis;
 
@@ -23,7 +23,7 @@ namespace Box2DSharp.Tests
 
         private Body _wheel;
 
-        protected override void Create()
+        public TheoJansen()
         {
             _offset.Set(0.0f, 8.0f);
             _motorSpeed = 2.0f;
@@ -206,7 +206,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -227,7 +227,10 @@ namespace Box2DSharp.Tests
             {
                 _motorJoint.EnableMotor(!_motorJoint.IsMotorEnabled());
             }
+        }
 
+        public override void OnRender()
+        {
             DrawString("Keys: left = a, brake = s, right = d, toggle motor = m");
         }
     }

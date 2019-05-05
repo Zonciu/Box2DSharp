@@ -6,7 +6,7 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class Gears : TestBase
+    public class Gears : Test
     {
         private RevoluteJoint _joint1;
 
@@ -18,7 +18,7 @@ namespace Box2DSharp.Tests
 
         private GearJoint _joint5;
 
-        protected override void Create()
+        public Gears()
         {
             Body ground;
             {
@@ -141,8 +141,7 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        public override void OnRender()
         {
             var ratio = _joint4.GetRatio();
             var value = _joint1.GetJointAngle() + ratio * _joint2.GetJointAngle();

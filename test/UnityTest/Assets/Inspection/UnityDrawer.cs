@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Debug = System.Diagnostics.Debug;
@@ -6,7 +7,7 @@ using Debug = System.Diagnostics.Debug;
 namespace Box2DSharp.Inspection
 {
     [ExecuteInEditMode]
-    public class DebugDrawer : MonoBehaviour
+    public class UnityDrawer : MonoBehaviour
     {
         private const string SceneCameraName = "SceneCamera";
 
@@ -21,12 +22,14 @@ namespace Box2DSharp.Inspection
         private readonly List<(Vector3 Center, float Radius, Color color)> _points =
             new List<(Vector3 Center, float Radius, Color color)>();
 
-        public static DebugDrawer GetDrawer()
+        private StringBuilder _stringBuilder = new StringBuilder();
+        
+        public static UnityDrawer GetDrawer()
         {
-            var drawLines = FindObjectOfType<DebugDrawer>();
+            var drawLines = FindObjectOfType<UnityDrawer>();
             if (drawLines == default)
             {
-                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<DebugDrawer>();
+                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<UnityDrawer>();
             }
 
             return drawLines;

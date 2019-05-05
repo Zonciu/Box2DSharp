@@ -9,13 +9,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace Box2DSharp.Tests
 {
     [TestName("Rope Joint")]
-    public class RopeJointTest : TestBase
+    public class RopeJointTest : Test
     {
         private Joint _rope;
 
         private RopeJointDef _ropeDef = new RopeJointDef();
 
-        protected override void Create()
+        public RopeJointTest()
         {
             Body ground;
             {
@@ -88,7 +88,7 @@ namespace Box2DSharp.Tests
         }
 
         /// <inheritdoc />
-        protected override void PostStep()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
@@ -102,16 +102,12 @@ namespace Box2DSharp.Tests
                     _rope = World.CreateJoint(_ropeDef);
                 }
             }
+        }
 
+        public override void OnRender()
+        {
             DrawString("Press (j) to toggle the rope joint.");
-            if (_rope != null)
-            {
-                DrawString("Rope ON");
-            }
-            else
-            {
-                DrawString("Rope OFF");
-            }
+            DrawString(_rope != null ? "Rope ON" : "Rope OFF");
         }
     }
 }

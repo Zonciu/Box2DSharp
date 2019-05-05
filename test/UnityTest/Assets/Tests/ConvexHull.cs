@@ -12,42 +12,27 @@ using Color = System.Drawing.Color;
 
 namespace Box2DSharp.Tests
 {
-    public class ConvexHull : TestBase
+    public class ConvexHull : Test
     {
-        private const int e_count = Settings.MaxPolygonVertices;
+        private const int Count = Settings.MaxPolygonVertices;
 
-        Vector2[] m_points = new Vector2[Settings.MaxPolygonVertices];
+        private Vector2[] _points = new Vector2[Settings.MaxPolygonVertices];
 
-        private int m_count;
+        private int _count;
 
-        private bool m_auto;
+        private bool _auto;
 
-        private PolygonShape Shape;
-
-        protected override void Create()
+        public ConvexHull()
         {
             Generate();
-            m_auto = false;
-
-            // {
-            //     var bd = new BodyDef()
-            //     {
-            //         BodyType = BodyType.StaticBody
-            //     };
-            //     var body = World.CreateBody(bd);
-            //
-            //     Shape = new PolygonShape();
-            //     Shape.Set(m_points);
-            //     Shape = (PolygonShape) body.CreateFixture(Shape, 0.0f).Shape;
-            // }
+            _auto = false;
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                m_auto = !m_auto;
+                _auto = !_auto;
             }
 
             if (Input.GetKeyDown(KeyCode.G))
@@ -56,49 +41,52 @@ namespace Box2DSharp.Tests
             }
         }
 
-        /// <inheritdoc />
-        protected override void PostStep()
+        private readonly GUIStyle _style = new GUIStyle
         {
-            //            Shape.Set(m_points);
-            DrawString("Press g to generate a new random convex hull");
+            fontSize = Screen.height * 2 / 100,
+            alignment = TextAnchor.LowerLeft,
+            normal =
+            {
+                textColor = new UnityEngine.Color(0.9f, 0.6f, 0.6f)
+            }
+        };
 
-            // Todo
+        public override void OnGUI()
+        {
+            foreach (var (position, text) in _contents)
+            {
+                var rect = new Rect(position.x, position.y, Screen.width, Screen.height * 2f / 100f);
+                GUI.Label(rect, text, _style);
+            }
+        }
+
+        public override void OnRender()
+        {
+            DrawString("Press g to generate a new random convex hull");
+            DrawString("Press a to toggle random convex hull auto generation");
             var shape = new PolygonShape();
-            shape.Set(m_points);
+            shape.Set(_points);
             var drawLine = new Vector2[shape.Count + 1];
-            Array.Copy(shape.Vertices, drawLine, shape.Count);
+            Array.Copy(shape.Vertices.ToArray(), drawLine, shape.Count);
             drawLine[drawLine.Length - 1] = shape.Vertices[0];
             Drawer.DrawPolygon(drawLine, drawLine.Length, Color.FromArgb(230, 230, 230));
             _contents.Clear();
+            var points = _points.Select(e => TestSettings.Camera.WorldToScreenPoint(e.ToUnityVector2()))
+                                .Select(e => new UnityEngine.Vector2(e.x, Screen.height - e.y))
+                                .ToArray();
 
-            var points = m_points.Select(e => MainCamera.WorldToScreenPoint(e.ToUnityVector2()))
-                                 .Select(e => new UnityEngine.Vector2(e.x, Screen.height - e.y))
-                                 .ToArray();
-            for (var i = 0; i < m_count; ++i)
+            for (var i = 0; i < _count; ++i)
             {
-                Drawer.DrawPoint(m_points[i], 10.0f, Color.FromArgb(77, 230, 77));
-
+                Drawer.DrawPoint(_points[i], 10.0f, Color.FromArgb(77, 230, 77));
                 WriteString(points[i] + new UnityEngine.Vector2(0.5f, 0.5f), $"{i}");
             }
 
             Drawer.DrawPoint(Vector2.Zero, 5f, Color.Yellow);
 
-            //
-            // if (shape.Validate() == false)
-            // {
-            //     //m_textLine += 0;
-            // }
-
-            if (m_auto)
+            if (_auto && !TestSettings.Pause)
             {
                 Generate();
             }
-        }
-
-        private ConvexHull()
-        {
-            Generate();
-            m_auto = false;
         }
 
         private readonly List<(UnityEngine.Vector2 position, string text)> _contents =
@@ -109,28 +97,12 @@ namespace Box2DSharp.Tests
             _contents.Add((position, text));
         }
 
-        /// <inheritdoc />
-        protected override void OnGUI()
-        {
-            base.OnGUI();
-            foreach (var (position, text) in _contents)
-            {
-                var rect = new Rect(position.x, position.y, Screen.width, Screen.height);
-                var style = new GUIStyle
-                {
-                    fontSize = Screen.height * 2 / 100,
-                    normal = {textColor = new UnityEngine.Color(0.9f, 0.6f, 0.6f)}
-                };
-                GUI.Label(rect, text, style);
-            }
-        }
-
         void Generate()
         {
             var lowerBound = new Vector2(-8.0f, -8.0f);
             var upperBound = new Vector2(8.0f, 8.0f);
 
-            for (var i = 0; i < e_count; ++i)
+            for (var i = 0; i < Count; ++i)
             {
                 var x = 10.0f * RandomFloat();
                 var y = 10.0f * RandomFloat();
@@ -139,10 +111,10 @@ namespace Box2DSharp.Tests
                 // This will stress the convex hull algorithm.
                 var v = new Vector2(x, y);
                 v = Vector2.Clamp(v, lowerBound, upperBound);
-                m_points[i] = v;
+                _points[i] = v;
             }
 
-            m_count = e_count;
+            _count = Count;
         }
     }
 }

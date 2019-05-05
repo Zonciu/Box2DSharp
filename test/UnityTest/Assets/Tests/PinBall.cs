@@ -7,7 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests
 {
-    public class PinBall : TestBase
+    public class PinBall : Test
     {
         private Body _ball;
 
@@ -17,7 +17,7 @@ namespace Box2DSharp.Tests
 
         private RevoluteJoint _rightJoint;
 
-        protected override void Create()
+        public PinBall()
         {
             // Ground body
             Body ground;
@@ -107,8 +107,7 @@ namespace Box2DSharp.Tests
             _button = false;
         }
 
-        /// <inheritdoc />
-        protected override void PreUpdate()
+        protected override void OnStep()
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
@@ -130,7 +129,10 @@ namespace Box2DSharp.Tests
                 _leftJoint.SetMotorSpeed(-10.0f);
                 _rightJoint.SetMotorSpeed(10.0f);
             }
+        }
 
+        public override void OnRender()
+        {
             DrawString("Press 'a' to control the flippers");
         }
     }

@@ -33,9 +33,9 @@ namespace Box2DSharp.Editor
         [MenuItem("Assets/Box2D/Show Tests")]
         public static void ShowTests()
         {
-            var testNames = typeof(TestBase)
+            var testNames = typeof(Test)
                            .Assembly.GetTypes()
-                           .Where(e => e.BaseType == typeof(TestBase))
+                           .Where(e => e.BaseType == typeof(Test))
                            .Select(e => (Regex.Replace(e.Name, @"(\B[A-Z])", " $1")))
                            .ToArray();
             Array.Sort(testNames);

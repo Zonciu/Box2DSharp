@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Box2DSharp
 {
-    public class TestSettings : MonoBehaviour
+    public class TestSettings
     {
-        [HideInInspector]
-        public DebugDrawer DebugDrawer;
+        public Camera Camera;
+        
+        public UnityDrawer UnityDrawer;
 
-        [HideInInspector]
-        public BoxDrawer WorldDrawer;
+        public BoxDrawer Drawer;
 
         [Toggle]
         public bool Sleep = true;
@@ -61,7 +61,7 @@ namespace Box2DSharp
 
         public bool SingleStep;
 
-        public int Frequency = 60;
+        public float Dt = 1 / 60f;
 
         public int PositionIteration = 3;
 
@@ -70,6 +70,9 @@ namespace Box2DSharp
         public bool ShowControlPanel;
 
         public bool EnableMouseAction;
+
+        public void Awake()
+        { }
     }
 
     [AttributeUsage(AttributeTargets.Field)]

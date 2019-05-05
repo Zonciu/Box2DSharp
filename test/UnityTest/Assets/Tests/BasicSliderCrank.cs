@@ -6,9 +6,9 @@ using Box2DSharp.Dynamics.Joints;
 
 namespace Box2DSharp.Tests
 {
-    public class BasicSliderCrank : TestBase
+    public class BasicSliderCrank : Test
     {
-        protected override void Create()
+        public BasicSliderCrank()
         {
             Body ground;
             {
