@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using Box2DSharp.Collision;
@@ -9,9 +8,6 @@ using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Contacts;
 using Box2DSharp.Dynamics.Joints;
-using Box2DSharp.Inspection;
-using UnityEngine;
-using UnityEngine.UIElements;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;

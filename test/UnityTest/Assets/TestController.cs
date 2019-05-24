@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Box2DSharp.Inspection;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Slider = UnityEngine.UI.Slider;
 using Toggle = UnityEngine.UI.Toggle;
@@ -231,7 +228,7 @@ namespace Box2DSharp
 
             if (Test.TestSettings.EnableMouseAction)
             {
-                if (Input.GetMouseButtonDown((int) MouseButton.LeftMouse))
+                if (Input.GetMouseButtonDown(0))
                 {
                     if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     {
@@ -243,13 +240,13 @@ namespace Box2DSharp
                     }
                 }
 
-                if (Input.GetMouseButtonUp((int) MouseButton.LeftMouse))
+                if (Input.GetMouseButtonUp(0))
                 {
                     CurrentTest.MouseUp();
                 }
 
                 // Mouse right move camera
-                if (Input.GetMouseButton((int) MouseButton.RightMouse))
+                if (Input.GetMouseButton(1))
                 {
                     Diference = MainCamera.ScreenToWorldPoint(Input.mousePosition)
                               - MainCamera.transform.position;
