@@ -3,7 +3,7 @@ using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 using UnityEngine;
-using Color = System.Drawing.Color;
+using Color = Box2DSharp.Common.Color;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Box2DSharp.Tests

@@ -15,7 +15,7 @@ using UnityEngine.UIElements;
 using Joint = Box2DSharp.Dynamics.Joints.Joint;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
-using Color = System.Drawing.Color;
+using Color = Box2DSharp.Common.Color;
 
 namespace Box2DSharp
 {
@@ -327,15 +327,15 @@ namespace Box2DSharp
                         var tangent = MathUtils.Cross(point.Normal, 1.0f);
                         var p1 = point.Position;
                         var p2 = p1 + impulseScale * point.TangentImpulse * tangent;
-                        TestSettings.Drawer.DrawSegment(p1, p2, System.Drawing.Color.FromArgb(230, 230, 77));
+                        TestSettings.Drawer.DrawSegment(p1, p2, Box2DSharp.Common.Color.FromArgb(230, 230, 77));
                     }
                 }
             }
 
             if (BombSpawning)
             {
-                TestSettings.Drawer.DrawPoint(BombSpawnPoint, 4.0f, System.Drawing.Color.Blue);
-                TestSettings.Drawer.DrawSegment(MouseWorld, BombSpawnPoint, System.Drawing.Color.FromArgb(203, 203, 203));
+                TestSettings.Drawer.DrawPoint(BombSpawnPoint, 4.0f, Box2DSharp.Common.Color.Blue);
+                TestSettings.Drawer.DrawSegment(MouseWorld, BombSpawnPoint, Box2DSharp.Common.Color.FromArgb(203, 203, 203));
             }
         }
 

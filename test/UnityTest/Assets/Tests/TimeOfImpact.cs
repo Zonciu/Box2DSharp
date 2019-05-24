@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Box2DSharp.Collision;
 using Box2DSharp.Collision.Shapes;

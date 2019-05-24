@@ -4,7 +4,7 @@ using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics.Internal;
 using UnityEngine;
-using Color = System.Drawing.Color;
+using Color = Box2DSharp.Common.Color;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
 

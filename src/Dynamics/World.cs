@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Numerics;
 using System.Threading;
 using Box2DSharp.Collision;

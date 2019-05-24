@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Box2DSharp.Common;
 using Box2DSharp.Inspection;
 using UnityEngine;
-using Color = System.Drawing.Color;
+using Color = Box2DSharp.Common.Color;
 using Transform = Box2DSharp.Common.Transform;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = UnityEngine.Vector3;

@@ -25,7 +25,7 @@ namespace Box2DSharp.Inspection
             return new Vector3(vector2.X, vector2.Y, 0);
         }
 
-        public static Color ToUnityColor(this System.Drawing.Color color)
+        public static Color ToUnityColor(this Box2DSharp.Common.Color color)
         {
             return new Color(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
         }
