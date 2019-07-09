@@ -28,15 +28,18 @@ namespace NETCoreTest
 
         public FixedUpdate FixedUpdate;
 
-        public FpsCounter FpsCounter = new FpsCounter();
-
         public Test()
         {
             World = new World(new Vector2(0, -9.8f));
         }
 
-        public void Tumbler(bool stressTest = false)
+        public void Tumbler(bool stressTest = false, bool showProfile = false)
         {
+            if (stressTest == false)
+            {
+                Console.Clear();
+            }
+
             Body ground;
             {
                 var bd = new BodyDef();
@@ -90,23 +93,21 @@ namespace NETCoreTest
             }
             else
             {
-                FixedUpdate = new FixedUpdate(TimeSpan.FromSeconds(1 / 60d), () => { Step(true); });
-                FixedUpdate.Start();
+                FixedUpdate = new FixedUpdate {UpdateCallback = () => Step(showProfile)};
                 while (true)
                 {
-                    FixedUpdate.Update();
+                    FixedUpdate.Tick();
                 }
             }
         }
 
-        private float _dt = 1 / 60f;
+        private const float Dt = 1 / 60f;
 
         private readonly StringBuilder _sb = new StringBuilder();
 
         private void Step(bool showProfile)
         {
-            World.Step(_dt, 8, 3);
-            FpsCounter.CountOne();
+            World.Step(Dt, 8, 3);
             if (_bodyCount < Count)
             {
                 var bd = new BodyDef
@@ -147,9 +148,9 @@ namespace NETCoreTest
                 TotalProfile.Broadphase += p.Broadphase;
 
                 var aveProfile = new Profile();
-                if (FixedUpdate.TickCount > 0)
+                if (FixedUpdate.UpdateTime.FrameCount > 0)
                 {
-                    var scale = 1.0f / FixedUpdate.TickCount;
+                    var scale = 1.0f / FixedUpdate.UpdateTime.FrameCount;
                     aveProfile.Step = scale * TotalProfile.Step;
                     aveProfile.Collide = scale * TotalProfile.Collide;
                     aveProfile.Solve = scale * TotalProfile.Solve;
@@ -160,7 +161,7 @@ namespace NETCoreTest
                     aveProfile.Broadphase = scale * TotalProfile.Broadphase;
                 }
 
-                _sb.AppendLine($"FPS {FpsCounter.Fps}, ms {FpsCounter.Ms}");
+                _sb.AppendLine($"FPS {FixedUpdate.UpdateTime.FramePerSecond}, ms {FixedUpdate.UpdateTime.Elapsed.TotalMilliseconds}");
                 _sb.AppendLine($"step [ave] (max) = {p.Step} [{aveProfile.Step}] ({MaxProfile.Step})");
                 _sb.AppendLine($"collide [ave] (max) = {p.Collide} [{aveProfile.Collide}] ({MaxProfile.Collide})");
                 _sb.AppendLine($"solve [ave] (max) = {p.Solve} [{aveProfile.Solve}] ({MaxProfile.Solve})");
