@@ -32,7 +32,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 活跃
         /// </summary>
-        IsActive = 1 << 5,
+        IsEnabled = 1 << 5,
 
         /// <summary>
         /// 碰撞时间

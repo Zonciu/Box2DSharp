@@ -157,7 +157,7 @@ namespace Box2DSharp.Dynamics.Joints
 
         /// Get the next joint the world joint list.
         /// Short-cut function to determine if either body is inactive.
-        public bool IsActive => BodyA.IsActive && BodyB.IsActive;
+        public bool IsEnabled => BodyA.IsEnabled && BodyB.IsEnabled;
 
         /// Get collide connected.
         /// Note: modifying the collide connect flag won't work correctly because

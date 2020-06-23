@@ -269,8 +269,8 @@ namespace Testbed.Tests
                 {
                     if (_bodies[i] != null)
                     {
-                        var active = _bodies[i].IsActive;
-                        _bodies[i].IsActive = !active;
+                        var active = _bodies[i].IsEnabled;
+                        _bodies[i].IsEnabled = !active;
                     }
                 }
             }

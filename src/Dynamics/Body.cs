@@ -31,13 +31,13 @@ namespace Box2DSharp.Dynamics
     /// You can safely re-use body definitions. Shapes are added to a body after construction.
     public struct BodyDef
     {
-        private bool? _active;
+        private bool? _enabled;
 
-        /// Does this body start out active?
-        public bool Active
+        /// Does this body start out enabled?
+        public bool Enabled
         {
-            get => _active ?? true;
-            set => _active = value;
+            get => _enabled ?? true;
+            set => _enabled = value;
         }
 
         private bool? _allowSleep;
@@ -123,10 +123,7 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         public IReadOnlyList<Fixture> FixtureList
         {
-            get
-            {
-                return Fixtures;
-            }
+            get { return Fixtures; }
         }
 
         /// <summary>
@@ -253,9 +250,9 @@ namespace Box2DSharp.Dynamics
                 Flags |= BodyFlags.IsAwake;
             }
 
-            if (def.Active)
+            if (def.Enabled)
             {
-                Flags |= BodyFlags.IsActive;
+                Flags |= BodyFlags.IsEnabled;
             }
 
             _world = world;
@@ -493,22 +490,22 @@ namespace Box2DSharp.Dynamics
         /// in the body list.
         /// Get the active state of the body.
         /// </summary>
-        public bool IsActive
+        public bool IsEnabled
 
         {
-            get => HasFlag(BodyFlags.IsActive);
+            get => HasFlag(BodyFlags.IsEnabled);
             set
             {
                 Debug.Assert(_world.IsLocked == false);
 
-                if (value == IsActive)
+                if (value == IsEnabled)
                 {
                     return;
                 }
 
                 if (value)
                 {
-                    Flags |= BodyFlags.IsActive;
+                    Flags |= BodyFlags.IsEnabled;
 
                     // Create all proxies.
                     // 激活时创建粗检测代理
@@ -518,11 +515,12 @@ namespace Box2DSharp.Dynamics
                         f.CreateProxies(broadPhase, Transform);
                     }
 
-                    // Contacts are created the next time step.
+                    // Contacts are created at the beginning of the next
+                    World.HasNewContacts = true;
                 }
                 else
                 {
-                    Flags &= ~BodyFlags.IsActive;
+                    Flags &= ~BodyFlags.IsEnabled;
 
                     // Destroy all proxies.
                     // 休眠时销毁粗检测代理
@@ -653,7 +651,7 @@ namespace Box2DSharp.Dynamics
 
             var fixture = Fixture.Create(this, def);
 
-            if (HasFlag(BodyFlags.IsActive))
+            if (HasFlag(BodyFlags.IsEnabled))
             {
                 var broadPhase = _world.ContactManager.BroadPhase;
                 fixture.CreateProxies(broadPhase, Transform);
@@ -671,7 +669,7 @@ namespace Box2DSharp.Dynamics
             // Let the world know we have a new fixture. This will cause new contacts
             // to be created at the beginning of the next time step.
             // 通知世界存在新增夹具,在下一个时间步中将自动创建新夹具的接触点
-            _world.NotifyNewFixture();
+            _world.HasNewContacts = true;
 
             return fixture;
         }
@@ -739,7 +737,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // 如果物体处于活跃状态,销毁夹具的粗检测代理对象
-            if (HasFlag(BodyFlags.IsActive))
+            if (HasFlag(BodyFlags.IsEnabled))
             {
                 var broadPhase = _world.ContactManager.BroadPhase;
                 fixture.DestroyProxies(broadPhase);
@@ -1188,7 +1186,7 @@ namespace Box2DSharp.Dynamics
             DumpLogger.Log($"  bd.awake = bool({HasFlag(BodyFlags.IsAwake)});");
             DumpLogger.Log($"  bd.fixedRotation = bool({HasFlag(BodyFlags.FixedRotation)});");
             DumpLogger.Log($"  bd.bullet = bool({HasFlag(BodyFlags.IsBullet)});");
-            DumpLogger.Log($"  bd.active = bool({HasFlag(BodyFlags.IsActive)});");
+            DumpLogger.Log($"  bd.active = bool({HasFlag(BodyFlags.IsEnabled)});");
             DumpLogger.Log($"  bd.gravityScale = {GravityScale};");
             DumpLogger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
             foreach (var f in Fixtures)

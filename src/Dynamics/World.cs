@@ -28,9 +28,9 @@ namespace Box2DSharp.Dynamics
         private bool _stepComplete;
 
         /// <summary>
-        /// 新增夹具
+        /// 存在新接触点
         /// </summary>
-        private bool _hasNewFixture;
+        public bool HasNewContacts;
 
         /// <summary>
         /// Register a destruction listener. The listener is owned by you and must
@@ -152,7 +152,8 @@ namespace Box2DSharp.Dynamics
         /// The minimum is 1.
         public float TreeQuality => ContactManager.BroadPhase.GetTreeQuality();
 
-        public World() : this(new Vector2(0, -10))
+        public World()
+            : this(new Vector2(0, -10))
         { }
 
         public World(in Vector2 gravity)
@@ -201,16 +202,6 @@ namespace Box2DSharp.Dynamics
             Profile = null;
             ToiProfile = null;
             GJkProfile = null;
-        }
-
-        internal void NotifyNewFixture()
-        {
-            _hasNewFixture = true;
-        }
-
-        private void ResetNewFixture()
-        {
-            _hasNewFixture = false;
         }
 
         /// <summary>
@@ -436,13 +427,13 @@ namespace Box2DSharp.Dynamics
 
             // If new fixtures were added, we need to find the new contacts.
             // 如果存在新增夹具,则需要找到新接触点
-            if (_hasNewFixture)
+            if (HasNewContacts)
             {
                 // 寻找新接触点
                 ContactManager.FindNewContacts();
 
                 // 去除新增夹具标志
-                ResetNewFixture();
+                HasNewContacts = false;
             }
 
             // 锁定世界
@@ -555,8 +546,8 @@ namespace Box2DSharp.Dynamics
             /// <inheritdoc />
             public bool QueryCallback(int proxyId)
             {
-                var proxy = (FixtureProxy) ContactManager
-                                          .BroadPhase.GetUserData(proxyId);
+                var proxy = (FixtureProxy)ContactManager
+                                         .BroadPhase.GetUserData(proxyId);
                 return Callback.QueryCallback(proxy.Fixture);
             }
         }
@@ -594,7 +585,7 @@ namespace Box2DSharp.Dynamics
             public float RayCastCallback(in RayCastInput input, int proxyId)
             {
                 var userData = ContactManager.BroadPhase.GetUserData(proxyId);
-                var proxy = (FixtureProxy) userData;
+                var proxy = (FixtureProxy)userData;
                 var fixture = proxy.Fixture;
                 var index = proxy.ChildIndex;
 
@@ -721,7 +712,7 @@ namespace Box2DSharp.Dynamics
                     continue;
                 }
 
-                if (body.IsAwake == false || body.IsActive == false) // 跳过休眠物体
+                if (body.IsAwake == false || body.IsEnabled == false) // 跳过休眠物体
                 {
                     continue;
                 }
@@ -747,7 +738,7 @@ namespace Box2DSharp.Dynamics
                     // Grab the next body off the stack and add it to the island.
                     //--stackCount;
                     var b = stack.Pop();
-                    Debug.Assert(b.IsActive);
+                    Debug.Assert(b.IsEnabled);
                     island.Add(b);
 
                     // Make sure the body is awake (without resetting sleep timer).
@@ -826,7 +817,7 @@ namespace Box2DSharp.Dynamics
 
                         // Don't simulate joints connected to inactive bodies.
                         // 跳过闲置物体
-                        if (other.IsActive == false)
+                        if (other.IsEnabled == false)
                         {
                             continue;
                         }
@@ -1422,7 +1413,7 @@ namespace Box2DSharp.Dynamics
                     var b = node.Value;
                     node = node.Next;
                     var xf = b.GetTransform();
-                    var isActive = b.IsActive;
+                    var isActive = b.IsEnabled;
                     var isAwake = b.IsAwake;
                     foreach (var f in b.Fixtures)
                     {
@@ -1488,7 +1479,7 @@ namespace Box2DSharp.Dynamics
                 {
                     var b = node.Value;
                     node = node.Next;
-                    if (b.IsActive == false)
+                    if (b.IsEnabled == false)
                     {
                         continue;
                     }
@@ -1549,7 +1540,7 @@ namespace Box2DSharp.Dynamics
 
             case JointType.PulleyJoint:
             {
-                var pulley = (PulleyJoint) joint;
+                var pulley = (PulleyJoint)joint;
                 var s1 = pulley.GetGroundAnchorA();
                 var s2 = pulley.GetGroundAnchorB();
                 Drawer.DrawSegment(s1, p1, color);
@@ -1612,9 +1603,9 @@ namespace Box2DSharp.Dynamics
 
                 var ghostColor = Color.FromArgb(
                     color.A,
-                    (int) (0.75f * color.R),
-                    (int) (0.75f * color.G),
-                    (int) (0.75f * color.B));
+                    (int)(0.75f * color.R),
+                    (int)(0.75f * color.G),
+                    (int)(0.75f * color.B));
 
                 var v1 = MathUtils.Mul(xf, vertices[0]);
                 Drawer.DrawPoint(v1, 4.0f, color);
