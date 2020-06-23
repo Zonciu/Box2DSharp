@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Box2DSharp", "src\Box2DShar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NETCoreTest", "test\NETCoreTest\NETCoreTest.csproj", "{FFEAB8DD-9D3F-4076-AC04-2C965B64818D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testbed", "test\Testbed\Testbed.csproj", "{0A8DEEBB-F454-489E-83D2-67EF2E9AB826}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FFEAB8DD-9D3F-4076-AC04-2C965B64818D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFEAB8DD-9D3F-4076-AC04-2C965B64818D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFEAB8DD-9D3F-4076-AC04-2C965B64818D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A8DEEBB-F454-489E-83D2-67EF2E9AB826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A8DEEBB-F454-489E-83D2-67EF2E9AB826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A8DEEBB-F454-489E-83D2-67EF2E9AB826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A8DEEBB-F454-489E-83D2-67EF2E9AB826}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
