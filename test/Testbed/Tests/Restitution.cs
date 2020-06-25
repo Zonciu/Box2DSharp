@@ -6,10 +6,10 @@ using Testbed.Basics;
 
 namespace Testbed.Tests
 {
-    [TestCase("Forces", "VaryingRestitution")]
-    public class VaryingRestitution : Test
+    [TestCase("Forces", "Restitution")]
+    public class Restitution : Test
     {
-        public VaryingRestitution()
+        public Restitution()
         {
             {
                 var bd = new BodyDef();

@@ -31,41 +31,6 @@ namespace Testbed.Tests
             Count = 0;
         }
 
-        private void DrawFixture(Fixture fixture)
-        {
-            var color = Color.FromArgb(242, 242, 153);
-            var xf = fixture.Body.GetTransform();
-
-            switch (fixture.Shape)
-            {
-            case CircleShape circle:
-            {
-                var center = MathUtils.Mul(xf, circle.Position);
-                var radius = circle.Radius + 0.01f;
-
-                _drawer.DrawCircle(center, radius, color);
-            }
-                break;
-            case PolygonShape polygonShape:
-            {
-                var vertexCount = polygonShape.Count;
-                Debug.Assert(vertexCount <= Settings.MaxPolygonVertices);
-                var vertices = new Vector2[Settings.MaxPolygonVertices];
-
-                for (var i = 0; i < vertexCount; ++i)
-                {
-                    var v = MathUtils.Mul(xf, polygonShape.Vertices[i]);
-                    v.X += 0.01f;
-                    v.Y += 0.01f;
-                    vertices[i] = v;
-                }
-
-                _drawer.DrawPolygon(vertices, vertexCount, color);
-            }
-                break;
-            }
-        }
-
         /// Called for each fixture found in the query AABB.
         /// @return false to terminate the query.
         public bool QueryCallback(Fixture fixture)
@@ -89,7 +54,9 @@ namespace Testbed.Tests
 
             if (overlap)
             {
-                DrawFixture(fixture);
+                var color = Box2DSharp.Common.Color.FromArgb(0.95f, 0.95f, 0.6f);
+                var center = body.GetWorldCenter();
+                _drawer.DrawPoint(center, 5.0f, color);
                 ++Count;
             }
 
@@ -269,8 +236,8 @@ namespace Testbed.Tests
                 {
                     if (_bodies[i] != null)
                     {
-                        var active = _bodies[i].IsEnabled;
-                        _bodies[i].IsEnabled = !active;
+                        var isEnabled = _bodies[i].IsEnabled;
+                        _bodies[i].IsEnabled = !isEnabled;
                     }
                 }
             }
@@ -279,7 +246,6 @@ namespace Testbed.Tests
             {
                 DestroyBody();
             }
-
         }
 
         /// <inheritdoc />
@@ -289,7 +255,6 @@ namespace Testbed.Tests
             DrawString("Press 'a' to (de)activate some bodies");
             DrawString("Press 'd' to destroy a body");
 
-          
             var callback = new PolyShapesCallback(Drawer) {Circle = {Radius = 2.0f}};
             callback.Circle.Position.Set(0.0f, 1.1f);
             callback.Circle.ComputeAABB(out var aabb, callback.Transform, 0);

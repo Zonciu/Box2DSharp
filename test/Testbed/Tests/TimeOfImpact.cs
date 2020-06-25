@@ -19,7 +19,10 @@ namespace Testbed.Tests
 
         public TimeOfImpactTest()
         {
-            World.ToiProfile = new ToiProfile();
+            World.ToiProfile = new ToiProfile
+            {
+                World = World
+            };
             _shapeA.SetAsBox(25.0f, 5.0f);
             _shapeB.SetAsBox(2.5f, 2.5f);
         }
@@ -50,7 +53,7 @@ namespace Testbed.Tests
             input.SweepB = sweepB;
             input.Tmax = 1.0f;
 
-            TimeOfImpact.ComputeTimeOfImpact(out var output, input);
+            TimeOfImpact.ComputeTimeOfImpact(out var output, input, World.ToiProfile, World.GJkProfile);
 
             DrawString($"toi = {output.Time}");
 

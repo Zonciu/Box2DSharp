@@ -10,13 +10,13 @@ using Vector2 = System.Numerics.Vector2;
 namespace Testbed.Tests
 {
     [TestCase("Joints", "Revolute")]
-    public class RevoluteJoint : Test
+    public class RevoluteJointTest : Test
     {
         private Body m_ball;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint m_joint;
+        private RevoluteJoint m_joint;
 
-        public RevoluteJoint()
+        public RevoluteJointTest()
         {
             Body ground;
             {
@@ -60,7 +60,7 @@ namespace Testbed.Tests
                 rjd.EnableLimit = true;
                 rjd.CollideConnected = true;
 
-                m_joint = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(rjd);
+                m_joint = (RevoluteJoint)World.CreateJoint(rjd);
             }
 
             {

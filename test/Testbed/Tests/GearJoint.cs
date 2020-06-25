@@ -10,11 +10,11 @@ namespace Testbed.Tests
     [TestCase("Joints", "Gear")]
     public class GearJoint : Test
     {
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _joint1;
+        private RevoluteJoint _joint1;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _joint2;
+        private RevoluteJoint _joint2;
 
-        private Box2DSharp.Dynamics.Joints.PrismaticJoint _joint3;
+        private PrismaticJoint _joint3;
 
         private Box2DSharp.Dynamics.Joints.GearJoint _joint4;
 
@@ -99,7 +99,7 @@ namespace Testbed.Tests
                 jd1.LocalAnchorA = ground.GetLocalPoint(bd1.Position);
                 jd1.LocalAnchorB = body1.GetLocalPoint(bd1.Position);
                 jd1.ReferenceAngle = body1.GetAngle() - ground.GetAngle();
-                _joint1 = (Box2DSharp.Dynamics.Joints.RevoluteJoint) World.CreateJoint(jd1);
+                _joint1 = (RevoluteJoint) World.CreateJoint(jd1);
 
                 var bd2 = new BodyDef();
                 bd2.BodyType = BodyType.DynamicBody;
@@ -109,7 +109,7 @@ namespace Testbed.Tests
 
                 var jd2 = new RevoluteJointDef();
                 jd2.Initialize(ground, body2, bd2.Position);
-                _joint2 = (Box2DSharp.Dynamics.Joints.RevoluteJoint) World.CreateJoint(jd2);
+                _joint2 = (RevoluteJoint) World.CreateJoint(jd2);
 
                 var bd3 = new BodyDef();
                 bd3.BodyType = BodyType.DynamicBody;
@@ -123,7 +123,7 @@ namespace Testbed.Tests
                 jd3.UpperTranslation = 5.0f;
                 jd3.EnableLimit = true;
 
-                _joint3 = (Box2DSharp.Dynamics.Joints.PrismaticJoint) World.CreateJoint(jd3);
+                _joint3 = (PrismaticJoint) World.CreateJoint(jd3);
 
                 var jd4 = new GearJointDef();
                 jd4.BodyA = body1;

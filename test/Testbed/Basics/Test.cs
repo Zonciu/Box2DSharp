@@ -19,6 +19,8 @@ namespace Testbed.Basics
     {
         public static TestSettings TestSettings => Global.Settings;
 
+        internal Game Game;
+
         public const int RandomLimit = 32767;
 
         internal readonly Random Random = new Random();
@@ -170,7 +172,7 @@ namespace Testbed.Basics
             _textLine = 26;
         }
 
-        public void Draw()
+        public void Render()
         {
             if (TestSettings.Pause)
             {
@@ -546,7 +548,7 @@ namespace Testbed.Basics
 
         #endregion
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             World?.Dispose();
             World = null;

@@ -12,7 +12,7 @@ namespace Testbed.Tests
     {
         private const int Count = 800;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _joint;
+        private RevoluteJoint _joint;
 
         private int _count;
 
@@ -54,7 +54,7 @@ namespace Testbed.Tests
                     MaxMotorTorque = 1e8f,
                     EnableMotor = true
                 };
-                _joint = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(jd);
+                _joint = (RevoluteJoint)World.CreateJoint(jd);
             }
 
             _count = 0;

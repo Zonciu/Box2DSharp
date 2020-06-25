@@ -12,9 +12,9 @@ namespace Testbed.Tests
     [TestCase("Examples", "Slider Crank 2")]
     public class SliderCrank2 : Test
     {
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _joint1;
+        private RevoluteJoint _joint1;
 
-        private Box2DSharp.Dynamics.Joints.PrismaticJoint _joint2;
+        private PrismaticJoint _joint2;
 
         public SliderCrank2()
         {
@@ -47,7 +47,7 @@ namespace Testbed.Tests
                     rjd.MotorSpeed = 1.0f * Settings.Pi;
                     rjd.MaxMotorTorque = 10000.0f;
                     rjd.EnableMotor = true;
-                    _joint1 = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(rjd);
+                    _joint1 = (RevoluteJoint)World.CreateJoint(rjd);
 
                     prevBody = body;
                 }
@@ -92,7 +92,7 @@ namespace Testbed.Tests
                     pjd.MaxMotorForce = 1000.0f;
                     pjd.EnableMotor = true;
 
-                    _joint2 = (Box2DSharp.Dynamics.Joints.PrismaticJoint)World.CreateJoint(pjd);
+                    _joint2 = (PrismaticJoint)World.CreateJoint(pjd);
                 }
 
                 // Create a payload

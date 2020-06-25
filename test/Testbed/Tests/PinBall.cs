@@ -16,9 +16,9 @@ namespace Testbed.Tests
 
         public bool _button;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _leftJoint;
+        private RevoluteJoint _leftJoint;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _rightJoint;
+        private RevoluteJoint _rightJoint;
 
         public PinBall()
         {
@@ -79,14 +79,14 @@ namespace Testbed.Tests
                 jd.BodyB = leftFlipper;
                 jd.LowerAngle = -30.0f * Settings.Pi / 180.0f;
                 jd.UpperAngle = 5.0f * Settings.Pi / 180.0f;
-                _leftJoint = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(jd);
+                _leftJoint = (RevoluteJoint)World.CreateJoint(jd);
 
                 jd.MotorSpeed = 0.0f;
                 jd.LocalAnchorA = p2;
                 jd.BodyB = rightFlipper;
                 jd.LowerAngle = -5.0f * Settings.Pi / 180.0f;
                 jd.UpperAngle = 30.0f * Settings.Pi / 180.0f;
-                _rightJoint = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(jd);
+                _rightJoint = (RevoluteJoint)World.CreateJoint(jd);
             }
 
             // Circle character

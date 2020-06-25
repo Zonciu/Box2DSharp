@@ -6,7 +6,7 @@ using Testbed.Basics;
 
 namespace Testbed.Tests
 {
-    [TestCase("Examples", "SliderCrank1")]
+    [TestCase("Examples", "Slider Crank 1")]
     public class SliderCrank1 : Test
     {
         public SliderCrank1()

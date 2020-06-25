@@ -108,8 +108,8 @@ namespace Testbed.Tests
                     {
                         ++j;
 
-                        var active = _bodies[z].IsEnabled;
-                        _bodies[z].IsEnabled = !active;
+                        var isEnabled = _bodies[z].IsEnabled;
+                        _bodies[z].IsEnabled = !isEnabled;
                     }
                 }
             }

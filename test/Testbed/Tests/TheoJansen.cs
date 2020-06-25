@@ -15,7 +15,7 @@ namespace Testbed.Tests
     {
         private Body _chassis;
 
-        private Box2DSharp.Dynamics.Joints.RevoluteJoint _motorJoint;
+        private RevoluteJoint _motorJoint;
 
         private bool _motorOn;
 
@@ -99,7 +99,7 @@ namespace Testbed.Tests
                 jd.MotorSpeed = _motorSpeed;
                 jd.MaxMotorTorque = 400.0f;
                 jd.EnableMotor = _motorOn;
-                _motorJoint = (Box2DSharp.Dynamics.Joints.RevoluteJoint)World.CreateJoint(jd);
+                _motorJoint = (RevoluteJoint)World.CreateJoint(jd);
             }
 
             Vector2 wheelAnchor;

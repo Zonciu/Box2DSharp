@@ -112,7 +112,9 @@ namespace Testbed.Tests
         protected override void OnRender()
         {
             DrawString("Keys: a: automate, c: create, d: destroy, m: move");
-            DrawString("Blue: overlap\nGreen: ray actor\nRed: ray actor & overlap");
+            DrawString("Blue: overlap");
+            DrawString("Green: ray actor");
+            DrawString("Red: ray actor & overlap");
             Color c;
             for (var i = 0; i < ActorCount; ++i)
             {
@@ -122,36 +124,36 @@ namespace Testbed.Tests
                     continue;
                 }
 
-                c = Color.FromArgb(230, 230, 230);
+                c = Color.FromArgb(0.9f, 0.9f, 0.9f);
                 if (actor == _rayActor && actor.Overlap)
                 {
-                    c = Color.FromArgb(230, 153, 153);
+                    c = Color.FromArgb(0.9f, 0.6f, 0.6f);
                 }
                 else if (actor == _rayActor)
                 {
-                    c = Color.FromArgb(153, 230, 153);
+                    c = Color.FromArgb(0.6f, 0.9f, 0.6f);
                 }
                 else if (actor.Overlap)
                 {
-                    c = Color.FromArgb(153, 153, 230);
+                    c = Color.FromArgb(0.6f, 0.6f, 0.9f);
                 }
 
                 Drawer.DrawAABB(actor.AABB, c);
             }
 
-            c = Color.FromArgb(178, 178, 178);
+            c = Color.FromArgb(0.7f, 0.7f, 0.7f);
             Drawer.DrawAABB(_queryAABB, c);
 
             Drawer.DrawSegment(_rayCastInput.P1, _rayCastInput.P2, c);
 
-            var c1 = Color.FromArgb(51, 230, 51);
-            var c2 = Color.FromArgb(230, 51, 51);
+            var c1 = Color.FromArgb(0.2f, 0.9f, 0.2f);
+            var c2 = Color.FromArgb(0.9f, 0.2f, 0.2f);
             Drawer.DrawPoint(_rayCastInput.P1, 6.0f, c1);
             Drawer.DrawPoint(_rayCastInput.P2, 6.0f, c2);
 
             if (_rayActor != null)
             {
-                var cr = Color.FromArgb(51, 51, 230);
+                var cr = Color.FromArgb(0.2f, 0.2f, 0.9f);
                 var p = _rayCastInput.P1 + _rayActor.Fraction * (_rayCastInput.P2 - _rayCastInput.P1);
                 Drawer.DrawPoint(p, 6.0f, cr);
             }

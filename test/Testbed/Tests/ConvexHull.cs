@@ -49,16 +49,13 @@ namespace Testbed.Tests
             shape.Set(_points);
             var drawLine = new Vector2[shape.Count + 1];
             Array.Copy(shape.Vertices.ToArray(), drawLine, shape.Count);
-            drawLine[drawLine.Length - 1] = shape.Vertices[0];
-            Drawer.DrawPolygon(drawLine, drawLine.Length, Color.FromArgb(230, 230, 230));
-            var points = _points.Select(e => Global.Camera.ConvertWorldToScreen(e))
-                                .Select(e => new Vector2(e.X, Global.Settings.WindowHeight - e.Y))
-                                .ToArray();
+            drawLine[^1] = shape.Vertices[0];
+            Drawer.DrawPolygon(drawLine, drawLine.Length, Color.FromArgb(0.9f, 0.9f, 0.9f));
 
             for (var i = 0; i < _count; ++i)
             {
-                Drawer.DrawPoint(_points[i], 10.0f, Color.FromArgb(77, 230, 77));
-                Drawer.DrawString((int)(points[i].X + 0.5f), (int)(points[i].Y + 0.5f), i.ToString());
+                Drawer.DrawPoint(_points[i], 3.0f, Color.FromArgb(0.3f, 0.9f, 0.3f));
+                Drawer.DrawString(_points[i] + new Vector2(0.05f, 0.05f), i.ToString());
             }
 
             Drawer.DrawPoint(Vector2.Zero, 5f, Color.Yellow);

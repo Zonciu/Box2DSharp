@@ -43,12 +43,29 @@ namespace Testbed.Basics
 
         public void Flush()
         {
-            _points?.Flush();
-            _lines?.Flush();
             _triangles?.Flush();
+            _lines?.Flush();
+            _points?.Flush();
         }
 
-        private readonly Vector4 _fontColor = new Vector4(0.9f, 0.6f, 0.6f, 1);
+        private readonly Vector4 _textColor = new Vector4(0.9f, 0.6f, 0.6f, 1);
+
+        public void DrawString(float x, float y, params string[] strings)
+        {
+            if (ShowUI == false)
+            {
+                return;
+            }
+
+            ImGuiNET.ImGui.Begin("Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar);
+            ImGuiNET.ImGui.SetCursorPos(new Vector2(x, y));
+            foreach (var s in strings)
+            {
+                ImGuiNET.ImGui.TextColored(_textColor, s);
+            }
+
+            ImGuiNET.ImGui.End();
+        }
 
         public void DrawString(int x, int y, params string[] strings)
         {
@@ -61,7 +78,20 @@ namespace Testbed.Basics
             ImGuiNET.ImGui.SetCursorPos(new Vector2(x, y));
             foreach (var s in strings)
             {
-                ImGuiNET.ImGui.TextColored(_fontColor, s);
+                ImGuiNET.ImGui.TextColored(_textColor, s);
+            }
+
+            ImGuiNET.ImGui.End();
+        }
+
+        public void DrawString(Vector2 worldPosition, params string[] strings)
+        {
+            var ps = Global.Camera.ConvertWorldToScreen(worldPosition);
+            ImGuiNET.ImGui.Begin("Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar);
+            ImGuiNET.ImGui.SetCursorPos(ps);
+            foreach (var s in strings)
+            {
+                ImGuiNET.ImGui.TextColored(_textColor, s);
             }
 
             ImGuiNET.ImGui.End();
@@ -84,8 +114,8 @@ namespace Testbed.Basics
         public void DrawSolidPolygon(Vector2[] vertices, int vertexCount, in Color color)
         {
             var color4 = color.ToColor4();
-            var fillColor = color4;
-            fillColor.A = 0.5f;
+            var fillColor = new Color4(color4.R * 0.5f, color4.G * 0.5f, color4.B * 0.5f, color4.A * 0.5f);
+
             for (var i = 1; i < vertexCount - 1; ++i)
             {
                 _triangles.Vertex(vertices[0], fillColor);
@@ -140,8 +170,7 @@ namespace Testbed.Basics
             var v0 = center;
             var r1 = new Vector2(cosInc, sinInc);
             var v1 = center + radius * r1;
-            var fillColor = color.ToColor4();
-            fillColor.A = 0.5f;
+            var fillColor = new Color4(color4.R * 0.5f, color4.G * 0.5f, color4.B * 0.5f, color4.A * 0.5f);
             for (var i = 0; i < Segments; ++i)
             {
                 // Perform rotation to avoid additional trigonometry.

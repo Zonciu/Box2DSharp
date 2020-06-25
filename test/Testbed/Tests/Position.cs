@@ -5,7 +5,7 @@ using Testbed.Basics;
 
 namespace Testbed.Tests
 {
-    [TestCase("Examples", "Position Test")]
+    [TestCase("Extra", "Position Test")]
     public class Position : Test
     {
         /// <inheritdoc />

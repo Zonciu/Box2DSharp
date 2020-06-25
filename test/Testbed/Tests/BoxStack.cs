@@ -8,7 +8,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed.Tests
 {
-    [TestCase("Stacking", "BoxStack")]
+    [TestCase("Stacking", "Boxes")]
     public class BoxStack : Test
     {
         private const int ColumnCount = 1;

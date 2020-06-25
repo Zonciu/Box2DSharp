@@ -1,3 +1,4 @@
+using System.Threading;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
@@ -14,6 +15,8 @@ namespace Testbed.Tests
         private readonly int e_columnCount = 0;
 
         private readonly int e_rowCount = 0;
+
+        private bool _autoCreate = false;
 
         public Confined()
         {
@@ -91,6 +94,11 @@ namespace Testbed.Tests
         /// <inheritdoc />
         protected override void PreStep()
         {
+            if (!_autoCreate)
+            {
+                return;
+            }
+
             var sleeping = true;
             foreach (var b in World.BodyList)
             {
@@ -107,24 +115,23 @@ namespace Testbed.Tests
 
             if (sleeping)
             {
+                Thread.Sleep(500);
                 CreateCircle();
             }
 
-            foreach (var b in World.BodyList)
-            {
-                if (b.BodyType != BodyType.DynamicBody)
-                {
-                    continue;
-                }
-
-                var p = b.GetPosition();
-                if (p.X <= -10.0f || 10.0f <= p.X || p.Y <= 0.0f || 20.0f <= p.Y)
-                {
-                    p.X += 0.0f;
-
-                    // ToDo
-                }
-            }
+            // foreach (var b in World.BodyList)
+            // {
+            //     if (b.BodyType != BodyType.DynamicBody)
+            //     {
+            //         continue;
+            //     }
+            //
+            //     var p = b.GetPosition();
+            //     if (p.X <= -10.0f || 10.0f <= p.X || p.Y <= 0.0f || 20.0f <= p.Y)
+            //     {
+            //         p.X += 0.1f;
+            //     }
+            // }
         }
 
         /// <inheritdoc />
@@ -134,11 +141,17 @@ namespace Testbed.Tests
             {
                 CreateCircle();
             }
+
+            if (key.Key == Key.A)
+            {
+                _autoCreate = !_autoCreate;
+            }
         }
 
         protected override void OnRender()
         {
             DrawString("Press 'c' to create a circle.");
+            DrawString("Press 'a' to toggle auto generate circles.");
         }
     }
 }

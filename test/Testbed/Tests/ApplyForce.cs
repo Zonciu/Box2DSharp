@@ -138,23 +138,23 @@ namespace Testbed.Tests
         }
 
         /// <inheritdoc />
-        public override void OnKeyDown(KeyboardKeyEventArgs key)
+        protected override void PreStep()
         {
-            if (key.Key == Key.W)
+            if (Game.IsKeyDown(Key.W))
             {
-                var f = _body.GetWorldVector(new Vector2(0.0f, -200.0f));
-                var p = _body.GetWorldPoint(new Vector2(0.0f, 2.0f));
+                var f = _body.GetWorldVector(new Vector2(0.0f, -50.0f));
+                var p = _body.GetWorldPoint(new Vector2(0.0f, 3.0f));
                 _body.ApplyForce(f, p, true);
             }
 
-            if (key.Key == Key.A)
+            if (Game.IsKeyDown(Key.A))
             {
-                _body.ApplyTorque(50.0f, true);
+                _body.ApplyTorque(10.0f, true);
             }
 
-            if (key.Key == Key.D)
+            if (Game.IsKeyDown(Key.D))
             {
-                _body.ApplyTorque(-50.0f, true);
+                _body.ApplyTorque(-10.0f, true);
             }
         }
 
