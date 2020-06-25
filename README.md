@@ -1,70 +1,102 @@
 # Box2DSharp
 A C# port of [Box2D](https://github.com/erincatto/Box2D)
 
-Base on commit: 
+Current ported to commit:
 ```
-a174dbac1bc32e05e790cd867d9e30fb37681d47
-
-2018/9/11 11:08:44s
-* Fixed link 
+1025f9a10949b963d6311995910bdd04f72dae6c
+2020-04-20 06:21:06
 ```
 
 # Unity test
 Run link.bat to link source code to Unity project
 
+# Testbed
+Driven by [OpenTk](https://github.com/opentk/opentk) + [ImGui.NET](https://github.com/mellinoe/imgui.net)
+
 # Test case
-* [x] Add Pair
-* [x] Apply Force
-* [x] Basic Slider Crank
-* [x] Body Types
-* [x] Breakable
-* [x] Bridge
+## Benchmark
+* [x] Add Pair Stress Test
+* [x] Tiles
+* [x] Tumbler
+
+## Bugs
+* [x] Chain Problem
+* [x] Dump Loader
+* [x] Skier
+
+## Collision
+* [x] Dynamic Tree
+* [x] Ray Cast
+* [x] Sensors
+* [x] Shape Cast
+* [x] Time of Impact
+
+## Continuous
 * [x] Bullet Test
-* [x] Cantilever
+* [x] Continuous Test
+
+## Examples
+* [x] BodyTypes
+* [x] Breakable
 * [x] Car
-* [x] Chain
 * [x] Character Collision
 * [x] Collision Filtering
 * [x] Collision Processing
 * [x] Compound Shapes
-* [x] Confined
-* [x] Continuous Test
-* [x] Convex Hull
 * [x] Conveyor Belt
-* [x] Distance Test
 * [x] Dominos
-* [x] Dynamic Tree Test
+* [x] HelloWorld
+* [x] Pinball
+* [x] Platformer
+* [x] Shape Editing
+* [x] Slider Crank 1
+* [x] Slider Crank 2
+* [x] Theo Jansen
+
+## Extra
+* [x] Position Test
+
+## Forces
+* [x] ApplyForce
+* [x] Friction
+* [x] Restitution
+
+## Geometry
+* [x] Convex Hull
+* [x] Distance Test
 * [x] Edge Shapes
 * [x] Edge Test
-* [x] Gears
-* [x] Heavy On Light
-* [x] Heavy On Light Two
-* [x] Hello World
-* [x] Mobile
-* [x] Mobile Balanced
-* [x] Motor Joint Test
-* [x] One Side Platform
-* [x] Pin Ball
-* [x] Poly Collision
-* [x] Poly Shapes
-* [x] Prismatic
-* [x] Pulleys
-* [x] Pyramid
-* [x] Ray Cast
-* [x] Revolute
-* [x] Rope Joint Test
-* [x] Sensor Test
-* [x] Shape Cast
-* [x] Shape Editing
-* [x] Slider Crank
-* [x] Sphere Stack
-* [x] Theo Jansen
-* [x] Tiles
-* [x] Time Of Impact Test
-* [x] Tumbler
-* [x] Varying Friction
-* [x] Varying Restitution
-* [x] Vertical Stack
-* [x] Web
+* [x] Polygon Collision
+* [x] Polygon Shapes
 
-* [x] Position Test
+## Joints
+* [x] Bridge
+* [x] Cantilever
+* [x] Chain
+* [x] Distance Joint
+* [x] Gear
+* [x] Motor Joint
+* [x] Prismatic
+* [x] Pulley
+* [x] Revolute
+* [x] Rope
+* [x] Wheel
+
+## Rope
+* [x] Bending
+
+## Solver
+* [x] Confined
+* [x] Heavy 1
+* [x] Heavy 2
+* [x] Mobile Balanced
+* [x] Mobile Unbalanced
+
+## Stacking
+* [x] Boxes
+* [x] Circles
+* [x] Pyramid
+
+# License
+[MIT license](https://en.wikipedia.org/wiki/MIT_License).
+
