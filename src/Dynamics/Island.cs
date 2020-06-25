@@ -103,7 +103,7 @@ namespace Box2DSharp.Dynamics
                 if (b.BodyType == BodyType.DynamicBody)
                 {
                     // Integrate velocities.
-                    v += h * (b.GravityScale * gravity + b.InvMass * b.Force);
+                    v += h * b.InvMass * (b.GravityScale * b.Mass * gravity + b.Force);
                     w += h * b.InverseInertia * b.Torque;
 
                     // Apply damping.

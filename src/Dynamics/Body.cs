@@ -286,16 +286,8 @@ namespace Box2DSharp.Dynamics
 
             _type = def.BodyType;
 
-            if (_type == BodyType.DynamicBody)
-            {
-                _mass = 1.0f;
-                InvMass = 1.0f;
-            }
-            else
-            {
-                _mass = 0.0f;
-                InvMass = 0.0f;
-            }
+            _mass = 0.0f;
+            InvMass = 0.0f;
 
             _inertia = 0.0f;
             InverseInertia = 0.0f;
@@ -1087,12 +1079,6 @@ namespace Box2DSharp.Dynamics
             {
                 InvMass = 1.0f / _mass;
                 localCenter *= InvMass;
-            }
-            else
-            {
-                // Force all dynamic bodies to have a positive mass.
-                _mass = 1.0f;
-                InvMass = 1.0f;
             }
 
             if (_inertia > 0.0f && !HasFlag(BodyFlags.FixedRotation)) // 存在转动惯量且物体可旋转

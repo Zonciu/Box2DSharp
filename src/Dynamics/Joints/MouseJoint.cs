@@ -180,7 +180,7 @@ namespace Box2DSharp.Dynamics.Joints
             // gamma has units of inverse mass.
             // beta has units of inverse time.
             var h = data.Step.Dt;
-            Debug.Assert(d + h * k > Settings.Epsilon);
+
             _gamma = h * (d + h * k);
             if (!_gamma.Equals(0.0f))
             {

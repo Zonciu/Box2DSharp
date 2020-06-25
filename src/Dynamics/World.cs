@@ -1405,17 +1405,20 @@ namespace Box2DSharp.Dynamics
 
             if (flags.HasFlag(DrawFlag.DrawShape))
             {
-                var node = BodyList.First;
-                while (node != null)
+                for (var node = BodyList.First; node != null; node = node.Next)
                 {
                     var b = node.Value;
-                    node = node.Next;
                     var xf = b.GetTransform();
-                    var isActive = b.IsEnabled;
+                    var isEnabled = b.IsEnabled;
                     var isAwake = b.IsAwake;
                     foreach (var f in b.Fixtures)
                     {
-                        if (isActive == false)
+                        if (b.BodyType == BodyType.DynamicBody && b.Mass.Equals(0))
+                        {
+                            // Bad body
+                            DrawShape(f, xf, Color.FromArgb(1.0f, 0.0f, 0.0f));
+                        }
+                        else if (isEnabled == false)
                         {
                             DrawShape(f, xf, inactiveColor);
                         }
