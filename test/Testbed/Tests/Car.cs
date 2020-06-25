@@ -15,7 +15,9 @@ namespace Testbed.Tests
     {
         private Body _car;
 
-        private float _hz;
+        private Body _wheel1;
+
+        private Body _wheel2;
 
         private float _speed;
 
@@ -23,16 +25,8 @@ namespace Testbed.Tests
 
         private WheelJoint _spring2;
 
-        private Body _wheel1;
-
-        private Body _wheel2;
-
-        private float _zeta;
-
         public Car()
         {
-            _hz = 4.0f;
-            _zeta = 0.7f;
             _speed = 50.0f;
 
             Body ground;
@@ -215,21 +209,32 @@ namespace Testbed.Tests
 
                 var jd = new WheelJointDef();
                 var axis = new Vector2(0.0f, 1.0f);
+                var mass1 = _wheel1.Mass;
+                var mass2 = _wheel2.Mass;
 
+                var hertz = 4.0f;
+                var dampingRatio = 0.7f;
+                var omega = 2.0f * Settings.Pi * hertz;
                 jd.Initialize(_car, _wheel1, _wheel1.GetPosition(), axis);
                 jd.MotorSpeed = 0.0f;
                 jd.MaxMotorTorque = 20.0f;
                 jd.EnableMotor = true;
-                jd.FrequencyHz = _hz;
-                jd.DampingRatio = _zeta;
+                jd.Stiffness = mass1 * omega * omega;
+                jd.Damping = 2.0f * mass1 * dampingRatio * omega;
+                jd.LowerTranslation = -0.25f;
+                jd.UpperTranslation = 0.25f;
+                jd.EnableLimit = true;
                 _spring1 = (WheelJoint)World.CreateJoint(jd);
 
                 jd.Initialize(_car, _wheel2, _wheel2.GetPosition(), axis);
                 jd.MotorSpeed = 0.0f;
                 jd.MaxMotorTorque = 10.0f;
                 jd.EnableMotor = false;
-                jd.FrequencyHz = _hz;
-                jd.DampingRatio = _zeta;
+                jd.Stiffness = mass2 * omega * omega;
+                jd.Damping = 2.0f * mass2 * dampingRatio * omega;
+                jd.LowerTranslation = -0.25f;
+                jd.UpperTranslation = 0.25f;
+                jd.EnableLimit = true;
                 _spring2 = (WheelJoint)World.CreateJoint(jd);
             }
         }
@@ -255,24 +260,12 @@ namespace Testbed.Tests
             case Key.D:
                 _spring1.SetMotorSpeed(-_speed);
                 break;
-            case Key.Q:
-                _hz = Math.Max(0.0f, _hz - 1.0f);
-                _spring1.SetSpringFrequencyHz(_hz);
-                _spring2.SetSpringFrequencyHz(_hz);
-                break;
-            case Key.E:
-                _hz += 1.0f;
-                _spring1.SetSpringFrequencyHz(_hz);
-                _spring2.SetSpringFrequencyHz(_hz);
-                break;
             }
         }
 
         protected override void OnRender()
         {
-            DrawString("Keys: left = a, brake = s, right = d, hz down = q, hz up = e");
-
-            DrawString($"frequency = {_hz} hz, damping ratio = {_zeta}");
+            DrawString("Keys: left = a, brake = s, right = d");
         }
     }
 }

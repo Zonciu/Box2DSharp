@@ -1,22 +1,17 @@
+﻿using System.Numerics;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Joints;
 using ImGuiNET;
-using OpenToolkit.Windowing.Common;
-using OpenToolkit.Windowing.Common.Input;
 using Testbed.Basics;
-using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed.Tests
 {
-    /// <summary>
-    /// Test the prismatic joint with limits and motor options.
-    /// </summary>
-    [TestCase("Joints", "Prismatic")]
-    public class PrismaticJointTest : Test
+    [TestCase("Joints", "Wheel")]
+    public class WheelJointTest : Test
     {
-        private PrismaticJoint _joint;
+        private WheelJoint _joint;
 
         private float _motorSpeed;
 
@@ -24,9 +19,9 @@ namespace Testbed.Tests
 
         private bool _enableLimit;
 
-        public PrismaticJointTest()
+        public WheelJointTest()
         {
-            Body ground;
+            Body ground = null;
             {
                 var bd = new BodyDef();
                 ground = World.CreateBody(bd);
@@ -41,57 +36,45 @@ namespace Testbed.Tests
             _motorSpeed = 10.0f;
 
             {
-                PolygonShape shape = new PolygonShape();
-                shape.SetAsBox(1.0f, 1.0f);
+                CircleShape shape = new CircleShape();
+                shape.Radius = 2.0f;
 
                 BodyDef bd = new BodyDef();
                 bd.BodyType = BodyType.DynamicBody;
                 bd.Position.Set(0.0f, 10.0f);
-                bd.Angle = 0.5f * Settings.Pi;
                 bd.AllowSleep = false;
                 var body = World.CreateBody(bd);
                 body.CreateFixture(shape, 5.0f);
 
-                PrismaticJointDef pjd = new PrismaticJointDef();
+                var mass = body.Mass;
+                var hertz = 1.0f;
+                var dampingRatio = 0.7f;
+                var omega = 2.0f * Settings.Pi * hertz;
+
+                var jd = new WheelJointDef();
 
                 // Horizontal
-                pjd.Initialize(ground, body, bd.Position, new Vector2(1.0f, 0.0f));
+                jd.Initialize(ground, body, bd.Position, new Vector2(0.0f, 1.0f));
 
-                pjd.MotorSpeed = _motorSpeed;
-                pjd.MaxMotorForce = 10000.0f;
-                pjd.EnableMotor = _enableMotor;
-                pjd.LowerTranslation = -10.0f;
-                pjd.UpperTranslation = 10.0f;
-                pjd.EnableLimit = _enableLimit;
+                jd.MotorSpeed = _motorSpeed;
+                jd.MaxMotorTorque = 10000.0f;
+                jd.EnableMotor = _enableMotor;
+                jd.Stiffness = mass * omega * omega;
+                jd.Damping = 2.0f * mass * dampingRatio * omega;
+                jd.LowerTranslation = -3.0f;
+                jd.UpperTranslation = 3.0f;
+                jd.EnableLimit = _enableLimit;
 
-                _joint = (PrismaticJoint)World.CreateJoint(pjd);
-            }
-        }
-
-        /// <inheritdoc />
-        public override void OnKeyDown(KeyboardKeyEventArgs key)
-        {
-            if (key.Key == Key.L)
-            {
-                _joint.EnableLimit(!_joint.IsLimitEnabled());
-            }
-
-            if (key.Key == Key.L)
-            {
-                _joint.EnableMotor(!_joint.IsMotorEnabled());
-            }
-
-            if (key.Key == Key.L)
-            {
-                _joint.SetMotorSpeed(-_joint.GetMotorSpeed());
+                _joint = (WheelJoint)World.CreateJoint(jd);
             }
         }
 
         /// <inheritdoc />
         protected override void OnRender()
         {
-            var force = _joint.GetMotorForce(TestSettings.Hertz);
-            DrawString($"Motor Force = {force}");
+            var torque = _joint.GetMotorTorque(TestSettings.Hertz);
+            DrawString($"Motor Torque = {torque}");
+
             ImGui.SetNextWindowPos(new Vector2(10.0f, 100.0f));
             ImGui.SetNextWindowSize(new Vector2(200.0f, 100.0f));
             ImGui.Begin("Joint Controls", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);

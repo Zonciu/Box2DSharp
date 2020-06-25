@@ -11,15 +11,6 @@ namespace Box2DSharp.Dynamics.Joints
     /// anchors and a local axis helps when saving and loading a game.
     public class WheelJointDef : JointDef
     {
-        /// Suspension damping ratio, one indicates critical damping
-        public float DampingRatio;
-
-        /// Enable/disable the joint motor.
-        public bool EnableMotor;
-
-        /// Suspension frequency, zero indicates no suspension
-        public float FrequencyHz;
-
         /// The local anchor point relative to bodyA's origin.
         public Vector2 LocalAnchorA;
 
@@ -29,11 +20,29 @@ namespace Box2DSharp.Dynamics.Joints
         /// The local translation axis in bodyA.
         public Vector2 LocalAxisA;
 
+        /// Enable/disable the joint limit.
+        public bool EnableLimit;
+
+        /// The lower translation limit, usually in meters.
+        public float LowerTranslation;
+
+        /// The upper translation limit, usually in meters.
+        public float UpperTranslation;
+
+        /// Enable/disable the joint motor.
+        public bool EnableMotor;
+
         /// The maximum motor torque, usually in N-m.
         public float MaxMotorTorque;
 
         /// The desired motor speed in radians per second.
         public float MotorSpeed;
+
+        /// Suspension stiffness. Typically in units N/m.
+        public float Stiffness;
+
+        /// Suspension damping. Typically in units of N*s/m.
+        public float Damping;
 
         public WheelJointDef()
         {
@@ -41,11 +50,14 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA.SetZero();
             LocalAnchorB.SetZero();
             LocalAxisA.Set(1.0f, 0.0f);
+            EnableLimit = false;
+            LowerTranslation = 0.0f;
+            UpperTranslation = 0.0f;
             EnableMotor = false;
             MaxMotorTorque = 0.0f;
             MotorSpeed = 0.0f;
-            FrequencyHz = 2.0f;
-            DampingRatio = 0.7f;
+            Stiffness = 0.0f;
+            Damping = 0.0f;
         }
 
         /// Initialize the bodies, anchors, axis, and reference angle using the world

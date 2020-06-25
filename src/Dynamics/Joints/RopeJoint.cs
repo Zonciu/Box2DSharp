@@ -48,11 +48,10 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Vector2 _rB;
 
-        private LimitState _state;
-
         private Vector2 _u;
 
-        internal RopeJoint(RopeJointDef def) : base(def)
+        internal RopeJoint(RopeJointDef def)
+            : base(def)
         {
             _localAnchorA = def.LocalAnchorA;
             _localAnchorB = def.LocalAnchorB;
@@ -61,7 +60,6 @@ namespace Box2DSharp.Dynamics.Joints
 
             _mass = 0.0f;
             _impulse = 0.0f;
-            _state = LimitState.InactiveLimit;
             _length = 0.0f;
         }
 
@@ -88,9 +86,9 @@ namespace Box2DSharp.Dynamics.Joints
             return _maxLength;
         }
 
-        public LimitState GetLimitState()
+        public float GetLength()
         {
-            return _state;
+            return _length;
         }
 
         /// <inheritdoc />
@@ -121,17 +119,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Dump joint to dmLog
         public override void Dump()
         {
-            var indexA = BodyA.IslandIndex;
-            var indexB = BodyB.IslandIndex;
-
-            DumpLogger.Log("  b2RopeJointDef jd;");
-            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
-            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
-            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            DumpLogger.Log($"  jd.maxLength = {_maxLength};");
-            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -164,16 +152,6 @@ namespace Box2DSharp.Dynamics.Joints
             _u = cB + _rB - cA - _rA;
 
             _length = _u.Length();
-
-            var C = _length - _maxLength;
-            if (C > 0.0f)
-            {
-                _state = LimitState.AtUpperLimit;
-            }
-            else
-            {
-                _state = LimitState.InactiveLimit;
-            }
 
             if (_length > Settings.LinearSlop)
             {
@@ -268,8 +246,8 @@ namespace Box2DSharp.Dynamics.Joints
             var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
             var u = cB + rB - cA - rA;
 
-            var length = u.Normalize();
-            var C = length - _maxLength;
+            _length = u.Normalize();
+            var C = _length - _maxLength;
 
             C = MathUtils.Clamp(C, 0.0f, Settings.MaxLinearCorrection);
 
@@ -286,7 +264,7 @@ namespace Box2DSharp.Dynamics.Joints
             data.Positions[_indexB].Center = cB;
             data.Positions[_indexB].Angle = aB;
 
-            return length - _maxLength < Settings.LinearSlop;
+            return _length - _maxLength < Settings.LinearSlop;
         }
     }
 }

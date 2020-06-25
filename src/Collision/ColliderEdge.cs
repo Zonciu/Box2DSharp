@@ -156,7 +156,7 @@ namespace Box2DSharp.Collision
             }
         }
 
-        /// Compute the collision manifold between an edge and a circle.
+        /// Compute the collision manifold between an edge and a polygon.
         public static void CollideEdgeAndPolygon(
             ref Manifold manifold,
             EdgeShape edgeA,

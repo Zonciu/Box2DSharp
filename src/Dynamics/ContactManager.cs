@@ -40,7 +40,7 @@ namespace Box2DSharp.Dynamics
 
         public int ContactCount => ContactList.Count;
 
-        private static readonly ContactRegister[,] _registers = new ContactRegister[(int) ShapeType.TypeCount, (int) ShapeType.TypeCount];
+        private static readonly ContactRegister[,] _registers = new ContactRegister[(int)ShapeType.TypeCount, (int)ShapeType.TypeCount];
 
         static ContactManager()
         {
@@ -57,10 +57,10 @@ namespace Box2DSharp.Dynamics
                 Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
                 Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-                _registers[(int) type1, (int) type2] = new ContactRegister(factory, true);
+                _registers[(int)type1, (int)type2] = new ContactRegister(factory, true);
                 if (type1 != type2)
                 {
-                    _registers[(int) type2, (int) type1] = new ContactRegister(factory, false);
+                    _registers[(int)type2, (int)type1] = new ContactRegister(factory, false);
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace Box2DSharp.Dynamics
             Debug.Assert(0 <= type1 && type1 < ShapeType.TypeCount);
             Debug.Assert(0 <= type2 && type2 < ShapeType.TypeCount);
 
-            var reg = _registers[(int) type1, (int) type2]
+            var reg = _registers[(int)type1, (int)type2]
                    ?? throw new NullReferenceException($"{type1.ToString()} can not contact to {type2.ToString()}");
             if (reg.Primary)
             {
@@ -124,14 +124,14 @@ namespace Box2DSharp.Dynamics
 
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
             Debug.Assert(0 <= typeA && typeB < ShapeType.TypeCount);
-            var reg = _registers[(int) typeA, (int) typeB];
+            var reg = _registers[(int)typeA, (int)typeB];
             reg.Factory.Destroy(contact);
         }
 
         public void AddPairCallback(object proxyUserDataA, object proxyUserDataB)
         {
-            var proxyA = (FixtureProxy) proxyUserDataA;
-            var proxyB = (FixtureProxy) proxyUserDataB;
+            var proxyA = (FixtureProxy)proxyUserDataA;
+            var proxyB = (FixtureProxy)proxyUserDataB;
             var fixtureA = proxyA.Fixture;
             var fixtureB = proxyB.Fixture;
 
@@ -203,15 +203,6 @@ namespace Box2DSharp.Dynamics
             c.NodeB.Other = bodyA;
             c.NodeB.Node = LinkedListNodePool<ContactEdge>.Shared.Get(c.NodeB);
             bodyB.ContactEdges.AddFirst(c.NodeB.Node);
-
-            // Wake up the bodies
-            if (fixtureA.IsSensor || fixtureB.IsSensor)
-            {
-                return;
-            }
-
-            bodyA.IsAwake = true;
-            bodyB.IsAwake = true;
         }
 
         public void FindNewContacts()

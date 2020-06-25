@@ -1,16 +1,18 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Joints
 {
+    /// <summary>
     /// A wheel joint. This joint provides two degrees of freedom: translation
     /// along an axis fixed in bodyA and rotation in the plane. In other words, it is a point to
-    /// line constraint with a rotational motor and a linear spring/damper.
-    /// This joint is designed for vehicle suspensions.
+    /// line constraint with a rotational motor and a linear spring/damper. The spring/damper is
+    /// initialized upon creation. This joint is designed for vehicle suspensions.
+    /// </summary>
     public class WheelJoint : Joint
     {
-        // Solver shared
         private readonly Vector2 _localAnchorA;
 
         private readonly Vector2 _localAnchorB;
@@ -19,56 +21,71 @@ namespace Box2DSharp.Dynamics.Joints
 
         private readonly Vector2 _localYAxisA;
 
-        private Vector2 _ax, _ay;
+        private float _impulse;
 
-        private float _bias;
+        private float _motorImpulse;
 
-        private float _dampingRatio;
+        private float _springImpulse;
+
+        private float _lowerImpulse;
+
+        private float _upperImpulse;
+
+        private float _translation;
+
+        private float _lowerTranslation;
+
+        private float _upperTranslation;
+
+        private float _maxMotorTorque;
+
+        private float _motorSpeed;
+
+        private bool _enableLimit;
 
         private bool _enableMotor;
 
-        private float _frequencyHz;
+        private float _stiffness;
 
-        private float _gamma;
-
-        private float _impulse;
+        private float _damping;
 
         // Solver temp
         private int _indexA;
 
         private int _indexB;
 
-        private float _invIa;
+        private Vector2 _localCenterA;
 
-        private float _invIb;
+        private Vector2 _localCenterB;
 
         private float _invMassA;
 
         private float _invMassB;
 
-        private Vector2 _localCenterA;
+        private float _invIA;
 
-        private Vector2 _localCenterB;
+        private float _invIB;
 
-        private float _mass;
-
-        private float _maxMotorTorque;
-
-        private float _motorImpulse;
-
-        private float _motorMass;
-
-        private float _motorSpeed;
+        private Vector2 _ax, _ay;
 
         private float _sAx, _sBx;
 
         private float _sAy, _sBy;
 
-        private float _springImpulse;
+        private float _mass;
+
+        private float _motorMass;
+
+        private float _axialMass;
 
         private float _springMass;
 
-        internal WheelJoint(WheelJointDef def) : base(def)
+        private float _bias;
+
+        private float _gamma;
+
+        internal WheelJoint(WheelJointDef def)
+            : base(def)
         {
             _localAnchorA = def.LocalAnchorA;
             _localAnchorB = def.LocalAnchorB;
@@ -82,18 +99,25 @@ namespace Box2DSharp.Dynamics.Joints
             _springMass = 0.0f;
             _springImpulse = 0.0f;
 
+            _axialMass = 0.0f;
+            _lowerImpulse = 0.0f;
+            _upperImpulse = 0.0f;
+            _lowerTranslation = def.LowerTranslation;
+            _upperTranslation = def.UpperTranslation;
+            _enableLimit = def.EnableLimit;
+
             _maxMotorTorque = def.MaxMotorTorque;
             _motorSpeed = def.MotorSpeed;
             _enableMotor = def.EnableMotor;
-
-            _frequencyHz = def.FrequencyHz;
-            _dampingRatio = def.DampingRatio;
 
             _bias = 0.0f;
             _gamma = 0.0f;
 
             _ax.SetZero();
             _ay.SetZero();
+
+            _stiffness = def.Stiffness;
+            _damping = def.Damping;
         }
 
         /// The local anchor point relative to bodyA's origin.
@@ -168,6 +192,43 @@ namespace Box2DSharp.Dynamics.Joints
             return wB - wA;
         }
 
+        /// Is the joint limit enabled?
+        public bool IsLimitEnabled() => _enableLimit;
+
+        /// Enable/disable the joint translation limit.
+        public void EnableLimit(bool flag)
+        {
+            if (flag != _enableLimit)
+            {
+                BodyA.IsAwake = true;
+                BodyB.IsAwake = true;
+                _enableLimit = flag;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
+            }
+        }
+
+        /// Get the lower joint translation limit, usually in meters.
+        public float GetLowerLimit() => _lowerTranslation;
+
+        /// Get the upper joint translation limit, usually in meters.
+        public float GetUpperLimit() => _upperTranslation;
+
+        /// Set the joint translation limits, usually in meters.
+        public void SetLimits(float lower, float upper)
+        {
+            Debug.Assert(lower <= upper);
+            if (!lower.Equals(_lowerTranslation) || !upper.Equals(_upperTranslation))
+            {
+                BodyA.IsAwake = true;
+                BodyB.IsAwake = true;
+                _lowerTranslation = lower;
+                _upperTranslation = upper;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
+            }
+        }
+
         /// Is the joint motor enabled?
         public bool IsMotorEnabled()
         {
@@ -205,7 +266,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Set/Get the maximum motor force, usually in N-m.
         public void SetMaxMotorTorque(float torque)
         {
-            if (torque != _maxMotorTorque)
+            if (!torque.Equals(_maxMotorTorque))
             {
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
@@ -224,27 +285,15 @@ namespace Box2DSharp.Dynamics.Joints
             return inv_dt * _motorImpulse;
         }
 
-        /// Set/Get the spring frequency in hertz. Setting the frequency to zero disables the spring.
-        public void SetSpringFrequencyHz(float hz)
-        {
-            _frequencyHz = hz;
-        }
+        /// Access spring stiffness
+        public void SetStiffness(float stiffness) => _stiffness = stiffness;
 
-        public float GetSpringFrequencyHz()
-        {
-            return _frequencyHz;
-        }
+        public float GetStiffness() => _stiffness;
 
-        /// Set/Get the spring damping ratio
-        public void SetSpringDampingRatio(float ratio)
-        {
-            _dampingRatio = ratio;
-        }
+        /// Access damping
+        public void SetDamping(float damping) => _damping = damping;
 
-        public float GetSpringDampingRatio()
-        {
-            return _dampingRatio;
-        }
+        public float GetDamping() => _damping;
 
         /// <inheritdoc />
         public override Vector2 GetAnchorA()
@@ -273,22 +322,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Dump to Logger.Log
         public override void Dump()
         {
-            var indexA = BodyA.IslandIndex;
-            var indexB = BodyB.IslandIndex;
-
-            DumpLogger.Log("  b2WheelJointDef jd;");
-            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
-            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
-            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            DumpLogger.Log($"  jd.localAxisA.Set({_localXAxisA.X}, {_localXAxisA.Y});");
-            DumpLogger.Log($"  jd.enableMotor = bool({_enableMotor});");
-            DumpLogger.Log($"  jd.motorSpeed = {_motorSpeed};");
-            DumpLogger.Log($"  jd.maxMotorTorque = {_maxMotorTorque};");
-            DumpLogger.Log($"  jd.frequencyHz = {_frequencyHz};");
-            DumpLogger.Log($"  jd.dampingRatio = {_dampingRatio};");
-            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -300,11 +334,11 @@ namespace Box2DSharp.Dynamics.Joints
             _localCenterB = BodyB.Sweep.LocalCenter;
             _invMassA = BodyA.InvMass;
             _invMassB = BodyB.InvMass;
-            _invIa = BodyA.InverseInertia;
-            _invIb = BodyB.InverseInertia;
+            _invIA = BodyA.InverseInertia;
+            _invIB = BodyB.InverseInertia;
 
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa, iB = _invIb;
+            float iA = _invIA, iB = _invIB;
 
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
@@ -339,47 +373,44 @@ namespace Box2DSharp.Dynamics.Joints
             }
 
             // Spring constraint
+            _ax = MathUtils.Mul(qA, _localXAxisA);
+            _sAx = MathUtils.Cross(d + rA, _ax);
+            _sBx = MathUtils.Cross(rB, _ax);
+
+            var invMass = mA + mB + iA * _sAx * _sAx + iB * _sBx * _sBx;
+            if (invMass > 0.0f)
+            {
+                _axialMass = 1.0f / invMass;
+            }
+            else
+            {
+                _axialMass = 0.0f;
+            }
+
             _springMass = 0.0f;
             _bias = 0.0f;
             _gamma = 0.0f;
-            if (_frequencyHz > 0.0f)
+
+            if (_stiffness > 0.0f && invMass > 0.0f)
             {
-                _ax = MathUtils.Mul(qA, _localXAxisA);
-                _sAx = MathUtils.Cross(d + rA, _ax);
-                _sBx = MathUtils.Cross(rB, _ax);
+                _springMass = 1.0f / invMass;
 
-                var invMass = mA + mB + iA * _sAx * _sAx + iB * _sBx * _sBx;
+                var C = Vector2.Dot(d, _ax);
 
-                if (invMass > 0.0f)
+                // magic formulas
+                var h = data.Step.Dt;
+                _gamma = h * (_damping + h * _stiffness);
+                if (_gamma > 0.0f)
                 {
-                    _springMass = 1.0f / invMass;
+                    _gamma = 1.0f / _gamma;
+                }
 
-                    var C = Vector2.Dot(d, _ax);
+                _bias = C * h * _stiffness * _gamma;
 
-                    // Frequency
-                    var omega = 2.0f * Settings.Pi * _frequencyHz;
-
-                    // Damping coefficient
-                    var damp = 2.0f * _springMass * _dampingRatio * omega;
-
-                    // Spring stiffness
-                    var k = _springMass * omega * omega;
-
-                    // magic formulas
-                    var h = data.Step.Dt;
-                    _gamma = h * (damp + h * k);
-                    if (_gamma > 0.0f)
-                    {
-                        _gamma = 1.0f / _gamma;
-                    }
-
-                    _bias = C * h * k * _gamma;
-
-                    _springMass = invMass + _gamma;
-                    if (_springMass > 0.0f)
-                    {
-                        _springMass = 1.0f / _springMass;
-                    }
+                _springMass = invMass + _gamma;
+                if (_springMass > 0.0f)
+                {
+                    _springMass = 1.0f / _springMass;
                 }
             }
             else
@@ -387,7 +418,16 @@ namespace Box2DSharp.Dynamics.Joints
                 _springImpulse = 0.0f;
             }
 
-            // Rotational motor
+            if (_enableLimit)
+            {
+                _translation = Vector2.Dot(_ax, d);
+            }
+            else
+            {
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
+            }
+
             if (_enableMotor)
             {
                 _motorMass = iA + iB;
@@ -409,21 +449,24 @@ namespace Box2DSharp.Dynamics.Joints
                 _springImpulse *= data.Step.DtRatio;
                 _motorImpulse *= data.Step.DtRatio;
 
-                var P = _impulse * _ay + _springImpulse * _ax;
-                var LA = _impulse * _sAy + _springImpulse * _sAx + _motorImpulse;
-                var LB = _impulse * _sBy + _springImpulse * _sBx + _motorImpulse;
+                var axialImpulse = _springImpulse + _lowerImpulse - _upperImpulse;
+                var P = _impulse * _ay + axialImpulse * _ax;
+                var LA = _impulse * _sAy + axialImpulse * _sAx + _motorImpulse;
+                var LB = _impulse * _sBy + axialImpulse * _sBx + _motorImpulse;
 
                 vA -= _invMassA * P;
-                wA -= _invIa * LA;
+                wA -= _invIA * LA;
 
                 vB += _invMassB * P;
-                wB += _invIb * LB;
+                wB += _invIB * LB;
             }
             else
             {
                 _impulse = 0.0f;
                 _springImpulse = 0.0f;
                 _motorImpulse = 0.0f;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
             }
 
             data.Velocities[_indexA].V = vA;
@@ -436,7 +479,7 @@ namespace Box2DSharp.Dynamics.Joints
         internal override void SolveVelocityConstraints(in SolverData data)
         {
             float mA = _invMassA, mB = _invMassB;
-            float iA = _invIa, iB = _invIb;
+            float iA = _invIA, iB = _invIB;
 
             var vA = data.Velocities[_indexA].V;
             var wA = data.Velocities[_indexA].W;
@@ -473,6 +516,48 @@ namespace Box2DSharp.Dynamics.Joints
                 wA -= iA * impulse;
                 wB += iB * impulse;
             }
+            if (_enableLimit)
+            {
+                // Lower limit
+                {
+                    var C = _translation - _lowerTranslation;
+                    var Cdot = Vector2.Dot(_ax, vB - vA) + _sBx * wB - _sAx * wA;
+                    var impulse = -_axialMass * (Cdot + Math.Max(C, 0.0f) * data.Step.InvDt);
+                    var oldImpulse = _lowerImpulse;
+                    _lowerImpulse = Math.Max(_lowerImpulse + impulse, 0.0f);
+                    impulse = _lowerImpulse - oldImpulse;
+
+                    var P = impulse * _ax;
+                    var LA = impulse * _sAx;
+                    var LB = impulse * _sBx;
+
+                    vA -= mA * P;
+                    wA -= iA * LA;
+                    vB += mB * P;
+                    wB += iB * LB;
+                }
+
+                // Upper limit
+                // Note: signs are flipped to keep C positive when the constraint is satisfied.
+                // This also keeps the impulse positive when the limit is active.
+                {
+                    var C = _upperTranslation - _translation;
+                    var Cdot = Vector2.Dot(_ax, vA - vB) + _sAx * wA - _sBx * wB;
+                    var impulse = -_axialMass * (Cdot + Math.Max(C, 0.0f) * data.Step.InvDt);
+                    var oldImpulse = _upperImpulse;
+                    _upperImpulse = Math.Max(_upperImpulse + impulse, 0.0f);
+                    impulse = _upperImpulse - oldImpulse;
+
+                    var P = impulse * _ax;
+                    var LA = impulse * _sAx;
+                    var LB = impulse * _sBx;
+
+                    vA += mA * P;
+                    wA += iA * LA;
+                    vB -= mB * P;
+                    wB -= iB * LB;
+                }
+            }
 
             // Solve point to line constraint
             {
@@ -505,47 +590,136 @@ namespace Box2DSharp.Dynamics.Joints
             var cB = data.Positions[_indexB].Center;
             var aB = data.Positions[_indexB].Angle;
 
-            var qA = new Rotation(aA);
-            var qB = new Rotation(aB);
+            var linearError = 0.0f;
 
-            var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
-            var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
-            var d = cB - cA + rB - rA;
-
-            var ay = MathUtils.Mul(qA, _localYAxisA);
-
-            var sAy = MathUtils.Cross(d + rA, ay);
-            var sBy = MathUtils.Cross(rB, ay);
-
-            var C = Vector2.Dot(d, ay);
-
-            var k = _invMassA + _invMassB + _invIa * _sAy * _sAy + _invIb * _sBy * _sBy;
-
-            float impulse;
-            if (!k.Equals(0.0f))
+            if (_enableLimit)
             {
-                impulse = -C / k;
+                var qA = new Rotation(aA);
+                var qB = new Rotation(aB);
+
+                var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
+                var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
+                var d = (cB - cA) + rB - rA;
+
+                var ax = MathUtils.Mul(qA, _localXAxisA);
+                var sAx = MathUtils.Cross(d + rA, _ax);
+                var sBx = MathUtils.Cross(rB, _ax);
+
+                var C = 0.0f;
+                var translation = Vector2.Dot(ax, d);
+                if (Math.Abs(_upperTranslation - _lowerTranslation) < 2.0f * Settings.LinearSlop)
+                {
+                    C = translation;
+                }
+                else if (translation <= _lowerTranslation)
+                {
+                    C = Math.Min(translation - _lowerTranslation, 0.0f);
+                }
+                else if (translation >= _upperTranslation)
+                {
+                    C = Math.Max(translation - _upperTranslation, 0.0f);
+                }
+
+                if (!C.Equals(0))
+                {
+                    var invMass = _invMassA + _invMassB + _invIA * sAx * sAx + _invIB * sBx * sBx;
+                    var impulse = 0.0f;
+                    if (!invMass.Equals(0))
+                    {
+                        impulse = -C / invMass;
+                    }
+
+                    var P = impulse * ax;
+                    var LA = impulse * sAx;
+                    var LB = impulse * sBx;
+
+                    cA -= _invMassA * P;
+                    aA -= _invIA * LA;
+                    cB += _invMassB * P;
+                    aB += _invIB * LB;
+
+                    linearError = Math.Abs(C);
+                }
             }
-            else
+
+            // Solve perpendicular constraint
             {
-                impulse = 0.0f;
+                var qA = new Rotation(aA);
+                var qB = new Rotation(aB);
+
+                var rA = MathUtils.Mul(qA, _localAnchorA - _localCenterA);
+                var rB = MathUtils.Mul(qB, _localAnchorB - _localCenterB);
+                var d = (cB - cA) + rB - rA;
+
+                var ay = MathUtils.Mul(qA, _localYAxisA);
+
+                var sAy = MathUtils.Cross(d + rA, ay);
+                var sBy = MathUtils.Cross(rB, ay);
+
+                var C = Vector2.Dot(d, ay);
+
+                var invMass = _invMassA + _invMassB + _invIA * _sAy * _sAy + _invIB * _sBy * _sBy;
+
+                var impulse = 0.0f;
+                if (!invMass.Equals(0))
+                {
+                    impulse = -C / invMass;
+                }
+
+                var P = impulse * ay;
+                var LA = impulse * sAy;
+                var LB = impulse * sBy;
+
+                cA -= _invMassA * P;
+                aA -= _invIA * LA;
+                cB += _invMassB * P;
+                aB += _invIB * LB;
+
+                linearError = Math.Max(linearError, Math.Abs(C));
             }
-
-            var P = impulse * ay;
-            var LA = impulse * sAy;
-            var LB = impulse * sBy;
-
-            cA -= _invMassA * P;
-            aA -= _invIa * LA;
-            cB += _invMassB * P;
-            aB += _invIb * LB;
 
             data.Positions[_indexA].Center = cA;
             data.Positions[_indexA].Angle = aA;
             data.Positions[_indexB].Center = cB;
             data.Positions[_indexB].Angle = aB;
 
-            return Math.Abs(C) <= Settings.LinearSlop;
+            return linearError <= Settings.LinearSlop;
+        }
+
+        /// <inheritdoc />
+        public override void Draw(IDrawer drawer)
+        {
+            var xfA = BodyA.GetTransform();
+            var xfB = BodyB.GetTransform();
+            var pA = MathUtils.Mul(xfA, _localAnchorA);
+            var pB = MathUtils.Mul(xfB, _localAnchorB);
+
+            var axis = MathUtils.Mul(xfA.Rotation, _localXAxisA);
+
+            var c1 = Color.FromArgb(0.7f, 0.7f, 0.7f);
+            var c2 = Color.FromArgb(0.3f, 0.9f, 0.3f);
+            var c3 = Color.FromArgb(0.9f, 0.3f, 0.3f);
+            var c4 = Color.FromArgb(0.3f, 0.3f, 0.9f);
+            var c5 = Color.FromArgb(0.4f, 0.4f, 0.4f);
+
+            drawer.DrawSegment(pA, pB, c5);
+
+            if (_enableLimit)
+            {
+                var lower = pA + _lowerTranslation * axis;
+                var upper = pA + _upperTranslation * axis;
+                var perp = MathUtils.Mul(xfA.Rotation, _localYAxisA);
+                drawer.DrawSegment(lower, upper, c1);
+                drawer.DrawSegment(lower - 0.5f * perp, lower + 0.5f * perp, c2);
+                drawer.DrawSegment(upper - 0.5f * perp, upper + 0.5f * perp, c3);
+            }
+            else
+            {
+                drawer.DrawSegment(pA - 1.0f * axis, pA + 1.0f * axis, c1);
+            }
+
+            drawer.DrawPoint(pA, 5.0f, c1);
+            drawer.DrawPoint(pB, 5.0f, c4);
         }
     }
 }

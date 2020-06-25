@@ -5,6 +5,9 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Collision.Shapes
 {
+    /// <summary>
+    /// A solid circle shape
+    /// </summary>
     public class CircleShape : Shape
     {
         /// Position
@@ -44,7 +47,16 @@ namespace Box2DSharp.Collision.Shapes
             return Vector2.Dot(d, d) <= Radius * Radius;
         }
 
+        /// <summary>
         /// Implement b2Shape.
+        /// @note because the circle is solid, rays that start inside do not hit because the normal is
+        /// not defined.
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <param name="transform"></param>
+        /// <param name="childIndex"></param>
+        /// <returns></returns>
         public override bool RayCast(
             out RayCastOutput output,
             in RayCastInput input,
