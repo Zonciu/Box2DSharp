@@ -63,5 +63,16 @@ namespace Box2DSharp.Common
 
             return length;
         }
+
+        /// <summary>
+        ///  Get the skew vector such that dot(skew_vec, other) == cross(vec, other)
+        /// </summary>
+        /// <param name="vector2"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 Skew(ref this Vector2 vector2)
+        {
+            return new Vector2(-vector2.Y, vector2.X);
+        }
     }
 }
