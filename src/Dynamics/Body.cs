@@ -121,10 +121,7 @@ namespace Box2DSharp.Dynamics
         /// <summary>
         /// 夹具列表
         /// </summary>
-        public IReadOnlyList<Fixture> FixtureList
-        {
-            get { return Fixtures; }
-        }
+        public IReadOnlyList<Fixture> FixtureList => Fixtures;
 
         /// <summary>
         /// 夹具列表
@@ -1204,15 +1201,36 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         internal void SynchronizeFixtures()
         {
-            var xf1 = new Transform();
-            xf1.Rotation.Set(Sweep.A0);
-            xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
+            var broadPhase = World.ContactManager.BroadPhase;
 
-            var broadPhase = _world.ContactManager.BroadPhase;
-            for (var index = 0; index < Fixtures.Count; index++)
+            if (HasFlag(BodyFlags.IsAwake))
             {
-                Fixtures[index].Synchronize(broadPhase, xf1, Transform);
+                var xf1 = new Transform();
+                xf1.Rotation.Set(Sweep.A0);
+                xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
+
+                for (var index = 0; index < Fixtures.Count; index++)
+                {
+                    Fixtures[index].Synchronize(broadPhase, xf1, Transform);
+                }
             }
+            else
+            {
+                for (var index = 0; index < Fixtures.Count; index++)
+                {
+                    Fixtures[index].Synchronize(broadPhase, Transform, Transform);
+                }
+            }
+
+            // var xf1 = new Transform();
+            // xf1.Rotation.Set(Sweep.A0);
+            // xf1.Position = Sweep.C0 - MathUtils.Mul(xf1.Rotation, Sweep.LocalCenter);
+            //
+            // var broadPhase = _world.ContactManager.BroadPhase;
+            // for (var index = 0; index < Fixtures.Count; index++)
+            // {
+            //     Fixtures[index].Synchronize(broadPhase, xf1, Transform);
+            // }
         }
 
         /// <summary>

@@ -325,7 +325,7 @@ namespace Box2DSharp.Dynamics
 
                 proxy.AABB.Combine(aabb1, aabb2);
 
-                var displacement = transform2.Position - transform1.Position;
+                var displacement = aabb2.GetCenter() - aabb1.GetCenter();
 
                 broadPhase.MoveProxy(proxy.ProxyId, proxy.AABB, displacement);
             }

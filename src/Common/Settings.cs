@@ -29,7 +29,7 @@ namespace Box2DSharp.Common
         /// This is used to fatten AABBs in the dynamic tree. This is used to predict
         /// the future position based on the current displacement.
         /// This is a dimensionless multiplier.
-        public const float AABBMultiplier = 2.0f;
+        public const float AABBMultiplier = 4.0f;
 
         /// A small length used as a collision and constraint tolerance. Usually it is
         /// chosen to be numerically significant, but visually insignificant.
@@ -81,7 +81,7 @@ namespace Box2DSharp.Common
         /// to overshoot.
         public const float Baumgarte = 0.2f;
 
-        public const float ToiBaugarte = 0.75f;
+        public const float ToiBaumgarte = 0.75f;
 
         // Sleep
 

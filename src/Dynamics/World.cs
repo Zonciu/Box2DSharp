@@ -911,11 +911,9 @@ namespace Box2DSharp.Dynamics
                     b.Sweep.Alpha0 = 0.0f;
                 }
 
-                var contactNode = ContactManager.ContactList.First;
-                while (contactNode != null)
+                for (var node = ContactManager.ContactList.First; node != null; node = node.Next)
                 {
-                    var c = contactNode.Value;
-                    contactNode = contactNode.Next;
+                    var c = node.Value;
 
                     // Invalidate TOI
                     c.Flags &= ~(Contact.ContactFlag.ToiFlag | Contact.ContactFlag.IslandFlag);
@@ -1379,7 +1377,7 @@ namespace Box2DSharp.Dynamics
 
         /// <summary>
         /// Register a routine for debug drawing. The debug draw functions are called
-        /// inside with b2World::DrawDebugData method. The debug draw object is owned
+        /// inside with <see cref="DebugDraw"/> method. The debug draw object is owned
         /// by you and must remain in scope.
         /// 调试绘制,用于绘制物体的图形
         /// </summary>
@@ -1391,7 +1389,7 @@ namespace Box2DSharp.Dynamics
 
         /// Call this to draw shapes and other debug draw data. This is intentionally non-const.
         /// 绘制调试数据
-        public void DrawDebugData()
+        public void DebugDraw()
         {
             if (Drawer == null)
             {
@@ -1454,11 +1452,9 @@ namespace Box2DSharp.Dynamics
             if (flags.HasFlag(DrawFlag.DrawPair))
             {
                 var color = Color.FromArgb(77, 230, 230);
-                var node = ContactManager.ContactList.First;
-                while (node != null)
+                for (var node = ContactManager.ContactList.First; node != null; node = node.Next)
                 {
                     var c = node.Value;
-                    node = node.Next;
                     var fixtureA = c.FixtureA;
                     var fixtureB = c.FixtureB;
 

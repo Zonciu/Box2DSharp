@@ -86,6 +86,7 @@ namespace Box2DSharp.Collision
             _treeNodes[nodeId].Child2 = NullNode;
             _treeNodes[nodeId].Height = 0;
             _treeNodes[nodeId].UserData = null;
+            _treeNodes[nodeId].Moved = false;
             ++_nodeCount;
             return nodeId;
         }
@@ -113,7 +114,7 @@ namespace Box2DSharp.Collision
             _treeNodes[proxyId].AABB.UpperBound = aabb.UpperBound + r;
             _treeNodes[proxyId].UserData = userData;
             _treeNodes[proxyId].Height = 0;
-
+            _treeNodes[proxyId].Moved = true;
             InsertLeaf(proxyId);
 
             return proxyId;
@@ -139,43 +140,65 @@ namespace Box2DSharp.Collision
 
             Debug.Assert(_treeNodes[proxyId].IsLeaf());
 
-            if (_treeNodes[proxyId].AABB.Contains(aabb))
-            {
-                return false;
-            }
-
-            RemoveLeaf(proxyId);
-
-            // Extend AABB.
-            var b = aabb;
+            // Extend AABB
             var r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
-            b.LowerBound = b.LowerBound - r;
-            b.UpperBound = b.UpperBound + r;
+            var fatAABB = new AABB
+            {
+                LowerBound = aabb.LowerBound - r,
+                UpperBound = aabb.UpperBound + r
+            };
 
-            // Predict AABB displacement.
+            // Predict AABB movement
             var d = Settings.AABBMultiplier * displacement;
 
             if (d.X < 0.0f)
             {
-                b.LowerBound.X += d.X;
+                fatAABB.LowerBound.X += d.X;
             }
             else
             {
-                b.UpperBound.X += d.X;
+                fatAABB.UpperBound.X += d.X;
             }
 
             if (d.Y < 0.0f)
             {
-                b.LowerBound.Y += d.Y;
+                fatAABB.LowerBound.Y += d.Y;
             }
             else
             {
-                b.UpperBound.Y += d.Y;
+                fatAABB.UpperBound.Y += d.Y;
             }
 
-            _treeNodes[proxyId].AABB = b;
+            ref var treeAABB = ref _treeNodes[proxyId].AABB;
+            if (treeAABB.Contains(aabb))
+            {
+                // The tree AABB still contains the object, but it might be too large.
+                // Perhaps the object was moving fast but has since gone to sleep.
+                // The huge AABB is larger than the new fat AABB.
+                var hugeAABB = new AABB
+                {
+                    LowerBound = fatAABB.LowerBound - 4.0f * r,
+                    UpperBound = fatAABB.UpperBound + 4.0f * r
+                };
+
+                if (hugeAABB.Contains(treeAABB))
+                {
+                    // The tree AABB contains the object AABB and the tree AABB is
+                    // not too large. No tree update needed.
+                    return false;
+                }
+
+                // Otherwise the tree AABB is huge and needs to be shrunk
+            }
+
+            RemoveLeaf(proxyId);
+
+            _treeNodes[proxyId].AABB = fatAABB;
 
             InsertLeaf(proxyId);
+
+            _treeNodes[proxyId].Moved = true;
+
             return true;
         }
 
@@ -185,6 +208,18 @@ namespace Box2DSharp.Collision
         {
             Debug.Assert(0 <= proxyId && proxyId < _nodeCapacity);
             return _treeNodes[proxyId].UserData;
+        }
+
+        public bool WasMoved(int proxyId)
+        {
+            Debug.Assert(0 <= proxyId && proxyId < _nodeCapacity);
+            return _treeNodes[proxyId].Moved;
+        }
+
+        public void ClearMoved(int proxyId)
+        {
+            Debug.Assert(0 <= proxyId && proxyId < _nodeCapacity);
+            _treeNodes[proxyId].Moved = false;
         }
 
         /// Get the fat AABB for a proxy.
@@ -957,6 +992,8 @@ namespace Box2DSharp.Collision
             get => Parent;
             set => Parent = value;
         }
+
+        public bool Moved;
 
         public bool IsLeaf()
         {

@@ -741,7 +741,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
                     // Prevent large corrections and allow slop.
                     var C = MathUtils.Clamp(
-                        Settings.ToiBaugarte * (separation + Settings.LinearSlop),
+                        Settings.ToiBaumgarte * (separation + Settings.LinearSlop),
                         -Settings.MaxLinearCorrection,
                         0.0f);
 

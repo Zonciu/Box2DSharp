@@ -267,7 +267,7 @@ namespace Testbed.Basics
             }
 
             Drawer.Flags = flags;
-            World.DrawDebugData();
+            World.DebugDraw();
             if (TestSettings.DrawContactPoints)
             {
                 const float ImpulseScale = 0.1f;

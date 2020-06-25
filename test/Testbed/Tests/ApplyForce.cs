@@ -3,7 +3,6 @@ using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Joints;
-using OpenToolkit.Windowing.Common;
 using OpenToolkit.Windowing.Common.Input;
 using Testbed.Basics;
 using Transform = Box2DSharp.Common.Transform;
@@ -11,6 +10,11 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed.Tests
 {
+    /// <summary>
+    /// This test shows how to apply forces and torques to a body.
+    /// It also shows how to use the friction joint that can be useful
+    /// for overhead games.
+    /// </summary>
     [TestCase("Forces", "ApplyForce")]
     public class ApplyForce : Test
     {
@@ -67,7 +71,7 @@ namespace Testbed.Tests
 
                 var sd1 = new FixtureDef();
                 sd1.Shape = poly1;
-                sd1.Density = 4.0f;
+                sd1.Density = 2.0f;
 
                 var xf2 = new Transform();
                 xf2.Rotation.Set(-0.3524f * Settings.Pi);
@@ -86,15 +90,32 @@ namespace Testbed.Tests
 
                 var bd = new BodyDef();
                 bd.BodyType = BodyType.DynamicBody;
-                bd.AngularDamping = 2.0f;
-                bd.LinearDamping = 0.5f;
-
-                bd.Position = new Vector2(0.0f, 2.0f);
+                bd.Position = new Vector2(0.0f, 3.0f);
                 bd.Angle = Settings.Pi;
                 bd.AllowSleep = false;
                 _body = World.CreateBody(bd);
                 _body.CreateFixture(sd1);
                 _body.CreateFixture(sd2);
+
+                var gravity = 10.0f;
+                var I = _body.Inertia;
+                var mass = _body.Mass;
+
+                // Compute an effective radius that can be used to
+                // set the max torque for a friction joint
+                // For a circle: I = 0.5 * m * r * r ==> r = sqrt(2 * I / m)
+                var radius = (float)Math.Sqrt(2.0f * I / mass);
+
+                FrictionJointDef jd = new FrictionJointDef();
+                jd.BodyA = ground;
+                jd.BodyB = _body;
+                jd.LocalAnchorA.SetZero();
+                jd.LocalAnchorB = _body.GetLocalCenter();
+                jd.CollideConnected = true;
+                jd.MaxForce = 0.5f * mass * gravity;
+                jd.MaxTorque = 0.2f * mass * radius * gravity;
+
+                World.CreateJoint(jd);
             }
 
             {
@@ -111,7 +132,7 @@ namespace Testbed.Tests
                     var bd = new BodyDef();
                     bd.BodyType = BodyType.DynamicBody;
 
-                    bd.Position = new Vector2(0.0f, 5.0f + 1.54f * i);
+                    bd.Position.Set(0.0f, 7.0f + 1.54f * i);
                     var body = World.CreateBody(bd);
 
                     body.CreateFixture(fd);
@@ -130,7 +151,7 @@ namespace Testbed.Tests
                     jd.BodyB = body;
                     jd.CollideConnected = true;
                     jd.MaxForce = mass * gravity;
-                    jd.MaxTorque = mass * radius * gravity;
+                    jd.MaxTorque = 0.1f * mass * radius * gravity;
 
                     World.CreateJoint(jd);
                 }
@@ -160,7 +181,7 @@ namespace Testbed.Tests
 
         protected override void OnRender()
         {
-            DrawString("Press A,D,W to control");
+            DrawString("Forward (W), Turn (A) and (D)");
         }
     }
 }
