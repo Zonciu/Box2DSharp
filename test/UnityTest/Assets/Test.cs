@@ -286,7 +286,7 @@ namespace Box2DSharp
             }
 
             TestSettings.Drawer.Flags = flags;
-            World.DrawDebugData();
+            World.DebugDraw();
             if (TestSettings.ContactPoint)
             {
                 const float impulseScale = 0.1f;
