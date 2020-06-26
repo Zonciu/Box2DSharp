@@ -49,7 +49,7 @@ namespace Testbed.Tests
             shape.Set(_points);
             var drawLine = new Vector2[shape.Count + 1];
             Array.Copy(shape.Vertices.ToArray(), drawLine, shape.Count);
-            drawLine[^1] = shape.Vertices[0];
+            drawLine[drawLine.Length - 1] = shape.Vertices[0];
             Drawer.DrawPolygon(drawLine, drawLine.Length, Color.FromArgb(0.9f, 0.9f, 0.9f));
 
             for (var i = 0; i < _count; ++i)

@@ -11,13 +11,10 @@ namespace Testbed
             Global.Settings.Load();
             Global.Camera.Width = Global.Settings.WindowWidth;
             Global.Camera.Height = Global.Settings.WindowHeight;
-            using var game = new Game(
-                new GameWindowSettings(),
-                new NativeWindowSettings
-                {
-                    Size = new Vector2i(Global.Settings.WindowWidth, Global.Settings.WindowHeight)
-                });
-            game.Run();
+            using (var game = new Game(new GameWindowSettings(), new NativeWindowSettings {Size = new Vector2i(Global.Settings.WindowWidth, Global.Settings.WindowHeight)}))
+            {
+                game.Run();
+            }
         }
     }
 }
