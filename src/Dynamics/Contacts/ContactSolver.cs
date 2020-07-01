@@ -7,25 +7,25 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Contacts
 {
-    public ref struct ContactSolver
+    public class ContactSolver
     {
-        private Contact[] _contacts;
-
-        private int _contactCount;
-
-        private ContactPositionConstraint[] _positionConstraints;
+        internal ContactPositionConstraint[] PositionConstraints;
 
         internal ContactVelocityConstraint[] VelocityConstraints;
 
+        private int _contactCount;
+
+        private Contact[] _contacts;
+
         private Position[] _positions;
 
-        private readonly Velocity[] _velocities;
+        private Velocity[] _velocities;
 
-        public ContactSolver(in ContactSolverDef def)
+        public void Setup(in ContactSolverDef def)
         {
             var step = def.Step;
             _contactCount = def.ContactCount;
-            _positionConstraints = ArrayPool<ContactPositionConstraint>.Shared.Rent(_contactCount);
+            PositionConstraints = ArrayPool<ContactPositionConstraint>.Shared.Rent(_contactCount);
             VelocityConstraints = ArrayPool<ContactVelocityConstraint>.Shared.Rent(_contactCount);
 
             _positions = def.Positions;
@@ -65,7 +65,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 vc.K.SetZero();
                 vc.NormalMass.SetZero();
 
-                ref var pc = ref _positionConstraints[i];
+                ref var pc = ref PositionConstraints[i];
                 pc.IndexA = bodyA.IslandIndex;
                 pc.IndexB = bodyB.IslandIndex;
                 pc.InvMassA = bodyA.InvMass;
@@ -110,10 +110,9 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public void Reset()
         {
-            ArrayPool<ContactPositionConstraint>.Shared.Return(_positionConstraints, true);
-            _positionConstraints = default;
-            ArrayPool<ContactVelocityConstraint>.Shared.Return(VelocityConstraints, true);
-            VelocityConstraints = default;
+            _positions = null;
+            _contacts = null;
+            _velocities = null;
             _contactCount = 0;
         }
 
@@ -122,7 +121,7 @@ namespace Box2DSharp.Dynamics.Contacts
             for (var i = 0; i < _contactCount; ++i)
             {
                 ref var vc = ref VelocityConstraints[i];
-                ref var pc = ref _positionConstraints[i];
+                ref var pc = ref PositionConstraints[i];
 
                 var radiusA = pc.RadiusA;
                 var radiusB = pc.RadiusB;
@@ -604,7 +603,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
             for (var i = 0; i < _contactCount; ++i)
             {
-                ref var pc = ref _positionConstraints[i];
+                ref var pc = ref PositionConstraints[i];
 
                 var indexA = pc.IndexA;
                 var indexB = pc.IndexB;
@@ -686,7 +685,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
             for (var i = 0; i < _contactCount; ++i)
             {
-                ref var pc = ref _positionConstraints[i];
+                ref var pc = ref PositionConstraints[i];
 
                 var indexA = pc.IndexA;
                 var indexB = pc.IndexB;

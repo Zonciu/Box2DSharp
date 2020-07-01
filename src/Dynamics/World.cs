@@ -657,6 +657,8 @@ namespace Box2DSharp.Dynamics
 
         private readonly Stopwatch _solveTimer = new Stopwatch();
 
+        private readonly Island _solveIsland = new Island();
+
         /// <summary>
         /// Find islands, integrate and solve constraints, solve position constraints
         /// 找出岛屿,迭代求解约束,求解位置约束(岛屿用来对物理空间进行物体分组求解,提高效率)
@@ -670,7 +672,8 @@ namespace Box2DSharp.Dynamics
 
             // Size the island for the worst case.
             // 最坏情况岛屿容量,即全世界在同一个岛屿
-            var island = new Island(
+            var island = _solveIsland;
+            island.Setup(
                 BodyList.Count,
                 ContactManager.ContactList.Count,
                 JointList.Count,
@@ -888,6 +891,8 @@ namespace Box2DSharp.Dynamics
             island.Reset();
         }
 
+        private readonly Island _solveToiIsland = new Island();
+
         /// <summary>
         /// Find TOI contacts and solve them.
         /// 求解碰撞时间
@@ -895,7 +900,8 @@ namespace Box2DSharp.Dynamics
         /// <param name="step"></param>
         private void SolveTOI(in TimeStep step)
         {
-            var island = new Island(
+            var island = _solveToiIsland;
+            island.Setup(
                 2 * Settings.MaxToiContacts,
                 Settings.MaxToiContacts,
                 0,

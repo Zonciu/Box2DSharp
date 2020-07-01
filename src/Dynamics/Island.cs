@@ -11,7 +11,7 @@ using Box2DSharp.Dynamics.Joints;
 namespace Box2DSharp.Dynamics
 {
     /// This is an internal class.
-    public ref struct Island
+    public class Island
     {
         internal Body[] Bodies;
 
@@ -31,7 +31,7 @@ namespace Box2DSharp.Dynamics
 
         internal Velocity[] Velocities;
 
-        public Island(
+        public void Setup(
             int bodyCapacity,
             int contactCapacity,
             int jointCapacity,
@@ -78,6 +78,8 @@ namespace Box2DSharp.Dynamics
             ContactCount = 0;
             JointCount = 0;
         }
+
+        private readonly ContactSolver _solveContactSolver = new ContactSolver();
 
         internal void Solve(out Profile profile, in TimeStep step, in Vector2 gravity, bool allowSleep)
         {
@@ -131,7 +133,8 @@ namespace Box2DSharp.Dynamics
             // Initialize velocity constraints.
             var contactSolverDef = new ContactSolverDef(in step, ContactCount, Contacts, Positions, Velocities);
 
-            var contactSolver = new ContactSolver(in contactSolverDef);
+            var contactSolver = _solveContactSolver;
+            contactSolver.Setup(in contactSolverDef);
             contactSolver.InitializeVelocityConstraints();
 
             if (step.WarmStarting)
@@ -279,6 +282,8 @@ namespace Box2DSharp.Dynamics
             contactSolver.Reset();
         }
 
+        private readonly ContactSolver _solveToiContactSolver = new ContactSolver();
+
         internal void SolveTOI(in TimeStep subStep, int toiIndexA, int toiIndexB)
         {
             Debug.Assert(toiIndexA < BodyCount);
@@ -295,7 +300,8 @@ namespace Box2DSharp.Dynamics
             }
 
             var contactSolverDef = new ContactSolverDef(in subStep, ContactCount, Contacts, Positions, Velocities);
-            var contactSolver = new ContactSolver(contactSolverDef);
+            var contactSolver = _solveToiContactSolver;
+            contactSolver.Setup(in contactSolverDef);
 
             // Solve position constraints.
             for (var i = 0; i < subStep.PositionIterations; ++i)

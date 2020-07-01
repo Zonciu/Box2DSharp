@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -179,6 +180,20 @@ namespace Box2DSharp.Common
         {
             var result = x > 0 && (x & (x - 1)) == 0;
             return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
+        public static int GetArraySize(int capacity)
+        {
+            var n = capacity - 1;
+
+            n |= n >> 1;
+            n |= n >> 2;
+            n |= n >> 4;
+            n |= n >> 8;
+            n |= n >> 16;
+            return n < 0 ? 128 : n + 1;
         }
     }
 }
