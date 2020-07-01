@@ -12,23 +12,16 @@ namespace Box2DSharp.Dynamics.Contacts
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal override void Evaluate(ref Manifold manifold, in Transform xfA, Transform xfB)
         {
-            var chain = (ChainShape) FixtureA.Shape;
+            var chain = (ChainShape)FixtureA.Shape;
 
             chain.GetChildEdge(out var edge, ChildIndexA);
-            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape) FixtureB.Shape, xfB);
+            CollisionUtils.CollideEdgeAndPolygon(ref manifold, edge, xfA, (PolygonShape)FixtureB.Shape, xfB);
         }
     }
 
     internal class ChainAndPolygonContactFactory : IContactFactory
     {
-        private readonly ObjectPool<ChainAndPolygonContact> _pool =
-            new ObjectPool<ChainAndPolygonContact>(
-                () => new ChainAndPolygonContact(),
-                contact =>
-                {
-                    contact.Reset();
-                    return true;
-                });
+        private readonly ContactPool<ChainAndPolygonContact> _pool = new ContactPool<ChainAndPolygonContact>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
@@ -43,7 +36,7 @@ namespace Box2DSharp.Dynamics.Contacts
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Destroy(Contact contact)
         {
-            _pool.Return((ChainAndPolygonContact) contact);
+            _pool.Return((ChainAndPolygonContact)contact);
         }
     }
 }

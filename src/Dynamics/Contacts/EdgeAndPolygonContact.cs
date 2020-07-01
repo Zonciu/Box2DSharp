@@ -17,24 +17,16 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             CollisionUtils.CollideEdgeAndPolygon(
                 ref manifold,
-                (EdgeShape) FixtureA.Shape,
+                (EdgeShape)FixtureA.Shape,
                 xfA,
-                (PolygonShape) FixtureB.Shape,
+                (PolygonShape)FixtureB.Shape,
                 xfB);
         }
     }
 
     internal class EdgeAndPolygonContactFactory : IContactFactory
     {
-        private readonly ObjectPool<EdgeAndPolygonContact> _pool =
-            new ObjectPool<EdgeAndPolygonContact>(
-                () => new EdgeAndPolygonContact(),
-                contact =>
-                {
-                    contact.Reset();
-                    return true;
-                }
-            );
+        private readonly ContactPool<EdgeAndPolygonContact> _pool = new ContactPool<EdgeAndPolygonContact>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
@@ -49,7 +41,7 @@ namespace Box2DSharp.Dynamics.Contacts
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Destroy(Contact contact)
         {
-            _pool.Return((EdgeAndPolygonContact) contact);
+            _pool.Return((EdgeAndPolygonContact)contact);
         }
     }
 }

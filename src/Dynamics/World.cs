@@ -525,7 +525,7 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        private class TreeQueryCallback : ITreeQueryCallback, IDisposable
+        private class TreeQueryCallback : ITreeQueryCallback
         {
             public ContactManager ContactManager { get; private set; }
 
@@ -537,7 +537,7 @@ namespace Box2DSharp.Dynamics
                 Callback = callback;
             }
 
-            public void Dispose()
+            public void Reset()
             {
                 ContactManager = default;
                 Callback = default;
@@ -552,19 +552,19 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private readonly TreeQueryCallback _treeQueryCallback = new TreeQueryCallback();
+
         /// Query the world for all fixtures that potentially overlap the
         /// provided AABB.
         /// @param callback a user implemented callback class.
         /// @param aabb the query box.
         public void QueryAABB(in IQueryCallback callback, in AABB aabb)
         {
-            var cb = SimpleObjectPool<TreeQueryCallback>.Shared.Get();
-            cb.Set(ContactManager, in callback);
-            ContactManager.BroadPhase.Query(cb, aabb);
-            SimpleObjectPool<TreeQueryCallback>.Shared.Return(cb, true);
+            _treeQueryCallback.Set(ContactManager, in callback);
+            ContactManager.BroadPhase.Query(_treeQueryCallback, aabb);
         }
 
-        private class InternalRayCastCallback : ITreeRayCastCallback, IDisposable
+        private class InternalRayCastCallback : ITreeRayCastCallback
         {
             public ContactManager ContactManager { get; private set; }
 
@@ -576,7 +576,7 @@ namespace Box2DSharp.Dynamics
                 Callback = callback;
             }
 
-            public void Dispose()
+            public void Reset()
             {
                 ContactManager = default;
                 Callback = default;
@@ -602,6 +602,8 @@ namespace Box2DSharp.Dynamics
             }
         }
 
+        private readonly InternalRayCastCallback _rayCastCallback = new InternalRayCastCallback();
+
         /// Ray-cast the world for all fixtures in the path of the ray. Your callback
         /// controls whether you get the closest point, any point, or n-points.
         /// The ray-cast ignores shapes that contain the starting point.
@@ -615,10 +617,9 @@ namespace Box2DSharp.Dynamics
                 MaxFraction = 1.0f, P1 = point1,
                 P2 = point2
             };
-            var cb = SimpleObjectPool<InternalRayCastCallback>.Shared.Get();
-            cb.Set(ContactManager, in callback);
-            ContactManager.BroadPhase.RayCast(cb, input);
-            SimpleObjectPool<InternalRayCastCallback>.Shared.Return(cb, true);
+            _rayCastCallback.Set(ContactManager, in callback);
+            ContactManager.BroadPhase.RayCast(_rayCastCallback, input);
+            _rayCastCallback.Reset();
         }
 
         /// Shift the world origin. Useful for large worlds.

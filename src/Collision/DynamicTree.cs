@@ -229,11 +229,14 @@ namespace Box2DSharp.Collision
             return _treeNodes[proxyId].AABB;
         }
 
+        private readonly Stack<int> _queryStack = new Stack<int>(256);
+
         /// Query an AABB for overlapping proxies. The callback class
         /// is called for each proxy that overlaps the supplied AABB.
         public void Query(in ITreeQueryCallback callback, in AABB aabb)
         {
-            var stack = SimpleObjectPool<Stack<int>>.Shared.Get();
+            var stack = _queryStack;
+            stack.Clear();
             stack.Push(_root);
 
             while (stack.Count > 0)
@@ -265,8 +268,9 @@ namespace Box2DSharp.Collision
             }
 
             stack.Clear();
-            SimpleObjectPool<Stack<int>>.Shared.Return(stack);
         }
+
+        private Stack<int> _rayCastStack = new Stack<int>(256);
 
         /// Ray-cast against the proxies in the tree. This relies on the callback
         /// to perform a exact ray-cast in the case were the proxy contains a shape.
@@ -300,7 +304,8 @@ namespace Box2DSharp.Collision
                 segmentAABB.UpperBound = Vector2.Max(p1, t);
             }
 
-            var stack = SimpleObjectPool<Stack<int>>.Shared.Get();
+            var stack = _rayCastStack;
+            stack.Clear();
             stack.Push(_root);
 
             while (stack.Count > 0)
@@ -360,9 +365,6 @@ namespace Box2DSharp.Collision
                     stack.Push(node.Child2);
                 }
             }
-
-            stack.Clear();
-            SimpleObjectPool<Stack<int>>.Shared.Return(stack);
         }
 
         /// Validate this tree. For testing.

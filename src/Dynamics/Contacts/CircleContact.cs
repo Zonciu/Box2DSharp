@@ -14,24 +14,16 @@ namespace Box2DSharp.Dynamics.Contacts
         {
             CollisionUtils.CollideCircles(
                 ref manifold,
-                (CircleShape) FixtureA.Shape,
+                (CircleShape)FixtureA.Shape,
                 xfA,
-                (CircleShape) FixtureB.Shape,
+                (CircleShape)FixtureB.Shape,
                 xfB);
         }
     }
 
     internal class CircleContactFactory : IContactFactory
     {
-        private readonly ObjectPool<CircleContact> _pool =
-            new ObjectPool<CircleContact>(
-                () => new CircleContact(),
-                contact =>
-                {
-                    contact.Reset();
-                    return true;
-                }
-            );
+        private readonly ContactPool<CircleContact> _pool = new ContactPool<CircleContact>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Contact Create(Fixture fixtureA, int indexA, Fixture fixtureB, int indexB)
@@ -46,7 +38,7 @@ namespace Box2DSharp.Dynamics.Contacts
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Destroy(Contact contact)
         {
-            _pool.Return((CircleContact) contact);
+            _pool.Return((CircleContact)contact);
         }
     }
 }
