@@ -16,16 +16,6 @@ namespace Box2DSharp.Dynamics.Contacts
         /// the contact        
         public Contact Contact;
 
-        public LinkedListNode<ContactEdge> Node;
-
-        internal static readonly ObjectPool<ContactEdge> Pool = new ObjectPool<ContactEdge>(
-            () => new ContactEdge(),
-            c =>
-            {
-                c.Other = default;
-                c.Contact = default;
-                c.Node = default;
-                return true;
-            });
+        public readonly LinkedListNode<ContactEdge> Node = new LinkedListNode<ContactEdge>(default);
     }
 }

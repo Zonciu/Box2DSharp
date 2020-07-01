@@ -187,7 +187,7 @@ namespace Box2DSharp.Dynamics
             bodyB = fixtureB.Body;
 
             // Insert into the world.
-            c.Node = LinkedListNodePool<Contact>.Shared.Get(c);
+            c.Node.Value = c;
             ContactList.AddFirst(c.Node);
 
             // Connect to island graph.
@@ -195,13 +195,13 @@ namespace Box2DSharp.Dynamics
             // Connect to body A
             c.NodeA.Contact = c;
             c.NodeA.Other = bodyB;
-            c.NodeA.Node = LinkedListNodePool<ContactEdge>.Shared.Get(c.NodeA);
+            c.NodeA.Node.Value = c.NodeA;
             bodyA.ContactEdges.AddFirst(c.NodeA.Node);
 
             // Connect to body B
             c.NodeB.Contact = c;
             c.NodeB.Other = bodyA;
-            c.NodeB.Node = LinkedListNodePool<ContactEdge>.Shared.Get(c.NodeB);
+            c.NodeB.Node.Value = c.NodeB;
             bodyB.ContactEdges.AddFirst(c.NodeB.Node);
         }
 
@@ -225,15 +225,12 @@ namespace Box2DSharp.Dynamics
 
             // Remove from the world.
             ContactList.Remove(c.Node);
-            LinkedListNodePool<Contact>.Shared.Return(c.Node);
 
             // Remove from body 1
             bodyA.ContactEdges.Remove(c.NodeA.Node);
-            LinkedListNodePool<ContactEdge>.Shared.Return(c.NodeA.Node);
 
             // Remove from body 2
             bodyB.ContactEdges.Remove(c.NodeB.Node);
-            LinkedListNodePool<ContactEdge>.Shared.Return(c.NodeB.Node);
 
             // Call the factory.
             DestroyContact(c);

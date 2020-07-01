@@ -43,11 +43,11 @@ namespace Box2DSharp.Dynamics.Contacts
 
         /// World pool and list pointers.
         /// Nodes for connecting bodies.
-        internal LinkedListNode<Contact> Node;
+        internal readonly LinkedListNode<Contact> Node = new LinkedListNode<Contact>(default);
 
-        internal ContactEdge NodeA;
+        internal readonly ContactEdge NodeA = new ContactEdge();
 
-        internal ContactEdge NodeB;
+        internal readonly ContactEdge NodeB = new ContactEdge();
 
         internal float Restitution;
 
@@ -63,9 +63,6 @@ namespace Box2DSharp.Dynamics.Contacts
 
             FixtureA = fixtureA;
             FixtureB = fixtureB;
-
-            NodeA = ContactEdge.Pool.Get();
-            NodeB = ContactEdge.Pool.Get();
 
             ChildIndexA = indexA;
             ChildIndexB = indexB;
@@ -87,11 +84,11 @@ namespace Box2DSharp.Dynamics.Contacts
             ChildIndexA = default;
             ChildIndexB = default;
             Manifold = default;
-            Node = default;
-            ContactEdge.Pool.Return(NodeA);
-            ContactEdge.Pool.Return(NodeB);
-            NodeA = default;
-            NodeB = default;
+            Node.Value = default;
+            NodeA.Node.Value = default;
+            NodeA.Other = default;
+            NodeB.Node.Value = default;
+            NodeB.Other = default;
             Restitution = default;
             TangentSpeed = default;
             Toi = default;
@@ -100,7 +97,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
         private static float MixFriction(float friction1, float friction2)
         {
-            return (float) Math.Sqrt(friction1 * friction2);
+            return (float)Math.Sqrt(friction1 * friction2);
         }
 
         private static float MixRestitution(float restitution1, float restitution2)
