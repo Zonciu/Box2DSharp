@@ -1,15 +1,11 @@
 using System;
 using System.Buffers;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
-using Box2DSharp.Dynamics;
 using Box2DSharp.Dynamics.Internal;
 
 namespace Box2DSharp.Collision
@@ -34,7 +30,7 @@ namespace Box2DSharp.Collision
 
             _nodeCapacity = 16;
             _nodeCount = 0;
-            _treeNodes = new TreeNode[_nodeCapacity];
+            _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
 
             // Build a linked list for the free list.
             // 节点数组初始化
@@ -62,9 +58,10 @@ namespace Box2DSharp.Collision
                 var oldNodes = _treeNodes;
                 _nodeCapacity *= 2;
 
-                _treeNodes = new TreeNode[_nodeCapacity];
+                _treeNodes = ArrayPool<TreeNode>.Shared.Rent(_nodeCapacity);
                 Array.Copy(oldNodes, _treeNodes, _nodeCount);
-                Array.Clear(oldNodes, 0, oldNodes.Length);
+                Array.Clear(oldNodes, 0, _nodeCount);
+                ArrayPool<TreeNode>.Shared.Return(oldNodes);
 
                 // Build a linked list for the free list. The parent
                 // pointer becomes the "next" pointer.
@@ -81,12 +78,13 @@ namespace Box2DSharp.Collision
             // Peel a node off the free list.
             var nodeId = _freeList;
             _freeList = _treeNodes[nodeId].Next;
-            _treeNodes[nodeId].Parent = NullNode;
-            _treeNodes[nodeId].Child1 = NullNode;
-            _treeNodes[nodeId].Child2 = NullNode;
-            _treeNodes[nodeId].Height = 0;
-            _treeNodes[nodeId].UserData = null;
-            _treeNodes[nodeId].Moved = false;
+            ref var newNode = ref _treeNodes[nodeId];
+            newNode.Parent = NullNode;
+            newNode.Child1 = NullNode;
+            newNode.Child2 = NullNode;
+            newNode.Height = 0;
+            newNode.UserData = null;
+            newNode.Moved = false;
             ++_nodeCount;
             return nodeId;
         }
@@ -95,7 +93,7 @@ namespace Box2DSharp.Collision
         {
             Debug.Assert(0 <= nodeId && nodeId < _nodeCapacity);
             Debug.Assert(0 < _nodeCount);
-            var freeNode = _treeNodes[nodeId];
+            ref var freeNode = ref _treeNodes[nodeId];
             freeNode.Reset();
             freeNode.Next = _freeList;
             freeNode.Height = -1;
@@ -107,14 +105,15 @@ namespace Box2DSharp.Collision
         public int CreateProxy(in AABB aabb, object userData)
         {
             var proxyId = AllocateNode();
+            ref var proxyNode = ref _treeNodes[proxyId];
 
             // Fatten the aabb.
             var r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
-            _treeNodes[proxyId].AABB.LowerBound = aabb.LowerBound - r;
-            _treeNodes[proxyId].AABB.UpperBound = aabb.UpperBound + r;
-            _treeNodes[proxyId].UserData = userData;
-            _treeNodes[proxyId].Height = 0;
-            _treeNodes[proxyId].Moved = true;
+            proxyNode.AABB.LowerBound = aabb.LowerBound - r;
+            proxyNode.AABB.UpperBound = aabb.UpperBound + r;
+            proxyNode.UserData = userData;
+            proxyNode.Height = 0;
+            proxyNode.Moved = true;
             InsertLeaf(proxyId);
 
             return proxyId;
@@ -169,7 +168,8 @@ namespace Box2DSharp.Collision
                 fatAABB.UpperBound.Y += d.Y;
             }
 
-            ref var treeAABB = ref _treeNodes[proxyId].AABB;
+            ref var proxyNode = ref _treeNodes[proxyId];
+            ref var treeAABB = ref proxyNode.AABB;
             if (treeAABB.Contains(aabb))
             {
                 // The tree AABB still contains the object, but it might be too large.
@@ -193,11 +193,11 @@ namespace Box2DSharp.Collision
 
             RemoveLeaf(proxyId);
 
-            _treeNodes[proxyId].AABB = fatAABB;
+            proxyNode.AABB = fatAABB;
 
             InsertLeaf(proxyId);
 
-            _treeNodes[proxyId].Moved = true;
+            proxyNode.Moved = true;
 
             return true;
         }
@@ -247,7 +247,7 @@ namespace Box2DSharp.Collision
                     continue;
                 }
 
-                var node = _treeNodes[nodeId];
+                ref readonly var node = ref _treeNodes[nodeId];
 
                 if (CollisionUtils.TestOverlap(node.AABB, aabb))
                 {
@@ -270,7 +270,7 @@ namespace Box2DSharp.Collision
             stack.Clear();
         }
 
-        private Stack<int> _rayCastStack = new Stack<int>(256);
+        private readonly Stack<int> _rayCastStack = new Stack<int>(256);
 
         /// Ray-cast against the proxies in the tree. This relies on the callback
         /// to perform a exact ray-cast in the case were the proxy contains a shape.
@@ -316,7 +316,7 @@ namespace Box2DSharp.Collision
                     continue;
                 }
 
-                var node = _treeNodes[nodeId];
+                ref readonly var node = ref _treeNodes[nodeId];
 
                 if (CollisionUtils.TestOverlap(node.AABB, segmentAABB) == false)
                 {
@@ -408,7 +408,7 @@ namespace Box2DSharp.Collision
             var maxBalance = 0;
             for (var i = 0; i < _nodeCapacity; ++i)
             {
-                var node = _treeNodes[i];
+                ref readonly var node = ref _treeNodes[i];
                 if (node.Height <= 1)
                 {
                     continue;
@@ -433,13 +433,13 @@ namespace Box2DSharp.Collision
                 return 0.0f;
             }
 
-            var root = _treeNodes[_root];
+            ref readonly var root = ref _treeNodes[_root];
             var rootArea = root.AABB.GetPerimeter();
 
             var totalArea = 0.0f;
             for (var i = 0; i < _nodeCapacity; ++i)
             {
-                var node = _treeNodes[i];
+                ref readonly var node = ref _treeNodes[i];
                 if (node.Height < 0)
                 {
                     // Free node in pool
@@ -461,15 +461,16 @@ namespace Box2DSharp.Collision
             // Build array of leaves. Free the rest.
             for (var i = 0; i < _nodeCapacity; ++i)
             {
-                if (_treeNodes[i].Height < 0)
+                ref var nodeI = ref _treeNodes[i];
+                if (nodeI.Height < 0)
                 {
                     // free node in pool
                     continue;
                 }
 
-                if (_treeNodes[i].IsLeaf())
+                if (nodeI.IsLeaf())
                 {
-                    _treeNodes[i].Parent = NullNode;
+                    nodeI.Parent = NullNode;
                     nodes[count] = i;
                     ++count;
                 }
@@ -503,11 +504,11 @@ namespace Box2DSharp.Collision
 
                 var index1 = nodes[iMin];
                 var index2 = nodes[jMin];
-                var child1 = _treeNodes[index1];
-                var child2 = _treeNodes[index2];
+                ref var child1 = ref _treeNodes[index1];
+                ref var child2 = ref _treeNodes[index2];
 
                 var parentIndex = AllocateNode();
-                var parent = _treeNodes[parentIndex];
+                ref var parent = ref _treeNodes[parentIndex];
                 parent.Child1 = index1;
                 parent.Child2 = index2;
                 parent.Height = 1 + Math.Max(child1.Height, child2.Height);
@@ -553,12 +554,13 @@ namespace Box2DSharp.Collision
             var index = _root;
             while (_treeNodes[index].IsLeaf() == false)
             {
-                var child1 = _treeNodes[index].Child1;
-                var child2 = _treeNodes[index].Child2;
+                ref var indexNode = ref _treeNodes[index];
+                var child1 = indexNode.Child1;
+                var child2 = indexNode.Child2;
 
-                var area = _treeNodes[index].AABB.GetPerimeter();
+                var area = indexNode.AABB.GetPerimeter();
 
-                AABB.Combine(_treeNodes[index].AABB, leafAABB, out var combinedAABB);
+                AABB.Combine(indexNode.AABB, leafAABB, out var combinedAABB);
                 var combinedArea = combinedAABB.GetPerimeter();
 
                 // Cost of creating a new parent for this node and the new leaf
@@ -617,37 +619,40 @@ namespace Box2DSharp.Collision
             var sibling = index;
 
             // Create a new parent.
-            var oldNode = _treeNodes[sibling];
+            ref readonly var oldNode = ref _treeNodes[sibling];
 
             var oldParent = oldNode.Parent;
             var newParent = AllocateNode();
-            _treeNodes[newParent].Parent = oldParent;
-            _treeNodes[newParent].UserData = null;
-            _treeNodes[newParent].AABB.Combine(leafAABB, oldNode.AABB);
-            _treeNodes[newParent].Height = oldNode.Height + 1;
+            ref var newParentNode = ref _treeNodes[newParent];
+            newParentNode.Parent = oldParent;
+            newParentNode.UserData = null;
+            newParentNode.AABB.Combine(leafAABB, oldNode.AABB);
+            newParentNode.Height = oldNode.Height + 1;
 
             if (oldParent != NullNode)
             {
+                ref var oldParentNode = ref _treeNodes[oldParent];
+
                 // The sibling was not the root.
-                if (_treeNodes[oldParent].Child1 == sibling)
+                if (oldParentNode.Child1 == sibling)
                 {
-                    _treeNodes[oldParent].Child1 = newParent;
+                    oldParentNode.Child1 = newParent;
                 }
                 else
                 {
-                    _treeNodes[oldParent].Child2 = newParent;
+                    oldParentNode.Child2 = newParent;
                 }
 
-                _treeNodes[newParent].Child1 = sibling;
-                _treeNodes[newParent].Child2 = leaf;
+                newParentNode.Child1 = sibling;
+                newParentNode.Child2 = leaf;
                 _treeNodes[sibling].Parent = newParent;
                 _treeNodes[leaf].Parent = newParent;
             }
             else
             {
                 // The sibling was the root.
-                _treeNodes[newParent].Child1 = sibling;
-                _treeNodes[newParent].Child2 = leaf;
+                newParentNode.Child1 = sibling;
+                newParentNode.Child2 = leaf;
                 _treeNodes[sibling].Parent = newParent;
                 _treeNodes[leaf].Parent = newParent;
                 _root = newParent;
@@ -658,17 +663,15 @@ namespace Box2DSharp.Collision
             while (index != NullNode)
             {
                 index = Balance(index);
+                ref var indexNode = ref _treeNodes[index];
+                Debug.Assert(indexNode.Child1 != NullNode);
+                Debug.Assert(indexNode.Child2 != NullNode);
+                ref var child1 = ref _treeNodes[indexNode.Child1];
+                ref var child2 = ref _treeNodes[indexNode.Child2];
+                indexNode.Height = 1 + Math.Max(child1.Height, child2.Height);
+                indexNode.AABB.Combine(child1.AABB, child2.AABB);
 
-                var child1 = _treeNodes[index].Child1;
-                var child2 = _treeNodes[index].Child2;
-
-                Debug.Assert(child1 != NullNode);
-                Debug.Assert(child2 != NullNode);
-
-                _treeNodes[index].Height = 1 + Math.Max(_treeNodes[child1].Height, _treeNodes[child2].Height);
-                _treeNodes[index].AABB.Combine(_treeNodes[child1].AABB, _treeNodes[child2].AABB);
-
-                index = _treeNodes[index].Parent;
+                index = indexNode.Parent;
             }
 
             //Validate();
@@ -683,27 +686,23 @@ namespace Box2DSharp.Collision
             }
 
             var parent = _treeNodes[leaf].Parent;
-            var grandParent = _treeNodes[parent].Parent;
-            int sibling;
-            if (_treeNodes[parent].Child1 == leaf)
-            {
-                sibling = _treeNodes[parent].Child2;
-            }
-            else
-            {
-                sibling = _treeNodes[parent].Child1;
-            }
+            ref var parentNode = ref _treeNodes[parent];
+            var grandParent = parentNode.Parent;
+
+            var sibling = parentNode.Child1 == leaf ? parentNode.Child2 : parentNode.Child1;
 
             if (grandParent != NullNode)
             {
+                ref var grandParentNode = ref _treeNodes[grandParent];
+
                 // Destroy parent and connect sibling to grandParent.
-                if (_treeNodes[grandParent].Child1 == parent)
+                if (grandParentNode.Child1 == parent)
                 {
-                    _treeNodes[grandParent].Child1 = sibling;
+                    grandParentNode.Child1 = sibling;
                 }
                 else
                 {
-                    _treeNodes[grandParent].Child2 = sibling;
+                    grandParentNode.Child2 = sibling;
                 }
 
                 _treeNodes[sibling].Parent = grandParent;
@@ -714,14 +713,14 @@ namespace Box2DSharp.Collision
                 while (index != NullNode)
                 {
                     index = Balance(index);
+                    ref var indexNode = ref _treeNodes[index];
+                    ref var child1 = ref _treeNodes[indexNode.Child1];
+                    ref var child2 = ref _treeNodes[indexNode.Child2];
 
-                    var child1 = _treeNodes[index].Child1;
-                    var child2 = _treeNodes[index].Child2;
+                    indexNode.AABB.Combine(child1.AABB, child2.AABB);
+                    indexNode.Height = 1 + Math.Max(child1.Height, child2.Height);
 
-                    _treeNodes[index].AABB.Combine(_treeNodes[child1].AABB, _treeNodes[child2].AABB);
-                    _treeNodes[index].Height = 1 + Math.Max(_treeNodes[child1].Height, _treeNodes[child2].Height);
-
-                    index = _treeNodes[index].Parent;
+                    index = indexNode.Parent;
                 }
             }
             else
@@ -738,7 +737,7 @@ namespace Box2DSharp.Collision
         {
             Debug.Assert(iA != NullNode);
 
-            var A = _treeNodes[iA];
+            ref var A = ref _treeNodes[iA];
             if (A.IsLeaf() || A.Height < 2)
             {
                 return iA;
@@ -749,8 +748,8 @@ namespace Box2DSharp.Collision
             Debug.Assert(0 <= iB && iB < _nodeCapacity);
             Debug.Assert(0 <= iC && iC < _nodeCapacity);
 
-            var B = _treeNodes[iB];
-            var C = _treeNodes[iC];
+            ref var B = ref _treeNodes[iB];
+            ref var C = ref _treeNodes[iC];
 
             var balance = C.Height - B.Height;
 
@@ -759,8 +758,8 @@ namespace Box2DSharp.Collision
             {
                 var iF = C.Child1;
                 var iG = C.Child2;
-                var F = _treeNodes[iF];
-                var G = _treeNodes[iG];
+                ref var F = ref _treeNodes[iF];
+                ref var G = ref _treeNodes[iG];
                 Debug.Assert(0 <= iF && iF < _nodeCapacity);
                 Debug.Assert(0 <= iG && iG < _nodeCapacity);
 
@@ -772,14 +771,15 @@ namespace Box2DSharp.Collision
                 // A's old parent should point to C
                 if (C.Parent != NullNode)
                 {
-                    if (_treeNodes[C.Parent].Child1 == iA)
+                    ref var cParentNode = ref _treeNodes[C.Parent];
+                    if (cParentNode.Child1 == iA)
                     {
-                        _treeNodes[C.Parent].Child1 = iC;
+                        cParentNode.Child1 = iC;
                     }
                     else
                     {
                         Debug.Assert(_treeNodes[C.Parent].Child2 == iA);
-                        _treeNodes[C.Parent].Child2 = iC;
+                        cParentNode.Child2 = iC;
                     }
                 }
                 else
@@ -819,8 +819,8 @@ namespace Box2DSharp.Collision
             {
                 var iD = B.Child1;
                 var iE = B.Child2;
-                var D = _treeNodes[iD];
-                var E = _treeNodes[iE];
+                ref var D = ref _treeNodes[iD];
+                ref var E = ref _treeNodes[iE];
                 Debug.Assert(0 <= iD && iD < _nodeCapacity);
                 Debug.Assert(0 <= iE && iE < _nodeCapacity);
 
@@ -832,14 +832,15 @@ namespace Box2DSharp.Collision
                 // A's old parent should point to B
                 if (B.Parent != NullNode)
                 {
-                    if (_treeNodes[B.Parent].Child1 == iA)
+                    ref var bParentNode = ref _treeNodes[B.Parent];
+                    if (bParentNode.Child1 == iA)
                     {
-                        _treeNodes[B.Parent].Child1 = iB;
+                        bParentNode.Child1 = iB;
                     }
                     else
                     {
                         Debug.Assert(_treeNodes[B.Parent].Child2 == iA);
-                        _treeNodes[B.Parent].Child2 = iB;
+                        bParentNode.Child2 = iB;
                     }
                 }
                 else
@@ -886,7 +887,7 @@ namespace Box2DSharp.Collision
         private int ComputeHeight(int nodeId)
         {
             Debug.Assert(0 <= nodeId && nodeId < _nodeCapacity);
-            var node = _treeNodes[nodeId];
+            ref readonly var node = ref _treeNodes[nodeId];
 
             if (node.IsLeaf())
             {
@@ -910,7 +911,7 @@ namespace Box2DSharp.Collision
                 Debug.Assert(_treeNodes[index].Parent == NullNode);
             }
 
-            var node = _treeNodes[index];
+            ref readonly var node = ref _treeNodes[index];
 
             var child1 = node.Child1;
             var child2 = node.Child2;
@@ -940,7 +941,7 @@ namespace Box2DSharp.Collision
                 return;
             }
 
-            var node = _treeNodes[index];
+            ref readonly var node = ref _treeNodes[index];
 
             var child1 = node.Child1;
             var child2 = node.Child2;
@@ -971,7 +972,7 @@ namespace Box2DSharp.Collision
         }
     }
 
-    public class TreeNode
+    public struct TreeNode
     {
         /// Enlarged AABB
         public AABB AABB;

@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Numerics;
-using System.Timers;
 using Box2DSharp.Collision.Shapes;
 using Box2DSharp.Common;
 using Box2DSharp.Dynamics;
@@ -71,7 +70,7 @@ namespace Box2DSharp.Collision
         /// Note: use b2Distance to compute the contact point and normal at the time of impact.
         public static void ComputeTimeOfImpact(out ToiOutput output, in ToiInput input, ToiProfile toiProfile = null, GJkProfile gjkProfile = null)
         {
-            var timer = toiProfile == null ? null : Stopwatch.StartNew();
+            var beginTime = toiProfile == null ? 0 : Stopwatch.GetTimestamp();
             output = new ToiOutput();
 
             if (toiProfile != null)
@@ -106,10 +105,12 @@ namespace Box2DSharp.Collision
 
             // Prepare input for distance query.
             var cache = new SimplexCache();
-            DistanceInput distanceInput;
-            distanceInput.ProxyA = input.ProxyA;
-            distanceInput.ProxyB = input.ProxyB;
-            distanceInput.UseRadii = false;
+            var distanceInput = new DistanceInput
+            {
+                ProxyA = input.ProxyA,
+                ProxyB = input.ProxyB,
+                UseRadii = false
+            };
 
             // The outer loop progressively attempts to compute new separating axes.
             // This loop terminates when an axis is repeated (no progress is made).
@@ -282,14 +283,13 @@ namespace Box2DSharp.Collision
                 }
             }
 
-            if (timer == null)
+            if (toiProfile == null)
             {
                 return;
             }
 
-            timer.Stop();
-            float time = timer.ElapsedMilliseconds;
-
+            var endTime = Stopwatch.GetTimestamp();
+            var time = (endTime - beginTime) / 10000f;
             toiProfile.ToiMaxIters = Math.Max(toiProfile.ToiMaxIters, iter);
             toiProfile.ToiMaxTime = Math.Max(toiProfile.ToiMaxTime, time);
             toiProfile.ToiTime += time;

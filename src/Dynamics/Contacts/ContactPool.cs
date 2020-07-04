@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 
 namespace Box2DSharp.Dynamics.Contacts
@@ -6,24 +7,51 @@ namespace Box2DSharp.Dynamics.Contacts
     public class ContactPool<T>
         where T : Contact, new()
     {
-        private readonly Queue<T> _objects;
+        private T[] _objects;
+
+        private int _total;
+
+        private int _capacity;
 
         public ContactPool(int capacity = 256)
         {
-            _objects = new Queue<T>(capacity);
+            _capacity = capacity;
+            _objects = ArrayPool<T>.Shared.Rent(_capacity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get()
         {
-            return _objects.Count > 0 ? _objects.Dequeue() : new T();
+            if (_total > 0)
+            {
+                --_total;
+                var item = _objects[_total];
+                _objects[_total] = null;
+                return item;
+            }
+
+            return new T();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Return(T item)
         {
             item.Reset();
-            _objects.Enqueue(item);
+            if (_total < _capacity)
+            {
+                _objects[_total] = item;
+                ++_total;
+            }
+            else
+            {
+                var old = _objects;
+                _capacity *= 2;
+                _objects = ArrayPool<T>.Shared.Rent(_capacity);
+                Array.Copy(old, _objects, _total);
+                ArrayPool<T>.Shared.Return(old, true);
+                _objects[_total] = item;
+                ++_total;
+            }
         }
     }
 }

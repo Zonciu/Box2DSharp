@@ -22,13 +22,13 @@ namespace Box2DSharp.Common
 
         private const int ARGBBlueShift = 0;
 
-        public static Color Blue => new Color(0xFF0000FF);
+        public static Color Blue { get; } = new Color(0xFF0000FF);
 
-        public static Color Green => new Color(0xFF00FF00);
+        public static Color Green { get; } = new Color(0xFF00FF00);
 
-        public static Color Red => new Color(0xFFFF0000);
+        public static Color Red { get; } = new Color(0xFFFF0000);
 
-        public static Color Yellow => new Color(0xFFFFFF00);
+        public static Color Yellow { get; } = new Color(0xFFFFFF00);
 
         private Color(long value)
         {

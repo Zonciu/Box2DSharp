@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Collision.Shapes;
-using Box2DSharp.Common;
 
 namespace Box2DSharp.Collision
 {
