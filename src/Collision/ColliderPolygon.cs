@@ -26,15 +26,29 @@ namespace Box2DSharp.Collision
             var n1s = poly1.Normals;
             var v1s = poly1.Vertices;
             var v2s = poly2.Vertices;
-            var xf = MathUtils.MulT(xf2, xf1);
+
+            // var xf = MathUtils.MulT(xf2, xf1); // inline
+            var subP = xf1.Position - xf2.Position;
+            var xfP = new Vector2(xf2.Rotation.Cos * subP.X + xf2.Rotation.Sin * subP.Y, -xf2.Rotation.Sin * subP.X + xf2.Rotation.Cos * subP.Y);
+            var xfR = new Rotation(
+                xf2.Rotation.Cos * xf1.Rotation.Sin - xf2.Rotation.Sin * xf1.Rotation.Cos,
+                xf2.Rotation.Cos * xf1.Rotation.Cos + xf2.Rotation.Sin * xf1.Rotation.Sin);
+            var xf = new Transform(xfP, xfR);
 
             var bestIndex = 0;
             var maxSeparation = -Settings.MaxFloat;
             for (var i = 0; i < count1; ++i)
             {
                 // Get poly1 normal in frame2.
-                var n = MathUtils.Mul(xf.Rotation, n1s[i]);
-                var v1 = MathUtils.Mul(xf, v1s[i]);
+                // var n = MathUtils.Mul(xf.Rotation, n1s[i]); // inline
+                ref readonly var n1si = ref n1s[i];
+                var n = new Vector2(xf.Rotation.Cos * n1si.X - xf.Rotation.Sin * n1si.Y, xf.Rotation.Sin * n1si.X + xf.Rotation.Cos * n1si.Y);
+
+                // var v1 = MathUtils.Mul(xf, v1s[i]); // inline
+                ref readonly var v1si = ref v1s[i];
+                var x = xf.Rotation.Cos * v1si.X - xf.Rotation.Sin * v1si.Y + xf.Position.X;
+                var y = xf.Rotation.Sin * v1si.X + xf.Rotation.Cos * v1si.Y + xf.Position.Y;
+                var v1 = new Vector2(x, y);
 
                 // Find deepest point for normal i.
                 var si = Settings.MaxFloat;
@@ -76,7 +90,10 @@ namespace Box2DSharp.Collision
             Debug.Assert(0 <= edge1 && edge1 < poly1.Count);
 
             // Get the normal of the reference edge in poly2's frame.
-            var normal1 = MathUtils.MulT(xf2.Rotation, MathUtils.Mul(xf1.Rotation, normals1[edge1]));
+            // var normal1 = MathUtils.MulT(xf2.Rotation, MathUtils.Mul(xf1.Rotation, normals1[edge1])); // inline
+            ref readonly var n1 = ref normals1[edge1];
+            var y = new Vector2(xf1.Rotation.Cos * n1.X - xf1.Rotation.Sin * n1.Y, xf1.Rotation.Sin * n1.X + xf1.Rotation.Cos * n1.Y);
+            var normal1 = new Vector2(xf2.Rotation.Cos * y.X + xf2.Rotation.Sin * y.Y, -xf2.Rotation.Sin * y.X + xf2.Rotation.Cos * y.Y);
 
             // Find the incident edge on poly2.
             var index = 0;
@@ -94,17 +111,19 @@ namespace Box2DSharp.Collision
             // Build the clip vertices for the incident edge.
             var i1 = index;
             var i2 = i1 + 1 < count2 ? i1 + 1 : 0;
-            c[0].Vector = MathUtils.Mul(xf2, vertices2[i1]);
-            c[0].Id.ContactFeature.IndexA = (byte) edge1;
-            c[0].Id.ContactFeature.IndexB = (byte) i1;
-            c[0].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
-            c[0].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
+            ref var c0 = ref c[0];
+            c0.Vector = MathUtils.Mul(xf2, vertices2[i1]);
+            c0.Id.ContactFeature.IndexA = (byte)edge1;
+            c0.Id.ContactFeature.IndexB = (byte)i1;
+            c0.Id.ContactFeature.TypeA = (byte)ContactFeature.FeatureType.Face;
+            c0.Id.ContactFeature.TypeB = (byte)ContactFeature.FeatureType.Vertex;
 
-            c[1].Vector = MathUtils.Mul(xf2, vertices2[i2]);
-            c[1].Id.ContactFeature.IndexA = (byte) edge1;
-            c[1].Id.ContactFeature.IndexB = (byte) i2;
-            c[1].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Face;
-            c[1].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Vertex;
+            ref var c1 = ref c[1];
+            c1.Vector = MathUtils.Mul(xf2, vertices2[i2]);
+            c1.Id.ContactFeature.IndexA = (byte)edge1;
+            c1.Id.ContactFeature.IndexB = (byte)i2;
+            c1.Id.ContactFeature.TypeA = (byte)ContactFeature.FeatureType.Face;
+            c1.Id.ContactFeature.TypeB = (byte)ContactFeature.FeatureType.Vertex;
         }
 
         // Find edge normal of max separation on A - return if separating axis is found

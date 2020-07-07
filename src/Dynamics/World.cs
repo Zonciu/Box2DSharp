@@ -712,7 +712,7 @@ namespace Box2DSharp.Dynamics
             {
                 var body = bodyNode.Value;
                 bodyNode = bodyNode.Next;
-                if (body.HasFlag(BodyFlags.Island)) // 已经分配到岛屿则跳过
+                if (body.Flags.HasFlag(BodyFlags.Island)) // 已经分配到岛屿则跳过
                 {
                     continue;
                 }
@@ -768,7 +768,7 @@ namespace Box2DSharp.Dynamics
 
                         // Has this contact already been added to an island?
                         // 接触点已经标记岛屿,跳过
-                        if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
+                        if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
                         {
                             continue;
                         }
@@ -795,7 +795,7 @@ namespace Box2DSharp.Dynamics
 
                         // Was the other body already added to this island?
                         // 如果接触边缘的另一个物体已经添加到岛屿则跳过
-                        if (other.HasFlag(BodyFlags.Island))
+                        if (other.Flags.HasFlag(BodyFlags.Island))
                         {
                             continue;
                         }
@@ -830,7 +830,7 @@ namespace Box2DSharp.Dynamics
                         island.Add(je.Joint);
                         je.Joint.IslandFlag = true;
 
-                        if (other.HasFlag(BodyFlags.Island))
+                        if (other.Flags.HasFlag(BodyFlags.Island))
                         {
                             continue;
                         }
@@ -870,7 +870,7 @@ namespace Box2DSharp.Dynamics
                     bodyNode = bodyNode.Next;
 
                     // If a body was not in an island then it did not move.
-                    if (!b.HasFlag(BodyFlags.Island))
+                    if (!b.Flags.HasFlag(BodyFlags.Island))
                     {
                         continue;
                     }
@@ -956,7 +956,7 @@ namespace Box2DSharp.Dynamics
                     }
 
                     var alpha = 1.0f;
-                    if (c.HasFlag(Contact.ContactFlag.ToiFlag))
+                    if (c.Flags.HasFlag(Contact.ContactFlag.ToiFlag))
                     {
                         // This contact has a valid cached TOI.
                         alpha = c.Toi;
@@ -1117,7 +1117,7 @@ namespace Box2DSharp.Dynamics
                             var contact = contactEdge.Contact;
 
                             // Has this contact already been added to the island?
-                            if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
+                            if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
                             {
                                 continue;
                             }
@@ -1141,7 +1141,7 @@ namespace Box2DSharp.Dynamics
 
                             // Tentatively advance the body to the TOI.
                             var backup = other.Sweep;
-                            if (!other.HasFlag(BodyFlags.Island))
+                            if (!other.Flags.HasFlag(BodyFlags.Island))
                             {
                                 other.Advance(minAlpha);
                             }
@@ -1170,7 +1170,7 @@ namespace Box2DSharp.Dynamics
                             island.Add(contact);
 
                             // Has the other body already been added to the island?
-                            if (other.HasFlag(BodyFlags.Island))
+                            if (other.Flags.HasFlag(BodyFlags.Island))
                             {
                                 continue;
                             }
@@ -1210,7 +1210,7 @@ namespace Box2DSharp.Dynamics
                             var contact = contactEdge.Contact;
 
                             // Has this contact already been added to the island?
-                            if (contact.HasFlag(Contact.ContactFlag.IslandFlag))
+                            if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
                             {
                                 continue;
                             }
@@ -1234,7 +1234,7 @@ namespace Box2DSharp.Dynamics
 
                             // Tentatively advance the body to the TOI.
                             var backup = other.Sweep;
-                            if (!other.HasFlag(BodyFlags.Island))
+                            if (!other.Flags.HasFlag(BodyFlags.Island))
                             {
                                 other.Advance(minAlpha);
                             }
@@ -1263,7 +1263,7 @@ namespace Box2DSharp.Dynamics
                             island.Add(contact);
 
                             // Has the other body already been added to the island?
-                            if (other.HasFlag(BodyFlags.Island))
+                            if (other.Flags.HasFlag(BodyFlags.Island))
                             {
                                 continue;
                             }

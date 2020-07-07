@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Box2DSharp.Collision.Collider;
@@ -998,6 +999,8 @@ namespace Box2DSharp.Collision
 
         public bool Moved;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public bool IsLeaf()
         {
             return Child1 == DynamicTree.NullNode;

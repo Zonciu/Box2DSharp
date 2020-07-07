@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Box2DSharp.Collision.Shapes;
 
 namespace Box2DSharp.Collision
@@ -78,6 +80,8 @@ namespace Box2DSharp.Collision
         }
 
         /// Get the supporting vertex index in the given direction.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public int GetSupport(in Vector2 d)
         {
             var bestIndex = 0;
@@ -120,6 +124,8 @@ namespace Box2DSharp.Collision
         }
 
         /// Get a vertex by index. Used by b2Distance.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public ref readonly Vector2 GetVertex(int index)
         {
             Debug.Assert(0 <= index && index < Count);

@@ -253,7 +253,7 @@ namespace Box2DSharp.Dynamics
                 var bodyB = fixtureB.Body;
 
                 // Is this contact flagged for filtering?
-                if (c.HasFlag(Contact.ContactFlag.FilterFlag))
+                if (c.Flags.HasFlag(Contact.ContactFlag.FilterFlag))
                 {
                     // Should these bodies collide?
                     if (bodyB.ShouldCollide(bodyA) == false)

@@ -1,8 +1,6 @@
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 
@@ -24,8 +22,16 @@ namespace Box2DSharp.Dynamics.Contacts
             {
             case ManifoldType.Circles:
             {
-                var pointA = MathUtils.Mul(xfA, pc.LocalPoint);
-                var pointB = MathUtils.Mul(xfB, pc.LocalPoints.Value0);
+                //var pointA = MathUtils.Mul(xfA, pc.LocalPoint); // inline
+                var x = xfA.Rotation.Cos * pc.LocalPoint.X - xfA.Rotation.Sin * pc.LocalPoint.Y + xfA.Position.X;
+                var y = xfA.Rotation.Sin * pc.LocalPoint.X + xfA.Rotation.Cos * pc.LocalPoint.Y + xfA.Position.Y;
+                var pointA = new Vector2(x, y);
+
+                // var pointB = MathUtils.Mul(xfB, pc.LocalPoints.Value0); // inline
+                x = xfB.Rotation.Cos * pc.LocalPoints.Value0.X - xfB.Rotation.Sin * pc.LocalPoints.Value0.Y + xfB.Position.X;
+                y = xfB.Rotation.Sin * pc.LocalPoints.Value0.X + xfB.Rotation.Cos * pc.LocalPoints.Value0.Y + xfB.Position.Y;
+                var pointB = new Vector2(x, y);
+
                 Normal = pointB - pointA;
                 Normal.Normalize();
                 Point = 0.5f * (pointA + pointB);
@@ -35,10 +41,31 @@ namespace Box2DSharp.Dynamics.Contacts
 
             case ManifoldType.FaceA:
             {
-                Normal = MathUtils.Mul(xfA.Rotation, pc.LocalNormal);
-                var planePoint = MathUtils.Mul(xfA, pc.LocalPoint);
+                // Normal = MathUtils.Mul(xfA.Rotation, pc.LocalNormal); // inline
+                Normal = new Vector2(
+                    xfA.Rotation.Cos * pc.LocalNormal.X - xfA.Rotation.Sin * pc.LocalNormal.Y,
+                    xfA.Rotation.Sin * pc.LocalNormal.X + xfA.Rotation.Cos * pc.LocalNormal.Y);
 
-                var clipPoint = MathUtils.Mul(xfB, pc.LocalPoints[index]);
+                // var planePoint = MathUtils.Mul(xfA, pc.LocalPoint); // inline
+                var x = xfA.Rotation.Cos * pc.LocalPoint.X - xfA.Rotation.Sin * pc.LocalPoint.Y + xfA.Position.X;
+                var y = xfA.Rotation.Sin * pc.LocalPoint.X + xfA.Rotation.Cos * pc.LocalPoint.Y + xfA.Position.Y;
+                var planePoint = new Vector2(x, y);
+
+                // var clipPoint = MathUtils.Mul(xfB, pc.LocalPoints[index]); // inline
+
+                if (index == 0)
+                {
+                    x = xfB.Rotation.Cos * pc.LocalPoints.Value0.X - xfB.Rotation.Sin * pc.LocalPoints.Value0.Y + xfB.Position.X;
+                    y = xfB.Rotation.Sin * pc.LocalPoints.Value0.X + xfB.Rotation.Cos * pc.LocalPoints.Value0.Y + xfB.Position.Y;
+                }
+                else
+                {
+                    x = xfB.Rotation.Cos * pc.LocalPoints.Value1.X - xfB.Rotation.Sin * pc.LocalPoints.Value1.Y + xfB.Position.X;
+                    y = xfB.Rotation.Sin * pc.LocalPoints.Value1.X + xfB.Rotation.Cos * pc.LocalPoints.Value1.Y + xfB.Position.Y;
+                }
+
+                var clipPoint = new Vector2(x, y);
+
                 Separation = Vector2.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
                 Point = clipPoint;
             }
@@ -46,10 +73,30 @@ namespace Box2DSharp.Dynamics.Contacts
 
             case ManifoldType.FaceB:
             {
-                Normal = MathUtils.Mul(xfB.Rotation, pc.LocalNormal);
-                var planePoint = MathUtils.Mul(xfB, pc.LocalPoint);
+                // Normal = MathUtils.Mul(xfB.Rotation, pc.LocalNormal); // inline
+                Normal = new Vector2(
+                    xfB.Rotation.Cos * pc.LocalNormal.X - xfB.Rotation.Sin * pc.LocalNormal.Y,
+                    xfB.Rotation.Sin * pc.LocalNormal.X + xfB.Rotation.Cos * pc.LocalNormal.Y);
 
-                var clipPoint = MathUtils.Mul(xfA, pc.LocalPoints[index]);
+                // var planePoint = MathUtils.Mul(xfB, pc.LocalPoint); // inline
+                var x = xfB.Rotation.Cos * pc.LocalPoint.X - xfB.Rotation.Sin * pc.LocalPoint.Y + xfB.Position.X;
+                var y = xfB.Rotation.Sin * pc.LocalPoint.X + xfB.Rotation.Cos * pc.LocalPoint.Y + xfB.Position.Y;
+                var planePoint = new Vector2(x, y);
+
+                // var clipPoint = MathUtils.Mul(xfA, pc.LocalPoints[index]); // inline
+                if (index == 0)
+                {
+                    x = xfA.Rotation.Cos * pc.LocalPoints.Value0.X - xfA.Rotation.Sin * pc.LocalPoints.Value0.Y + xfA.Position.X;
+                    y = xfA.Rotation.Sin * pc.LocalPoints.Value0.X + xfA.Rotation.Cos * pc.LocalPoints.Value0.Y + xfA.Position.Y;
+                }
+                else
+                {
+                    x = xfA.Rotation.Cos * pc.LocalPoints.Value1.X - xfA.Rotation.Sin * pc.LocalPoints.Value1.Y + xfA.Position.X;
+                    y = xfA.Rotation.Sin * pc.LocalPoints.Value1.X + xfA.Rotation.Cos * pc.LocalPoints.Value1.Y + xfA.Position.Y;
+                }
+
+                var clipPoint = new Vector2(x, y);
+
                 Separation = Vector2.Dot(clipPoint - planePoint, Normal) - pc.RadiusA - pc.RadiusB;
                 Point = clipPoint;
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Box2DSharp.Collision.Collider;
 using Box2DSharp.Common;
 
@@ -30,6 +32,8 @@ namespace Box2DSharp.Collision
         ///     Verify that the bounds are sorted.
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public bool IsValid()
         {
             var d = UpperBound - LowerBound;
@@ -42,6 +46,8 @@ namespace Box2DSharp.Collision
         ///     Get the center of the AABB.
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public Vector2 GetCenter()
         {
             return 0.5f * (LowerBound + UpperBound);
@@ -51,6 +57,8 @@ namespace Box2DSharp.Collision
         ///     Get the extents of the AABB (half-widths).
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public Vector2 GetExtents()
         {
             return 0.5f * (UpperBound - LowerBound);
@@ -60,6 +68,8 @@ namespace Box2DSharp.Collision
         ///     Get the perimeter length
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public float GetPerimeter()
         {
             var wx = UpperBound.X - LowerBound.X;
@@ -208,6 +218,8 @@ namespace Box2DSharp.Collision
         /// </summary>
         /// <param name="aabb">the provided AABB</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Pure]
         public bool Contains(in AABB aabb)
         {
             return LowerBound.X <= aabb.LowerBound.X
