@@ -31,17 +31,15 @@ namespace Testbed.Basics
 
         public Body GroundBody;
 
-        public readonly Profile MaxProfile = new Profile();
+        public Profile MaxProfile;
 
         public MouseJoint MouseJoint;
 
         public Vector2 MouseWorld;
 
-        public readonly Profile TotalProfile = new Profile();
+        public Profile TotalProfile;
 
         public World World;
-
-        public readonly string TestName;
 
         public int StepCount;
 
@@ -49,7 +47,7 @@ namespace Testbed.Basics
 
         protected Test()
         {
-            TestName = Regex.Replace(GetType().Name, @"(\B[A-Z])", " $1");
+            Regex.Replace(GetType().Name, @"(\B[A-Z])", " $1");
             World = new World(new Vector2(0, -10));
             World.SetContactListener(this);
             World.DestructionListener = this;
@@ -83,18 +81,20 @@ namespace Testbed.Basics
             CollisionUtils.GetPointStates(state1, state2, oldManifold, manifold);
 
             contact.GetWorldManifold(out var worldManifold);
-
-            for (var i = 0; i < manifold.PointCount && PointsCount < Points.Length; ++i)
+            unsafe
             {
-                var cp = new ContactPoint
+                for (var i = 0; i < manifold.PointCount && PointsCount < Points.Length; ++i)
                 {
-                    FixtureA = fixtureA, FixtureB = fixtureB,
-                    Position = worldManifold.Points[i], Normal = worldManifold.Normal,
-                    State = state2[i], NormalImpulse = manifold.Points[i].NormalImpulse,
-                    TangentImpulse = manifold.Points[i].TangentImpulse, Separation = worldManifold.Separations[i]
-                };
-                Points[PointsCount] = cp;
-                ++PointsCount;
+                    var cp = new ContactPoint
+                    {
+                        FixtureA = fixtureA, FixtureB = fixtureB,
+                        Position = worldManifold.Points[i], Normal = worldManifold.Normal,
+                        State = state2[i], NormalImpulse = manifold.Points[i].NormalImpulse,
+                        TangentImpulse = manifold.Points[i].TangentImpulse, Separation = worldManifold.Separations[i]
+                    };
+                    Points[PointsCount] = cp;
+                    ++PointsCount;
+                }
             }
         }
 

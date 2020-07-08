@@ -58,6 +58,28 @@ namespace Testbed
             base.OnUpdateFrame(e);
         }
 
+        static float _avgDuration = 0;
+
+        const float Alpha = 1f / 100f; // 采样数设置为100
+
+        static int _frameCount = 0;
+
+        private int GetFps(float deltaTime) // ms
+        {
+            ++_frameCount;
+
+            if (1 == _frameCount)
+            {
+                _avgDuration = deltaTime;
+            }
+            else
+            {
+                _avgDuration = _avgDuration * (1 - Alpha) + deltaTime * Alpha;
+            }
+
+            return (int)(1f / _avgDuration * 1000);
+        }
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             _controller.Update(this, (float)e.Time);
@@ -67,7 +89,9 @@ namespace Testbed
             Test.Render();
             if (Global.DebugDraw.ShowUI)
             {
-                Global.DebugDraw.DrawString(5, Global.Camera.Height - 20, $"{_frameTime / 10000f:.#} ms");
+                Global.DebugDraw.DrawString(5, Global.Camera.Height - 60, $"steps: {Test.StepCount}");
+                Global.DebugDraw.DrawString(5, Global.Camera.Height - 40, $"{_frameTime / 10000f:.#} ms");
+                Global.DebugDraw.DrawString(5, Global.Camera.Height - 20, $"{GetFps(_frameTime / 10000f)} fps");
             }
 
             Global.DebugDraw.Flush();

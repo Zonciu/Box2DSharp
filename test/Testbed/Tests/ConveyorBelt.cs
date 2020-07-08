@@ -57,7 +57,7 @@ namespace Testbed.Tests
         /// <inheritdoc />
         public override void PreSolve(Contact contact, in Manifold oldManifold)
         {
-            base.PreSolve(contact, in oldManifold);
+            base.PreSolve(contact, oldManifold);
 
             var fixtureA = contact.FixtureA;
             var fixtureB = contact.FixtureB;

@@ -63,7 +63,7 @@ namespace Testbed.Tests
         /// <inheritdoc />
         public override void PostSolve(Contact contact, in ContactImpulse impulse)
         {
-            base.PostSolve(contact, in impulse);
+            base.PostSolve(contact, impulse);
 
             if (_broke)
             {
