@@ -242,7 +242,7 @@ namespace Box2DSharp.Dynamics
                 Flags |= BodyFlags.AutoSleep;
             }
 
-            if (def.Awake)
+            if (def.Awake && def.BodyType != BodyType.StaticBody)
             {
                 Flags |= BodyFlags.IsAwake;
             }
@@ -362,6 +362,7 @@ namespace Box2DSharp.Dynamics
                     AngularVelocity = 0.0f;
                     Sweep.A0 = Sweep.A;
                     Sweep.C0 = Sweep.C;
+                    UnsetFlag(BodyFlags.IsAwake);
                     SynchronizeFixtures();
                 }
 
@@ -446,6 +447,11 @@ namespace Box2DSharp.Dynamics
             get => Flags.HasFlag(BodyFlags.IsAwake);
             set
             {
+                if (BodyType == BodyType.StaticBody)
+                {
+                    return;
+                }
+
                 if (value)
                 {
                     Flags |= BodyFlags.IsAwake;

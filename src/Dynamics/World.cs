@@ -746,15 +746,15 @@ namespace Box2DSharp.Dynamics
                     Debug.Assert(b.IsEnabled);
                     island.Add(b);
 
-                    // Make sure the body is awake (without resetting sleep timer).
-                    b.SetFlag(BodyFlags.IsAwake);
-
                     // To keep islands as small as possible, we don't
                     // propagate islands across static bodies.
                     if (b.BodyType == BodyType.StaticBody)
                     {
                         continue;
                     }
+
+                    // Make sure the body is awake (without resetting sleep timer).
+                    b.SetFlag(BodyFlags.IsAwake);
 
                     // Search all contacts connected to this body.
                     // 查找该物体所有接触点

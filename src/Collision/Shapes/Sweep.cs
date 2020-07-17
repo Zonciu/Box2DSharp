@@ -20,8 +20,9 @@ namespace Box2DSharp.Collision.Shapes
         /// <param name="beta"></param>
         public void GetTransform(out Transform xf, float beta)
         {
-            var angle = (1.0f - beta) * A0 + beta * A;
-            xf = new Transform((1.0f - beta) * C0 + beta * C, new Rotation(angle));
+            var position = C0 + beta * (C - C0);
+            var angle = A0 + beta * (A - A0);
+            xf = new Transform(position, angle);
 
             // Shift to origin
             xf.Position -= MathUtils.Mul(xf.Rotation, LocalCenter);
@@ -42,7 +43,7 @@ namespace Box2DSharp.Collision.Shapes
         public void Normalize()
         {
             const float twoPi = 2.0f * Settings.Pi;
-            var d = twoPi * (float) Math.Floor(A0 / twoPi);
+            var d = twoPi * (float)Math.Floor(A0 / twoPi);
             A0 -= d;
             A -= d;
         }

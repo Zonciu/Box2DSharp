@@ -181,7 +181,12 @@ namespace Box2DSharp.Collision.Shapes
 
             var v1 = MathUtils.Mul(transform, Vertices[i1]);
             var v2 = MathUtils.Mul(transform, Vertices[i2]);
-            aabb = new AABB(Vector2.Min(v1, v2), Vector2.Max(v1, v2));
+
+            var lower = Vector2.Min(v1, v2);
+            var upper = Vector2.Max(v1, v2);
+
+            var r = new Vector2(Radius, Radius);
+            aabb = new AABB(lower - r, upper + r);
         }
 
         /// Chains have zero mass.
