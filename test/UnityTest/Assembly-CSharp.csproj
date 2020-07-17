@@ -99,12 +99,10 @@
      <Compile Include="Assets\Box2D\Common\Drawer.cs" />
      <Compile Include="Assets\Box2D\Common\DumpLogger.cs" />
      <Compile Include="Assets\Box2D\Common\FixedArray.cs" />
-     <Compile Include="Assets\Box2D\Common\LinkedListNodePool.cs" />
      <Compile Include="Assets\Box2D\Common\MathExtensions.cs" />
      <Compile Include="Assets\Box2D\Common\MathUtils.cs" />
      <Compile Include="Assets\Box2D\Common\Matrix2x2.cs" />
      <Compile Include="Assets\Box2D\Common\Matrix3x3.cs" />
-     <Compile Include="Assets\Box2D\Common\ObjectPool.cs" />
      <Compile Include="Assets\Box2D\Common\Rotation.cs" />
      <Compile Include="Assets\Box2D\Common\Settings.cs" />
      <Compile Include="Assets\Box2D\Common\Transform.cs" />
@@ -118,8 +116,9 @@
      <Compile Include="Assets\Box2D\Dynamics\Contacts\Contact.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactEdge.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactImpulse.cs" />
+     <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactPool.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactPositionConstraint.cs" />
-     <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactSolve.cs" />
+     <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactSolver.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactSolverDef.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\ContactVelocityConstraint.cs" />
      <Compile Include="Assets\Box2D\Dynamics\Contacts\EdgeAndCircleContact.cs" />
