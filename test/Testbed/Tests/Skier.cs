@@ -14,6 +14,12 @@ namespace Testbed.Tests
     [TestCase("Bugs", "Skier")]
     public class Skier : Test
     {
+        public Body SkierBody;
+
+        public float PlatformWidth;
+
+        public bool FixedCamera;
+
         public Skier()
         {
             Body ground = null;
@@ -46,75 +52,28 @@ namespace Testbed.Tests
 
                 //
 
-                Platform_width = PlatformWidth;
-
-                List<Vector2> verts = new List<Vector2>();
+                this.PlatformWidth = PlatformWidth;
 
                 // Horizontal platform
-                verts.Add(new Vector2(-PlatformWidth, 0.0f));
-                verts.Add(Vector2.Zero);
+                var v1 = new Vector2(-PlatformWidth, 0.0f);
+                var v2 = new Vector2(0.0f, 0.0f);
+                var v3 = new Vector2((float)(SlopeLength * Math.Cos(Slope1Incline)), (float)(-SlopeLength * Math.Sin(Slope1Incline)));
+                var v4 = new Vector2((float)(v3.X + SlopeLength * Math.Cos(Slope2Incline)), (float)(v3.Y - SlopeLength * Math.Sin(Slope2Incline)));
+                var v5 = new Vector2(v4.X, v4.Y - 1.0f);
 
-                // Slope
-                verts.Add(
-                    new Vector2(
-                        verts.Last().X + SlopeLength * (float)Math.Cos(Slope1Incline),
-                        verts.Last().Y - SlopeLength * (float)Math.Sin(Slope1Incline)
-                    ));
+                var vertices = new[] {v5, v4, v3, v2, v1};
 
-                verts.Add(
-                    new Vector2(
-                        verts.Last().X + SlopeLength * (float)Math.Cos(Slope2Incline),
-                        verts.Last().Y - SlopeLength * (float)Math.Sin(Slope2Incline)
-                    ));
+                ChainShape shape = new ChainShape();
+                shape.CreateLoop(vertices, 5);
+                FixtureDef fd = new FixtureDef();
+                fd.Shape = shape;
+                fd.Density = 0.0f;
+                fd.Friction = SurfaceFriction;
 
-                {
-                    EdgeShape shape = new EdgeShape();
-                    shape.Set(verts[0], verts[1]);
-                    shape.HasVertex3 = true;
-                    shape.Vertex3 = verts[2];
-
-                    FixtureDef fd = new FixtureDef();
-                    fd.Shape = shape;
-                    fd.Density = 0.0f;
-                    fd.Friction = SurfaceFriction;
-
-                    ground.CreateFixture(fd);
-                }
-
-                {
-                    EdgeShape shape = new EdgeShape();
-                    shape.Set(verts[1], verts[2]);
-                    shape.HasVertex0 = true;
-                    shape.HasVertex3 = true;
-                    shape.Vertex0 = verts[0];
-                    shape.Vertex3 = verts[3];
-
-                    FixtureDef fd = new FixtureDef();
-                    fd.Shape = shape;
-                    fd.Density = 0.0f;
-                    fd.Friction = SurfaceFriction;
-
-                    ground.CreateFixture(fd);
-                }
-
-                {
-                    EdgeShape shape = new EdgeShape();
-                    shape.Set(verts[2], verts[3]);
-                    shape.HasVertex0 = true;
-                    shape.Vertex0 = verts[1];
-
-                    FixtureDef fd = new FixtureDef();
-                    fd.Shape = shape;
-                    fd.Density = 0.0f;
-                    fd.Friction = SurfaceFriction;
-
-                    ground.CreateFixture(fd);
-                }
+                ground.CreateFixture(fd);
             }
 
             {
-                const bool EnableCircularSkiTips = false;
-
                 const float BodyWidth = 1.0f;
                 const float BodyHeight = 2.5f;
                 const float SkiLength = 3.0f;
@@ -131,38 +90,20 @@ namespace Testbed.Tests
                 bd.BodyType = BodyType.DynamicBody;
 
                 float initial_y = BodyHeight / 2 + SkiThickness;
-                if (EnableCircularSkiTips)
-                {
-                    initial_y += SkiThickness / 6;
-                }
+                bd.Position.Set(-PlatformWidth / 2, initial_y);
 
-                bd.Position.Set(-Platform_width / 2, initial_y);
-
-                Body skier = World.CreateBody(bd);
-
-                PolygonShape body = new PolygonShape();
-                body.SetAsBox(BodyWidth / 2, BodyHeight / 2);
+                var skier = World.CreateBody(bd);
 
                 PolygonShape ski = new PolygonShape();
-                List<Vector2> verts = new List<Vector2>();
-                verts.Add(new Vector2(-SkiLength / 2 - SkiThickness, -BodyHeight / 2));
-                verts.Add(new Vector2(-SkiLength / 2, -BodyHeight / 2 - SkiThickness));
-                verts.Add(new Vector2(SkiLength / 2, -BodyHeight / 2 - SkiThickness));
-                verts.Add(new Vector2(SkiLength / 2 + SkiThickness, -BodyHeight / 2));
-                ski.Set(verts.ToArray());
-
-                CircleShape ski_back_shape = new CircleShape();
-                ski_back_shape.Position.Set(-SkiLength / 2.0f, -BodyHeight / 2 - SkiThickness * (2.0f / 3));
-                ski_back_shape.Radius = SkiThickness / 2;
-
-                CircleShape ski_front_shape = new CircleShape();
-                ski_front_shape.Position.Set(SkiLength / 2, -BodyHeight / 2 - SkiThickness * (2.0f / 3));
-                ski_front_shape.Radius = SkiThickness / 2;
+                var verts = new Vector2[4];
+                verts[0].Set(-SkiLength / 2 - SkiThickness, -BodyHeight / 2);
+                verts[1].Set(-SkiLength / 2, -BodyHeight / 2 - SkiThickness);
+                verts[2].Set(SkiLength / 2, -BodyHeight / 2 - SkiThickness);
+                verts[3].Set(SkiLength / 2 + SkiThickness, -BodyHeight / 2);
+                ski.Set(verts, 4);
 
                 FixtureDef fd = new FixtureDef();
-                fd.Shape = body;
                 fd.Density = 1.0f;
-                skier.CreateFixture(fd);
 
                 fd.Friction = SkiFriction;
                 fd.Restitution = SkiRestitution;
@@ -170,23 +111,14 @@ namespace Testbed.Tests
                 fd.Shape = ski;
                 skier.CreateFixture(fd);
 
-                if (EnableCircularSkiTips)
-                {
-                    fd.Shape = ski_back_shape;
-                    skier.CreateFixture(fd);
-
-                    fd.Shape = ski_front_shape;
-                    skier.CreateFixture(fd);
-                }
-
                 skier.SetLinearVelocity(new Vector2(0.5f, 0.0f));
 
-                _skier = skier;
+                SkierBody = skier;
             }
 
-            Global.Camera.Center = new Vector2(Platform_width / 2.0f, 0.0f);
+            Global.Camera.Center = new Vector2(PlatformWidth / 2.0f, 0.0f);
             Global.Camera.Zoom = 0.4f;
-            Fixed_camera = true;
+            FixedCamera = true;
         }
 
         /// <inheritdoc />
@@ -195,10 +127,10 @@ namespace Testbed.Tests
             switch (key.Key)
             {
             case Key.C:
-                Fixed_camera = !Fixed_camera;
-                if (Fixed_camera)
+                FixedCamera = !FixedCamera;
+                if (FixedCamera)
                 {
-                    Global.Camera.Center = new Vector2(Platform_width / 2.0f, 0.0f);
+                    Global.Camera.Center = new Vector2(PlatformWidth / 2.0f, 0.0f);
                 }
 
                 break;
@@ -209,16 +141,10 @@ namespace Testbed.Tests
         {
             DrawString("Keys: c = Camera fixed/tracking");
 
-            if (!Fixed_camera)
+            if (!FixedCamera)
             {
-                Global.Camera.Center = _skier.GetPosition();
+                Global.Camera.Center = SkierBody.GetPosition();
             }
         }
-
-        Body _skier;
-
-        float Platform_width;
-
-        bool Fixed_camera;
     }
 }

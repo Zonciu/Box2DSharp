@@ -4,7 +4,7 @@ namespace Box2DSharp.Collision.Collider
     /// This must be 4 bytes or less.
     public struct ContactFeature
     {
-        public enum FeatureType
+        public enum FeatureType: byte
         {
             Vertex = 0,
 

@@ -29,7 +29,7 @@ namespace Testbed.Tests
 
                 var edge = new EdgeShape();
 
-                edge.Set(new Vector2(-10.0f, 0.0f), new Vector2(10.0f, 0.0f));
+                edge.SetTwoSided(new Vector2(-10.0f, 0.0f), new Vector2(10.0f, 0.0f));
                 body.CreateFixture(edge, 0.0f);
 
                 var shape = new PolygonShape();

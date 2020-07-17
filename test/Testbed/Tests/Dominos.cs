@@ -16,7 +16,7 @@ namespace Testbed.Tests
 
             {
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
 
                 var bd = new BodyDef();
                 b1 = World.CreateBody(bd);

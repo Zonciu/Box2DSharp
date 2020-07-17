@@ -20,7 +20,7 @@ namespace Testbed.Tests
                 var ground = World.CreateBody(bd);
 
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-20.0f, 0.0f), new Vector2(20.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-20.0f, 0.0f), new Vector2(20.0f, 0.0f));
                 ground.CreateFixture(shape, 0.0f);
             }
 
@@ -32,11 +32,11 @@ namespace Testbed.Tests
                 var ground = World.CreateBody(bd);
 
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-8.0f, 1.0f), new Vector2(-6.0f, 1.0f));
+                shape.SetTwoSided(new Vector2(-8.0f, 1.0f), new Vector2(-6.0f, 1.0f));
                 ground.CreateFixture(shape, 0.0f);
-                shape.Set(new Vector2(-6.0f, 1.0f), new Vector2(-4.0f, 1.0f));
+                shape.SetTwoSided(new Vector2(-6.0f, 1.0f), new Vector2(-4.0f, 1.0f));
                 ground.CreateFixture(shape, 0.0f);
-                shape.Set(new Vector2(-4.0f, 1.0f), new Vector2(-2.0f, 1.0f));
+                shape.SetTwoSided(new Vector2(-4.0f, 1.0f), new Vector2(-2.0f, 1.0f));
                 ground.CreateFixture(shape, 0.0f);
             }
 
@@ -53,7 +53,7 @@ namespace Testbed.Tests
                     new Vector2(8.0f, 7.0f)
                 };
                 var shape = new ChainShape();
-                shape.CreateChain(vs);
+                shape.CreateLoop(vs);
                 ground.CreateFixture(shape, 0.0f);
             }
 

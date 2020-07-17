@@ -174,7 +174,7 @@ namespace Testbed.Tests
                 var ground = World.CreateBody(bd);
 
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
                 ground.CreateFixture(shape, 0.0f);
             }
 
@@ -221,7 +221,7 @@ namespace Testbed.Tests
             }
 
             {
-                _edge.Set(new Vector2(-1.0f, 0.0f), new Vector2(1.0f, 0.0f));
+                _edge.SetTwoSided(new Vector2(-1.0f, 0.0f), new Vector2(1.0f, 0.0f));
             }
 
             _bodyIndex = 0;

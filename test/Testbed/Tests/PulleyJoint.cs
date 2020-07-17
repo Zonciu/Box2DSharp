@@ -24,11 +24,6 @@ namespace Testbed.Tests
                 var bd = new BodyDef();
                 ground = World.CreateBody(bd);
 
-                var edge = new EdgeShape();
-                edge.Set(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
-
-                //ground.CreateFixture(shape, 0.0f);
-
                 var circle = new CircleShape();
                 circle.Radius = 2.0f;
 

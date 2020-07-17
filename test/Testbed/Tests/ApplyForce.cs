@@ -40,19 +40,19 @@ namespace Testbed.Tests
                 sd.Restitution = restitution;
 
                 // Left vertical
-                shape.Set(new Vector2(-20.0f, -20.0f), new Vector2(-20.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(-20.0f, -20.0f), new Vector2(-20.0f, 20.0f));
                 ground.CreateFixture(sd);
 
                 // Right vertical
-                shape.Set(new Vector2(20.0f, -20.0f), new Vector2(20.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(20.0f, -20.0f), new Vector2(20.0f, 20.0f));
                 ground.CreateFixture(sd);
 
                 // Top horizontal
-                shape.Set(new Vector2(-20.0f, 20.0f), new Vector2(20.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(-20.0f, 20.0f), new Vector2(20.0f, 20.0f));
                 ground.CreateFixture(sd);
 
                 // Bottom horizontal
-                shape.Set(new Vector2(-20.0f, -20.0f), new Vector2(20.0f, -20.0f));
+                shape.SetTwoSided(new Vector2(-20.0f, -20.0f), new Vector2(20.0f, -20.0f));
                 ground.CreateFixture(sd);
             }
 

@@ -41,7 +41,7 @@ namespace Testbed.Tests
                 bd.Bullet = true;
                 var body = World.CreateBody(bd);
                 body.CreateFixture(shape, 1.0f);
-                body.SetLinearVelocity(new Vector2(150.0f, 0.0f));
+                body.SetLinearVelocity(new Vector2(10.0f, 0.0f));
             }
         }
     }

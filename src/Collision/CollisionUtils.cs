@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Box2DSharp.Collision.Collider;
@@ -67,7 +68,7 @@ namespace Box2DSharp.Collision
             int vertexIndexA)
         {
             // Start with no output points
-            var numOut = 0;
+            var count = 0;
 
             // Calculate the distance of end points to the line
             var distance0 = Vector2.Dot(normal, vIn[0].Vector) - offset;
@@ -76,12 +77,12 @@ namespace Box2DSharp.Collision
             // If the points are behind the plane
             if (distance0 <= 0.0f)
             {
-                vOut[numOut++] = vIn[0];
+                vOut[count++] = vIn[0];
             }
 
             if (distance1 <= 0.0f)
             {
-                vOut[numOut++] = vIn[1];
+                vOut[count++] = vIn[1];
             }
 
             // If the points are on different sides of the plane
@@ -89,17 +90,18 @@ namespace Box2DSharp.Collision
             {
                 // Find intersection point of edge and plane
                 var interp = distance0 / (distance0 - distance1);
-                vOut[numOut].Vector = vIn[0].Vector + interp * (vIn[1].Vector - vIn[0].Vector);
+                vOut[count].Vector = vIn[0].Vector + interp * (vIn[1].Vector - vIn[0].Vector);
 
                 // VertexA is hitting edgeB.
-                vOut[numOut].Id.ContactFeature.IndexA = (byte) vertexIndexA;
-                vOut[numOut].Id.ContactFeature.IndexB = vIn[0].Id.ContactFeature.IndexB;
-                vOut[numOut].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
-                vOut[numOut].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
-                ++numOut;
+                vOut[count].Id.ContactFeature.IndexA = (byte) vertexIndexA;
+                vOut[count].Id.ContactFeature.IndexB = vIn[0].Id.ContactFeature.IndexB;
+                vOut[count].Id.ContactFeature.TypeA = (byte) ContactFeature.FeatureType.Vertex;
+                vOut[count].Id.ContactFeature.TypeB = (byte) ContactFeature.FeatureType.Face;
+                ++count;
+                Debug.Assert(count == 2);
             }
 
-            return numOut;
+            return count;
         }
 
         /// Determine if two generic shapes overlap.

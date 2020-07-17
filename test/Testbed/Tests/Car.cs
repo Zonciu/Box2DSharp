@@ -41,7 +41,7 @@ namespace Testbed.Tests
                 fd.Density = 0.0f;
                 fd.Friction = 0.6f;
 
-                shape.Set(new Vector2(-20.0f, 0.0f), new Vector2(20.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-20.0f, 0.0f), new Vector2(20.0f, 0.0f));
                 ground.CreateFixture(fd);
 
                 float[] hs = {0.25f, 1.0f, 4.0f, 0.0f, 0.0f, -1.0f, -2.0f, -2.0f, -1.25f, 0.0f};
@@ -51,7 +51,7 @@ namespace Testbed.Tests
                 for (var i = 0; i < 10; ++i)
                 {
                     var y2 = hs[i];
-                    shape.Set(new Vector2(x, y1), new Vector2(x + dx, y2));
+                    shape.SetTwoSided(new Vector2(x, y1), new Vector2(x + dx, y2));
                     ground.CreateFixture(fd);
                     y1 = y2;
                     x += dx;
@@ -60,29 +60,29 @@ namespace Testbed.Tests
                 for (var i = 0; i < 10; ++i)
                 {
                     var y2 = hs[i];
-                    shape.Set(new Vector2(x, y1), new Vector2(x + dx, y2));
+                    shape.SetTwoSided(new Vector2(x, y1), new Vector2(x + dx, y2));
                     ground.CreateFixture(fd);
                     y1 = y2;
                     x += dx;
                 }
 
-                shape.Set(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
                 ground.CreateFixture(fd);
 
                 x += 80.0f;
-                shape.Set(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
                 ground.CreateFixture(fd);
 
                 x += 40.0f;
-                shape.Set(new Vector2(x, 0.0f), new Vector2(x + 10.0f, 5.0f));
+                shape.SetTwoSided(new Vector2(x, 0.0f), new Vector2(x + 10.0f, 5.0f));
                 ground.CreateFixture(fd);
 
                 x += 20.0f;
-                shape.Set(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(x, 0.0f), new Vector2(x + 40.0f, 0.0f));
                 ground.CreateFixture(fd);
 
                 x += 40.0f;
-                shape.Set(new Vector2(x, 0.0f), new Vector2(x, 20.0f));
+                shape.SetTwoSided(new Vector2(x, 0.0f), new Vector2(x, 20.0f));
                 ground.CreateFixture(fd);
             }
 

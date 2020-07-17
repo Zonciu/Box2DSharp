@@ -6,14 +6,17 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Collision.Shapes
 {
+    /// <summary>
+    /// A chain shape is a free form sequence of line segments.
+    /// The chain has one-sided collision, with the surface normal pointing to the right of the edge.
+    /// This provides a counter-clockwise winding like the polygon shape.
+    /// Connectivity information is used to create smooth collisions.
+    /// <para>@warning the chain will not collide properly if there are self-intersections.</para>
+    /// </summary>
     public class ChainShape : Shape
     {
         /// The vertex count.
         public int Count;
-
-        public bool HasPrevVertex;
-
-        public bool HasNextVertex;
 
         public Vector2 PrevVertex;
 
@@ -28,8 +31,6 @@ namespace Box2DSharp.Collision.Shapes
             Radius = Settings.PolygonRadius;
             Vertices = null;
             Count = 0;
-            HasPrevVertex = false;
-            HasNextVertex = false;
         }
 
         /// Implement b2Shape. Vertices are cloned using b2Alloc.
@@ -40,8 +41,6 @@ namespace Box2DSharp.Collision.Shapes
             clone.Count = Count;
             clone.PrevVertex = PrevVertex;
             clone.NextVertex = NextVertex;
-            clone.HasPrevVertex = HasPrevVertex;
-            clone.HasNextVertex = HasNextVertex;
             return clone;
         }
 
@@ -86,16 +85,17 @@ namespace Box2DSharp.Collision.Shapes
             Vertices[count] = Vertices[0];
             PrevVertex = Vertices[Count - 2];
             NextVertex = Vertices[1];
-            HasPrevVertex = true;
-            HasNextVertex = true;
         }
 
-        /// Create a chain with isolated end vertices.
-        /// @param vertices an array of vertices, these are copied
-        /// @param count the vertex count
-        public void CreateChain(Vector2[] vertices)
+        /// <summary>
+        /// Create a chain with ghost vertices to connect multiple chains together.
+        /// </summary>
+        /// <param name="vertices">an array of vertices, these are copied</param>
+        /// <param name="count">the vertex count</param>
+        /// <param name="prevVertex">previous vertex from chain that connects to the start</param>
+        /// <param name="nextVertex">next vertex from chain that connects to the end</param>
+        public void CreateChain(Vector2[] vertices, int count, Vector2 prevVertex, Vector2 nextVertex)
         {
-            var count = vertices.Length;
             Debug.Assert(Vertices == null && Count == 0);
             Debug.Assert(count >= 2);
             for (var i = 1; i < count; ++i)
@@ -110,27 +110,8 @@ namespace Box2DSharp.Collision.Shapes
             Vertices = new Vector2[count];
             Array.Copy(vertices, Vertices, count);
 
-            HasPrevVertex = false;
-            HasNextVertex = false;
-
-            PrevVertex.SetZero();
-            NextVertex.SetZero();
-        }
-
-        /// Establish connectivity to a vertex that precedes the first vertex.
-        /// Don't call this for loops.
-        public void SetPrevVertex(in Vector2 prevVertex)
-        {
             PrevVertex = prevVertex;
-            HasPrevVertex = true;
-        }
-
-        /// Establish connectivity to a vertex that follows the last vertex.
-        /// Don't call this for loops.
-        public void SetNextVertex(in Vector2 nextVertex)
-        {
             NextVertex = nextVertex;
-            HasNextVertex = true;
         }
 
         /// @see b2Shape::GetChildCount
@@ -148,30 +129,11 @@ namespace Box2DSharp.Collision.Shapes
                 ShapeType = ShapeType.Edge,
                 Radius = Radius,
                 Vertex1 = Vertices[index + 0],
-                Vertex2 = Vertices[index + 1]
+                Vertex2 = Vertices[index + 1],
+                OneSided = true,
+                Vertex0 = index > 0 ? Vertices[index - 1] : PrevVertex,
+                Vertex3 = index < Count - 2 ? Vertices[index + 2] : NextVertex
             };
-
-            if (index > 0)
-            {
-                edge.Vertex0 = Vertices[index - 1];
-                edge.HasVertex0 = true;
-            }
-            else
-            {
-                edge.Vertex0 = PrevVertex;
-                edge.HasVertex0 = HasPrevVertex;
-            }
-
-            if (index < Count - 2)
-            {
-                edge.Vertex3 = Vertices[index + 2];
-                edge.HasVertex3 = true;
-            }
-            else
-            {
-                edge.Vertex3 = NextVertex;
-                edge.HasVertex3 = HasNextVertex;
-            }
         }
 
         /// This always return false.

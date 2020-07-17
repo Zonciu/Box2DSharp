@@ -26,7 +26,7 @@ namespace Testbed.Tests
                 Body body = World.CreateBody(bd);
 
                 EdgeShape shape = new EdgeShape();
-                shape.Set(new Vector2(50.0f, 0.0f), new Vector2(-50.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(50.0f, 0.0f), new Vector2(-50.0f, 0.0f));
 
                 body.CreateFixture(shape, 0.0f);
             }

@@ -16,7 +16,7 @@ namespace Testbed.Tests
             // Ground body
             {
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-50.0f, 0.0f), new Vector2(50.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-50.0f, 0.0f), new Vector2(50.0f, 0.0f));
 
                 var sd = new FixtureDef();
                 sd.Shape = shape;

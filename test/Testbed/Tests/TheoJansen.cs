@@ -38,13 +38,13 @@ namespace Testbed.Tests
                 var ground = World.CreateBody(bd);
 
                 var shape = new EdgeShape();
-                shape.Set(new Vector2(-50.0f, 0.0f), new Vector2(50.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-50.0f, 0.0f), new Vector2(50.0f, 0.0f));
                 ground.CreateFixture(shape, 0.0f);
 
-                shape.Set(new Vector2(-50.0f, 0.0f), new Vector2(-50.0f, 10.0f));
+                shape.SetTwoSided(new Vector2(-50.0f, 0.0f), new Vector2(-50.0f, 10.0f));
                 ground.CreateFixture(shape, 0.0f);
 
-                shape.Set(new Vector2(50.0f, 0.0f), new Vector2(50.0f, 10.0f));
+                shape.SetTwoSided(new Vector2(50.0f, 0.0f), new Vector2(50.0f, 10.0f));
                 ground.CreateFixture(shape, 0.0f);
             }
 

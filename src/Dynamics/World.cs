@@ -1548,6 +1548,12 @@ namespace Box2DSharp.Dynamics
                 var v1 = MathUtils.Mul(xf, edge.Vertex1);
                 var v2 = MathUtils.Mul(xf, edge.Vertex2);
                 Drawer.DrawSegment(v1, v2, color);
+
+                if (edge.OneSided == false)
+                {
+                    Drawer.DrawPoint(v1, 4.0f, color);
+                    Drawer.DrawPoint(v2, 4.0f, color);
+                }
             }
                 break;
 
@@ -1556,35 +1562,12 @@ namespace Box2DSharp.Dynamics
                 var count = chain.Count;
                 var vertices = chain.Vertices;
 
-                var ghostColor = Color.FromArgb(
-                    color.A,
-                    (int)(0.75f * color.R),
-                    (int)(0.75f * color.G),
-                    (int)(0.75f * color.B));
-
                 var v1 = MathUtils.Mul(xf, vertices[0]);
-                Drawer.DrawPoint(v1, 4.0f, color);
-
-                if (chain.HasPrevVertex)
-                {
-                    var vp = MathUtils.Mul(xf, chain.PrevVertex);
-                    Drawer.DrawSegment(vp, v1, ghostColor);
-                    Drawer.DrawCircle(vp, 0.1f, ghostColor);
-                }
-
                 for (var i = 1; i < count; ++i)
                 {
                     var v2 = MathUtils.Mul(xf, vertices[i]);
                     Drawer.DrawSegment(v1, v2, color);
-                    Drawer.DrawPoint(v2, 4.0f, color);
                     v1 = v2;
-                }
-
-                if (chain.HasNextVertex)
-                {
-                    var vn = MathUtils.Mul(xf, chain.NextVertex);
-                    Drawer.DrawSegment(v1, vn, ghostColor);
-                    Drawer.DrawCircle(vn, 0.1f, ghostColor);
                 }
             }
                 break;

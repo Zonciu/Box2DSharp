@@ -59,7 +59,7 @@ namespace Testbed.Tests
                     var y2 = 2.0f * (float)Math.Cos(x2 / 10.0f * Settings.Pi);
 
                     var shape = new EdgeShape();
-                    shape.Set(new Vector2(x1, y1), new Vector2(x2, y2));
+                    shape.SetTwoSided(new Vector2(x1, y1), new Vector2(x2, y2));
                     ground.CreateFixture(shape, 0.0f);
 
                     x1 = x2;

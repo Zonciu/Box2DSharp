@@ -13,101 +13,55 @@ namespace Testbed.Tests
     {
         public ChainProblem()
         {
-            //dump
+            Vector2 g = new Vector2(0.0f, -10.0f);
+            World.Gravity = g;
+            var bodies = new Body[2];
             {
-                Vector2 g = new Vector2(0.000000000000000e+00f, -1.000000000000000e+01f);
-                World.Gravity = g;
-                Body[] bodies = new Body[2];
-                Joint[] joints = new Joint[0];
+                BodyDef bd = new BodyDef();
+                bd.BodyType = BodyType.StaticBody;
+                bodies[0] = World.CreateBody(bd);
+
                 {
-                    BodyDef bd = new BodyDef
-                    {
-                        BodyType = (BodyType)0,
-                        Position = new Vector2(0.000000000000000e+00f, 0.000000000000000e+00f),
-                        Angle = 0.000000000000000e+00f,
-                        LinearVelocity = new Vector2(0.000000000000000e+00f, 0.000000000000000e+00f),
-                        AngularVelocity = 0.000000000000000e+00f,
-                        LinearDamping = 0.000000000000000e+00f,
-                        AngularDamping = 0.000000000000000e+00f,
-                        AllowSleep = true,
-                        Awake = true,
-                        FixedRotation = false,
-                        Bullet = false,
-                        Enabled = true,
-                        GravityScale = 1.000000000000000e+00f
-                    };
-                    bodies[0] = World.CreateBody(bd);
+                    FixtureDef fd;
 
-                    {
-                        FixtureDef fd = new FixtureDef();
-                        fd.Friction = 2.000000029802322e-01f;
-                        fd.Restitution = 0.000000000000000e+00f;
-                        fd.Density = 0.000000000000000e+00f;
-                        fd.IsSensor = false;
-                        fd.Filter.CategoryBits = 1;
-                        fd.Filter.MaskBits = 65535;
-                        fd.Filter.GroupIndex = 0;
-                        ChainShape shape = new ChainShape();
-                        Vector2[] vs =
-                        {
-                            new Vector2(0.000000000000000e+00f, 1.000000000000000e+00f),
-                            new Vector2(0.000000000000000e+00f, 0.000000000000000e+00f),
-                            new Vector2(4.000000000000000e+00f, 0.000000000000000e+00f)
-                        };
+                    var v1 = new Vector2(0.0f, 1.0f);
+                    var v2 = new Vector2(0.0f, 0.0f);
+                    var v3 = new Vector2(4.0f, 0.0f);
 
-                        shape.CreateChain(vs);
-                        shape.PrevVertex.Set(4.719737010713663e-34f, 8.266340761211261e-34f);
-                        shape.NextVertex.Set(1.401298464324817e-45f, 8.266340761211261e-34f);
-                        shape.HasPrevVertex = false;
-                        shape.HasNextVertex = false;
+                    EdgeShape shape = new EdgeShape();
+                    shape.SetTwoSided(v1, v2);
+                    bodies[0].CreateFixture(shape, 0.0f);
 
-                        fd.Shape = shape;
-
-                        bodies[0].CreateFixture(fd);
-                    }
+                    shape.SetTwoSided(v2, v3);
+                    bodies[0].CreateFixture(shape, 0.0f);
                 }
-                {
-                    BodyDef bd = new BodyDef();
-                    bd.BodyType = (BodyType)2;
-                    bd.Position.Set(6.033980250358582e-01f, 3.028350114822388e+00f);
-                    bd.Angle = 0.000000000000000e+00f;
-                    bd.LinearVelocity.Set(0.000000000000000e+00f, 0.000000000000000e+00f);
-                    bd.AngularVelocity = 0.000000000000000e+00f;
-                    bd.LinearDamping = 0.000000000000000e+00f;
-                    bd.AngularDamping = 0.000000000000000e+00f;
-                    bd.AllowSleep = true;
-                    bd.Awake = true;
-                    bd.FixedRotation = false;
-                    bd.Bullet = true;
-                    bd.Enabled = true;
-                    bd.GravityScale = 1.000000000000000e+00f;
-                    bodies[1] = World.CreateBody(bd);
-
-                    {
-                        FixtureDef fd = new FixtureDef();
-                        fd.Friction = 2.000000029802322e-01f;
-                        fd.Restitution = 0.000000000000000e+00f;
-                        fd.Density = 1.000000000000000e+01f;
-                        fd.IsSensor = false;
-                        fd.Filter.CategoryBits = 1;
-                        fd.Filter.MaskBits = 65535;
-                        fd.Filter.GroupIndex = 0;
-                        PolygonShape shape = new PolygonShape();
-                        Vector2[] vs = new Vector2[8];
-                        vs[0].Set(5.000000000000000e-01f, -3.000000000000000e+00f);
-                        vs[1].Set(5.000000000000000e-01f, 3.000000000000000e+00f);
-                        vs[2].Set(-5.000000000000000e-01f, 3.000000000000000e+00f);
-                        vs[3].Set(-5.000000000000000e-01f, -3.000000000000000e+00f);
-                        shape.Set(vs, 4);
-
-                        fd.Shape = shape;
-
-                        bodies[1].CreateFixture(fd);
-                    }
-                }
-                joints = null;
-                bodies = null;
             }
+            {
+                BodyDef bd = new BodyDef();
+                bd.BodyType = BodyType.DynamicBody;
+
+                //bd.position.Set(6.033980250358582e-01f, 3.028350114822388e+00f);
+                bd.Position.Set(1.0f, 3.0f);
+                bodies[1] = World.CreateBody(bd);
+
+                {
+                    FixtureDef fd = new FixtureDef();
+                    fd.Friction = 0.2f;
+                    fd.Density = 10.0f;
+                    PolygonShape shape = new PolygonShape();
+                    var vs = new Vector2[8];
+                    vs[0].Set(0.5f, -3.0f);
+                    vs[1].Set(0.5f, 3.0f);
+                    vs[2].Set(-0.5f, 3.0f);
+                    vs[3].Set(-0.5f, -3.0f);
+                    shape.Set(vs, 4);
+
+                    fd.Shape = shape;
+
+                    bodies[1].CreateFixture(fd);
+                }
+            }
+            bodies = default;
         }
     }
 }

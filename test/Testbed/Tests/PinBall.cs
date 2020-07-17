@@ -29,11 +29,11 @@ namespace Testbed.Tests
                 ground = World.CreateBody(bd);
 
                 var vs = new Vector2[5];
-                vs[0].Set(0.0f, -2.0f);
-                vs[1].Set(8.0f, 6.0f);
+                vs[0].Set(-8.0f, 6.0f);
+                vs[1].Set(-8.0f, 20.0f);
                 vs[2].Set(8.0f, 20.0f);
-                vs[3].Set(-8.0f, 20.0f);
-                vs[4].Set(-8.0f, 6.0f);
+                vs[3].Set(8.0f, 6.0f);
+                vs[4].Set(0.0f, -2.0f);
 
                 var loop = new ChainShape();
                 loop.CreateLoop(vs);

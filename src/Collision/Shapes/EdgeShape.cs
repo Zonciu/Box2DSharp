@@ -5,15 +5,13 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Collision.Shapes
 {
+    /// <summary>
+    /// A line segment (edge) shape. These can be connected in chains or loops
+    /// to other edge shapes. Edges created independently are two-sided and do
+    /// no provide smooth movement accross junctions. 
+    /// </summary>
     public class EdgeShape : Shape
     {
-        public bool HasVertex0;
-
-        public bool HasVertex3;
-
-        /// Optional adjacent vertices. These are used for smooth collision.
-        public Vector2 Vertex0;
-
         /// These are the edge vertices
         public Vector2 Vertex1;
 
@@ -21,7 +19,13 @@ namespace Box2DSharp.Collision.Shapes
         public Vector2 Vertex2;
 
         /// Optional adjacent vertices. These are used for smooth collision.
+        public Vector2 Vertex0;
+
+        /// Optional adjacent vertices. These are used for smooth collision.
         public Vector2 Vertex3;
+
+        /// Uses m_vertex0 and m_vertex3 to create smooth collision.
+        public bool OneSided;
 
         public EdgeShape()
         {
@@ -29,12 +33,35 @@ namespace Box2DSharp.Collision.Shapes
             Radius = Settings.PolygonRadius;
         }
 
-        public void Set(in Vector2 v1, in Vector2 v2)
+        /// <summary>
+        /// Set this as a part of a sequence. Vertex v0 precedes the edge and vertex v3
+        /// follows. These extra vertices are used to provide smooth movement
+        /// across junctions. This also makes the collision one-sided. The edge
+        /// normal points to the right looking from v1 to v2.
+        /// </summary>
+        /// <param name="v0"></param>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        /// <param name="v3"></param>
+        public void SetOneSided(in Vector2 v0, in Vector2 v1, in Vector2 v2, in Vector2 v3)
+        {
+            Vertex0 = v0;
+            Vertex1 = v1;
+            Vertex2 = v2;
+            Vertex3 = v3;
+            OneSided = true;
+        }
+
+        /// <summary>
+        /// Set this as an isolated edge. Collision is two-sided.
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        public void SetTwoSided(in Vector2 v1, in Vector2 v2)
         {
             Vertex1 = v1;
             Vertex2 = v2;
-            HasVertex0 = false;
-            HasVertex3 = false;
+            OneSided = false;
         }
 
         /// <inheritdoc />
@@ -46,8 +73,7 @@ namespace Box2DSharp.Collision.Shapes
                 Vertex1 = Vertex1,
                 Vertex2 = Vertex2,
                 Vertex3 = Vertex3,
-                HasVertex0 = HasVertex0,
-                HasVertex3 = HasVertex3
+                OneSided = OneSided
             };
             return clone;
         }
@@ -81,6 +107,8 @@ namespace Box2DSharp.Collision.Shapes
             var v1 = Vertex1;
             var v2 = Vertex2;
             var e = v2 - v1;
+
+            // Normal points to the right, looking from v1 at v2
             var normal = new Vector2(e.Y, -e.X);
             normal.Normalize();
 
@@ -88,6 +116,11 @@ namespace Box2DSharp.Collision.Shapes
             // dot(normal, q - v1) = 0
             // dot(normal, p1 - v1) + t * dot(normal, d) = 0
             var numerator = Vector2.Dot(normal, v1 - p1);
+            if (OneSided && numerator > 0.0f)
+            {
+                return false;
+            }
+
             var denominator = Vector2.Dot(normal, d);
 
             if (Math.Abs(denominator) < Settings.Epsilon)

@@ -27,19 +27,19 @@ namespace Testbed.Tests
                 var shape = new EdgeShape();
 
                 // Floor
-                shape.Set(new Vector2(-10.0f, 0.0f), new Vector2(10.0f, 0.0f));
+                shape.SetTwoSided(new Vector2(-10.0f, 0.0f), new Vector2(10.0f, 0.0f));
                 ground.CreateFixture(shape, 0.0f);
 
                 // Left wall
-                shape.Set(new Vector2(-10.0f, 0.0f), new Vector2(-10.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(-10.0f, 0.0f), new Vector2(-10.0f, 20.0f));
                 ground.CreateFixture(shape, 0.0f);
 
                 // Right wall
-                shape.Set(new Vector2(10.0f, 0.0f), new Vector2(10.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(10.0f, 0.0f), new Vector2(10.0f, 20.0f));
                 ground.CreateFixture(shape, 0.0f);
 
                 // Roof
-                shape.Set(new Vector2(-10.0f, 20.0f), new Vector2(10.0f, 20.0f));
+                shape.SetTwoSided(new Vector2(-10.0f, 20.0f), new Vector2(10.0f, 20.0f));
                 ground.CreateFixture(shape, 0.0f);
             }
             {
