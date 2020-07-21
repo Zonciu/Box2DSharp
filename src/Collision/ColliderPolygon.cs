@@ -23,40 +23,42 @@ namespace Box2DSharp.Collision
             var count1 = poly1.Count;
             var count2 = poly2.Count;
 
-            var n1s = poly1.Normals;
-            var v1s = poly1.Vertices;
-            var v2s = poly2.Vertices;
+            Span<Vector2> n1s = poly1.Normals;
+            Span<Vector2> v1s = poly1.Vertices;
+            Span<Vector2> v2s = poly2.Vertices;
 
             // var xf = MathUtils.MulT(xf2, xf1); // inline
-            var subP = xf1.Position - xf2.Position;
-            var xfP = new Vector2(xf2.Rotation.Cos * subP.X + xf2.Rotation.Sin * subP.Y, -xf2.Rotation.Sin * subP.X + xf2.Rotation.Cos * subP.Y);
-            var xfR = new Rotation(
-                xf2.Rotation.Cos * xf1.Rotation.Sin - xf2.Rotation.Sin * xf1.Rotation.Cos,
-                xf2.Rotation.Cos * xf1.Rotation.Cos + xf2.Rotation.Sin * xf1.Rotation.Sin);
-            var xf = new Transform(xfP, xfR);
+            var subX = xf1.Position.X - xf2.Position.X;
+            var subY = xf1.Position.Y - xf2.Position.Y;
+            var x = xf2.Rotation.Cos * subX + xf2.Rotation.Sin * subY;
+            var y = -xf2.Rotation.Sin * subX + xf2.Rotation.Cos * subY;
+            var sin = xf2.Rotation.Cos * xf1.Rotation.Sin - xf2.Rotation.Sin * xf1.Rotation.Cos;
+            var cos = xf2.Rotation.Cos * xf1.Rotation.Cos + xf2.Rotation.Sin * xf1.Rotation.Sin;
 
             var bestIndex = 0;
             var maxSeparation = -Settings.MaxFloat;
+            float nX, nY, v1X, v1Y;
+            float si;
             for (var i = 0; i < count1; ++i)
             {
                 // Get poly1 normal in frame2.
                 // var n = MathUtils.Mul(xf.Rotation, n1s[i]); // inline
                 ref readonly var n1si = ref n1s[i];
-                var n = new Vector2(xf.Rotation.Cos * n1si.X - xf.Rotation.Sin * n1si.Y, xf.Rotation.Sin * n1si.X + xf.Rotation.Cos * n1si.Y);
+                nX = cos * n1si.X - sin * n1si.Y;
+                nY = sin * n1si.X + cos * n1si.Y;
 
                 // var v1 = MathUtils.Mul(xf, v1s[i]); // inline
                 ref readonly var v1si = ref v1s[i];
-                var x = xf.Rotation.Cos * v1si.X - xf.Rotation.Sin * v1si.Y + xf.Position.X;
-                var y = xf.Rotation.Sin * v1si.X + xf.Rotation.Cos * v1si.Y + xf.Position.Y;
-                var v1 = new Vector2(x, y);
+                v1X = cos * v1si.X - sin * v1si.Y + x;
+                v1Y = sin * v1si.X + cos * v1si.Y + y;
 
                 // Find deepest point for normal i.
-                var si = Settings.MaxFloat;
+                si = Settings.MaxFloat;
                 for (var j = 0; j < count2; ++j)
                 {
-                    //var sij = Vector2.Dot(n, v2s[j] - v1);
+                    //var sij = Vector2.Dot(n, v2s[j] - v1); // inline
                     ref readonly var v2sj = ref v2s[j];
-                    var sij = n.X * (v2sj.X - v1.X) + n.Y * (v2sj.Y - v1.Y);
+                    var sij = nX * (v2sj.X - v1X) + nY * (v2sj.Y - v1Y);
                     if (sij < si)
                     {
                         si = sij;
