@@ -7,6 +7,11 @@ Current ported to commit:
 2020-04-20 06:21:06
 ```
 
+# Communicate
+
+[![Join the chat at Discord](https://img.shields.io/badge/Discord-Join%20chat-blue)](https://discord.gg/C244nr3)
+[![加入QQ群](https://img.shields.io/badge/QQ%20Group-加入QQ群-orange)](https://jq.qq.com/?_wv=1027&k=b2zyTWnZ)
+
 # Unity test
 Run link.bat to link source code to Unity project
 
