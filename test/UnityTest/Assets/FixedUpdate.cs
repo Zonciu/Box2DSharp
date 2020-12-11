@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Box2DSharp
+namespace Box2DSharp.Testbed.Unity
 {
     public class FixedUpdate
     {

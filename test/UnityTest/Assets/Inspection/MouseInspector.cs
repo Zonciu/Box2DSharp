@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-namespace Box2DSharp.Inspection
+namespace Box2DSharp.Testbed.Unity.Inspection
 {
     public class MouseInspector : MonoBehaviour
     {
@@ -19,7 +20,7 @@ namespace Box2DSharp.Inspection
 
         private void Update()
         {
-            ScreenMouse = Input.mousePosition;
+            ScreenMouse = Mouse.current.position.ReadValue();
             WorldMouse = MainCamera.ScreenToWorldPoint(ScreenMouse);
             ViewPortMouse = MainCamera.ScreenToViewportPoint(ScreenMouse);
         }

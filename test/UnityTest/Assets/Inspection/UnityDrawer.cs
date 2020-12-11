@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Debug = System.Diagnostics.Debug;
 
-namespace Box2DSharp.Inspection
+namespace Box2DSharp.Testbed.Unity.Inspection
 {
     [ExecuteInEditMode]
     public class UnityDrawer : MonoBehaviour

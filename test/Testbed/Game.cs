@@ -1,14 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using Box2DSharp.Common;
 using ImGuiNET;
-using OpenToolkit.Graphics.OpenGL4;
-using OpenToolkit.Mathematics;
-using OpenToolkit.Windowing.Common;
-using OpenToolkit.Windowing.Common.Input;
-using OpenToolkit.Windowing.Desktop;
-using Testbed.Basics;
-using Testbed.Basics.ImGui;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
+using Testbed.Abstractions;
+using Testbed.Gui;
+using Testbed.Render;
+using Testbed.TestCases;
+using TKKeyModifiers = OpenTK.Windowing.GraphicsLibraryFramework.KeyModifiers;
+using TKMouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton;
 
 namespace Testbed
 {
@@ -20,32 +27,94 @@ namespace Testbed
 
         private long _lastUpdateTime;
 
-        private Stopwatch _stopwatch = Stopwatch.StartNew();
+        private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
 
-        public Test Test;
+        public TestBase Test { get; private set; }
+
+        public readonly DebugDrawer DebugDrawer;
+
+        public readonly Input Input;
+
+        private bool _stopped;
+
+        private string _environment;
 
         /// <inheritdoc />
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
-        { }
+        {
+            _environment = System.Environment.Version.ToString();
+            Input = new Input(this);
+            Global.Input = Input;
+
+            DebugDrawer = new DebugDrawer();
+            Global.DebugDrawer = DebugDrawer;
+        }
 
         /// <inheritdoc />
         protected override void OnLoad()
         {
+            Title = $"Box2DSharp Testbed - Runtime Version: {_environment}";
+            var testBaseType = typeof(TestBase);
+            var testTypes = typeof(HelloWorld).Assembly.GetTypes()
+                                              .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract && e.GetCustomAttribute<TestCaseAttribute>() != null)
+                                              .ToHashSet();
+            var inheritedTest = this.GetType()
+                                    .Assembly.GetTypes()
+                                    .Where(
+                                         e => testBaseType.IsAssignableFrom(e)
+                                           && e.GetCustomAttribute<TestInheritAttribute>() != null
+                                           && e.GetCustomAttribute<TestCaseAttribute>() != null)
+                                    .ToList();
+            foreach (var type in inheritedTest)
+            {
+                testTypes.Remove(type.BaseType);
+            }
+
+            var typeList = new List<Type>(testTypes.Count + inheritedTest.Count);
+            typeList.AddRange(testTypes);
+            typeList.AddRange(inheritedTest);
+            Global.SetupTestCases(typeList);
+
             GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
             _controller = new ImGuiController(Size.X, Size.Y);
-            Global.Settings.Load();
-            Global.DebugDraw.Create();
+            DebugDrawer.Create();
+
             _currentTestIndex = Math.Clamp(_currentTestIndex, 0, Global.Tests.Count - 1);
-            _testSelection = _currentTestIndex;
-            RestartTest();
+            _testSelected = _currentTestIndex;
+            LoadTest(_testSelected);
             base.OnLoad();
+        }
+
+        /// <inheritdoc />
+        protected override void OnUnload()
+        {
+            _stopped = true;
+            base.OnUnload();
+        }
+
+        /// <inheritdoc />
+        protected override void OnClosed()
+        {
+            Test?.Dispose();
+            Test = null;
+            DebugDrawer.Destroy();
+            TestSettingHelper.Save(Global.Settings);
+            _controller.Dispose();
+            _controller = null;
+            _stopwatch.Stop();
+            base.OnClosed();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            if (_stopped)
+            {
+                return;
+            }
+
             var input = KeyboardState;
-            if (input.IsKeyDown(Key.Escape))
+            if (input.IsKeyDown(Keys.Escape))
             {
                 Close();
             }
@@ -80,6 +149,8 @@ namespace Testbed
             return (int)(1f / _avgDuration * 1000);
         }
 
+        #region Render
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             _controller.Update(this, (float)e.Time);
@@ -87,14 +158,14 @@ namespace Testbed
             UpdateText();
             UpdateUI();
             Test.Render();
-            if (Global.DebugDraw.ShowUI)
+            if (DebugDrawer.ShowUI)
             {
-                Global.DebugDraw.DrawString(5, Global.Camera.Height - 60, $"steps: {Test.StepCount}");
-                Global.DebugDraw.DrawString(5, Global.Camera.Height - 40, $"{_frameTime / 10000f:.#} ms");
-                Global.DebugDraw.DrawString(5, Global.Camera.Height - 20, $"{GetFps(_frameTime / 10000f)} fps");
+                DebugDrawer.DrawString(5, Global.Camera.Height - 60, $"steps: {Test.StepCount}");
+                DebugDrawer.DrawString(5, Global.Camera.Height - 40, $"{_frameTime / 10000f:.#} ms");
+                DebugDrawer.DrawString(5, Global.Camera.Height - 20, $"{GetFps(_frameTime / 10000f)} fps");
             }
 
-            Global.DebugDraw.Flush();
+            DebugDrawer.Flush();
 
             _controller.Render();
 
@@ -105,7 +176,7 @@ namespace Testbed
 
         private void UpdateText()
         {
-            if (Global.DebugDraw.ShowUI)
+            if (DebugDrawer.ShowUI)
             {
                 ImGui.SetNextWindowPos(new System.Numerics.Vector2(0.0f, 0.0f));
                 ImGui.SetNextWindowSize(new System.Numerics.Vector2(Global.Camera.Width, Global.Camera.Height));
@@ -120,12 +191,12 @@ namespace Testbed
         public void UpdateUI()
         {
             const int MenuWidth = 180;
-            if (Global.DebugDraw.ShowUI)
+            if (DebugDrawer.ShowUI)
             {
                 ImGui.SetNextWindowPos(new System.Numerics.Vector2((float)Global.Camera.Width - MenuWidth - 10, 10));
                 ImGui.SetNextWindowSize(new System.Numerics.Vector2(MenuWidth, (float)Global.Camera.Height - 20));
 
-                ImGui.Begin("Tools", ref Global.DebugDraw.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
+                ImGui.Begin("Tools", ref DebugDrawer.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
 
                 if (ImGui.BeginTabBar("ControlTabs", ImGuiTabBarFlags.None))
                 {
@@ -241,25 +312,16 @@ namespace Testbed
             }
         }
 
-        /// <inheritdoc />
-        protected override void OnClosed()
-        {
-            Test?.Dispose();
-            Test = null;
-            Global.DebugDraw.Destroy();
-            Global.Settings.Save();
-            _controller.Dispose();
-            _controller = null;
-            _stopwatch.Stop();
-            base.OnClosed();
-        }
+        #endregion
+
+        #region KeyboardControl
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             switch (e.Key)
             {
-            case Key.Left:
+            case Keys.Left:
                 if (e.Control)
                 {
                     Test.ShiftOrigin(new System.Numerics.Vector2(2.0f, 0.0f));
@@ -270,7 +332,7 @@ namespace Testbed
                 }
 
                 break;
-            case Key.Right:
+            case Keys.Right:
                 if (e.Control)
                 {
                     var newOrigin = new System.Numerics.Vector2(-2.0f, 0.0f);
@@ -282,7 +344,7 @@ namespace Testbed
                 }
 
                 break;
-            case Key.Up:
+            case Keys.Up:
                 if (e.Control)
                 {
                     var newOrigin = new System.Numerics.Vector2(0.0f, -2.0f);
@@ -294,7 +356,7 @@ namespace Testbed
                 }
 
                 break;
-            case Key.Down:
+            case Keys.Down:
                 if (e.Control)
                 {
                     var newOrigin = new System.Numerics.Vector2(0.0f, 2.0f);
@@ -306,60 +368,60 @@ namespace Testbed
                 }
 
                 break;
-            case Key.Home:
+            case Keys.Home:
                 // Reset view
                 Global.Camera.Zoom = 1.0f;
                 Global.Camera.Center.Set(0.0f, 20.0f);
                 break;
-            case Key.Z:
+            case Keys.Z:
                 // Zoom out
                 Global.Camera.Zoom = Math.Min(1.1f * Global.Camera.Zoom, 20.0f);
                 break;
-            case Key.X:
+            case Keys.X:
                 // Zoom in
                 Global.Camera.Zoom = Math.Max(0.9f * Global.Camera.Zoom, 0.02f);
                 break;
-            case Key.R:
+            case Keys.R:
                 // Reset test
                 RestartTest();
                 break;
-            case Key.Space:
+            case Keys.Space:
                 // Launch a bomb.
                 Test?.LaunchBomb();
                 break;
-            case Key.O:
+            case Keys.O:
                 Global.Settings.SingleStep = true;
                 break;
 
-            case Key.P:
+            case Keys.P:
                 Global.Settings.Pause = !Global.Settings.Pause;
                 break;
 
-            case Key.BracketLeft:
+            case Keys.LeftBracket:
                 // Switch to previous test
-                --_testSelection;
-                if (_testSelection < 0)
+                --_testSelected;
+                if (_testSelected < 0)
                 {
-                    _testSelection = Global.Tests.Count - 1;
+                    _testSelected = Global.Tests.Count - 1;
                 }
 
                 break;
 
-            case Key.BracketRight:
+            case Keys.RightBracket:
                 // Switch to next test
-                ++_testSelection;
-                if (_testSelection == Global.Tests.Count)
+                ++_testSelected;
+                if (_testSelected == Global.Tests.Count)
                 {
-                    _testSelection = 0;
+                    _testSelected = 0;
                 }
 
                 break;
 
-            case Key.Tab:
-                Global.DebugDraw.ShowUI = !Global.DebugDraw.ShowUI;
+            case Keys.Tab:
+                DebugDrawer.ShowUI = !DebugDrawer.ShowUI;
                 break;
             default:
-                Test?.OnKeyDown(e);
+                Test?.OnKeyDown(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
                 break;
             }
 
@@ -369,18 +431,22 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
-            Test.OnKeyUp(e);
+            Test.OnKeyUp(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
             base.OnKeyUp(e);
         }
+
+        #endregion
+
+        #region MouseControl
 
         /// <inheritdoc />
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (e.Button == TKMouseButton.Left)
             {
                 var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
 
-                if (e.Modifiers == KeyModifiers.Shift)
+                if (e.Modifiers == TKKeyModifiers.Shift)
                 {
                     Test.ShiftMouseDown(pw);
                 }
@@ -396,7 +462,7 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (e.Button == TKMouseButton.Left)
             {
                 var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
                 Test.MouseUp(pw);
@@ -408,19 +474,85 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
-            if (IsMouseButtonDown(MouseButton.Left))
+            if (IsMouseButtonDown(TKMouseButton.Left))
             {
                 var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
                 Test.MouseMove(pw);
             }
 
-            if (IsMouseButtonDown(MouseButton.Right))
+            if (IsMouseButtonDown(TKMouseButton.Right))
             {
-                Global.Camera.Center.X += e.DeltaX * 0.05f * Global.Camera.Zoom;
-                Global.Camera.Center.Y -= e.DeltaY * 0.05f * Global.Camera.Zoom;
+                Global.Camera.Center.X -= e.DeltaX * 0.05f * Global.Camera.Zoom;
+                Global.Camera.Center.Y += e.DeltaY * 0.05f * Global.Camera.Zoom;
             }
 
             base.OnMouseMove(e);
+        }
+
+        #endregion
+
+        #region Test Control
+
+        public void RestartTest()
+        {
+            LoadTest(_currentTestIndex);
+        }
+
+        private int _testSelected;
+
+        private static int _currentTestIndex
+        {
+            get => Global.Settings.TestIndex;
+            set => Global.Settings.TestIndex = value;
+        }
+
+        private void SetTest(int index)
+        {
+            _testSelected = index;
+        }
+
+        private void CheckTestChange()
+        {
+            if (_currentTestIndex != _testSelected)
+            {
+                _currentTestIndex = _testSelected;
+                LoadTest(_testSelected);
+            }
+        }
+
+        private void LoadTest(int index)
+        {
+            Test?.Dispose();
+            Test = (TestBase)Activator.CreateInstance(Global.Tests[index].TestType);
+            if (Test != null)
+            {
+                Test.Input = Global.Input;
+                Test.Drawer = Global.DebugDrawer;
+                Test.TestSettings = Global.Settings;
+                Test.World.Drawer = Global.DebugDrawer;
+            }
+        }
+
+        #endregion
+
+        #region View Control
+
+        public Vector2 Scroll;
+
+        /// <inheritdoc />
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            Scroll = MouseState.ScrollDelta;
+            ScrollCallback(Scroll.X, Scroll.Y);
+        }
+
+        /// <inheritdoc />
+        protected override void OnResize(ResizeEventArgs e)
+        {
+            GL.Viewport(0, 0, e.Width, e.Height);
+            _controller.WindowResized(e.Width, e.Height);
+            ResizeWindowCallback(e.Width, e.Height);
+            base.OnResize(e);
         }
 
         public static void ResizeWindowCallback(int width, int height)
@@ -441,67 +573,6 @@ namespace Testbed
             {
                 Global.Camera.Zoom *= 1.1f;
             }
-        }
-
-        #region Test Control
-
-        public void RestartTest()
-        {
-            Test?.Dispose();
-            Test = (Test)Activator.CreateInstance(Global.Tests[_currentTestIndex].TestType);
-            if (Test != null)
-            {
-                Test.Game = this;
-            }
-        }
-
-        private int _testSelection;
-
-        private static int _currentTestIndex
-        {
-            get => Global.Settings.TestIndex;
-            set => Global.Settings.TestIndex = value;
-        }
-
-        private void SetTest(int index)
-        {
-            _testSelection = index;
-        }
-
-        private void CheckTestChange()
-        {
-            if (_currentTestIndex != _testSelection)
-            {
-                Test.Dispose();
-                _currentTestIndex = _testSelection;
-                Test = (Test)Activator.CreateInstance(Global.Tests[_testSelection].TestType);
-                if (Test != null)
-                {
-                    Test.Game = this;
-                }
-            }
-        }
-
-        #endregion
-
-        #region View Control
-
-        public Vector2 Scroll;
-
-        /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
-        {
-            Scroll = e.Offset;
-            ScrollCallback(e.OffsetX, e.OffsetY);
-        }
-
-        /// <inheritdoc />
-        protected override void OnResize(ResizeEventArgs e)
-        {
-            GL.Viewport(0, 0, e.Width, e.Height);
-            _controller.WindowResized(e.Width, e.Height);
-            ResizeWindowCallback(e.Width, e.Height);
-            base.OnResize(e);
         }
 
         #endregion

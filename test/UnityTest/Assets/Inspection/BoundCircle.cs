@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Box2DSharp.Inspection
+namespace Box2DSharp.Testbed.Unity.Inspection
 {
     public class BoundCircle : BoundBase
     {

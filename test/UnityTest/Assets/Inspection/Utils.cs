@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Box2DSharp.Inspection
+namespace Box2DSharp.Testbed.Unity.Inspection
 {
     public static class Utils
     {

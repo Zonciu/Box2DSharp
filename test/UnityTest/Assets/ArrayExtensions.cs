@@ -1,4 +1,4 @@
-namespace Box2DSharp
+namespace Box2DSharp.Testbed.Unity
 {
     public static class ArrayExtensions
     {

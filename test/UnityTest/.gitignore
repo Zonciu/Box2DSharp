@@ -71,4 +71,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # Link directories
-/[Aa]ssets/Box2D
+/[Aa]ssets/Box2DSharp
+settings.ini
+imgui.ini

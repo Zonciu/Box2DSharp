@@ -2,27 +2,19 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
+        <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
         <LangVersion>7.3</LangVersion>
-        <TargetFrameworks>netcoreapp3.1;netcoreapp5.0</TargetFrameworks>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ImGui.NET" Version="1.75.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-      <PackageReference Include="OpenTK" Version="4.0.0-pre9.1" />
-      <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+      <ProjectReference Include="..\Testbed.TestCases\Testbed.TestCases.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Box2DSharp.csproj" />
+      <PackageReference Include="ImGui.NET" Version="1.78.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+      <PackageReference Include="OpenTK" Version="4.3.0" />
+      <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
     </ItemGroup>
 
 </Project>

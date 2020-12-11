@@ -1,7 +1,7 @@
 ﻿using Box2DSharp.Common;
 using UnityEngine;
 
-namespace Box2DSharp
+namespace Box2DSharp.Testbed.Unity
 {
     public class UnityLogger : IDumpLogger
     {
