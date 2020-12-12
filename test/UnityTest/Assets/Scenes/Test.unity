@@ -248,14 +248,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 143d54880e664cba8e885837f3c9e1d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MouseInViewPort: 0
-  MouseInUI: 0
   UnityDrawer: {fileID: 0}
   MainCamera: {fileID: 0}
   Difference: {x: 0, y: 0, z: 0}
   Origin: {x: 0, y: 0, z: 0}
   Drag: 0
-  EnableMouseAction: 0
   Scroll: {x: 0, y: 0}
 --- !u!114 &519420035
 MonoBehaviour:
@@ -273,7 +270,7 @@ MonoBehaviour:
   _camera: {fileID: 519420031}
   _renderFeature: {fileID: 0}
   _rendererType: 0
-  _platformType: 0
+  _platformType: 1
   _initialConfiguration:
     KeyboardNavigation: 0
     GamepadNavigation: 0

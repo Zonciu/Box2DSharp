@@ -259,6 +259,11 @@
      <Compile Include="Assets\Inspection\Utils.cs" />
      <Compile Include="Assets\TestInheritAttribute.cs" />
      <Compile Include="Assets\TestSettingHelper.cs" />
+     <Compile Include="Assets\Tests\CompoundShapesRender.cs" />
+     <Compile Include="Assets\Tests\EdgeTestBaseRender.cs" />
+     <Compile Include="Assets\Tests\PrismaticJointTestBaseRender.cs" />
+     <Compile Include="Assets\Tests\RopeTestBaseRender.cs" />
+     <Compile Include="Assets\Tests\WheelJointTestBaseRender.cs" />
      <Compile Include="Assets\UnityInput.cs" />
      <Compile Include="Assets\UnityLogger.cs" />
      <Compile Include="Assets\UnityTestSettings.cs" />

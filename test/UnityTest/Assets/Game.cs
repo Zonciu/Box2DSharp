@@ -48,29 +48,29 @@ namespace Box2DSharp.Testbed.Unity
             Screen.SetResolution(Settings.WindowWidth, Settings.WindowHeight, Settings.FullScreenMode);
 
             var testBaseType = typeof(TestBase);
-            var testTypeArray = typeof(HelloWorld).Assembly.GetTypes()
-                                                  .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract && e.GetCustomAttribute<TestCaseAttribute>() != null)
-                                                  .ToArray();
+            var allTypes = this.GetType()
+                               .Assembly.GetTypes();
+            var testTypeArray = allTypes.Where(
+                                             e => testBaseType.IsAssignableFrom(e)
+                                               && !e.IsAbstract
+                                               && e.GetCustomAttribute<TestCaseAttribute>() != null)
+                                        .ToArray();
             var testTypes = new HashSet<Type>(testTypeArray);
-            var inheritedTest = this.GetType()
-                                    .Assembly.GetTypes()
-                                    .Where(
-                                         e => testBaseType.IsAssignableFrom(e)
-                                           && e.GetCustomAttribute<TestInheritAttribute>() != null
-                                           && e.GetCustomAttribute<TestCaseAttribute>() != null)
-                                    .ToList();
+            var inheritedTest = allTypes.Where(
+                                             e => testBaseType.IsAssignableFrom(e)
+                                               && e.GetCustomAttribute<TestInheritAttribute>() != null
+                                               && e.GetCustomAttribute<TestCaseAttribute>() != null)
+                                        .ToList();
             foreach (var type in inheritedTest)
             {
                 testTypes.Remove(type.BaseType);
             }
 
+            inheritedTest.ForEach(t => testTypes.Add(t));
+            Global.SetupTestCases(testTypes.ToList());
+
             _screenWidth = Screen.width;
             _screenHeight = Screen.height;
-
-            var typeList = new List<Type>(testTypes.Count + inheritedTest.Count);
-            typeList.AddRange(testTypes);
-            typeList.AddRange(inheritedTest);
-            Global.SetupTestCases(typeList);
 
             UnityInput = new UnityInput();
             Global.Input = UnityInput;
@@ -125,7 +125,6 @@ namespace Box2DSharp.Testbed.Unity
             {
                 Test.DrawString($"{Test.StepCount} Steps");
             }
-            Test.Render();
             CheckZoom();
 
             CheckResize();
@@ -139,12 +138,17 @@ namespace Box2DSharp.Testbed.Unity
 
         private void OnEnable()
         {
-            ImGuiUn.Layout += GUIController.Render;
+            ImGuiUn.Layout += RenderUI;
         }
 
         private void OnDisable()
         {
-            ImGuiUn.Layout -= GUIController.Render;
+            ImGuiUn.Layout -= RenderUI;
+        }
+
+        private void RenderUI()
+        {
+            GUIController.Render();
         }
 
         #region Test Control

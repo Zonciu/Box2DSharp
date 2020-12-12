@@ -50,6 +50,7 @@ namespace Box2DSharp.Testbed.Unity
             const int MenuWidth = 180;
             if (_game.DebugDrawer.ShowUI)
             {
+                _game.Test.Render();
                 ImGui.SetNextWindowPos(new Vector2((float)Global.Camera.Width - MenuWidth - 10, 10));
                 ImGui.SetNextWindowSize(new Vector2(MenuWidth, (float)Global.Camera.Height - 20));
 
