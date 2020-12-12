@@ -23,7 +23,7 @@ namespace Box2DSharp.Testbed.Unity
         public bool ShowUI = true;
 
         /// <inheritdoc />
-        public void DrawPolygon(Vector2[] vertices, int vertexCount, in Color color)
+        public void DrawPolygon(Span<Vector2> vertices, int vertexCount, in Color color)
         {
             var list = new List<(Vector3 begin, Vector3 end)>();
 
@@ -43,7 +43,7 @@ namespace Box2DSharp.Testbed.Unity
         }
 
         /// <inheritdoc />
-        public void DrawSolidPolygon(Vector2[] vertices, int vertexCount, in Color color)
+        public void DrawSolidPolygon(Span<Vector2> vertices, int vertexCount, in Color color)
         {
             var list = new List<(Vector3 begin, Vector3 end)>();
 

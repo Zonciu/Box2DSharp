@@ -1482,6 +1482,7 @@ namespace Box2DSharp.Dynamics
                 var bp = ContactManager.BroadPhase;
 
                 var node = BodyList.First;
+                Span<Vector2> vs = stackalloc Vector2[4];
                 while (node != null)
                 {
                     var b = node.Value;
@@ -1496,14 +1497,11 @@ namespace Box2DSharp.Dynamics
                         foreach (var proxy in f.Proxies)
                         {
                             var aabb = bp.GetFatAABB(proxy.ProxyId);
-                            var vs = ArrayPool<Vector2>.Shared.Rent(4);
-                            vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
-                            vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
-                            vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
-                            vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y);
-
+                            vs[0] = new Vector2(aabb.LowerBound.X, aabb.LowerBound.Y);
+                            vs[1] = new Vector2(aabb.UpperBound.X, aabb.LowerBound.Y);
+                            vs[2] = new Vector2(aabb.UpperBound.X, aabb.UpperBound.Y);
+                            vs[3] = new Vector2(aabb.LowerBound.X, aabb.UpperBound.Y);
                             Drawer.DrawPolygon(vs, 4, color);
-                            ArrayPool<Vector2>.Shared.Return(vs, true);
                         }
                     }
                 }
@@ -1576,7 +1574,7 @@ namespace Box2DSharp.Dynamics
             {
                 var vertexCount = poly.Count;
                 Debug.Assert(vertexCount <= Settings.MaxPolygonVertices);
-                var vertices = ArrayPool<Vector2>.Shared.Rent(vertexCount);
+                Span<Vector2> vertices = stackalloc Vector2[vertexCount];
 
                 for (var i = 0; i < vertexCount; ++i)
                 {
@@ -1584,7 +1582,6 @@ namespace Box2DSharp.Dynamics
                 }
 
                 Drawer.DrawSolidPolygon(vertices, vertexCount, color);
-                ArrayPool<Vector2>.Shared.Return(vertices);
             }
                 break;
             }

@@ -87,7 +87,7 @@ namespace Testbed.Render
         }
 
         /// <inheritdoc />
-        public void DrawPolygon(Vector2[] vertices, int vertexCount, in Color color)
+        public void DrawPolygon(Span<Vector2> vertices, int vertexCount, in Color color)
         {
             var p1 = vertices[vertexCount - 1];
             for (var i = 0; i < vertexCount; ++i)
@@ -100,7 +100,7 @@ namespace Testbed.Render
         }
 
         /// <inheritdoc />
-        public void DrawSolidPolygon(Vector2[] vertices, int vertexCount, in Color color)
+        public void DrawSolidPolygon(Span<Vector2> vertices, int vertexCount, in Color color)
         {
             var color4 = color.ToColor4();
             var fillColor = new Color4(color4.R * 0.5f, color4.G * 0.5f, color4.B * 0.5f, color4.A * 0.5f);

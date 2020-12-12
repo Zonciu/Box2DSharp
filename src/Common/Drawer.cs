@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 namespace Box2DSharp.Common
@@ -7,10 +8,10 @@ namespace Box2DSharp.Common
         DrawFlag Flags { get; set; }
 
         /// Draw a closed polygon provided in CCW order.
-        void DrawPolygon(Vector2[] vertices, int vertexCount, in Color color);
+        void DrawPolygon(Span<Vector2> vertices, int vertexCount, in Color color);
 
         /// Draw a solid closed polygon provided in CCW order.
-        void DrawSolidPolygon(Vector2[] vertices, int vertexCount, in Color color);
+        void DrawSolidPolygon(Span<Vector2> vertices, int vertexCount, in Color color);
 
         /// Draw a circle.
         void DrawCircle(in Vector2 center, float radius, in Color color);
