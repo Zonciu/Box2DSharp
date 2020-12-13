@@ -70,7 +70,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Link directories
+# Custom
 /[Aa]ssets/Box2DSharp
 settings.ini
 imgui.ini
