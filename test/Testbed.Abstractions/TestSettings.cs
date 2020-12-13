@@ -34,10 +34,6 @@ namespace Testbed.Abstractions
             EnableSleep = true;
             Pause = false;
             SingleStep = false;
-            Sleep = true;
-            WarmStarting = true;
-            TimeOfImpact = true;
-            SubStepping = false;
             DrawStats = false;
             DrawProfile = false;
         }
@@ -105,13 +101,5 @@ namespace Testbed.Abstractions
         public bool Pause;
 
         public bool SingleStep;
-
-        public bool Sleep;
-
-        public bool WarmStarting;
-
-        public bool TimeOfImpact;
-
-        public bool SubStepping;
     }
 }

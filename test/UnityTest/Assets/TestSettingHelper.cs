@@ -23,10 +23,6 @@ namespace Box2DSharp.Testbed.Unity
                 var settings = JsonUtility.FromJson<UnityTestSettings>(json);
                 settings.Pause = false;
                 settings.SingleStep = false;
-                settings.Sleep = false;
-                settings.WarmStarting = false;
-                settings.TimeOfImpact = false;
-                settings.SubStepping = false;
                 return settings;
             }
             catch (Exception e)

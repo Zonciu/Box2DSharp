@@ -121,10 +121,10 @@ namespace Testbed.Abstractions
 
             void WorldStep()
             {
-                World.AllowSleep = TestSettings.Sleep;
-                World.WarmStarting = TestSettings.WarmStarting;
-                World.ContinuousPhysics = TestSettings.TimeOfImpact;
-                World.SubStepping = TestSettings.SubStepping;
+                World.AllowSleep = TestSettings.EnableSleep;
+                World.WarmStarting = TestSettings.EnableWarmStarting;
+                World.ContinuousPhysics = TestSettings.EnableContinuous;
+                World.SubStepping = TestSettings.EnableSubStepping;
 
                 PointsCount = 0;
 
