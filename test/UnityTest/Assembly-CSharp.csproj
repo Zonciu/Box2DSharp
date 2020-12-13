@@ -251,9 +251,6 @@
      <Compile Include="Assets\FpsCounter.cs" />
      <Compile Include="Assets\GUIController.cs" />
      <Compile Include="Assets\Game.cs" />
-     <Compile Include="Assets\Inspection\BoundBase.cs" />
-     <Compile Include="Assets\Inspection\BoundCircle.cs" />
-     <Compile Include="Assets\Inspection\BoundRect.cs" />
      <Compile Include="Assets\Inspection\MouseInspector.cs" />
      <Compile Include="Assets\Inspection\UnityDrawer.cs" />
      <Compile Include="Assets\Inspection\Utils.cs" />

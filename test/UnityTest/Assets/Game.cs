@@ -136,6 +136,11 @@ namespace Box2DSharp.Testbed.Unity
             CheckMouseUp();
         }
 
+        private void OnPreRender()
+        {
+            Test.Render();
+        }
+
         private void OnEnable()
         {
             ImGuiUn.Layout += RenderUI;

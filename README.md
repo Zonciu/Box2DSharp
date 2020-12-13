@@ -13,7 +13,7 @@ Current ported to commit:
 [![加入QQ群](https://img.shields.io/badge/QQ%20Group-加入QQ群-orange)](https://jq.qq.com/?_wv=1027&k=b2zyTWnZ)
 
 # Unity test
-Run link.bat to link source code to Unity project
+Run `CopyToUnityTestbed.bat` to copy source code and test code to Unity project
 
 # Testbed
 Driven by [OpenTk](https://github.com/opentk/opentk) + [ImGui.NET](https://github.com/mellinoe/imgui.net)
