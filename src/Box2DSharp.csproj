@@ -5,22 +5,28 @@
         <LangVersion>7.3</LangVersion>
         <AssemblyName>Box2DSharp</AssemblyName>
         <RootNamespace>Box2DSharp</RootNamespace>
-        <Version>0.3.1</Version>
+        <Version>0.5</Version>
         <Authors>Zonciu Liang</Authors>
         <Company>Zonciu Studio</Company>
-        <PackageLicenseUrl>https://raw.githubusercontent.com/Zonciu/Box2DSharp/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseUrl></PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/Zonciu/Box2DSharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Zonciu/Box2DSharp</RepositoryUrl>
-        <Copyright>Copyright © Zonciu Liang 2018</Copyright>
+        <Copyright>Copyright © Zonciu Liang 2020</Copyright>
         <Description>A C# port of Box2D</Description>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <PackageVersion>0.4</PackageVersion>
+        <PackageVersion>0.5</PackageVersion>
+        <Title>Box2DSharp</Title>
+        <PackageTags>2D;C#;Box2D;Physic</PackageTags>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <DebugType>full</DebugType>
       <DebugSymbols>true</DebugSymbols>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>E:\dev\Box2DSharp\src\Box2DSharp.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -28,8 +34,16 @@
       <DebugType>full</DebugType>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DocumentationFile>E:\dev\Box2DSharp\src\Box2DSharp.xml</DocumentationFile>
+    </PropertyGroup>
+
     <ItemGroup>
         <None Remove="**\*.meta" />
+        <None Include="..\LICENSE">
+          <Pack>True</Pack>
+          <PackagePath></PackagePath>
+        </None>
     </ItemGroup>
     
     <ItemGroup>
