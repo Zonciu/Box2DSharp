@@ -2,12 +2,12 @@
 using Box2DSharp.Ropes;
 using ImGuiNET;
 using Testbed.TestCases;
-using Vector2 = UnityEngine.Vector2;
+using UnityEngine;
 
 namespace Box2DSharp.Testbed.Unity.Tests
 {
     [TestInherit]
-    public class RopeTestBaseRender : RopeTestBase
+    public class RopeTestRender : RopeTest
     {
         /// <inheritdoc />
         protected override void OnRender()
@@ -21,7 +21,7 @@ namespace Box2DSharp.Testbed.Unity.Tests
             ImGui.PushItemWidth(ImGui.GetWindowWidth() * 0.5f);
 
             const ImGuiComboFlags comboFlags = 0;
-            string[] bendModels = {"Spring", "PBD Ang", "XPBD Ang", "PBD Dist", "PBD Height"};
+            string[] bendModels = {"Spring", "PBD Ang", "XPBD Ang", "PBD Dist", "PBD Height", "PBD Triangle"};
             string[] stretchModels = {"PBD", "XPBD"};
 
             ImGui.Text("Rope 1");

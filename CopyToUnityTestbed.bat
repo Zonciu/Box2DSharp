@@ -1,7 +1,7 @@
 @echo off
 set rootPath=%cd%
 
-if exist "%cd%\test\UnityTest\Assets\Box2D" rd /s /q "%cd%\test\UnityTest\Assets\Box2D"
+rmdir /s /q "%cd%\test\UnityTest\Assets\Box2DSharp"
 
 xcopy /s /y /q "%cd%\src" "%cd%\test\UnityTest\Assets\Box2DSharp\Box2DSharp\"
 xcopy /s /y /q "%cd%\test\Testbed.Abstractions" "%cd%\test\UnityTest\Assets\Box2DSharp\Testbed.Abstractions\"

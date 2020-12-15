@@ -1,11 +1,11 @@
 ﻿using ImGuiNET;
 using Testbed.TestCases;
-using Vector2 = UnityEngine.Vector2;
+using UnityEngine;
 
 namespace Box2DSharp.Testbed.Unity.Tests
 {
     [TestInherit]
-    public class WheelJointTestBaseRender : WheelJointTestBase
+    public class PrismaticJointTestRender : PrismaticJointTest
     {
         /// <inheritdoc />
         protected override void OnRender()

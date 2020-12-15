@@ -1,11 +1,11 @@
 ﻿using ImGuiNET;
 using Testbed.TestCases;
-using Vector2 = UnityEngine.Vector2;
+using UnityEngine;
 
 namespace Box2DSharp.Testbed.Unity.Tests
 {
     [TestInherit]
-    public class EdgeTestBaseRender : EdgeTestBase
+    public class EdgeTestRender : EdgeTest
     {
         /// <inheritdoc />
         protected override void OnRender()
@@ -14,7 +14,7 @@ namespace Box2DSharp.Testbed.Unity.Tests
             ImGui.SetNextWindowSize(new Vector2(200.0f, 100.0f));
             ImGui.Begin("Custom Controls", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize);
 
-            if (ImGui.RadioButton("Boxes", Boxes == true))
+            if (ImGui.RadioButton("Boxes", Boxes))
             {
                 CreateBoxes();
                 Boxes = true;

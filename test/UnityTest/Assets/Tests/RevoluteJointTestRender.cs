@@ -1,11 +1,11 @@
 ﻿using ImGuiNET;
 using Testbed.TestCases;
-using Vector2 = UnityEngine.Vector2;
+using UnityEngine;
 
 namespace Box2DSharp.Testbed.Unity.Tests
 {
     [TestInherit]
-    public class PrismaticJointTestBaseRender : PrismaticJointTestBase
+    public class RevoluteJointTestRender : RevoluteJointTest
     {
         /// <inheritdoc />
         protected override void OnRender()
@@ -16,21 +16,20 @@ namespace Box2DSharp.Testbed.Unity.Tests
 
             if (ImGui.Checkbox("Limit", ref EnableLimit))
             {
-                Joint.EnableLimit(EnableLimit);
+                Joint1.EnableLimit(EnableLimit);
             }
 
             if (ImGui.Checkbox("Motor", ref EnableMotor))
             {
-                Joint.EnableMotor(EnableMotor);
+                Joint1.EnableMotor(EnableMotor);
             }
 
-            if (ImGui.SliderFloat("Speed", ref MotorSpeed, -100.0f, 100.0f, "%.0f"))
+            if (ImGui.SliderFloat("Speed", ref MotorSpeed, -20.0f, 20.0f, "%.0f"))
             {
-                Joint.SetMotorSpeed(MotorSpeed);
+                Joint1.SetMotorSpeed(MotorSpeed);
             }
 
             ImGui.End();
-            base.OnRender();
         }
     }
 }
