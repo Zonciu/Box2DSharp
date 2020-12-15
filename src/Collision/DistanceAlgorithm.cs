@@ -178,6 +178,12 @@ namespace Box2DSharp.Collision
             }
         }
 
+        /// <summary>
+        /// Perform a linear shape cast of shape B moving and shape A fixed. Determines the hit point, normal, and translation fraction.
+        /// </summary>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns>true if hit, false if there is no hit or an initial overlap</returns>
         public static bool ShapeCast(out ShapeCastOutput output, in ShapeCastInput input)
         {
             output = new ShapeCastOutput
@@ -223,7 +229,7 @@ namespace Box2DSharp.Collision
             // 迭代次数上限
             const int maxIters = 20;
             var iter = 0;
-            while (iter < maxIters && Math.Abs(v.Length() - sigma) > tolerance)
+            while (iter < maxIters && v.Length() - sigma > tolerance)
             {
                 Debug.Assert(simplex.Count < 3);
 
@@ -305,8 +311,13 @@ namespace Box2DSharp.Collision
                 ++iter;
             }
 
+            if (iter == 0)
+            {
+                // Initial overlap
+                return false;
+            }
+
             // Prepare output.
-            //Vector2 pointA, pointB;
             simplex.GetWitnessPoints(out var pointB, out var pointA);
 
             if (v.LengthSquared() > 0.0f)

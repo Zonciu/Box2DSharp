@@ -67,7 +67,8 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _ratio;
 
-        public GearJoint(GearJointDef def) : base(def)
+        public GearJoint(GearJointDef def)
+            : base(def)
         {
             _joint1 = def.Joint1;
             _joint2 = def.Joint2;
@@ -85,6 +86,9 @@ namespace Box2DSharp.Dynamics.Joints
             _bodyC = _joint1.BodyA;
             BodyA = _joint1.BodyB;
 
+            // Body B on joint1 must be dynamic
+            Debug.Assert(BodyA.BodyType == BodyType.DynamicBody);
+
             // Get geometry of joint1
             var xfA = BodyA.Transform;
             var aA = BodyA.Sweep.A;
@@ -93,7 +97,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             if (_typeA == JointType.RevoluteJoint)
             {
-                var revolute = (RevoluteJoint) def.Joint1;
+                var revolute = (RevoluteJoint)def.Joint1;
                 _localAnchorC = revolute.LocalAnchorA;
                 _localAnchorA = revolute.LocalAnchorB;
                 _referenceAngleA = revolute.ReferenceAngle;
@@ -103,7 +107,7 @@ namespace Box2DSharp.Dynamics.Joints
             }
             else
             {
-                var prismatic = (PrismaticJoint) def.Joint1;
+                var prismatic = (PrismaticJoint)def.Joint1;
                 _localAnchorC = prismatic.LocalAnchorA;
                 _localAnchorA = prismatic.LocalAnchorB;
                 _referenceAngleA = prismatic.ReferenceAngle;
@@ -119,6 +123,9 @@ namespace Box2DSharp.Dynamics.Joints
             _bodyD = _joint2.BodyA;
             BodyB = _joint2.BodyB;
 
+            // Body B on joint2 must be dynamic
+            Debug.Assert(BodyB.BodyType == BodyType.DynamicBody);
+
             // Get geometry of joint2
             var xfB = BodyB.Transform;
             var aB = BodyB.Sweep.A;
@@ -127,7 +134,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             if (_typeB == JointType.RevoluteJoint)
             {
-                var revolute = (RevoluteJoint) def.Joint2;
+                var revolute = (RevoluteJoint)def.Joint2;
                 _localAnchorD = revolute.LocalAnchorA;
                 _localAnchorB = revolute.LocalAnchorB;
                 _referenceAngleB = revolute.ReferenceAngle;
@@ -137,7 +144,7 @@ namespace Box2DSharp.Dynamics.Joints
             }
             else
             {
-                var prismatic = (PrismaticJoint) def.Joint2;
+                var prismatic = (PrismaticJoint)def.Joint2;
                 _localAnchorD = prismatic.LocalAnchorA;
                 _localAnchorB = prismatic.LocalAnchorB;
                 _referenceAngleB = prismatic.ReferenceAngle;

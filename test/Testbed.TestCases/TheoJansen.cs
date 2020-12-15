@@ -179,30 +179,37 @@ namespace Testbed.TestCases
             body1.CreateFixture(fd1);
             body2.CreateFixture(fd2);
 
-            var djd = new DistanceJointDef();
+            {
+                var jd = new DistanceJointDef();
 
-            // Using a soft distance constraint can reduce some jitter.
-            // It also makes the structure seem a bit more fluid by
-            // acting like a suspension system.
-            djd.DampingRatio = 0.5f;
-            djd.FrequencyHz = 10.0f;
+                // Using a soft distance constraint can reduce some jitter.
+                // It also makes the structure seem a bit more fluid by
+                // acting like a suspension system.
+                var dampingRatio = 0.5f;
+                var frequencyHz = 10.0f;
 
-            djd.Initialize(body1, body2, p2 + _offset, p5 + _offset);
-            World.CreateJoint(djd);
+                jd.Initialize(body1, body2, p2 + _offset, p5 + _offset);
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
+                World.CreateJoint(jd);
 
-            djd.Initialize(body1, body2, p3 + _offset, p4 + _offset);
-            World.CreateJoint(djd);
+                jd.Initialize(body1, body2, p3 + _offset, p4 + _offset);
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
+                World.CreateJoint(jd);
 
-            djd.Initialize(body1, _wheel, p3 + _offset, wheelAnchor + _offset);
-            World.CreateJoint(djd);
+                jd.Initialize(body1, _wheel, p3 + _offset, wheelAnchor + _offset);
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
+                World.CreateJoint(jd);
 
-            djd.Initialize(body2, _wheel, p6 + _offset, wheelAnchor + _offset);
-            World.CreateJoint(djd);
+                jd.Initialize(body2, _wheel, p6 + _offset, wheelAnchor + _offset);
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
+                World.CreateJoint(jd);
+            }
 
-            var rjd = new RevoluteJointDef();
-
-            rjd.Initialize(body2, _chassis, p4 + _offset);
-            World.CreateJoint(rjd);
+            {
+                var jd = new RevoluteJointDef();
+                jd.Initialize(body2, _chassis, p4 + _offset);
+                World.CreateJoint(jd);
+            }
         }
 
         /// <inheritdoc />

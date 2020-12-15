@@ -11,13 +11,18 @@ namespace Testbed.TestCases
     {
         public Restitution()
         {
+            const float threshold = 10.0f;
             {
                 var bd = new BodyDef();
                 var ground = World.CreateBody(bd);
 
                 var shape = new EdgeShape();
                 shape.SetTwoSided(new Vector2(-40.0f, 0.0f), new Vector2(40.0f, 0.0f));
-                ground.CreateFixture(shape, 0.0f);
+
+                FixtureDef fd = new FixtureDef();
+                fd.Shape = shape;
+                fd.RestitutionThreshold = threshold;
+                ground.CreateFixture(fd);
             }
 
             {
@@ -39,6 +44,7 @@ namespace Testbed.TestCases
                     var body = World.CreateBody(bd);
 
                     fd.Restitution = restitution[i];
+                    fd.RestitutionThreshold = threshold;
                     body.CreateFixture(fd);
                 }
             }

@@ -60,8 +60,8 @@ namespace Testbed.TestCases
                 fd.Density = 20.0f;
 
                 var jd = new WeldJointDef();
-                jd.FrequencyHz = 5.0f;
-                jd.DampingRatio = 0.7f;
+                var frequencyHz = 5.0f;
+                var dampingRatio = 0.7f;
 
                 var prevBody = ground;
                 for (var i = 0; i < 3; ++i)
@@ -74,6 +74,7 @@ namespace Testbed.TestCases
 
                     var anchor = new Vector2(-15.0f + 2.0f * i, 15.0f);
                     jd.Initialize(prevBody, body, anchor);
+                    JointUtils.AngularStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, prevBody, body);
                     World.CreateJoint(jd);
 
                     prevBody = body;
@@ -119,8 +120,8 @@ namespace Testbed.TestCases
                 fd.Density = 20.0f;
 
                 var jd = new WeldJointDef();
-                jd.FrequencyHz = 8.0f;
-                jd.DampingRatio = 0.7f;
+                var frequencyHz = 8.0f;
+                var dampingRatio = 0.7f;
 
                 var prevBody = ground;
                 for (var i = 0; i < Count; ++i)
@@ -135,6 +136,7 @@ namespace Testbed.TestCases
                     {
                         var anchor = new Vector2(5.0f + 1.0f * i, 10.0f);
                         jd.Initialize(prevBody, body, anchor);
+                        JointUtils.AngularStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                         World.CreateJoint(jd);
                     }
 

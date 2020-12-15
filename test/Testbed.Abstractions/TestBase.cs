@@ -371,13 +371,19 @@ namespace Testbed.Abstractions
             World.QueryAABB(_callback, aabb);
             if (_callback.QueryFixture != null)
             {
+                float frequencyHz = 5.0f;
+                float dampingRatio = 0.7f;
+
                 var body = _callback.QueryFixture.Body;
-                var md = new MouseJointDef
+                var jd = new MouseJointDef
                 {
-                    BodyA = GroundBody, BodyB = body,
-                    Target = p, MaxForce = 1000.0f * body.Mass
+                    BodyA = GroundBody,
+                    BodyB = body,
+                    Target = p,
+                    MaxForce = 1000.0f * body.Mass
                 };
-                MouseJoint = (MouseJoint)World.CreateJoint(md);
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
+                MouseJoint = (MouseJoint)World.CreateJoint(jd);
                 body.IsAwake = true;
             }
         }

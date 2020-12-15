@@ -8,12 +8,12 @@ namespace Box2DSharp.Dynamics.Joints
     /// of the anchor points is important for computing the reaction torque.
     public class WeldJointDef : JointDef
     {
-        /// The damping ratio. 0 = no damping, 1 = critical damping.
-        public float DampingRatio;
+        /// The rotational stiffness in N*m
+        /// Disable softness with a value of 0
+        public float Stiffness;
 
-        /// The mass-spring-damper frequency in Hertz. Rotation only.
-        /// Disable softness with a value of 0.
-        public float FrequencyHz;
+        /// The rotational damping in N*m*s
+        public float Damping;
 
         /// The local anchor point relative to bodyA's origin.
         public Vector2 LocalAnchorA;
@@ -30,12 +30,16 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA.Set(0.0f, 0.0f);
             LocalAnchorB.Set(0.0f, 0.0f);
             ReferenceAngle = 0.0f;
-            FrequencyHz = 0.0f;
-            DampingRatio = 0.0f;
+            Stiffness = 0.0f;
+            Damping = 0.0f;
         }
 
-        /// Initialize the bodies, anchors, and reference angle using a world
-        /// anchor point.
+        /// <summary>
+        /// Initialize the bodies, anchors, reference angle, stiffness, and damping.
+        /// </summary>
+        /// <param name="bA">the first body connected by this joint</param>
+        /// <param name="bB">the second body connected by this joint</param>
+        /// <param name="anchor">the point of connection in world coordinates</param>
         public void Initialize(Body bA, Body bB, in Vector2 anchor)
         {
             BodyA = bA;

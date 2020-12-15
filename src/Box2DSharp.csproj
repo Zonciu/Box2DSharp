@@ -8,7 +8,6 @@
         <Version>0.5</Version>
         <Authors>Zonciu Liang</Authors>
         <Company>Zonciu Studio</Company>
-        <PackageLicenseUrl></PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/Zonciu/Box2DSharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Zonciu/Box2DSharp</RepositoryUrl>
         <Copyright>Copyright © Zonciu Liang 2020</Copyright>
@@ -17,32 +16,17 @@
         <PackageVersion>0.5</PackageVersion>
         <Title>Box2DSharp</Title>
         <PackageTags>2D;C#;Box2D;Physic</PackageTags>
-        <PackageLicenseExpression></PackageLicenseExpression>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <DebugType>full</DebugType>
-      <DebugSymbols>true</DebugSymbols>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DocumentationFile>E:\dev\Box2DSharp\src\Box2DSharp.xml</DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DebugType>full</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DocumentationFile>E:\dev\Box2DSharp\src\Box2DSharp.xml</DocumentationFile>
+        <DocumentationFile>$(OutDir)\Box2DSharp.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="**\*.meta" />
         <None Include="..\LICENSE">
           <Pack>True</Pack>
-          <PackagePath></PackagePath>
+        </None>
+        <None Include="..\Box2D.LICENSE">
+            <Pack>True</Pack>
         </None>
     </ItemGroup>
     

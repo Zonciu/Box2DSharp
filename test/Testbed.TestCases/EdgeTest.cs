@@ -7,7 +7,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Geometry", "Edge Test")]
-    public class EdgeTestBase : TestBase
+    public class EdgeTest : TestBase
     {
         public readonly Vector2 Offset1;
 
@@ -19,7 +19,7 @@ namespace Testbed.TestCases
 
         public bool Boxes;
 
-        public EdgeTestBase()
+        public EdgeTest()
         {
             var vertices = new Vector2[]
             {

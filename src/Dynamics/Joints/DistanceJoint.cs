@@ -4,9 +4,8 @@ using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Joints
 {
-    /// A distance joint constrains two points on two bodies
-    /// to remain at a fixed distance from each other. You can view
-    /// this as a massless, rigid rod.
+    /// A distance joint constrains two points on two bodies to remain at a fixed
+    /// distance from each other. You can view this as a massless, rigid rod.
     public class DistanceJoint : Joint
     {
         // Solver shared
@@ -45,28 +44,45 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Vector2 _u;
 
-        internal DistanceJoint(DistanceJointDef def) : base(def)
+        /// The rest length
+        private float _length;
+
+        private float _minLength;
+
+        private float _maxLength;
+
+        private float _currentLength;
+
+        private float _lowerImpulse;
+
+        private float _upperImpulse;
+
+        internal DistanceJoint(DistanceJointDef def)
+            : base(def)
         {
             _localAnchorA = def.LocalAnchorA;
             _localAnchorB = def.LocalAnchorB;
-            Length = def.Length;
-            FrequencyHz = def.FrequencyHz;
-            DampingRatio = def.DampingRatio;
+            _length = Math.Max(def.Length, Settings.LinearSlop);
+            _minLength = Math.Max(def.MinLength, Settings.LinearSlop);
+            _maxLength = Math.Max(def.MaxLength, _minLength);
+            Stiffness = def.Stiffness;
+            Damping = def.Damping;
             _impulse = 0.0f;
             _gamma = 0.0f;
             _bias = 0.0f;
+            _impulse = 0.0f;
+            _lowerImpulse = 0.0f;
+            _upperImpulse = 0.0f;
+            _currentLength = 0.0f;
         }
 
-        /// Set/get the natural length.
-        /// Manipulating the length can lead to non-physical behavior when the frequency is zero.
-        public float Length { get; set; }
+        /// Set/get the linear stiffness in N/m
+        public float Stiffness { get; set; }
 
-        /// Set/get frequency in Hz.
-        public float FrequencyHz { get; set; }
+        /// Set/get linear damping in N*s/m
+        public float Damping { get; set; }
 
-        /// Set/get damping ratio.
-
-        public float DampingRatio { get; set; }
+        public float SoftMass { get; set; }
 
         public override Vector2 GetAnchorA()
         {
@@ -82,7 +98,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Unit is N.
         public override Vector2 GetReactionForce(float inv_dt)
         {
-            var F = inv_dt * _impulse * _u;
+            var F = inv_dt * (_impulse + _lowerImpulse - _upperImpulse) * _u;
             return F;
         }
 
@@ -105,22 +121,40 @@ namespace Box2DSharp.Dynamics.Joints
             return _localAnchorB;
         }
 
+        public float SetLength(float length)
+        {
+            _impulse = 0.0f;
+            _length = Math.Max(Settings.LinearSlop, length);
+            return _length;
+        }
+
+        public float SetMinLength(float minLength)
+        {
+            _lowerImpulse = 0.0f;
+            _minLength = MathUtils.Clamp(minLength, Settings.LinearSlop, _maxLength);
+            return _minLength;
+        }
+
+        public float SetMaxLength(float maxLength)
+        {
+            _upperImpulse = 0.0f;
+            _maxLength = Math.Max(maxLength, _minLength);
+            return _maxLength;
+        }
+
+        public float GetCurrentLength()
+        {
+            var pA = BodyA.GetWorldPoint(_localAnchorA);
+            var pB = BodyB.GetWorldPoint(_localAnchorB);
+            var d = pB - pA;
+            var length = d.Length();
+            return length;
+        }
+
         /// Dump joint to dmLog
         public override void Dump()
         {
-            var indexA = BodyA.IslandIndex;
-            var indexB = BodyB.IslandIndex;
-
-            DumpLogger.Log("  b2DistanceJointDef jd;");
-            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
-            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
-            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            DumpLogger.Log($"  jd.length = {Length};");
-            DumpLogger.Log($"  jd.frequencyHz = {FrequencyHz};");
-            DumpLogger.Log($"  jd.dampingRatio = {DampingRatio};");
-            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+            // Todo
         }
 
         internal override void InitVelocityConstraints(in SolverData data)
@@ -152,57 +186,61 @@ namespace Box2DSharp.Dynamics.Joints
             _u = cB + _rB - cA - _rA;
 
             // Handle singularity.
-            var length = _u.Length();
-            if (length > Settings.LinearSlop)
+            _currentLength = _u.Length();
+            if (_currentLength > Settings.LinearSlop)
             {
-                _u *= 1.0f / length;
+                _u *= 1.0f / _currentLength;
             }
             else
             {
                 _u.Set(0.0f, 0.0f);
+                _mass = 0.0f;
+                _impulse = 0.0f;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
             }
 
             var crAu = MathUtils.Cross(_rA, _u);
             var crBu = MathUtils.Cross(_rB, _u);
             var invMass = _invMassA + _invIa * crAu * crAu + _invMassB + _invIb * crBu * crBu;
-
-            // Compute the effective mass matrix.
-            _mass = Math.Abs(invMass) > Settings.Epsilon ? 1.0f / invMass : 0.0f;
-
-            if (FrequencyHz > 0.0f)
+            _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
+            if (Stiffness > 0.0f && _minLength < _maxLength)
             {
-                var C = length - Length;
+                // soft
+                var C = _currentLength - _length;
 
-                // Frequency
-                var omega = 2.0f * Settings.Pi * FrequencyHz;
-
-                // Damping coefficient
-                var d = 2.0f * _mass * DampingRatio * omega;
-
-                // Spring stiffness
-                var k = _mass * omega * omega;
+                var d = Damping;
+                var k = Stiffness;
 
                 // magic formulas
                 var h = data.Step.Dt;
+
+                // gamma = 1 / (h * (d + h * k))
+                // the extra factor of h in the denominator is since the lambda is an impulse, not a force
                 _gamma = h * (d + h * k);
                 _gamma = !_gamma.Equals(0.0f) ? 1.0f / _gamma : 0.0f;
                 _bias = C * h * k * _gamma;
 
                 invMass += _gamma;
-                _mass = Math.Abs(invMass) > Settings.Epsilon ? 1.0f / invMass : 0.0f;
+                SoftMass = Math.Abs(invMass) > Settings.Epsilon ? 1.0f / invMass : 0.0f;
             }
             else
             {
+                // rigid
                 _gamma = 0.0f;
                 _bias = 0.0f;
+                _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
+                SoftMass = _mass;
             }
 
             if (data.Step.WarmStarting)
             {
                 // Scale the impulse to support a variable time step.
                 _impulse *= data.Step.DtRatio;
+                _lowerImpulse *= data.Step.DtRatio;
+                _upperImpulse *= data.Step.DtRatio;
 
-                var P = _impulse * _u;
+                var P = (_impulse + _lowerImpulse - _upperImpulse) * _u;
                 vA -= _invMassA * P;
                 wA -= _invIa * MathUtils.Cross(_rA, P);
                 vB += _invMassB * P;
@@ -225,20 +263,85 @@ namespace Box2DSharp.Dynamics.Joints
             var wA = data.Velocities[_indexA].W;
             var vB = data.Velocities[_indexB].V;
             var wB = data.Velocities[_indexB].W;
+            if (_minLength < _maxLength)
+            {
+                if (Stiffness > 0.0f)
+                {
+                    // Cdot = dot(u, v + cross(w, r))
+                    var vpA = vA + MathUtils.Cross(wA, _rA);
+                    var vpB = vB + MathUtils.Cross(wB, _rB);
+                    var Cdot = Vector2.Dot(_u, vpB - vpA);
 
-            // Cdot = dot(u, v + cross(w, r))
-            var vpA = vA + MathUtils.Cross(wA, _rA);
-            var vpB = vB + MathUtils.Cross(wB, _rB);
-            var Cdot = Vector2.Dot(_u, vpB - vpA);
+                    var impulse = -SoftMass * (Cdot + _bias + _gamma * _impulse);
+                    _impulse += impulse;
 
-            var impulse = -_mass * (Cdot + _bias + _gamma * _impulse);
-            _impulse += impulse;
+                    var P = impulse * _u;
+                    vA -= _invMassA * P;
+                    wA -= _invIa * MathUtils.Cross(_rA, P);
+                    vB += _invMassB * P;
+                    wB += _invIb * MathUtils.Cross(_rB, P);
+                }
 
-            var P = impulse * _u;
-            vA -= _invMassA * P;
-            wA -= _invIa * MathUtils.Cross(_rA, P);
-            vB += _invMassB * P;
-            wB += _invIb * MathUtils.Cross(_rB, P);
+                // lower
+                {
+                    var C = _currentLength - _minLength;
+                    var bias = Math.Max(0.0f, C) * data.Step.InvDt;
+
+                    var vpA = vA + MathUtils.Cross(wA, _rA);
+                    var vpB = vB + MathUtils.Cross(wB, _rB);
+                    var Cdot = Vector2.Dot(_u, vpB - vpA);
+
+                    var impulse = -_mass * (Cdot + bias);
+                    var oldImpulse = _lowerImpulse;
+                    _lowerImpulse = Math.Max(0.0f, _lowerImpulse + impulse);
+                    impulse = _lowerImpulse - oldImpulse;
+                    var P = impulse * _u;
+
+                    vA -= _invMassA * P;
+                    wA -= _invIa * MathUtils.Cross(_rA, P);
+                    vB += _invMassB * P;
+                    wB += _invIb * MathUtils.Cross(_rB, P);
+                }
+
+                // upper
+                {
+                    var C = _maxLength - _currentLength;
+                    var bias = Math.Max(0.0f, C) * data.Step.InvDt;
+
+                    var vpA = vA + MathUtils.Cross(wA, _rA);
+                    var vpB = vB + MathUtils.Cross(wB, _rB);
+                    var Cdot = Vector2.Dot(_u, vpA - vpB);
+
+                    var impulse = -_mass * (Cdot + bias);
+                    var oldImpulse = _upperImpulse;
+                    _upperImpulse = Math.Max(0.0f, _upperImpulse + impulse);
+                    impulse = _upperImpulse - oldImpulse;
+                    var P = -impulse * _u;
+
+                    vA -= _invMassA * P;
+                    wA -= _invIa * MathUtils.Cross(_rA, P);
+                    vB += _invMassB * P;
+                    wB += _invIb * MathUtils.Cross(_rB, P);
+                }
+            }
+            else
+            {
+                // Equal limits
+
+                // Cdot = dot(u, v + cross(w, r))
+                var vpA = vA + MathUtils.Cross(wA, _rA);
+                var vpB = vB + MathUtils.Cross(wB, _rB);
+                var Cdot = Vector2.Dot(_u, vpB - vpA);
+
+                var impulse = -_mass * Cdot;
+                _impulse += impulse;
+
+                var P = impulse * _u;
+                vA -= _invMassA * P;
+                wA -= _invIa * MathUtils.Cross(_rA, P);
+                vB += _invMassB * P;
+                wB += _invIb * MathUtils.Cross(_rB, P);
+            }
 
             data.Velocities[_indexA].V = vA;
             data.Velocities[_indexA].W = wA;
@@ -248,12 +351,6 @@ namespace Box2DSharp.Dynamics.Joints
 
         internal override bool SolvePositionConstraints(in SolverData data)
         {
-            if (FrequencyHz > 0.0f)
-            {
-                // There is no position correction for soft distance constraints.
-                return true;
-            }
-
             var cA = data.Positions[_indexA].Center;
             var aA = data.Positions[_indexA].Angle;
             var cB = data.Positions[_indexB].Center;
@@ -267,8 +364,23 @@ namespace Box2DSharp.Dynamics.Joints
             var u = cB + rB - cA - rA;
 
             var length = u.Normalize();
-            var C = length - Length;
-            C = MathUtils.Clamp(C, -Settings.MaxLinearCorrection, Settings.MaxLinearCorrection);
+            float C;
+            if (Math.Abs(_minLength - _maxLength) < Settings.Epsilon)
+            {
+                C = length - _minLength;
+            }
+            else if (length < _minLength)
+            {
+                C = length - _minLength;
+            }
+            else if (_maxLength < length)
+            {
+                C = length - _maxLength;
+            }
+            else
+            {
+                return true;
+            }
 
             var impulse = -_mass * C;
             var P = impulse * u;
@@ -284,6 +396,43 @@ namespace Box2DSharp.Dynamics.Joints
             data.Positions[_indexB].Angle = aB;
 
             return Math.Abs(C) < Settings.LinearSlop;
+        }
+
+        /// <inheritdoc />
+        public override void Draw(IDrawer drawer)
+        {
+            var xfA = BodyA.GetTransform();
+            var xfB = BodyB.GetTransform();
+            var pA = MathUtils.Mul(xfA, _localAnchorA);
+            var pB = MathUtils.Mul(xfB, _localAnchorB);
+
+            var axis = pB - pA;
+            var length = axis.Normalize();
+
+            var c1 = Color.FromArgb(0.7f, 0.7f, 0.7f);
+            var c2 = Color.FromArgb(0.3f, 0.9f, 0.3f);
+            var c3 = Color.FromArgb(0.9f, 0.3f, 0.3f);
+            var c4 = Color.FromArgb(0.4f, 0.4f, 0.4f);
+
+            drawer.DrawSegment(pA, pB, c4);
+
+            var pRest = pA + _length * axis;
+            drawer.DrawPoint(pRest, 8.0f, c1);
+
+            if (Math.Abs(_minLength - _maxLength) > Settings.Epsilon)
+            {
+                if (_minLength > Settings.LinearSlop)
+                {
+                    var pMin = pA + _minLength * axis;
+                    drawer.DrawPoint(pMin, 4.0f, c2);
+                }
+
+                if (_maxLength < Settings.MaxFloat)
+                {
+                    var pMax = pA + _maxLength * axis;
+                    drawer.DrawPoint(pMax, 4.0f, c3);
+                }
+            }
         }
     }
 }

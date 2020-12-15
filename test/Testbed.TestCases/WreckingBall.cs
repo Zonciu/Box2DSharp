@@ -8,14 +8,26 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed.TestCases
 {
-    [TestCase("Joints", "Rope")]
-    public class RopeJoint : TestBase
+    /// This test shows how a distance joint can be used to stabilize a chain of
+    /// bodies with a heavy payload. Notice that the distance joint just prevents
+    /// excessive stretching and has no other effect.
+    /// By disabling the distance joint you can see that the Box2D solver has trouble
+    /// supporting heavy bodies with light bodies. Try playing around with the
+    /// densities, time step, and iterations to see how they affect stability.
+    /// This test also shows how to use contact filtering. Filtering is configured
+    /// so that the payload does not collide with the chain.
+    [TestCase("Examples", "Wrecking Ball")]
+    public class WreckingBall : TestBase
     {
         private Joint _rope;
 
-        private RopeJointDef _ropeDef = new RopeJointDef();
+        protected DistanceJointDef _distanceJointDef = new DistanceJointDef();
 
-        public RopeJoint()
+        protected Joint _distanceJoint;
+
+        protected bool _stabilize;
+
+        public WreckingBall()
         {
             Body ground;
             {
@@ -44,7 +56,7 @@ namespace Testbed.TestCases
 
                 const int N = 10;
                 const float y = 15.0f;
-                _ropeDef.LocalAnchorA.Set(0.0f, y);
+                _distanceJointDef.LocalAnchorA.Set(0.0f, y);
 
                 var prevBody = ground;
                 for (var i = 0; i < N; ++i)
@@ -54,16 +66,25 @@ namespace Testbed.TestCases
                     bd.Position.Set(0.5f + 1.0f * i, y);
                     if (i == N - 1)
                     {
-                        shape.SetAsBox(1.5f, 1.5f);
-                        fd.Density = 100.0f;
-                        filter = fd.Filter;
-                        filter.CategoryBits = 0x0002;
-                        fd.Filter = filter;
                         bd.Position.Set(1.0f * i, y);
                         bd.AngularDamping = 0.4f;
                     }
 
                     var body = World.CreateBody(bd);
+                    if (i == N - 1)
+                    {
+                        CircleShape circleShape = new CircleShape();
+                        circleShape.Radius = 1.5f;
+                        FixtureDef sfd = new FixtureDef();
+                        sfd.Shape = circleShape;
+                        sfd.Density = 100.0f;
+                        sfd.Filter.CategoryBits = 0x0002;
+                        body.CreateFixture(sfd);
+                    }
+                    else
+                    {
+                        body.CreateFixture(fd);
+                    }
 
                     body.CreateFixture(fd);
 
@@ -74,16 +95,18 @@ namespace Testbed.TestCases
                     prevBody = body;
                 }
 
-                _ropeDef.LocalAnchorB.SetZero();
+                _distanceJointDef.LocalAnchorB.SetZero();
 
                 var extraLength = 0.01f;
-                _ropeDef.MaxLength = N - 1.0f + extraLength;
-                _ropeDef.BodyB = prevBody;
+                _distanceJointDef.MinLength = 0.0f;
+                _distanceJointDef.MaxLength = N - 1.0f + extraLength;
+                _distanceJointDef.BodyB = prevBody;
             }
 
             {
-                _ropeDef.BodyA = ground;
-                _rope = World.CreateJoint(_ropeDef);
+                _distanceJointDef.BodyA = ground;
+                _distanceJoint = World.CreateJoint(_distanceJointDef);
+                _stabilize = true;
             }
         }
 
@@ -100,15 +123,21 @@ namespace Testbed.TestCases
                 }
                 else
                 {
-                    _rope = World.CreateJoint(_ropeDef);
+                    _rope = World.CreateJoint(_distanceJointDef);
                 }
             }
         }
 
         protected override void OnRender()
         {
-            DrawString("Press (j) to toggle the rope joint.");
-            DrawString(_rope != null ? "Rope ON" : "Rope OFF");
+            if (_distanceJoint != null)
+            {
+                DrawString("Distance Joint ON");
+            }
+            else
+            {
+                DrawString("Distance Joint OFF");
+            }
         }
     }
 }

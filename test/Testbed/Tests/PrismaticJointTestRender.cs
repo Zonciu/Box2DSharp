@@ -5,7 +5,7 @@ using Testbed.TestCases;
 namespace Testbed.Tests
 {
     [TestInherit]
-    public class PrismaticJointTestBaseRender : PrismaticJointTestBase
+    public class PrismaticJointTestRender : PrismaticJointTest
     {
         /// <inheritdoc />
         protected override void OnRender()

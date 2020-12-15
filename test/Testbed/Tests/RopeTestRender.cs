@@ -7,7 +7,7 @@ using Testbed.TestCases;
 namespace Testbed.Tests
 {
     [TestInherit]
-    public class RopeTestBaseRender : RopeTestBase
+    public class RopeTestRender : RopeTest
     {
         /// <inheritdoc />
         protected override void OnRender()
@@ -21,7 +21,7 @@ namespace Testbed.Tests
             ImGui.PushItemWidth(ImGui.GetWindowWidth() * 0.5f);
 
             const ImGuiComboFlags comboFlags = 0;
-            string[] bendModels = {"Spring", "PBD Ang", "XPBD Ang", "PBD Dist", "PBD Height"};
+            string[] bendModels = {"Spring", "PBD Ang", "XPBD Ang", "PBD Dist", "PBD Height", "PBD Triangle"};
             string[] stretchModels = {"PBD", "XPBD"};
 
             ImGui.Text("Rope 1");

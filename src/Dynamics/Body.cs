@@ -22,9 +22,6 @@ namespace Box2DSharp.Dynamics
         KinematicBody = 1,
 
         DynamicBody = 2
-
-        // TODO_ERIN
-        //b2_bulletBody,
     }
 
     /// A body definition holds all the data needed to construct a rigid body.
@@ -769,6 +766,9 @@ namespace Box2DSharp.Dynamics
             {
                 f.Synchronize(broadPhase, Transform, Transform);
             }
+
+            // Check for new contacts the next step
+            World.HasNewContacts = true;
         }
 
         /// Get the body transform for the body's origin.
@@ -1155,32 +1155,7 @@ namespace Box2DSharp.Dynamics
         /// Dump this body to a log file
         public void Dump()
         {
-            var bodyIndex = IslandIndex;
-
-            DumpLogger.Log("{");
-            DumpLogger.Log("  b2BodyDef bd;");
-            DumpLogger.Log($"  bd.type = b2BodyType({_type});");
-            DumpLogger.Log($"  bd.position.Set({Transform.Position.X}, {Transform.Position.Y});");
-            DumpLogger.Log($"  bd.angle = {Sweep.A};");
-            DumpLogger.Log($"  bd.linearVelocity.Set({LinearVelocity.X}, {LinearVelocity.Y});");
-            DumpLogger.Log($"  bd.angularVelocity = {AngularVelocity};");
-            DumpLogger.Log($"  bd.linearDamping = {_linearDamping};");
-            DumpLogger.Log($"  bd.angularDamping = {_angularDamping};");
-            DumpLogger.Log($"  bd.allowSleep = bool({Flags.HasFlag(BodyFlags.AutoSleep)});");
-            DumpLogger.Log($"  bd.awake = bool({Flags.HasFlag(BodyFlags.IsAwake)});");
-            DumpLogger.Log($"  bd.fixedRotation = bool({Flags.HasFlag(BodyFlags.FixedRotation)});");
-            DumpLogger.Log($"  bd.bullet = bool({Flags.HasFlag(BodyFlags.IsBullet)});");
-            DumpLogger.Log($"  bd.active = bool({Flags.HasFlag(BodyFlags.IsEnabled)});");
-            DumpLogger.Log($"  bd.gravityScale = {GravityScale};");
-            DumpLogger.Log($"  bodies[{IslandIndex}] = m_world.CreateBody(&bd);");
-            foreach (var f in Fixtures)
-            {
-                DumpLogger.Log("  {");
-                f.Dump(bodyIndex);
-                DumpLogger.Log("  }");
-            }
-
-            DumpLogger.Log("}");
+            // Todo
         }
 
         /// <summary>

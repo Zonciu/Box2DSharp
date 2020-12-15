@@ -19,9 +19,9 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Vector2 _C;
 
-        private float _dampingRatio;
+        public float Damping;
 
-        private float _frequencyHz;
+        public float Stiffness;
 
         private float _gamma;
 
@@ -39,28 +39,23 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Matrix2x2 _mass;
 
-        private float _maxForce;
+        public float MaxForce;
 
         private Vector2 _rB;
 
-        private Vector2 _targetA;
+        public Vector2 Target;
 
-        internal MouseJoint(MouseJointDef def) : base(def)
+        internal MouseJoint(MouseJointDef def)
+            : base(def)
         {
-            Debug.Assert(def.Target.IsValid());
-            Debug.Assert(def.MaxForce.IsValid() && def.MaxForce >= 0.0f);
-            Debug.Assert(def.FrequencyHz.IsValid() && def.FrequencyHz >= 0.0f);
-            Debug.Assert(def.DampingRatio.IsValid() && def.DampingRatio >= 0.0f);
+            Target = def.Target;
+            _localAnchorB = MathUtils.MulT(BodyB.GetTransform(), Target);
 
-            _targetA = def.Target;
-            _localAnchorB = MathUtils.MulT(BodyB.GetTransform(), _targetA);
+            MaxForce = def.MaxForce;
+            Stiffness = def.Stiffness;
+            Damping = def.Damping;
 
-            _maxForce = def.MaxForce;
             _impulse.SetZero();
-
-            _frequencyHz = def.FrequencyHz;
-            _dampingRatio = def.DampingRatio;
-
             _beta = 0.0f;
             _gamma = 0.0f;
         }
@@ -69,61 +64,23 @@ namespace Box2DSharp.Dynamics.Joints
         /// Use this to update the target point.
         public void SetTarget(in Vector2 target)
         {
-            if (target != _targetA)
+            if (target != Target)
             {
                 BodyB.IsAwake = true;
-                _targetA = target;
+                Target = target;
             }
-        }
-
-        public Vector2 GetTarget()
-        {
-            return _targetA;
-        }
-
-        /// Set/get the maximum force in Newtons.
-        public void SetMaxForce(float force)
-        {
-            _maxForce = force;
-        }
-
-        public float GetMaxForce()
-        {
-            return _maxForce;
-        }
-
-        /// Set/get the frequency in Hertz.
-        public void SetFrequency(float hz)
-        {
-            _frequencyHz = hz;
-        }
-
-        public float GetFrequency()
-        {
-            return _frequencyHz;
-        }
-
-        /// Set/get the damping ratio (dimensionless).
-        public void SetDampingRatio(float ratio)
-        {
-            _dampingRatio = ratio;
-        }
-
-        public float GetDampingRatio()
-        {
-            return _dampingRatio;
         }
 
         /// <inheritdoc />
         public override void ShiftOrigin(in Vector2 newOrigin)
         {
-            _targetA -= newOrigin;
+            Target -= newOrigin;
         }
 
         /// <inheritdoc />
         public override Vector2 GetAnchorA()
         {
-            return _targetA;
+            return Target;
         }
 
         /// <inheritdoc />
@@ -165,16 +122,8 @@ namespace Box2DSharp.Dynamics.Joints
 
             var qB = new Rotation(aB);
 
-            var mass = BodyB.Mass;
-
-            // Frequency
-            var omega = 2.0f * Settings.Pi * _frequencyHz;
-
-            // Damping coefficient
-            var d = 2.0f * mass * _dampingRatio * omega;
-
-            // Spring stiffness
-            var k = mass * (omega * omega);
+            var d = Damping;
+            var k = Stiffness;
 
             // magic formulas
             // gamma has units of inverse mass.
@@ -203,7 +152,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             _mass = K.GetInverse();
 
-            _C = cB + _rB - _targetA;
+            _C = cB + _rB - Target;
             _C *= _beta;
 
             // Cheat with some damping
@@ -236,7 +185,7 @@ namespace Box2DSharp.Dynamics.Joints
 
             var oldImpulse = _impulse;
             _impulse += impulse;
-            var maxImpulse = data.Step.Dt * _maxForce;
+            var maxImpulse = data.Step.Dt * MaxForce;
             if (_impulse.LengthSquared() > maxImpulse * maxImpulse)
             {
                 _impulse *= maxImpulse / _impulse.Length();

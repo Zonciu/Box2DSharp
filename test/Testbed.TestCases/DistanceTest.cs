@@ -9,7 +9,7 @@ using Vector2 = System.Numerics.Vector2;
 namespace Testbed.TestCases
 {
     [TestCase("Geometry", "Distance Test")]
-    public class DistanceTestBase : TestBase
+    public class DistanceTest : TestBase
     {
         private float _angleB;
 
@@ -23,7 +23,7 @@ namespace Testbed.TestCases
 
         private Transform _transformB;
 
-        public DistanceTestBase()
+        public DistanceTest()
         {
             {
                 _transformA.SetIdentity();

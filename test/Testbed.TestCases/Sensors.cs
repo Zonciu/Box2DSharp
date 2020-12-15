@@ -14,6 +14,10 @@ namespace Testbed.TestCases
 
         private readonly Body[] _bodies = new Body[Count];
 
+        protected float _force;
+
+        private bool[] _touching = new bool[Count];
+
         private Fixture _sensor;
 
         public Sensors()
@@ -49,11 +53,13 @@ namespace Testbed.TestCases
                     var bd = new BodyDef();
                     bd.BodyType = BodyType.DynamicBody;
                     bd.Position.Set(-10.0f + 3.0f * i, 20.0f);
-                    bd.UserData = false;
+                    bd.UserData = i;
+                    _touching[i] = false;
                     _bodies[i] = World.CreateBody(bd);
                     _bodies[i].CreateFixture(shape, 1.0f);
                 }
             }
+            _force = 100.0f;
         }
 
         /// <inheritdoc />
@@ -63,8 +69,7 @@ namespace Testbed.TestCases
             // that overlap the sensor.
             for (var i = 0; i < Count; ++i)
             {
-                var touching = (bool)_bodies[i].UserData;
-                if (touching == false)
+                if (_touching[i] == false)
                 {
                     continue;
                 }
@@ -84,7 +89,7 @@ namespace Testbed.TestCases
                 }
 
                 d = Vector2.Normalize(d);
-                var F = 100.0f * d;
+                var F = _force * d;
                 body.ApplyForce(F, position, false);
             }
         }
@@ -97,21 +102,19 @@ namespace Testbed.TestCases
 
             if (fixtureA == _sensor)
             {
-                var userData = fixtureB.Body.UserData;
-                if (userData != null)
+                var index = (int?)fixtureB.Body.UserData;
+                if (index < Count)
                 {
-                    userData = true;
-                    fixtureB.Body.UserData = userData;
+                    _touching[index.Value] = true;
                 }
             }
 
             if (fixtureB == _sensor)
             {
-                var userData = fixtureA.Body.UserData;
-                if (userData != null)
+                var index = (int?)fixtureA.Body.UserData;
+                if (index < Count)
                 {
-                    userData = true;
-                    fixtureA.Body.UserData = userData;
+                    _touching[index.Value] = true;
                 }
             }
         }
@@ -124,21 +127,19 @@ namespace Testbed.TestCases
 
             if (fixtureA == _sensor)
             {
-                var userData = fixtureB.Body.UserData;
-                if (userData != null)
+                var index = (int?)fixtureB.Body.UserData;
+                if (index < Count)
                 {
-                    userData = false;
-                    fixtureB.Body.UserData = userData;
+                    _touching[index.Value] = false;
                 }
             }
 
             if (fixtureB == _sensor)
             {
-                var userData = fixtureA.Body.UserData;
-                if (userData != null)
+                var index = (int?)fixtureA.Body.UserData;
+                if (index < Count)
                 {
-                    userData = false;
-                    fixtureA.Body.UserData = userData;
+                    _touching[index.Value] = false;
                 }
             }
         }

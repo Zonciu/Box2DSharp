@@ -25,16 +25,12 @@ namespace Testbed.TestCases
         public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float fraction)
         {
             var body = fixture.Body;
-            var userData = body.UserData;
-            if (userData != null)
+            var userData = (int?)body.UserData;
+            if (userData == 1)
             {
-                var index = (int)userData;
-                if (index == 0)
-                {
-                    // By returning -1, we instruct the calling code to ignore this fixture and
-                    // continue the ray-cast to the next fixture.
-                    return -1.0f;
-                }
+                // By returning -1, we instruct the calling code to ignore this fixture and
+                // continue the ray-cast to the next fixture.
+                return -1.0f;
             }
 
             Hit = true;
@@ -64,16 +60,12 @@ namespace Testbed.TestCases
         public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float _)
         {
             var body = fixture.Body;
-            var userData = body.UserData;
-            if (userData != null)
+            var userData = (int?)body.UserData;
+            if (userData == 1)
             {
-                var index = (int)userData;
-                if (index == 0)
-                {
-                    // By returning -1, we instruct the calling code to ignore this fixture
-                    // and continue the ray-cast to the next fixture.
-                    return -1.0f;
-                }
+                // By returning -1, we instruct the calling code to ignore this fixture
+                // and continue the ray-cast to the next fixture.
+                return -1.0f;
             }
 
             Hit = true;
@@ -107,16 +99,12 @@ namespace Testbed.TestCases
         public float RayCastCallback(Fixture fixture, in Vector2 point, in Vector2 normal, float _)
         {
             var body = fixture.Body;
-            var userData = body.UserData;
-            if (userData != null)
+            var userData = (int?)body.UserData;
+            if (userData == 1)
             {
-                var index = (int)userData;
-                if (index == 0)
-                {
-                    // By returning -1, we instruct the calling code to ignore this fixture
-                    // and continue the ray-cast to the next fixture.
-                    return -1.0f;
-                }
+                // By returning -1, we instruct the calling code to ignore this fixture
+                // and continue the ray-cast to the next fixture.
+                return -1.0f;
             }
 
             Debug.Assert(Count < MaxCount);
@@ -156,13 +144,11 @@ namespace Testbed.TestCases
             new PolygonShape()
         };
 
-        private readonly int[] _userData = new int[MaxBodies];
-
-        private float _angle;
+        protected float _degrees;
 
         private int _bodyIndex;
 
-        private Mode _mode;
+        protected Mode _mode;
 
         public RayCast()
         {
@@ -224,7 +210,7 @@ namespace Testbed.TestCases
 
             _bodyIndex = 0;
 
-            _angle = 0.0f;
+            _degrees = 0.0f;
 
             _mode = Mode.Closest;
         }
@@ -232,10 +218,7 @@ namespace Testbed.TestCases
         /// <inheritdoc />
         protected override void OnRender()
         {
-            var advanceRay = TestSettings.Pause == false || TestSettings.SingleStep;
-
-            DrawString("Press 1-6 to drop stuff, m to change the mode");
-            DrawString("Staff 1 ignore ray cast");
+            DrawString("Shape 1 is intentionally ignored by the ray");
             switch (_mode)
             {
             case Mode.Closest:
@@ -251,10 +234,11 @@ namespace Testbed.TestCases
                 break;
             }
 
+            var angle = Settings.Pi * _degrees / 180.0f;
             var L = 11.0f;
             var point1 = new Vector2(0.0f, 10.0f);
 
-            var d = new Vector2(L * (float)Math.Cos(_angle), L * (float)Math.Sin(_angle));
+            var d = new Vector2(L * (float)Math.Cos(angle), L * (float)Math.Sin(angle));
             var point2 = point1 + d;
 
             switch (_mode)
@@ -318,14 +302,9 @@ namespace Testbed.TestCases
                 break;
             }
             }
-
-            if (advanceRay)
-            {
-                _angle += 0.25f * Settings.Pi / 180.0f;
-            }
         }
 
-        private void Create(int index)
+        protected void Create(int index)
         {
             if (_bodies[_bodyIndex] != null)
             {
@@ -339,9 +318,6 @@ namespace Testbed.TestCases
             bd.Position.Set(x, y);
             bd.Angle = RandomFloat(-Settings.Pi, Settings.Pi);
 
-            _userData[_bodyIndex] = index;
-            bd.UserData = _userData[_bodyIndex];
-
             if (index == 4)
             {
                 bd.AngularDamping = 0.02f;
@@ -352,23 +328,26 @@ namespace Testbed.TestCases
             if (index < 4)
             {
                 var fd = new FixtureDef {Shape = _polygons[index], Friction = 0.3f};
+                fd.UserData = index + 1;
                 _bodies[_bodyIndex].CreateFixture(fd);
             }
             else if (index < 5)
             {
                 var fd = new FixtureDef {Shape = _circle, Friction = 0.3f};
+                fd.UserData = index + 1;
                 _bodies[_bodyIndex].CreateFixture(fd);
             }
             else
             {
                 var fd = new FixtureDef {Shape = _edge, Friction = 0.3f};
+                fd.UserData = index + 1;
                 _bodies[_bodyIndex].CreateFixture(fd);
             }
 
             _bodyIndex = (_bodyIndex + 1) % MaxBodies;
         }
 
-        private void DestroyBody()
+        protected void DestroyBody()
         {
             for (var i = 0; i < MaxBodies; ++i)
             {
@@ -381,69 +360,13 @@ namespace Testbed.TestCases
             }
         }
 
-        /// <inheritdoc />
-        public override void OnKeyDown(KeyInputEventArgs keyInput)
+        protected enum Mode
         {
-            var k = -1;
-            if (keyInput.Key == KeyCodes.D1)
-            {
-                k = 0;
-            }
-            else if (keyInput.Key == KeyCodes.D2)
-            {
-                k = 1;
-            }
-            else if (keyInput.Key == KeyCodes.D3)
-            {
-                k = 2;
-            }
-            else if (keyInput.Key == KeyCodes.D4)
-            {
-                k = 3;
-            }
-            else if (keyInput.Key == KeyCodes.D5)
-            {
-                k = 4;
-            }
-            else if (keyInput.Key == KeyCodes.D6)
-            {
-                k = 5;
-            }
+            Any = 0,
 
-            if (k != -1)
-            {
-                Create(k);
-            }
+            Closest = 1,
 
-            if (keyInput.Key == KeyCodes.D)
-            {
-                DestroyBody();
-            }
-
-            if (keyInput.Key == KeyCodes.M)
-            {
-                switch (_mode)
-                {
-                case Mode.Closest:
-                    _mode = Mode.Any;
-                    break;
-                case Mode.Any:
-                    _mode = Mode.Multiple;
-                    break;
-                case Mode.Multiple:
-                    _mode = Mode.Closest;
-                    break;
-                }
-            }
-        }
-
-        private enum Mode
-        {
-            Closest,
-
-            Any,
-
-            Multiple
+            Multiple = 2
         }
     }
 }

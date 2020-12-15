@@ -1,7 +1,10 @@
 namespace Box2DSharp.Dynamics.Joints
 {
+    /// <summary>
     /// Gear joint definition. This definition requires two existing
     /// revolute or prismatic joints (any combination will work).
+    /// @warning bodyB on the input joints must both be dynamic
+    /// </summary>
     public class GearJointDef : JointDef
     {
         /// The first revolute/prismatic joint attached to the gear joint.

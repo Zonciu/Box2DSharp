@@ -32,6 +32,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
         public float Restitution;
 
+        public float Threshold;
+
         public float TangentSpeed;
     }
 }

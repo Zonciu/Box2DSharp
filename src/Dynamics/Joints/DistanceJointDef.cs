@@ -1,24 +1,28 @@
+using System;
 using System.Numerics;
 using Box2DSharp.Common;
 
 namespace Box2DSharp.Dynamics.Joints
 {
-    /// Distance joint definition. This requires defining an
-    /// anchor point on both bodies and the non-zero length of the
-    /// distance joint. The definition uses local anchor points
-    /// so that the initial configuration can violate the constraint
-    /// slightly. This helps when saving and loading a game.
-    /// @warning Do not use a zero or short length.
+    /// Distance joint definition. This requires defining an anchor point on both
+    /// bodies and the non-zero distance of the distance joint. The definition uses
+    /// local anchor points so that the initial configuration can violate the
+    /// constraint slightly. This helps when saving and loading a game.
     public class DistanceJointDef : JointDef
     {
-        /// The damping ratio. 0 = no damping, 1 = critical damping.
-        public float DampingRatio;
+        /// Minimum length. Clamped to a stable minimum value.
+        public float MinLength;
 
-        /// The mass-spring-damper frequency in Hertz. A value of 0
-        /// disables softness.
-        public float FrequencyHz;
+        /// Maximum length. Must be greater than or equal to the minimum length.
+        public float MaxLength;
 
-        /// The natural length between the anchor points.
+        /// The linear stiffness in N/m.
+        public float Stiffness;
+
+        /// The linear damping in N*s/m.
+        public float Damping;
+
+        /// The rest length of this joint. Clamped to a stable minimum value.
         public float Length;
 
         /// The local anchor point relative to bodyA's origin.
@@ -32,13 +36,15 @@ namespace Box2DSharp.Dynamics.Joints
             JointType = JointType.DistanceJoint;
             LocalAnchorA.Set(0.0f, 0.0f);
             LocalAnchorB.Set(0.0f, 0.0f);
+            MinLength = 0.0f;
+            MaxLength = Settings.MaxFloat;
             Length = 1.0f;
-            FrequencyHz = 0.0f;
-            DampingRatio = 0.0f;
+            Stiffness = 0.0f;
+            Damping = 0.0f;
         }
 
-        /// Initialize the bodies, anchors, and length using the world
-        /// anchors.
+        /// Initialize the bodies, anchors, and rest length using world space anchors.
+        /// The minimum and maximum lengths are set to the rest length.
         public void Initialize(
             Body b1,
             Body b2,
@@ -50,7 +56,9 @@ namespace Box2DSharp.Dynamics.Joints
             LocalAnchorA = BodyA.GetLocalPoint(anchor1);
             LocalAnchorB = BodyB.GetLocalPoint(anchor2);
             var d = anchor2 - anchor1;
-            Length = d.Length();
+            Length = Math.Max(d.Length(), Settings.LinearSlop);
+            MinLength = Length;
+            MaxLength = Length;
         }
     }
 }

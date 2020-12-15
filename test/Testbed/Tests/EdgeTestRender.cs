@@ -5,7 +5,7 @@ using Testbed.TestCases;
 namespace Testbed.Tests
 {
     [TestInherit]
-    public class EdgeTestBaseRender : EdgeTestBase
+    public class EdgeTestRender : EdgeTest
     {
         /// <inheritdoc />
         protected override void OnRender()

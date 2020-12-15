@@ -8,7 +8,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Continuous","Continuous Test")]
-    public class ContinuousTestBase : TestBase
+    public class ContinuousTest : TestBase
     {
         private float _angularVelocity;
 
@@ -18,7 +18,7 @@ namespace Testbed.TestCases
 
         private ToiProfile _toiProfile = new ToiProfile();
 
-        public ContinuousTestBase()
+        public ContinuousTest()
         {
             {
                 World.ToiProfile = _toiProfile;

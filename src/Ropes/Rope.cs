@@ -263,6 +263,9 @@ namespace Box2DSharp.Ropes
                 case BendingModel.PbdHeightBendingModel:
                     SolveBend_PBD_Height();
                     break;
+                case BendingModel.PbdTriangleBendingModel:
+                    SolveBend_PBD_Triangle();
+                    break;
                 }
 
                 switch (_tuning.StretchingModel)
@@ -699,6 +702,42 @@ namespace Box2DSharp.Ropes
                 _ps[c.i1] = p1;
                 _ps[c.i2] = p2;
                 _ps[c.i3] = p3;
+            }
+        }
+
+        // M. Kelager: A Triangle Bending Constraint Model for PBD
+        private void SolveBend_PBD_Triangle()
+        {
+            var stiffness = _tuning.BendStiffness;
+
+            for (var i = 0; i < _bendCount; ++i)
+            {
+                var c = _bendConstraints[i];
+
+                var b0 = _ps[c.i1];
+                var v = _ps[c.i2];
+                var b1 = _ps[c.i3];
+
+                var wb0 = c.invMass1;
+                var wv = c.invMass2;
+                var wb1 = c.invMass3;
+
+                var W = wb0 + wb1 + 2.0f * wv;
+                var invW = stiffness / W;
+
+                var d = v - (1.0f / 3.0f) * (b0 + v + b1);
+
+                var db0 = 2.0f * wb0 * invW * d;
+                var dv = -4.0f * wv * invW * d;
+                var db1 = 2.0f * wb1 * invW * d;
+
+                b0 += db0;
+                v += dv;
+                b1 += db1;
+
+                _ps[c.i1] = b0;
+                _ps[c.i2] = v;
+                _ps[c.i3] = b1;
             }
         }
 

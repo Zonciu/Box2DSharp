@@ -8,7 +8,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Continuous", "Bullet Test")]
-    public class BulletTestBase : TestBase
+    public class BulletTest : TestBase
     {
         private Body _body;
 
@@ -20,7 +20,7 @@ namespace Testbed.TestCases
 
         private ToiProfile _toiProfile = new ToiProfile();
 
-        public BulletTestBase()
+        public BulletTest()
         {
             {
                 var bd = new BodyDef();

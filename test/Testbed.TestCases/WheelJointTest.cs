@@ -8,7 +8,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Joints", "Wheel")]
-    public class WheelJointTestBase : TestBase
+    public class WheelJointTest : TestBase
     {
         protected WheelJoint Joint;
 
@@ -18,7 +18,7 @@ namespace Testbed.TestCases
 
         protected bool EnableLimit;
 
-        public WheelJointTestBase()
+        public WheelJointTest()
         {
             Body ground = null;
             {
@@ -73,6 +73,9 @@ namespace Testbed.TestCases
         {
             var torque = Joint.GetMotorTorque(TestSettings.Hertz);
             DrawString($"Motor Torque = {torque}");
+
+            var F = Joint.GetReactionForce(TestSettings.Hertz);
+            DrawString($"Reaction Force = ({F.X}, {F.X})");
         }
     }
 }

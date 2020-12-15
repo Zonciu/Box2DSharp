@@ -17,9 +17,9 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _bias;
 
-        private float _dampingRatio;
+        public float Stiffness = 0.0f;
 
-        private float _frequencyHz;
+        public float Damping = 0.0f;
 
         private float _gamma;
 
@@ -48,13 +48,14 @@ namespace Box2DSharp.Dynamics.Joints
 
         private Vector2 _rB;
 
-        internal WeldJoint(WeldJointDef def) : base(def)
+        internal WeldJoint(WeldJointDef def)
+            : base(def)
         {
             _localAnchorA = def.LocalAnchorA;
             _localAnchorB = def.LocalAnchorB;
             _referenceAngle = def.ReferenceAngle;
-            _frequencyHz = def.FrequencyHz;
-            _dampingRatio = def.DampingRatio;
+            Damping = def.Damping;
+            Stiffness = def.Stiffness;
 
             _impulse.SetZero();
         }
@@ -75,28 +76,6 @@ namespace Box2DSharp.Dynamics.Joints
         public float GetReferenceAngle()
         {
             return _referenceAngle;
-        }
-
-        /// Set/get frequency in Hz.
-        public void SetFrequency(float hz)
-        {
-            _frequencyHz = hz;
-        }
-
-        public float GetFrequency()
-        {
-            return _frequencyHz;
-        }
-
-        /// Set/get damping ratio.
-        public void SetDampingRatio(float ratio)
-        {
-            _dampingRatio = ratio;
-        }
-
-        public float GetDampingRatio()
-        {
-            return _dampingRatio;
         }
 
         /// <inheritdoc />
@@ -127,19 +106,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// Dump to Logger.Log
         public override void Dump()
         {
-            var indexA = BodyA.IslandIndex;
-            var indexB = BodyB.IslandIndex;
-
-            DumpLogger.Log("  b2WeldJointDef jd;");
-            DumpLogger.Log($"  jd.bodyA = bodies[{indexA}];");
-            DumpLogger.Log($"  jd.bodyB = bodies[{indexB}];");
-            DumpLogger.Log($"  jd.collideConnected = bool({CollideConnected});");
-            DumpLogger.Log($"  jd.localAnchorA.Set({_localAnchorA.X}, {_localAnchorA.Y});");
-            DumpLogger.Log($"  jd.localAnchorB.Set({_localAnchorB.X}, {_localAnchorB.Y});");
-            DumpLogger.Log($"  jd.referenceAngle = {_referenceAngle};");
-            DumpLogger.Log($"  jd.frequencyHz = {_frequencyHz};");
-            DumpLogger.Log($"  jd.dampingRatio = {_dampingRatio};");
-            DumpLogger.Log($"  joints[{Index}] = m_world.CreateJoint(&jd);");
+           // Todo
         }
 
         /// <inheritdoc />
@@ -191,23 +158,19 @@ namespace Box2DSharp.Dynamics.Joints
             K.Ey.Z = K.Ez.Y;
             K.Ez.Z = iA + iB;
 
-            if (_frequencyHz > 0.0f)
+            if (Stiffness > 0.0f)
             {
                 K.GetInverse22(ref _mass);
 
                 var invM = iA + iB;
-                var m = invM > 0.0f ? 1.0f / invM : 0.0f;
 
                 var C = aB - aA - _referenceAngle;
 
-                // Frequency
-                var omega = 2.0f * Settings.Pi * _frequencyHz;
-
                 // Damping coefficient
-                var d = 2.0f * m * _dampingRatio * omega;
+                var d = Damping;
 
                 // Spring stiffness
-                var k = m * omega * omega;
+                var k = Stiffness;
 
                 // magic formulas
                 var h = data.Step.Dt;
@@ -266,7 +229,7 @@ namespace Box2DSharp.Dynamics.Joints
             float mA = _invMassA, mB = _invMassB;
             float iA = _invIa, iB = _invIb;
 
-            if (_frequencyHz > 0.0f)
+            if (Stiffness > 0.0f)
             {
                 var Cdot2 = wB - wA;
 
@@ -344,7 +307,7 @@ namespace Box2DSharp.Dynamics.Joints
             K.Ey.Z = K.Ez.Y;
             K.Ez.Z = iA + iB;
 
-            if (_frequencyHz > 0.0f)
+            if (Stiffness > 0.0f)
             {
                 var C1 = cB + rB - cA - rA;
 

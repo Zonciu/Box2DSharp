@@ -56,6 +56,7 @@ namespace Box2DSharp.Dynamics.Contacts
                 ref var vc = ref velocityConstraints[i];
                 vc.Friction = contact.Friction;
                 vc.Restitution = contact.Restitution;
+                vc.Threshold = contact.RestitutionThreshold;
                 vc.TangentSpeed = contact.TangentSpeed;
                 vc.IndexA = bodyA.IslandIndex;
                 vc.IndexB = bodyB.IslandIndex;
@@ -222,7 +223,7 @@ namespace Box2DSharp.Dynamics.Contacts
                     var vRel = Vector2.Dot(
                         vc.Normal,
                         new Vector2(vB.X - wB * vcp.Rb.Y - vA.X + wA * vcp.Ra.Y, vB.Y + wB * vcp.Rb.X - vA.Y - wA * vcp.Ra.X));
-                    if (vRel < -Settings.VelocityThreshold)
+                    if (vRel < -vc.Threshold)
                     {
                         vcp.VelocityBias = -vc.Restitution * vRel;
                     }

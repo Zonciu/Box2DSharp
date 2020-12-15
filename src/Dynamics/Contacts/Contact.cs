@@ -51,6 +51,8 @@ namespace Box2DSharp.Dynamics.Contacts
 
         internal float Restitution;
 
+        internal float RestitutionThreshold;
+
         internal float TangentSpeed;
 
         internal float Toi;
@@ -72,7 +74,7 @@ namespace Box2DSharp.Dynamics.Contacts
 
             Friction = MixFriction(FixtureA.Friction, FixtureB.Friction);
             Restitution = MixRestitution(FixtureA.Restitution, FixtureB.Restitution);
-
+            RestitutionThreshold = MixRestitutionThreshold(FixtureA.RestitutionThreshold, FixtureB.RestitutionThreshold);
             TangentSpeed = 0.0f;
         }
 
@@ -107,6 +109,13 @@ namespace Box2DSharp.Dynamics.Contacts
         private static float MixRestitution(float restitution1, float restitution2)
         {
             return restitution1 > restitution2 ? restitution1 : restitution2;
+        }
+
+        /// Restitution mixing law. This picks the lowest value.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float MixRestitutionThreshold(float threshold1, float threshold2)
+        {
+            return threshold1 < threshold2 ? threshold1 : threshold2;
         }
 
         /// Get the world manifold.
@@ -198,6 +207,28 @@ namespace Box2DSharp.Dynamics.Contacts
         public void ResetRestitution()
         {
             Restitution = MixRestitution(FixtureA.Restitution, FixtureB.Restitution);
+        }
+
+        /// Override the default restitution velocity threshold mixture. You can call this in b2ContactListener::PreSolve.
+        /// The value persists until you set or reset.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetRestitutionThreshold(float threshold)
+        {
+            RestitutionThreshold = threshold;
+        }
+
+        /// Get the restitution threshold.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float GetRestitutionThreshold()
+        {
+            return RestitutionThreshold;
+        }
+
+        /// Reset the restitution threshold to the default value.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ResetRestitutionThreshold()
+        {
+            RestitutionThreshold = MixRestitutionThreshold(FixtureA.RestitutionThreshold, FixtureB.RestitutionThreshold);
         }
 
         /// Set the desired tangent speed for a conveyor belt behavior. In meters per second.

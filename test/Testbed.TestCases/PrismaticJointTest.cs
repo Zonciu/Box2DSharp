@@ -11,7 +11,7 @@ namespace Testbed.TestCases
     /// Test the prismatic joint with limits and motor options.
     /// </summary>
     [TestCase("Joints", "Prismatic")]
-    public class PrismaticJointTestBase : TestBase
+    public class PrismaticJointTest : TestBase
     {
         protected PrismaticJoint Joint;
 
@@ -21,7 +21,7 @@ namespace Testbed.TestCases
 
         protected bool EnableLimit;
 
-        public PrismaticJointTestBase()
+        public PrismaticJointTest()
         {
             Body ground;
             {

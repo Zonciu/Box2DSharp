@@ -141,6 +141,7 @@ namespace Box2DSharp.Dynamics.Joints
             _enableLimit = def.EnableLimit;
             _enableMotor = def.EnableMotor;
 
+            _translation = 0.0f;
             _axis.SetZero();
             _perp.SetZero();
         }
@@ -321,7 +322,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         public override Vector2 GetReactionForce(float inv_dt)
         {
-            return inv_dt * (_impulse.X * _perp + (_motorImpulse + _lowerImpulse + _upperImpulse) * _axis);
+            return inv_dt * (_impulse.X * _perp + (_motorImpulse + _lowerImpulse - _upperImpulse) * _axis);
         }
 
         /// <inheritdoc />

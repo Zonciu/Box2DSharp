@@ -310,7 +310,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         public override Vector2 GetReactionForce(float inv_dt)
         {
-            return inv_dt * (_impulse * _ay + _springImpulse * _ax);
+            return inv_dt * (_impulse * _ay + (_springImpulse + _lowerImpulse - _upperImpulse) * _ax);
         }
 
         /// <inheritdoc />

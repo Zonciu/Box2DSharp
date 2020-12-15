@@ -61,7 +61,7 @@ namespace Testbed.TestCases
                 body3.CreateFixture(circle2, 5.0f);
 
                 var jd1 = new RevoluteJointDef();
-                jd1.Initialize(body2, body1, bd1.Position);
+                jd1.Initialize(body1, body2, bd1.Position);
                 var joint1 = World.CreateJoint(jd1);
 
                 var jd2 = new RevoluteJointDef();
@@ -99,7 +99,7 @@ namespace Testbed.TestCases
                 jd1.LocalAnchorA = ground.GetLocalPoint(bd1.Position);
                 jd1.LocalAnchorB = body1.GetLocalPoint(bd1.Position);
                 jd1.ReferenceAngle = body1.GetAngle() - ground.GetAngle();
-                _joint1 = (RevoluteJoint) World.CreateJoint(jd1);
+                _joint1 = (RevoluteJoint)World.CreateJoint(jd1);
 
                 var bd2 = new BodyDef();
                 bd2.BodyType = BodyType.DynamicBody;
@@ -109,7 +109,7 @@ namespace Testbed.TestCases
 
                 var jd2 = new RevoluteJointDef();
                 jd2.Initialize(ground, body2, bd2.Position);
-                _joint2 = (RevoluteJoint) World.CreateJoint(jd2);
+                _joint2 = (RevoluteJoint)World.CreateJoint(jd2);
 
                 var bd3 = new BodyDef();
                 bd3.BodyType = BodyType.DynamicBody;
@@ -123,7 +123,7 @@ namespace Testbed.TestCases
                 jd3.UpperTranslation = 5.0f;
                 jd3.EnableLimit = true;
 
-                _joint3 = (PrismaticJoint) World.CreateJoint(jd3);
+                _joint3 = (PrismaticJoint)World.CreateJoint(jd3);
 
                 var jd4 = new GearJointDef();
                 jd4.BodyA = body1;
@@ -131,7 +131,7 @@ namespace Testbed.TestCases
                 jd4.Joint1 = _joint1;
                 jd4.Joint2 = _joint2;
                 jd4.Ratio = circle2.Radius / circle1.Radius;
-                _joint4 = (Box2DSharp.Dynamics.Joints.GearJoint) World.CreateJoint(jd4);
+                _joint4 = (Box2DSharp.Dynamics.Joints.GearJoint)World.CreateJoint(jd4);
 
                 var jd5 = new GearJointDef();
                 jd5.BodyA = body2;
@@ -139,7 +139,7 @@ namespace Testbed.TestCases
                 jd5.Joint1 = _joint2;
                 jd5.Joint2 = _joint3;
                 jd5.Ratio = -1.0f / circle2.Radius;
-                _joint5 = (Box2DSharp.Dynamics.Joints.GearJoint) World.CreateJoint(jd5);
+                _joint5 = (Box2DSharp.Dynamics.Joints.GearJoint)World.CreateJoint(jd5);
             }
         }
 

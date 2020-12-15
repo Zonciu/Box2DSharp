@@ -14,14 +14,14 @@ namespace Box2DSharp.Collision.Shapes
         /// <summary>
         /// Get the interpolated transform at a specific time.
         /// @param beta is a factor in [0,1], where 0 indicates alpha0.
-        /// 获取特定时间的位置插值
+        /// https://fgiesen.wordpress.com/2012/08/15/linear-interpolation-past-present-and-future/
         /// </summary>
-        /// <param name="xf">位置</param>
+        /// <param name="xf"></param>
         /// <param name="beta"></param>
         public void GetTransform(out Transform xf, float beta)
         {
-            var position = C0 + beta * (C - C0);
-            var angle = A0 + beta * (A - A0);
+            var position = (1.0f - beta) * C0 + beta * C;
+            var angle = (1.0f - beta) * A0 + beta * A;
             xf = new Transform(position, angle);
 
             // Shift to origin

@@ -6,7 +6,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Rope", "Bending")]
-    public class RopeTestBase : TestBase
+    public class RopeTest : TestBase
     {
         protected readonly Rope Rope1;
 
@@ -26,7 +26,7 @@ namespace Testbed.TestCases
 
         protected float Speed;
 
-        public RopeTestBase()
+        public RopeTest()
         {
             const int N = 20;
             const float L = 0.5f;
@@ -46,12 +46,12 @@ namespace Testbed.TestCases
                 BendHertz = 30.0f,
                 BendDamping = 4.0f,
                 BendStiffness = 1.0f,
-                BendingModel = BendingModel.XpdAngleBendingModel,
+                BendingModel = BendingModel.PbdTriangleBendingModel,
                 Isometric = true,
                 StretchHertz = 30.0f,
                 StretchDamping = 4.0f,
                 StretchStiffness = 1.0f,
-                StretchingModel = StretchingModel.XpbdStretchingModel
+                StretchingModel = StretchingModel.PbdStretchingModel
             };
 
             Tuning2 = new RopeTuning
@@ -92,8 +92,6 @@ namespace Testbed.TestCases
 
             Speed = 10.0f;
         }
-
-     
 
         protected override void PreStep()
         {

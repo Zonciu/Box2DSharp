@@ -7,16 +7,12 @@ using Testbed.Abstractions;
 
 namespace Testbed.TestCases
 {
-    [TestCase("Joints", "Distance Joint")]
-    public class DistanceJoint : TestBase
+    [TestCase("Examples", "Web")]
+    public class WebTest : TestBase
     {
-        Body[] m_bodies = new Body[4];
-
-        Joint[] m_joints = new Joint[8];
-
-        public DistanceJoint()
+        public WebTest()
         {
-            Body ground = null;
+            Body ground;
             {
                 BodyDef bd = new BodyDef();
                 ground = World.CreateBody(bd);
@@ -50,10 +46,12 @@ namespace Testbed.TestCases
                 m_bodies[3].CreateFixture(shape, 5.0f);
 
                 DistanceJointDef jd = new DistanceJointDef();
-                Vector2 p1, p2, d;
+                Vector2 p1;
+                Vector2 p2;
+                Vector2 d;
 
-                jd.FrequencyHz = 2.0f;
-                jd.DampingRatio = 0.0f;
+                float frequencyHz = 2.0f;
+                float dampingRatio = 0.0f;
 
                 jd.BodyA = ground;
                 jd.BodyB = m_bodies[0];
@@ -63,6 +61,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[0] = World.CreateJoint(jd);
 
                 jd.BodyA = ground;
@@ -73,6 +72,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[1] = World.CreateJoint(jd);
 
                 jd.BodyA = ground;
@@ -83,6 +83,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[2] = World.CreateJoint(jd);
 
                 jd.BodyA = ground;
@@ -93,6 +94,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[3] = World.CreateJoint(jd);
 
                 jd.BodyA = m_bodies[0];
@@ -104,6 +106,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[4] = World.CreateJoint(jd);
 
                 jd.BodyA = m_bodies[1];
@@ -114,6 +117,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[5] = World.CreateJoint(jd);
 
                 jd.BodyA = m_bodies[2];
@@ -124,6 +128,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[6] = World.CreateJoint(jd);
 
                 jd.BodyA = m_bodies[3];
@@ -134,6 +139,7 @@ namespace Testbed.TestCases
                 p2 = jd.BodyB.GetWorldPoint(jd.LocalAnchorB);
                 d = p2 - p1;
                 jd.Length = d.Length();
+                JointUtils.LinearStiffness(out jd.Stiffness, out jd.Damping, frequencyHz, dampingRatio, jd.BodyA, jd.BodyB);
                 m_joints[7] = World.CreateJoint(jd);
             }
         }
@@ -144,7 +150,7 @@ namespace Testbed.TestCases
             switch (keyInput.Key)
             {
             case KeyCodes.B:
-                for (int i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                 {
                     if (m_bodies[i] != null)
                     {
@@ -157,7 +163,7 @@ namespace Testbed.TestCases
                 break;
 
             case KeyCodes.J:
-                for (int i = 0; i < 8; ++i)
+                for (var i = 0; i < 8; ++i)
                 {
                     if (m_joints[i] != null)
                     {
@@ -174,13 +180,13 @@ namespace Testbed.TestCases
         /// <inheritdoc />
         protected override void OnRender()
         {
-            DrawString("This demonstrates a soft distance joint.");
-            DrawString("Press: (b) to delete a Body, (j) to delete a joint");
+            base.OnRender();
+            DrawString("Press: (b) to delete a body, (j) to delete a joint");
         }
 
         public override void JointDestroyed(Joint joint)
         {
-            for (int i = 0; i < 8; ++i)
+            for (var i = 0; i < 8; ++i)
             {
                 if (m_joints[i] == joint)
                 {
@@ -189,5 +195,9 @@ namespace Testbed.TestCases
                 }
             }
         }
+
+        Body[] m_bodies = new Body[4];
+
+        Joint[] m_joints = new Joint[8];
     }
 }

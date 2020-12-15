@@ -178,6 +178,8 @@ namespace Testbed.TestCases
             djd.LocalAnchorB.Set(0.0f, -1.0f);
             var d = djd.BodyB.GetWorldPoint(djd.LocalAnchorB) - djd.BodyA.GetWorldPoint(djd.LocalAnchorA);
             djd.Length = d.Length();
+
+            JointUtils.LinearStiffness(out djd.Stiffness, out djd.Damping, 1.0f, 1.0f, djd.BodyA, djd.BodyB);
             World.CreateJoint(djd);
 
             {

@@ -19,7 +19,7 @@ namespace Box2DSharp.Dynamics.Joints
 
         private bool _enableMotor;
 
-        private Vector3 _impulse;
+        private Vector2 _impulse;
 
         // Solver temp
         private int _indexA;
@@ -30,11 +30,15 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _invIb;
 
+        private Matrix2x2 _K;
+
+        private float _angle;
+
+        private float _axialMass;
+
         private float _invMassA;
 
         private float _invMassB;
-
-        private LimitState _limitState;
 
         private Vector2 _localCenterA;
 
@@ -42,13 +46,13 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _lowerAngle;
 
-        private Matrix3x3 _mass; // effective mass for point-to-point constraint.
-
         private float _maxMotorTorque;
 
         private float _motorImpulse;
 
-        private float _motorMass; // effective mass for motor/limit angular constraint.
+        private float _lowerImpulse;
+
+        private float _upperImpulse;
 
         private float _motorSpeed;
 
@@ -63,7 +67,8 @@ namespace Box2DSharp.Dynamics.Joints
 
         internal Vector2 LocalAnchorB;
 
-        internal RevoluteJoint(RevoluteJointDef def) : base(def)
+        internal RevoluteJoint(RevoluteJointDef def)
+            : base(def)
         {
             LocalAnchorA = def.LocalAnchorA;
             LocalAnchorB = def.LocalAnchorB;
@@ -71,6 +76,9 @@ namespace Box2DSharp.Dynamics.Joints
 
             _impulse.SetZero();
             _motorImpulse = 0.0f;
+            _axialMass = 0.0f;
+            _lowerImpulse = 0.0f;
+            _upperImpulse = 0.0f;
 
             _lowerAngle = def.LowerAngle;
             _upperAngle = def.UpperAngle;
@@ -78,7 +86,7 @@ namespace Box2DSharp.Dynamics.Joints
             _motorSpeed = def.MotorSpeed;
             _enableLimit = def.EnableLimit;
             _enableMotor = def.EnableMotor;
-            _limitState = LimitState.InactiveLimit;
+            _angle = 0.0f;
         }
 
         /// The local anchor point relative to bodyA's origin.
@@ -129,7 +137,8 @@ namespace Box2DSharp.Dynamics.Joints
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
                 _enableLimit = flag;
-                _impulse.Z = 0.0f;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
             }
         }
 
@@ -150,11 +159,12 @@ namespace Box2DSharp.Dynamics.Joints
         {
             Debug.Assert(lower <= upper);
 
-            if (lower != _lowerAngle || upper != _upperAngle)
+            if (Math.Abs(lower - _lowerAngle) > Settings.Epsilon || Math.Abs(upper - _upperAngle) > Settings.Epsilon)
             {
                 BodyA.IsAwake = true;
                 BodyB.IsAwake = true;
-                _impulse.Z = 0.0f;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
                 _lowerAngle = lower;
                 _upperAngle = upper;
             }
@@ -241,7 +251,7 @@ namespace Box2DSharp.Dynamics.Joints
         /// <inheritdoc />
         public override float GetReactionTorque(float inv_dt)
         {
-            return inv_dt * _impulse.Z;
+            return inv_dt * (_motorImpulse + _lowerImpulse - _upperImpulse);
         }
 
         /// Dump to Logger.Log.
@@ -297,29 +307,34 @@ namespace Box2DSharp.Dynamics.Joints
             // r_skew = [-ry; rx]
 
             // Matlab
-            // K = [ mA+r1y^2*iA+mB+r2y^2*iB,  -r1y*iA*r1x-r2y*iB*r2x,          -r1y*iA-r2y*iB]
-            //     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
-            //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
+            // K = [ mA+r1y^2*iA+mB+r2y^2*iB,  -r1y*iA*r1x-r2y*iB*r2x]
+            //     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB]
 
             float mA = _invMassA, mB = _invMassB;
             float iA = _invIa, iB = _invIb;
 
-            var fixedRotation = (iA + iB).Equals(0.0f);
+            _K.Ex.X = mA + mB + _rA.Y * _rA.Y * iA + _rB.Y * _rB.Y * iB;
+            _K.Ey.X = -_rA.Y * _rA.X * iA - _rB.Y * _rB.X * iB;
+            _K.Ex.Y = _K.Ey.X;
+            _K.Ey.Y = mA + mB + _rA.X * _rA.X * iA + _rB.X * _rB.X * iB;
 
-            _mass.Ex.X = mA + mB + _rA.Y * _rA.Y * iA + _rB.Y * _rB.Y * iB;
-            _mass.Ey.X = -_rA.Y * _rA.X * iA - _rB.Y * _rB.X * iB;
-            _mass.Ez.X = -_rA.Y * iA - _rB.Y * iB;
-            _mass.Ex.Y = _mass.Ey.X;
-            _mass.Ey.Y = mA + mB + _rA.X * _rA.X * iA + _rB.X * _rB.X * iB;
-            _mass.Ez.Y = _rA.X * iA + _rB.X * iB;
-            _mass.Ex.Z = _mass.Ez.X;
-            _mass.Ey.Z = _mass.Ez.Y;
-            _mass.Ez.Z = iA + iB;
-
-            _motorMass = iA + iB;
-            if (_motorMass > 0.0f)
+            _axialMass = iA + iB;
+            bool fixedRotation;
+            if (_axialMass > 0.0f)
             {
-                _motorMass = 1.0f / _motorMass;
+                _axialMass = 1.0f / _axialMass;
+                fixedRotation = false;
+            }
+            else
+            {
+                fixedRotation = true;
+            }
+
+            _angle = aB - aA - ReferenceAngle;
+            if (_enableLimit == false || fixedRotation)
+            {
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
             }
 
             if (_enableMotor == false || fixedRotation)
@@ -327,60 +342,29 @@ namespace Box2DSharp.Dynamics.Joints
                 _motorImpulse = 0.0f;
             }
 
-            if (_enableLimit && fixedRotation == false)
-            {
-                var jointAngle = aB - aA - ReferenceAngle;
-                if (Math.Abs(_upperAngle - _lowerAngle) < 2.0f * Settings.AngularSlop)
-                {
-                    _limitState = LimitState.EqualLimits;
-                }
-                else if (jointAngle <= _lowerAngle)
-                {
-                    if (_limitState != LimitState.AtLowerLimit)
-                    {
-                        _impulse.Z = 0.0f;
-                    }
-
-                    _limitState = LimitState.AtLowerLimit;
-                }
-                else if (jointAngle >= _upperAngle)
-                {
-                    if (_limitState != LimitState.AtUpperLimit)
-                    {
-                        _impulse.Z = 0.0f;
-                    }
-
-                    _limitState = LimitState.AtUpperLimit;
-                }
-                else
-                {
-                    _limitState = LimitState.InactiveLimit;
-                    _impulse.Z = 0.0f;
-                }
-            }
-            else
-            {
-                _limitState = LimitState.InactiveLimit;
-            }
-
             if (data.Step.WarmStarting)
             {
                 // Scale impulses to support a variable time step.
                 _impulse *= data.Step.DtRatio;
                 _motorImpulse *= data.Step.DtRatio;
+                _lowerImpulse *= data.Step.DtRatio;
+                _upperImpulse *= data.Step.DtRatio;
 
+                var axialImpulse = _motorImpulse + _lowerImpulse - _upperImpulse;
                 var P = new Vector2(_impulse.X, _impulse.Y);
 
                 vA -= mA * P;
-                wA -= iA * (MathUtils.Cross(_rA, P) + _motorImpulse + _impulse.Z);
+                wA -= iA * (MathUtils.Cross(_rA, P) + axialImpulse);
 
                 vB += mB * P;
-                wB += iB * (MathUtils.Cross(_rB, P) + _motorImpulse + _impulse.Z);
+                wB += iB * (MathUtils.Cross(_rB, P) + axialImpulse);
             }
             else
             {
                 _impulse.SetZero();
                 _motorImpulse = 0.0f;
+                _lowerImpulse = 0.0f;
+                _upperImpulse = 0.0f;
             }
 
             data.Velocities[_indexA].V = vA;
@@ -403,10 +387,10 @@ namespace Box2DSharp.Dynamics.Joints
             var fixedRotation = (iA + iB).Equals(0.0f);
 
             // Solve motor constraint.
-            if (_enableMotor && _limitState != LimitState.EqualLimits && fixedRotation == false)
+            if (_enableMotor && fixedRotation == false)
             {
                 var cdot = wB - wA - _motorSpeed;
-                var impulse = -_motorMass * cdot;
+                var impulse = -_axialMass * cdot;
                 var oldImpulse = _motorImpulse;
                 var maxImpulse = data.Step.Dt * _maxMotorTorque;
                 _motorImpulse = MathUtils.Clamp(_motorImpulse + impulse, -maxImpulse, maxImpulse);
@@ -416,71 +400,41 @@ namespace Box2DSharp.Dynamics.Joints
                 wB += iB * impulse;
             }
 
-            // Solve limit constraint.
-            if (_enableLimit && _limitState != LimitState.InactiveLimit && fixedRotation == false)
+            if (_enableLimit && fixedRotation == false)
             {
-                var cdot1 = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
-                var cdot2 = wB - wA;
-                var cdot = new Vector3(cdot1.X, cdot1.Y, cdot2);
+                // Lower limit
+                {
+                    float C = _angle - _lowerAngle;
+                    float Cdot = wB - wA;
+                    float impulse = -_axialMass * (Cdot + Math.Max(C, 0.0f) * data.Step.InvDt);
+                    float oldImpulse = _lowerImpulse;
+                    _lowerImpulse = Math.Max(_lowerImpulse + impulse, 0.0f);
+                    impulse = _lowerImpulse - oldImpulse;
 
-                var impulse = -_mass.Solve33(cdot);
-
-                if (_limitState == LimitState.EqualLimits)
-                {
-                    _impulse += impulse;
-                }
-                else if (_limitState == LimitState.AtLowerLimit)
-                {
-                    var newImpulse = _impulse.Z + impulse.Z;
-                    if (newImpulse < 0.0f)
-                    {
-                        var rhs = -cdot1 + _impulse.Z * new Vector2(_mass.Ez.X, _mass.Ez.Y);
-                        var reduced = _mass.Solve22(rhs);
-                        impulse.X = reduced.X;
-                        impulse.Y = reduced.Y;
-                        impulse.Z = -_impulse.Z;
-                        _impulse.X += reduced.X;
-                        _impulse.Y += reduced.Y;
-                        _impulse.Z = 0.0f;
-                    }
-                    else
-                    {
-                        _impulse += impulse;
-                    }
-                }
-                else if (_limitState == LimitState.AtUpperLimit)
-                {
-                    var newImpulse = _impulse.Z + impulse.Z;
-                    if (newImpulse > 0.0f)
-                    {
-                        var rhs = -cdot1 + _impulse.Z * new Vector2(_mass.Ez.X, _mass.Ez.Y);
-                        var reduced = _mass.Solve22(rhs);
-                        impulse.X = reduced.X;
-                        impulse.Y = reduced.Y;
-                        impulse.Z = -_impulse.Z;
-                        _impulse.X += reduced.X;
-                        _impulse.Y += reduced.Y;
-                        _impulse.Z = 0.0f;
-                    }
-                    else
-                    {
-                        _impulse += impulse;
-                    }
+                    wA -= iA * impulse;
+                    wB += iB * impulse;
                 }
 
-                var P = new Vector2(impulse.X, impulse.Y);
+                // Upper limit
+                // Note: signs are flipped to keep C positive when the constraint is satisfied.
+                // This also keeps the impulse positive when the limit is active.
+                {
+                    float C = _upperAngle - _angle;
+                    float Cdot = wA - wB;
+                    float impulse = -_axialMass * (Cdot + Math.Max(C, 0.0f) * data.Step.InvDt);
+                    float oldImpulse = _upperImpulse;
+                    _upperImpulse = Math.Max(_upperImpulse + impulse, 0.0f);
+                    impulse = _upperImpulse - oldImpulse;
 
-                vA -= mA * P;
-                wA -= iA * (MathUtils.Cross(_rA, P) + impulse.Z);
-
-                vB += mB * P;
-                wB += iB * (MathUtils.Cross(_rB, P) + impulse.Z);
+                    wA += iA * impulse;
+                    wB -= iB * impulse;
+                }
             }
-            else
+
+            // Solve point-to-point constraint
             {
-                // Solve point-to-point constraint
                 var Cdot = vB + MathUtils.Cross(wB, _rB) - vA - MathUtils.Cross(wA, _rA);
-                var impulse = _mass.Solve22(-Cdot);
+                var impulse = _K.Solve(-Cdot);
 
                 _impulse.X += impulse.X;
                 _impulse.Y += impulse.Y;
@@ -506,57 +460,40 @@ namespace Box2DSharp.Dynamics.Joints
             var cB = data.Positions[_indexB].Center;
             var aB = data.Positions[_indexB].Angle;
 
-            Rotation
-                qA = new Rotation(aA), qB = new Rotation(aB);
+            var qA = new Rotation(aA);
+            var qB = new Rotation(aB);
 
             var angularError = 0.0f;
             var positionError = 0.0f;
 
             var fixedRotation = (_invIa + _invIb).Equals(0.0f);
 
-            // Solve angular limit constraint.
-            if (_enableLimit && _limitState != LimitState.InactiveLimit && fixedRotation == false)
+            // Solve angular limit constraint
+            if (_enableLimit && fixedRotation == false)
             {
-                var angle = aB - aA - ReferenceAngle;
-                var limitImpulse = 0.0f;
+                float angle = aB - aA - ReferenceAngle;
+                float C = 0.0f;
 
-                if (_limitState == LimitState.EqualLimits)
+                if (Math.Abs(_upperAngle - _lowerAngle) < 2.0f * Settings.AngularSlop)
                 {
                     // Prevent large angular corrections
-                    var C = MathUtils.Clamp(
-                        angle - _lowerAngle,
-                        -Settings.MaxAngularCorrection,
-                        Settings.MaxAngularCorrection);
-                    limitImpulse = -_motorMass * C;
-                    angularError = Math.Abs(C);
+                    C = MathUtils.Clamp(angle - _lowerAngle, -Settings.MaxAngularCorrection, Settings.MaxAngularCorrection);
                 }
-                else if (_limitState == LimitState.AtLowerLimit)
+                else if (angle <= _lowerAngle)
                 {
-                    var C = angle - _lowerAngle;
-                    angularError = -C;
-
                     // Prevent large angular corrections and allow some slop.
-                    C = MathUtils.Clamp(
-                        C + Settings.AngularSlop,
-                        -Settings.MaxAngularCorrection,
-                        0.0f);
-                    limitImpulse = -_motorMass * C;
+                    C = MathUtils.Clamp(angle - _lowerAngle + Settings.AngularSlop, -Settings.MaxAngularCorrection, 0.0f);
                 }
-                else if (_limitState == LimitState.AtUpperLimit)
+                else if (angle >= _upperAngle)
                 {
-                    var C = angle - _upperAngle;
-                    angularError = C;
-
                     // Prevent large angular corrections and allow some slop.
-                    C = MathUtils.Clamp(
-                        C - Settings.AngularSlop,
-                        0.0f,
-                        Settings.MaxAngularCorrection);
-                    limitImpulse = -_motorMass * C;
+                    C = MathUtils.Clamp(angle - _upperAngle - Settings.AngularSlop, 0.0f, Settings.MaxAngularCorrection);
                 }
 
+                float limitImpulse = -_axialMass * C;
                 aA -= _invIa * limitImpulse;
                 aB += _invIb * limitImpulse;
+                angularError = Math.Abs(C);
             }
 
             // Solve point-to-point constraint.
@@ -593,6 +530,48 @@ namespace Box2DSharp.Dynamics.Joints
             data.Positions[_indexB].Angle = aB;
 
             return positionError <= Settings.LinearSlop && angularError <= Settings.AngularSlop;
+        }
+
+        /// <inheritdoc />
+        public override void Draw(IDrawer drawer)
+        {
+            var xfA = BodyA.GetTransform();
+            var xfB = BodyB.GetTransform();
+            var pA = MathUtils.Mul(xfA, LocalAnchorA);
+            var pB = MathUtils.Mul(xfB, LocalAnchorB);
+
+            var c1 = Color.FromArgb(0.7f, 0.7f, 0.7f);
+            var c2 = Color.FromArgb(0.3f, 0.9f, 0.3f);
+            var c3 = Color.FromArgb(0.9f, 0.3f, 0.3f);
+            var c4 = Color.FromArgb(0.3f, 0.3f, 0.9f);
+            var c5 = Color.FromArgb(0.4f, 0.4f, 0.4f);
+
+            drawer.DrawPoint(pA, 5.0f, c4);
+            drawer.DrawPoint(pB, 5.0f, c5);
+
+            var aA = BodyA.GetAngle();
+            var aB = BodyB.GetAngle();
+            var angle = aB - aA - ReferenceAngle;
+
+            var L = 0.5f;
+
+            var r = L * new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            drawer.DrawSegment(pB, pB + r, c1);
+            drawer.DrawCircle(pB, L, c1);
+
+            if (_enableLimit)
+            {
+                var rlo = L * new Vector2((float)Math.Cos(_lowerAngle), (float)Math.Cos(_lowerAngle));
+                var rhi = L * new Vector2((float)Math.Cos(_upperAngle), (float)Math.Cos(_upperAngle));
+
+                drawer.DrawSegment(pB, pB + rlo, c2);
+                drawer.DrawSegment(pB, pB + rhi, c3);
+            }
+
+            var color = Color.FromArgb(0.5f, 0.8f, 0.8f);
+            drawer.DrawSegment(xfA.Position, pA, color);
+            drawer.DrawSegment(pA, pB, color);
+            drawer.DrawSegment(xfB.Position, pB, color);
         }
     }
 }

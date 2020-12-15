@@ -8,6 +8,8 @@ namespace Box2DSharp.Common
 
         public const float Pi = 3.14159265359f;
 
+        public const float LengthUnitsPerMeter = 1.0f;
+
         // @file
         // Global tuning constants based on meters-kilograms-seconds (MKS) units.
 
@@ -24,7 +26,7 @@ namespace Box2DSharp.Common
         /// This is used to fatten AABBs in the dynamic tree. This allows proxies
         /// to move by a small amount without triggering a tree adjustment.
         /// This is in meters.
-        public const float AABBExtension = 0.1f;
+        public const float AABBExtension = 0.1f * LengthUnitsPerMeter;
 
         /// This is used to fatten AABBs in the dynamic tree. This is used to predict
         /// the future position based on the current displacement.
@@ -33,7 +35,7 @@ namespace Box2DSharp.Common
 
         /// A small length used as a collision and constraint tolerance. Usually it is
         /// chosen to be numerically significant, but visually insignificant.
-        public const float LinearSlop = 0.005f;
+        public const float LinearSlop = 0.005f * LengthUnitsPerMeter;
 
         /// A small angle used as a collision and constraint tolerance. Usually it is
         /// chosen to be numerically significant, but visually insignificant.
@@ -52,13 +54,9 @@ namespace Box2DSharp.Common
         /// Maximum number of contacts to be handled to solve a TOI impact.
         public const int MaxToiContacts = 32;
 
-        /// A velocity threshold for elastic collisions. Any collision with a relative linear
-        /// velocity below this threshold will be treated as inelastic.
-        public const float VelocityThreshold = 1.0f;
-
         /// The maximum linear position correction used when solving constraints. This helps to
         /// prevent overshoot.
-        public const float MaxLinearCorrection = 0.2f;
+        public const float MaxLinearCorrection = 0.2f * LengthUnitsPerMeter;
 
         /// The maximum angular position correction used when solving constraints. This helps to
         /// prevent overshoot.
@@ -66,7 +64,7 @@ namespace Box2DSharp.Common
 
         /// The maximum linear velocity of a body. This limit is very large and is used
         /// to prevent numerical problems. You shouldn't need to adjust this.
-        public const float MaxTranslation = 2.0f;
+        public const float MaxTranslation = 2.0f * LengthUnitsPerMeter;
 
         public const float MaxTranslationSquared = MaxTranslation * MaxTranslation;
 
@@ -89,7 +87,7 @@ namespace Box2DSharp.Common
         public const float TimeToSleep = 0.5f;
 
         /// A body cannot sleep if its linear velocity is above this tolerance.
-        public const float LinearSleepTolerance = 0.01f;
+        public const float LinearSleepTolerance = 0.01f * LengthUnitsPerMeter;
 
         /// A body cannot sleep if its angular velocity is above this tolerance.
         public const float AngularSleepTolerance = 2.0f / 180.0f * Pi;

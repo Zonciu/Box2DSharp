@@ -7,7 +7,7 @@ using Testbed.Abstractions;
 namespace Testbed.TestCases
 {
     [TestCase("Collision", "Time of Impact")]
-    public class TimeOfImpactTestBase : TestBase
+    public class TimeOfImpactTest : TestBase
     {
         private PolygonShape _shapeA = new PolygonShape();
 
@@ -17,7 +17,7 @@ namespace Testbed.TestCases
 
         public int ToiMaxRootIters => World.ToiProfile.ToiMaxRootIters;
 
-        public TimeOfImpactTestBase()
+        public TimeOfImpactTest()
         {
             World.ToiProfile = new ToiProfile
             {

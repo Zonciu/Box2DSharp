@@ -22,6 +22,12 @@ namespace Box2DSharp.Dynamics
         /// </summary>
         public float Restitution;
 
+        /// <summary>
+        /// The restitution velocity threshold.
+        /// Modify this will _not_ change the restitution threshold of existing contacts.
+        /// </summary>
+        public float RestitutionThreshold;
+
         /// Get the parent body of this fixture. This is null if the fixture is not attached.
         /// @return the parent body.
         public Body Body { get; set; }
@@ -105,6 +111,7 @@ namespace Box2DSharp.Dynamics
                 UserData = def.UserData,
                 Friction = def.Friction,
                 Restitution = def.Restitution,
+                RestitutionThreshold = def.RestitutionThreshold,
                 Body = body,
                 Filter = def.Filter,
                 IsSensor = def.IsSensor,
@@ -324,6 +331,16 @@ namespace Box2DSharp.Dynamics
 
         /// The restitution (elasticity) usually in the range [0,1].
         public float Restitution;
+
+        /// Restitution velocity threshold, usually in m/s. Collisions above this
+        /// speed have restitution applied (will bounce).
+        public float RestitutionThreshold
+        {
+            get => _restitutionThreshold.GetValueOrDefault(1.0f * Settings.LengthUnitsPerMeter);
+            set => _restitutionThreshold = value;
+        }
+
+        private float? _restitutionThreshold;
 
         /// The shape, this must be set. The shape will be cloned, so you
         /// can create the shape on the stack.

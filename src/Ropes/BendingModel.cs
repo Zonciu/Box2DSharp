@@ -6,6 +6,7 @@
         PbdAngleBendingModel,
         XpdAngleBendingModel,
         PbdDistanceBendingModel,
-        PbdHeightBendingModel
+        PbdHeightBendingModel,
+        PbdTriangleBendingModel
     };
 }

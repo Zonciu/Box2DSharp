@@ -34,17 +34,6 @@ namespace Box2DSharp.Dynamics.Joints
         MotorJoint
     }
 
-    public enum LimitState
-    {
-        InactiveLimit,
-
-        AtLowerLimit,
-
-        AtUpperLimit,
-
-        EqualLimits
-    }
-
     /// A joint edge is used to connect bodies and joints together
     /// in a joint graph where each body is a node and each joint
     /// is an edge. A joint edge belongs to a doubly linked list
@@ -264,8 +253,6 @@ namespace Box2DSharp.Dynamics.Joints
                 return new PulleyJoint(def);
             case RevoluteJointDef def:
                 return new RevoluteJoint(def);
-            case RopeJointDef def:
-                return new RopeJoint(def);
             case FrictionJointDef def:
                 return new FrictionJoint(def);
             case GearJointDef def:
@@ -277,6 +264,69 @@ namespace Box2DSharp.Dynamics.Joints
             default:
                 throw new ArgumentOutOfRangeException(nameof(jointDef.JointType));
             }
+        }
+    }
+
+    public static class JointUtils
+    {
+        /// Utility to compute linear stiffness values from frequency and damping ratio
+        public static void LinearStiffness(
+            out float stiffness,
+            out float damping,
+            float frequencyHertz,
+            float dampingRatio,
+            Body bodyA,
+            Body bodyB)
+        {
+            var massA = bodyA.Mass;
+            var massB = bodyB.Mass;
+            float mass;
+            if (massA > 0.0f && massB > 0.0f)
+            {
+                mass = massA * massB / (massA + massB);
+            }
+            else if (massA > 0.0f)
+            {
+                mass = massA;
+            }
+            else
+            {
+                mass = massB;
+            }
+
+            var omega = 2.0f * Settings.Pi * frequencyHertz;
+            stiffness = mass * omega * omega;
+            damping = 2.0f * mass * dampingRatio * omega;
+        }
+
+        /// Utility to compute rotational stiffness values frequency and damping ratio
+        public static void AngularStiffness(
+            out float stiffness,
+            out float damping,
+            float frequencyHertz,
+            float dampingRatio,
+            Body bodyA,
+            Body bodyB)
+        {
+            var IA = bodyA.Inertia;
+            var IB = bodyB.Inertia;
+            float I;
+            if (IA > 0.0f && IB > 0.0f)
+            {
+                I = IA * IB / (IA + IB);
+            }
+            else if (IA > 0.0f)
+            {
+                I = IA;
+            }
+            else
+            {
+                I = IB;
+            }
+
+            var omega = 2.0f * Settings.Pi * frequencyHertz;
+            stiffness = I * omega * omega;
+            damping = 2.0f * I * dampingRatio * omega;
         }
     }
 }
