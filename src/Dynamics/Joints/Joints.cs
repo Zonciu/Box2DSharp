@@ -29,8 +29,6 @@ namespace Box2DSharp.Dynamics.Joints
 
         FrictionJoint,
 
-        RopeJoint,
-
         MotorJoint
     }
 
