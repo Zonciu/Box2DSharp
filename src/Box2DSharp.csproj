@@ -17,7 +17,7 @@
         <PackageTags>2D;C#;Box2D;Physic</PackageTags>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <DocumentationFile>$(OutDir)\Box2DSharp.xml</DocumentationFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
