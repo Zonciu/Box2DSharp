@@ -139,7 +139,7 @@ namespace Box2DSharp.Dynamics.Contacts
         public bool IsTouching
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Flags.HasFlag(ContactFlag.TouchingFlag);
+            get => Flags.IsSet(ContactFlag.TouchingFlag);
         }
 
         /// Enable/disable this contact. This can be used inside the pre-solve
@@ -162,7 +162,7 @@ namespace Box2DSharp.Dynamics.Contacts
         public bool IsEnabled
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Flags.HasFlag(ContactFlag.EnabledFlag);
+            get => Flags.IsSet(ContactFlag.EnabledFlag);
         }
 
         /// Override the default friction mixture. You can call this in b2ContactListener::PreSolve.
@@ -264,7 +264,7 @@ namespace Box2DSharp.Dynamics.Contacts
             Flags |= ContactFlag.EnabledFlag;
 
             var touching = false;
-            var wasTouching = Flags.HasFlag(ContactFlag.TouchingFlag);
+            var wasTouching = Flags.IsSet(ContactFlag.TouchingFlag);
 
             var sensorA = FixtureA.IsSensor;
             var sensorB = FixtureB.IsSensor;

@@ -712,7 +712,7 @@ namespace Box2DSharp.Dynamics
             {
                 var body = bodyNode.Value;
                 bodyNode = bodyNode.Next;
-                if (body.Flags.HasFlag(BodyFlags.Island)) // 已经分配到岛屿则跳过
+                if (body.Flags.IsSet(BodyFlags.Island)) // 已经分配到岛屿则跳过
                 {
                     continue;
                 }
@@ -768,7 +768,7 @@ namespace Box2DSharp.Dynamics
 
                         // Has this contact already been added to an island?
                         // 接触点已经标记岛屿,跳过
-                        if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
+                        if (contact.Flags.IsSet(Contact.ContactFlag.IslandFlag))
                         {
                             continue;
                         }
@@ -795,7 +795,7 @@ namespace Box2DSharp.Dynamics
 
                         // Was the other body already added to this island?
                         // 如果接触边缘的另一个物体已经添加到岛屿则跳过
-                        if (other.Flags.HasFlag(BodyFlags.Island))
+                        if (other.Flags.IsSet(BodyFlags.Island))
                         {
                             continue;
                         }
@@ -830,7 +830,7 @@ namespace Box2DSharp.Dynamics
                         island.Add(je.Joint);
                         je.Joint.IslandFlag = true;
 
-                        if (other.Flags.HasFlag(BodyFlags.Island))
+                        if (other.Flags.IsSet(BodyFlags.Island))
                         {
                             continue;
                         }
@@ -870,7 +870,7 @@ namespace Box2DSharp.Dynamics
                     bodyNode = bodyNode.Next;
 
                     // If a body was not in an island then it did not move.
-                    if (!b.Flags.HasFlag(BodyFlags.Island))
+                    if (!b.Flags.IsSet(BodyFlags.Island))
                     {
                         continue;
                     }
@@ -956,7 +956,7 @@ namespace Box2DSharp.Dynamics
                     }
 
                     var alpha = 1.0f;
-                    if (c.Flags.HasFlag(Contact.ContactFlag.ToiFlag))
+                    if (c.Flags.IsSet(Contact.ContactFlag.ToiFlag))
                     {
                         // This contact has a valid cached TOI.
                         alpha = c.Toi;
@@ -1117,7 +1117,7 @@ namespace Box2DSharp.Dynamics
                             var contact = contactEdge.Contact;
 
                             // Has this contact already been added to the island?
-                            if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
+                            if (contact.Flags.IsSet(Contact.ContactFlag.IslandFlag))
                             {
                                 continue;
                             }
@@ -1141,7 +1141,7 @@ namespace Box2DSharp.Dynamics
 
                             // Tentatively advance the body to the TOI.
                             var backup = other.Sweep;
-                            if (!other.Flags.HasFlag(BodyFlags.Island))
+                            if (!other.Flags.IsSet(BodyFlags.Island))
                             {
                                 other.Advance(minAlpha);
                             }
@@ -1170,7 +1170,7 @@ namespace Box2DSharp.Dynamics
                             island.Add(contact);
 
                             // Has the other body already been added to the island?
-                            if (other.Flags.HasFlag(BodyFlags.Island))
+                            if (other.Flags.IsSet(BodyFlags.Island))
                             {
                                 continue;
                             }
@@ -1210,7 +1210,7 @@ namespace Box2DSharp.Dynamics
                             var contact = contactEdge.Contact;
 
                             // Has this contact already been added to the island?
-                            if (contact.Flags.HasFlag(Contact.ContactFlag.IslandFlag))
+                            if (contact.Flags.IsSet(Contact.ContactFlag.IslandFlag))
                             {
                                 continue;
                             }
@@ -1234,7 +1234,7 @@ namespace Box2DSharp.Dynamics
 
                             // Tentatively advance the body to the TOI.
                             var backup = other.Sweep;
-                            if (!other.Flags.HasFlag(BodyFlags.Island))
+                            if (!other.Flags.IsSet(BodyFlags.Island))
                             {
                                 other.Advance(minAlpha);
                             }
@@ -1263,7 +1263,7 @@ namespace Box2DSharp.Dynamics
                             island.Add(contact);
 
                             // Has the other body already been added to the island?
-                            if (other.Flags.HasFlag(BodyFlags.Island))
+                            if (other.Flags.IsSet(BodyFlags.Island))
                             {
                                 continue;
                             }
@@ -1411,7 +1411,7 @@ namespace Box2DSharp.Dynamics
             var lastColor = Color.FromArgb(230, 179, 179);
             var flags = Drawer.Flags;
 
-            if (flags.HasFlag(DrawFlag.DrawShape))
+            if (flags.IsSet(DrawFlag.DrawShape))
             {
                 for (var node = BodyList.First; node != null; node = node.Next)
                 {
@@ -1450,7 +1450,7 @@ namespace Box2DSharp.Dynamics
                 }
             }
 
-            if (flags.HasFlag(DrawFlag.DrawJoint))
+            if (flags.IsSet(DrawFlag.DrawJoint))
             {
                 var node = JointList.First;
                 while (node != null)
@@ -1460,7 +1460,7 @@ namespace Box2DSharp.Dynamics
                 }
             }
 
-            if (flags.HasFlag(DrawFlag.DrawPair))
+            if (flags.IsSet(DrawFlag.DrawPair))
             {
                 var color = Color.FromArgb(77, 230, 230);
                 for (var node = ContactManager.ContactList.First; node != null; node = node.Next)
@@ -1476,7 +1476,7 @@ namespace Box2DSharp.Dynamics
                 }
             }
 
-            if (flags.HasFlag(DrawFlag.DrawAABB))
+            if (flags.IsSet(DrawFlag.DrawAABB))
             {
                 var color = Color.FromArgb(230, 77, 230);
                 var bp = ContactManager.BroadPhase;
@@ -1507,7 +1507,7 @@ namespace Box2DSharp.Dynamics
                 }
             }
 
-            if (flags.HasFlag(DrawFlag.DrawCenterOfMass))
+            if (flags.IsSet(DrawFlag.DrawCenterOfMass))
             {
                 var node = BodyList.First;
                 while (node != null)

@@ -282,7 +282,7 @@ namespace Box2DSharp.Dynamics
                         continue;
                     }
 
-                    if (!b.Flags.HasFlag(BodyFlags.AutoSleep)                              // 不允许休眠
+                    if (!b.Flags.IsSet(BodyFlags.AutoSleep)                              // 不允许休眠
                      || b.AngularVelocity * b.AngularVelocity > angTolSqr            // 或 角速度大于最小值
                      || Vector2.Dot(b.LinearVelocity, b.LinearVelocity) > linTolSqr) // 或 线速度大于最小值
                     {

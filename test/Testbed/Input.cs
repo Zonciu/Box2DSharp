@@ -82,38 +82,40 @@ namespace Testbed
         public static KeyModifiers GetKeyModifiers(TKKeyModifiers keyModifiers)
         {
             KeyModifiers value = 0;
-            if (keyModifiers.HasFlag(TKKeyModifiers.Shift))
+            if (IsSet(keyModifiers, TKKeyModifiers.Shift))
             {
                 value |= KeyModifiers.Shift;
             }
 
-            if (keyModifiers.HasFlag(TKKeyModifiers.Control))
+            if (IsSet(keyModifiers, TKKeyModifiers.Control))
             {
                 value |= KeyModifiers.Control;
             }
 
-            if (keyModifiers.HasFlag(TKKeyModifiers.Alt))
+            if (IsSet(keyModifiers, TKKeyModifiers.Alt))
             {
                 value |= KeyModifiers.Alt;
             }
 
-            if (keyModifiers.HasFlag(TKKeyModifiers.Super))
+            if (IsSet(keyModifiers, TKKeyModifiers.Super))
             {
                 value |= KeyModifiers.Super;
             }
 
-            if (keyModifiers.HasFlag(TKKeyModifiers.CapsLock))
+            if (IsSet(keyModifiers, TKKeyModifiers.CapsLock))
             {
                 value |= KeyModifiers.CapsLock;
             }
 
-            if (keyModifiers.HasFlag(TKKeyModifiers.NumLock))
+            if (IsSet(keyModifiers, TKKeyModifiers.NumLock))
             {
                 value |= KeyModifiers.NumLock;
             }
 
             return value;
         }
+
+        private static bool IsSet(TKKeyModifiers self, TKKeyModifiers flag) => (self & flag) == flag;
 
         public static readonly Dictionary<KeyCodes, Keys> KeyMap;
 
