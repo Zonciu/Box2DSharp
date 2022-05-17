@@ -74,3 +74,4 @@ crashlytics-build.properties
 /[Aa]ssets/Box2DSharp
 settings.ini
 imgui.ini
+*.DotSettings
