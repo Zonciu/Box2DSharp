@@ -64,19 +64,19 @@ namespace Box2DSharp.Collision
 
                 switch (simplex.Count)
                 {
-                case 1:
-                    break;
+                    case 1:
+                        break;
 
-                case 2:
-                    simplex.Solve2();
-                    break;
+                    case 2:
+                        simplex.Solve2();
+                        break;
 
-                case 3:
-                    simplex.Solve3();
-                    break;
+                    case 3:
+                        simplex.Solve3();
+                        break;
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(simplex.Count));
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(simplex.Count));
                 }
 
                 // If we have 3 points, then the origin is in the corresponding triangle.
@@ -153,27 +153,25 @@ namespace Box2DSharp.Collision
             // Apply radii if requested.
             if (input.UseRadii)
             {
-                var rA = proxyA.Radius;
-                var rB = proxyB.Radius;
-
-                if (output.Distance > rA + rB && output.Distance > Settings.Epsilon)
+                if (output.Distance < Settings.Epsilon)
                 {
-                    // Shapes are still no overlapped.
-                    // Move the witness points to the outer surface.
-                    output.Distance -= rA + rB;
-                    var normal = output.PointB - output.PointA;
-                    normal.Normalize();
-                    output.PointA += rA * normal;
-                    output.PointB -= rB * normal;
-                }
-                else
-                {
-                    // Shapes are overlapped when radii are considered.
-                    // Move the witness points to the middle.
+                    // Shapes are too close to safely compute normal
                     var p = 0.5f * (output.PointA + output.PointB);
                     output.PointA = p;
                     output.PointB = p;
                     output.Distance = 0.0f;
+                }
+                else
+                {
+                    // Keep closest points on perimeter even if overlapped, this way
+                    // the points move smoothly.
+                    var rA = proxyA.Radius;
+                    var rB = proxyB.Radius;
+                    var normal = output.PointB - output.PointA;
+                    normal.Normalize();
+                    output.Distance = Math.Max(0.0f, output.Distance - rA - rB);
+                    output.PointA += rA * normal;
+                    output.PointB -= rB * normal;
                 }
             }
         }
@@ -281,20 +279,20 @@ namespace Box2DSharp.Collision
 
                 switch (simplex.Count)
                 {
-                case 1:
-                    break;
+                    case 1:
+                        break;
 
-                case 2:
-                    simplex.Solve2();
-                    break;
+                    case 2:
+                        simplex.Solve2();
+                        break;
 
-                case 3:
-                    simplex.Solve3();
-                    break;
+                    case 3:
+                        simplex.Solve3();
+                        break;
 
-                default:
-                    Debug.Assert(false);
-                    break;
+                    default:
+                        Debug.Assert(false);
+                        break;
                 }
 
                 // If we have 3 points, then the origin is in the corresponding triangle.
