@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Numerics;
 using Box2DSharp.Common;
@@ -67,6 +68,8 @@ namespace Box2DSharp.Dynamics.Joints
 
         private float _ratio;
 
+        private float _tolerance;
+
         public GearJoint(GearJointDef def)
             : base(def)
         {
@@ -104,6 +107,9 @@ namespace Box2DSharp.Dynamics.Joints
                 _localAxisC.SetZero();
 
                 coordinateA = aA - aC - _referenceAngleA;
+
+                // position error is measured in radians
+                _tolerance = Settings.AngularSlop;
             }
             else
             {
@@ -118,6 +124,9 @@ namespace Box2DSharp.Dynamics.Joints
                     xfC.Rotation,
                     MathUtils.Mul(xfA.Rotation, _localAnchorA) + (xfA.Position - xfC.Position));
                 coordinateA = Vector2.Dot(pA - pC, _localAxisC);
+
+                // position error is measured in meters
+                _tolerance = Settings.LinearSlop;
             }
 
             _bodyD = _joint2.BodyA;
@@ -392,7 +401,6 @@ namespace Box2DSharp.Dynamics.Joints
             var qC = new Rotation(aC);
             var qD = new Rotation(aD);
 
-            var linearError = 0.0f;
 
             float coordinateA, coordinateB;
 
@@ -475,8 +483,7 @@ namespace Box2DSharp.Dynamics.Joints
             data.Positions[_indexD].Center = cD;
             data.Positions[_indexD].Angle = aD;
 
-            // TODO_ERIN not implemented
-            return linearError < Settings.LinearSlop;
+            return Math.Abs(C) < _tolerance;
         }
     }
 }

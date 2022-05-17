@@ -671,7 +671,7 @@ namespace Box2DSharp.Dynamics
         /// 创建夹具
         public Fixture CreateFixture(Shape shape, float density)
         {
-            var def = new FixtureDef {Shape = shape, Density = density};
+            var def = new FixtureDef { Shape = shape, Density = density };
 
             return CreateFixture(def);
         }
@@ -707,6 +707,7 @@ namespace Box2DSharp.Dynamics
             // You tried to remove a shape that is not attached to this body.
             // 确定该夹具存在于物体的夹具列表中
             Debug.Assert(Fixtures.Any(e => e == fixture));
+            var density = fixture.Density;
 
             // Destroy any contacts associated with the fixture.
             // 销毁关联在夹具上的接触点
@@ -736,7 +737,10 @@ namespace Box2DSharp.Dynamics
 
             // Reset the mass data.
             // 夹具销毁后重新计算物体质量
-            ResetMassData();
+            if (density > 0.0f)
+            {
+                ResetMassData();
+            }
         }
 
         /// Set the position of the body's origin and rotation.
@@ -979,9 +983,9 @@ namespace Box2DSharp.Dynamics
 
         /// Get the mass data of the body.
         /// @return a struct containing the mass, inertia and center of the body.
-        public void GetMassData(out MassData data)
+        public MassData GetMassData()
         {
-            data = new MassData
+            return new MassData
             {
                 Mass = _mass,
                 RotationInertia = _inertia + _mass * Vector2.Dot(Sweep.LocalCenter, Sweep.LocalCenter),

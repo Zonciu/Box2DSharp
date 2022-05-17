@@ -407,7 +407,7 @@ namespace Box2DSharp.Dynamics.Joints
             var pB = MathUtils.Mul(xfB, _localAnchorB);
 
             var axis = pB - pA;
-            var length = axis.Normalize();
+            axis.Normalize();
 
             var c1 = Color.FromArgb(0.7f, 0.7f, 0.7f);
             var c2 = Color.FromArgb(0.3f, 0.9f, 0.3f);

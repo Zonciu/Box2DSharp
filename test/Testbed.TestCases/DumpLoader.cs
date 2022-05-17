@@ -51,7 +51,7 @@ namespace Testbed.TestCases
             var v = m_ball.LinearVelocity;
             var omega = m_ball.AngularVelocity;
 
-            m_ball.GetMassData(out var massData);
+            var massData = m_ball.GetMassData();
 
             var ke = 0.5f * massData.Mass * Vector2.Dot(v, v) + 0.5f * massData.RotationInertia * omega * omega;
 

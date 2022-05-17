@@ -370,8 +370,7 @@ namespace Testbed
                 break;
             case Keys.Home:
                 // Reset view
-                Global.Camera.Zoom = 1.0f;
-                Global.Camera.Center.Set(0.0f, 20.0f);
+                Global.Camera.ResetView();
                 break;
             case Keys.Z:
                 // Zoom out

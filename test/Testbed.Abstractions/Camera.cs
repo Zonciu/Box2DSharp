@@ -15,10 +15,15 @@ namespace Testbed.Abstractions
 
         public Camera()
         {
-            Center.Set(0.0f, 20.0f);
-            Zoom = 1.0f;
             Width = 1280;
             Height = 800;
+            ResetView();
+        }
+
+        public void ResetView()
+        {
+            Center.Set(0.0f, 20.0f);
+            Zoom = 1.0f;
         }
 
         public Vector2 ConvertScreenToWorld(Vector2 screenPoint)
