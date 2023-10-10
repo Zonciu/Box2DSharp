@@ -1519,6 +1519,20 @@ namespace Box2DSharp.Dynamics
                     Drawer.DrawTransform(xf);
                 }
             }
+
+            if (flags.IsSet(DrawFlag.DrawContactPoint))
+            {
+                var color = Color.FromArgb(77, 230, 230);
+                for (var node = ContactManager.ContactList.First; node != null; node = node.Next)
+                {
+                    var c = node.Value;
+
+                    c.GetWorldManifold(out var worldManifold);
+
+                    for (int i = 0; i < c.Manifold.PointCount; i++)
+                        Drawer.DrawPoint(worldManifold.Points[i], 5, color);
+                }
+            }
         }
 
         /// <summary>
