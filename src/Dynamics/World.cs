@@ -931,7 +931,7 @@ namespace Box2DSharp.Dynamics
             }
 
             // Find TOI events and solve them.
-            for (;;)
+            for (; ; )
             {
                 // Find the first TOI.
                 Contact minContact = null;
@@ -1519,6 +1519,20 @@ namespace Box2DSharp.Dynamics
                     Drawer.DrawTransform(xf);
                 }
             }
+
+            if (flags.IsSet(DrawFlag.DrawContactPoint))
+            {
+                var color = Color.FromArgb(77, 230, 230);
+                for (var node = ContactManager.ContactList.First; node != null; node = node.Next)
+                {
+                    var c = node.Value;
+
+                    c.GetWorldManifold(out var worldManifold);
+
+                    for (int i = 0; i < c.Manifold.PointCount; i++)
+                        Drawer.DrawPoint(worldManifold.Points[i], 5, color);
+                }
+            }
         }
 
         /// <summary>
@@ -1531,59 +1545,59 @@ namespace Box2DSharp.Dynamics
         {
             switch (fixture.Shape)
             {
-            case CircleShape circle:
-            {
-                var center = MathUtils.Mul(xf, circle.Position);
-                var radius = circle.Radius;
-                var axis = MathUtils.Mul(xf.Rotation, new Vector2(1.0f, 0.0f));
+                case CircleShape circle:
+                    {
+                        var center = MathUtils.Mul(xf, circle.Position);
+                        var radius = circle.Radius;
+                        var axis = MathUtils.Mul(xf.Rotation, new Vector2(1.0f, 0.0f));
 
-                Drawer.DrawSolidCircle(center, radius, axis, color);
-            }
-                break;
+                        Drawer.DrawSolidCircle(center, radius, axis, color);
+                    }
+                    break;
 
-            case EdgeShape edge:
-            {
-                var v1 = MathUtils.Mul(xf, edge.Vertex1);
-                var v2 = MathUtils.Mul(xf, edge.Vertex2);
-                Drawer.DrawSegment(v1, v2, color);
+                case EdgeShape edge:
+                    {
+                        var v1 = MathUtils.Mul(xf, edge.Vertex1);
+                        var v2 = MathUtils.Mul(xf, edge.Vertex2);
+                        Drawer.DrawSegment(v1, v2, color);
 
-                if (edge.OneSided == false)
-                {
-                    Drawer.DrawPoint(v1, 4.0f, color);
-                    Drawer.DrawPoint(v2, 4.0f, color);
-                }
-            }
-                break;
+                        if (edge.OneSided == false)
+                        {
+                            Drawer.DrawPoint(v1, 4.0f, color);
+                            Drawer.DrawPoint(v2, 4.0f, color);
+                        }
+                    }
+                    break;
 
-            case ChainShape chain:
-            {
-                var count = chain.Count;
-                var vertices = chain.Vertices;
+                case ChainShape chain:
+                    {
+                        var count = chain.Count;
+                        var vertices = chain.Vertices;
 
-                var v1 = MathUtils.Mul(xf, vertices[0]);
-                for (var i = 1; i < count; ++i)
-                {
-                    var v2 = MathUtils.Mul(xf, vertices[i]);
-                    Drawer.DrawSegment(v1, v2, color);
-                    v1 = v2;
-                }
-            }
-                break;
+                        var v1 = MathUtils.Mul(xf, vertices[0]);
+                        for (var i = 1; i < count; ++i)
+                        {
+                            var v2 = MathUtils.Mul(xf, vertices[i]);
+                            Drawer.DrawSegment(v1, v2, color);
+                            v1 = v2;
+                        }
+                    }
+                    break;
 
-            case PolygonShape poly:
-            {
-                var vertexCount = poly.Count;
-                Debug.Assert(vertexCount <= Settings.MaxPolygonVertices);
-                Span<Vector2> vertices = stackalloc Vector2[vertexCount];
+                case PolygonShape poly:
+                    {
+                        var vertexCount = poly.Count;
+                        Debug.Assert(vertexCount <= Settings.MaxPolygonVertices);
+                        Span<Vector2> vertices = stackalloc Vector2[vertexCount];
 
-                for (var i = 0; i < vertexCount; ++i)
-                {
-                    vertices[i] = MathUtils.Mul(xf, poly.Vertices[i]);
-                }
+                        for (var i = 0; i < vertexCount; ++i)
+                        {
+                            vertices[i] = MathUtils.Mul(xf, poly.Vertices[i]);
+                        }
 
-                Drawer.DrawSolidPolygon(vertices, vertexCount, color);
-            }
-                break;
+                        Drawer.DrawSolidPolygon(vertices, vertexCount, color);
+                    }
+                    break;
             }
         }
 
