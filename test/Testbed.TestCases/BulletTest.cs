@@ -93,7 +93,7 @@ namespace Testbed.TestCases
             if (_toiProfile.ToiCalls > 0)
             {
                 DrawString(
-                    $"toi calls = {_toiProfile.ToiCalls}, ave toi iters = {_toiProfile.ToiIters / (float)_toiProfile.ToiCalls}, max toi iters = {_toiProfile.ToiMaxRootIters}");
+                    $"toi calls = {_toiProfile.ToiCalls}, ave toi iters = {_toiProfile.ToiIters / (float)_toiProfile.ToiCalls}, max toi iters = {_toiProfile.ToiMaxIters}");
                 DrawString(
                     $"ave toi root iters = {_toiProfile.ToiRootIters / (float)_toiProfile.ToiCalls}, max toi root iters = {_toiProfile.ToiMaxRootIters}");
             }
