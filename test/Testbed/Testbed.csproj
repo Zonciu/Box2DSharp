@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFrameworks>net6.0;net5.0;netcoreapp3.1</TargetFrameworks>
-        <LangVersion>7.3</LangVersion>
+        <TargetFrameworks>net8.0;</TargetFrameworks>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -11,10 +11,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ImGui.NET" Version="1.78.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-      <PackageReference Include="OpenTK" Version="4.3.0" />
-      <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+      <PackageReference Include="ImGui.NET" Version="1.90.5.1" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="OpenTK" Version="4.8.2" />
+      <PackageReference Include="System.Drawing.Common" Version="8.0.4" />
     </ItemGroup>
 
 </Project>

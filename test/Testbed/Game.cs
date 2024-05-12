@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Box2DSharp.Common;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -51,6 +50,19 @@ namespace Testbed
             Global.DebugDrawer = DebugDrawer;
         }
 
+        public override void Dispose()
+        {
+            _stopped = true;
+            TestSettingHelper.Save(Global.Settings);
+            Test?.Dispose();
+            Test = null;
+            DebugDrawer.Destroy();
+            _controller.Dispose();
+            _controller = null;
+            _stopwatch.Stop();
+            base.Dispose();
+        }
+
         /// <inheritdoc />
         protected override void OnLoad()
         {
@@ -91,19 +103,6 @@ namespace Testbed
         {
             _stopped = true;
             base.OnUnload();
-        }
-
-        /// <inheritdoc />
-        protected override void OnClosed()
-        {
-            Test?.Dispose();
-            Test = null;
-            DebugDrawer.Destroy();
-            TestSettingHelper.Save(Global.Settings);
-            _controller.Dispose();
-            _controller = null;
-            _stopwatch.Stop();
-            base.OnClosed();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -153,6 +152,11 @@ namespace Testbed
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            if (_stopped)
+            {
+                return;
+            }
+
             _controller.Update(this, (float)e.Time);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             UpdateText();

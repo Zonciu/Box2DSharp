@@ -55,7 +55,6 @@ namespace Testbed.Gui
             io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors; // We can honor GetMouseCursor() values (optional)
             io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;  // We can honor io.WantSetMousePos requests (optional, rarely used)
             CreateDeviceResources();
-            SetKeyMappings();
             SetPerFrameImGuiData(1f / 60f);
 
             ImGui.NewFrame();
@@ -224,30 +223,6 @@ void main()
             io.KeySuper = keyboardState.IsKeyDown(Keys.LeftSuper) || keyboardState.IsKeyDown(Keys.RightSuper);
         }
 
-        private static void SetKeyMappings()
-        {
-            var io = ImGui.GetIO();
-            io.KeyMap[(int)ImGuiKey.Tab] = (int)Keys.Tab;
-            io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Keys.Left;
-            io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Keys.Right;
-            io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Keys.Up;
-            io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Keys.Down;
-            io.KeyMap[(int)ImGuiKey.PageUp] = (int)Keys.PageUp;
-            io.KeyMap[(int)ImGuiKey.PageDown] = (int)Keys.PageDown;
-            io.KeyMap[(int)ImGuiKey.Home] = (int)Keys.Home;
-            io.KeyMap[(int)ImGuiKey.End] = (int)Keys.End;
-            io.KeyMap[(int)ImGuiKey.Delete] = (int)Keys.Delete;
-            io.KeyMap[(int)ImGuiKey.Backspace] = (int)Keys.Backspace;
-            io.KeyMap[(int)ImGuiKey.Enter] = (int)Keys.Enter;
-            io.KeyMap[(int)ImGuiKey.Escape] = (int)Keys.Escape;
-            io.KeyMap[(int)ImGuiKey.A] = (int)Keys.A;
-            io.KeyMap[(int)ImGuiKey.C] = (int)Keys.C;
-            io.KeyMap[(int)ImGuiKey.V] = (int)Keys.V;
-            io.KeyMap[(int)ImGuiKey.X] = (int)Keys.X;
-            io.KeyMap[(int)ImGuiKey.Y] = (int)Keys.Y;
-            io.KeyMap[(int)ImGuiKey.Z] = (int)Keys.Z;
-        }
-
         private void RenderImDrawData(ImDrawDataPtr drawData)
         {
             if (drawData.CmdListsCount == 0)
@@ -257,7 +232,7 @@ void main()
 
             for (var i = 0; i < drawData.CmdListsCount; i++)
             {
-                var cmdList = drawData.CmdListsRange[i];
+                var cmdList = drawData.CmdLists[i];
 
                 var vertexSize = cmdList.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>();
                 if (vertexSize > _vertexBufferSize)
@@ -311,7 +286,7 @@ void main()
             // Render command lists
             for (var n = 0; n < drawData.CmdListsCount; n++)
             {
-                var cmdList = drawData.CmdListsRange[n];
+                var cmdList = drawData.CmdLists[n];
 
                 GL.NamedBufferSubData(_vertexBuffer, IntPtr.Zero, cmdList.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>(), cmdList.VtxBuffer.Data);
                 Util.CheckGLError($"Data Vert {n}");
