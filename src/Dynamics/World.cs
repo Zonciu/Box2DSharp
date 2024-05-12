@@ -41,10 +41,10 @@ namespace Box2DSharp.Dynamics
         public IDestructionListener DestructionListener { get; set; }
 
         /// <summary>
-        /// Debug Drawer
+        /// Debug Draw
         /// 调试绘制
         /// </summary>
-        public IDrawer Drawer { get; set; }
+        public IDraw Draw { get; set; }
 
         /// <summary>
         /// 是否启用连续碰撞
@@ -198,7 +198,7 @@ namespace Box2DSharp.Dynamics
             ContactManager = null;
 
             DestructionListener = null;
-            Drawer = null;
+            Draw = null;
 
             Profile = default;
             ToiProfile = null;
@@ -1381,7 +1381,7 @@ namespace Box2DSharp.Dynamics
             }
         }
 
-        #region Drawer
+        #region Draw
 
         /// <summary>
         /// Register a routine for debug drawing. The debug draw functions are called
@@ -1389,17 +1389,17 @@ namespace Box2DSharp.Dynamics
         /// by you and must remain in scope.
         /// 调试绘制,用于绘制物体的图形
         /// </summary>
-        /// <param name="drawer"></param>
-        public void SetDebugDrawer(IDrawer drawer)
+        /// <param name="draw"></param>
+        public void SetDebugDraw(IDraw draw)
         {
-            Drawer = drawer;
+            Draw = draw;
         }
 
         /// Call this to draw shapes and other debug draw data. This is intentionally non-const.
         /// 绘制调试数据
         public void DebugDraw()
         {
-            if (Drawer == null)
+            if (Draw == null)
             {
                 return;
             }
@@ -1409,7 +1409,7 @@ namespace Box2DSharp.Dynamics
             var kinematicBodyColor = Color.FromArgb(127, 127, 230);
             var sleepColor = Color.FromArgb(153, 153, 153);
             var lastColor = Color.FromArgb(230, 179, 179);
-            var flags = Drawer.Flags;
+            var flags = Draw.Flags;
 
             if (flags.IsSet(DrawFlag.DrawShape))
             {
@@ -1455,7 +1455,7 @@ namespace Box2DSharp.Dynamics
                 var node = JointList.First;
                 while (node != null)
                 {
-                    node.Value.Draw(Drawer);
+                    node.Value.Draw(Draw);
                     node = node.Next;
                 }
             }
@@ -1472,7 +1472,7 @@ namespace Box2DSharp.Dynamics
                     var cA = fixtureA.GetAABB(c.ChildIndexA).GetCenter();
                     var cB = fixtureB.GetAABB(c.ChildIndexB).GetCenter();
 
-                    Drawer.DrawSegment(cA, cB, color);
+                    Draw.DrawSegment(cA, cB, color);
                 }
             }
 
@@ -1501,7 +1501,7 @@ namespace Box2DSharp.Dynamics
                             vs[1] = new Vector2(aabb.UpperBound.X, aabb.LowerBound.Y);
                             vs[2] = new Vector2(aabb.UpperBound.X, aabb.UpperBound.Y);
                             vs[3] = new Vector2(aabb.LowerBound.X, aabb.UpperBound.Y);
-                            Drawer.DrawPolygon(vs, 4, color);
+                            Draw.DrawPolygon(vs, 4, color);
                         }
                     }
                 }
@@ -1516,7 +1516,7 @@ namespace Box2DSharp.Dynamics
                     node = node.Next;
                     var xf = b.GetTransform();
                     xf.Position = b.GetWorldCenter();
-                    Drawer.DrawTransform(xf);
+                    Draw.DrawTransform(xf);
                 }
             }
         }
@@ -1537,7 +1537,7 @@ namespace Box2DSharp.Dynamics
                 var radius = circle.Radius;
                 var axis = MathUtils.Mul(xf.Rotation, new Vector2(1.0f, 0.0f));
 
-                Drawer.DrawSolidCircle(center, radius, axis, color);
+                Draw.DrawSolidCircle(center, radius, axis, color);
             }
                 break;
 
@@ -1545,12 +1545,12 @@ namespace Box2DSharp.Dynamics
             {
                 var v1 = MathUtils.Mul(xf, edge.Vertex1);
                 var v2 = MathUtils.Mul(xf, edge.Vertex2);
-                Drawer.DrawSegment(v1, v2, color);
+                Draw.DrawSegment(v1, v2, color);
 
                 if (edge.OneSided == false)
                 {
-                    Drawer.DrawPoint(v1, 4.0f, color);
-                    Drawer.DrawPoint(v2, 4.0f, color);
+                    Draw.DrawPoint(v1, 4.0f, color);
+                    Draw.DrawPoint(v2, 4.0f, color);
                 }
             }
                 break;
@@ -1564,7 +1564,7 @@ namespace Box2DSharp.Dynamics
                 for (var i = 1; i < count; ++i)
                 {
                     var v2 = MathUtils.Mul(xf, vertices[i]);
-                    Drawer.DrawSegment(v1, v2, color);
+                    Draw.DrawSegment(v1, v2, color);
                     v1 = v2;
                 }
             }
@@ -1581,7 +1581,7 @@ namespace Box2DSharp.Dynamics
                     vertices[i] = MathUtils.Mul(xf, poly.Vertices[i]);
                 }
 
-                Drawer.DrawSolidPolygon(vertices, vertexCount, color);
+                Draw.DrawSolidPolygon(vertices, vertexCount, color);
             }
                 break;
             }

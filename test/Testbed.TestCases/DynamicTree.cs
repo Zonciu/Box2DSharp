@@ -136,24 +136,24 @@ namespace Testbed.TestCases
                     c = Color.FromArgb(0.6f, 0.6f, 0.9f);
                 }
 
-                Drawer.DrawAABB(actor.AABB, c);
+                Draw.DrawAABB(actor.AABB, c);
             }
 
             c = Color.FromArgb(0.7f, 0.7f, 0.7f);
-            Drawer.DrawAABB(_queryAABB, c);
+            Draw.DrawAABB(_queryAABB, c);
 
-            Drawer.DrawSegment(_rayCastInput.P1, _rayCastInput.P2, c);
+            Draw.DrawSegment(_rayCastInput.P1, _rayCastInput.P2, c);
 
             var c1 = Color.FromArgb(0.2f, 0.9f, 0.2f);
             var c2 = Color.FromArgb(0.9f, 0.2f, 0.2f);
-            Drawer.DrawPoint(_rayCastInput.P1, 6.0f, c1);
-            Drawer.DrawPoint(_rayCastInput.P2, 6.0f, c2);
+            Draw.DrawPoint(_rayCastInput.P1, 6.0f, c1);
+            Draw.DrawPoint(_rayCastInput.P2, 6.0f, c2);
 
             if (_rayActor != null)
             {
                 var cr = Color.FromArgb(0.2f, 0.2f, 0.9f);
                 var p = _rayCastInput.P1 + _rayActor.Fraction * (_rayCastInput.P2 - _rayCastInput.P1);
-                Drawer.DrawPoint(p, 6.0f, cr);
+                Draw.DrawPoint(p, 6.0f, cr);
             }
 
             {
@@ -161,17 +161,6 @@ namespace Testbed.TestCases
                 DrawString($"dynamic tree height = {height}");
             }
         }
-
-        // public void DrawAABB(AABB aabb, Color color)
-        // {
-        //     var vs = new Vector2 [4];
-        //     vs[0].Set(aabb.LowerBound.X, aabb.LowerBound.Y);
-        //     vs[1].Set(aabb.UpperBound.X, aabb.LowerBound.Y);
-        //     vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y);
-        //     vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y);
-        //
-        //     Drawer.DrawPolygon(vs, 4, color);
-        // }
 
         public bool QueryCallback(int proxyId)
         {

@@ -533,7 +533,7 @@ namespace Box2DSharp.Dynamics.Joints
         }
 
         /// <inheritdoc />
-        public override void Draw(IDrawer drawer)
+        public override void Draw(IDraw draw)
         {
             var xfA = BodyA.GetTransform();
             var xfB = BodyB.GetTransform();
@@ -546,8 +546,8 @@ namespace Box2DSharp.Dynamics.Joints
             var c4 = Color.FromArgb(0.3f, 0.3f, 0.9f);
             var c5 = Color.FromArgb(0.4f, 0.4f, 0.4f);
 
-            drawer.DrawPoint(pA, 5.0f, c4);
-            drawer.DrawPoint(pB, 5.0f, c5);
+            draw.DrawPoint(pA, 5.0f, c4);
+            draw.DrawPoint(pB, 5.0f, c5);
 
             var aA = BodyA.GetAngle();
             var aB = BodyB.GetAngle();
@@ -556,22 +556,22 @@ namespace Box2DSharp.Dynamics.Joints
             var L = 0.5f;
 
             var r = L * new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
-            drawer.DrawSegment(pB, pB + r, c1);
-            drawer.DrawCircle(pB, L, c1);
+            draw.DrawSegment(pB, pB + r, c1);
+            draw.DrawCircle(pB, L, c1);
 
             if (_enableLimit)
             {
                 var rlo = L * new Vector2((float)Math.Cos(_lowerAngle), (float)Math.Cos(_lowerAngle));
                 var rhi = L * new Vector2((float)Math.Cos(_upperAngle), (float)Math.Cos(_upperAngle));
 
-                drawer.DrawSegment(pB, pB + rlo, c2);
-                drawer.DrawSegment(pB, pB + rhi, c3);
+                draw.DrawSegment(pB, pB + rlo, c2);
+                draw.DrawSegment(pB, pB + rhi, c3);
             }
 
             var color = Color.FromArgb(0.5f, 0.8f, 0.8f);
-            drawer.DrawSegment(xfA.Position, pA, color);
-            drawer.DrawSegment(pA, pB, color);
-            drawer.DrawSegment(xfB.Position, pB, color);
+            draw.DrawSegment(xfA.Position, pA, color);
+            draw.DrawSegment(pA, pB, color);
+            draw.DrawSegment(xfB.Position, pB, color);
         }
     }
 }

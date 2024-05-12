@@ -91,19 +91,19 @@ namespace Testbed.TestCases
                     v[i] = MathUtils.Mul(_transformA, _polygonA.Vertices[i]);
                 }
 
-                Drawer.DrawPolygon(v, _polygonA.Count, color);
+                Draw.DrawPolygon(v, _polygonA.Count, color);
 
                 for (var i = 0; i < _polygonB.Count; ++i)
                 {
                     v[i] = MathUtils.Mul(_transformB, _polygonB.Vertices[i]);
                 }
 
-                Drawer.DrawPolygon(v, _polygonB.Count, color);
+                Draw.DrawPolygon(v, _polygonB.Count, color);
             }
 
             for (var i = 0; i < manifold.PointCount; ++i)
             {
-                Drawer.DrawPoint(worldManifold.Points[i], 4.0f, Color.FromArgb(230, 77, 77));
+                Draw.DrawPoint(worldManifold.Points[i], 4.0f, Color.FromArgb(230, 77, 77));
             }
         }
     }

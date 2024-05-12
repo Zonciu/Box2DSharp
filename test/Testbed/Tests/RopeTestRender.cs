@@ -158,8 +158,8 @@ namespace Testbed.Tests
 
             ImGui.End();
 
-            Rope1.Draw(Drawer);
-            Rope2.Draw(Drawer);
+            Rope1.Draw(Draw);
+            Rope2.Draw(Draw);
 
             DrawString("Press comma and period to move left and right");
             base.OnRender();

@@ -25,7 +25,7 @@ namespace Box2DSharp.Testbed.Unity
 
         private void UpdateText()
         {
-            if (_game.DebugDrawer.ShowUI)
+            if (_game.DebugDraw.ShowUI)
             {
                 ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
                 ImGui.SetNextWindowSize(new Vector2(Global.Camera.Width, Global.Camera.Height));
@@ -35,7 +35,7 @@ namespace Box2DSharp.Testbed.Unity
                 var (category, name, _) = Global.Tests[Global.Settings.TestIndex];
                 _game.Test?.DrawTitle($"{category} : {name}");
 
-                while (_game.DebugDrawer.Texts.TryDequeue(out var text))
+                while (_game.DebugDraw.Texts.TryDequeue(out var text))
                 {
                     ImGui.Begin("Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar);
                     ImGui.SetCursorPos(text.Position.ToUnityVector2());
@@ -48,13 +48,13 @@ namespace Box2DSharp.Testbed.Unity
         public void UpdateUI()
         {
             const int MenuWidth = 180;
-            if (_game.DebugDrawer.ShowUI)
+            if (_game.DebugDraw.ShowUI)
             {
                 _game.Test.Render();
                 ImGui.SetNextWindowPos(new Vector2((float)Global.Camera.Width - MenuWidth - 10, 10));
                 ImGui.SetNextWindowSize(new Vector2(MenuWidth, (float)Global.Camera.Height - 20));
 
-                ImGui.Begin("Tools", ref _game.DebugDrawer.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
+                ImGui.Begin("Tools", ref _game.DebugDraw.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
 
                 if (ImGui.BeginTabBar("ControlTabs", ImGuiTabBarFlags.None))
                 {

@@ -14,7 +14,7 @@ namespace Testbed.TestCases
     {
         private const int MaxCount = 4;
 
-        private readonly IDrawer _drawer;
+        private readonly IDraw _draw;
 
         public CircleShape Circle = new CircleShape();
 
@@ -22,9 +22,9 @@ namespace Testbed.TestCases
 
         public Transform Transform = new Transform();
 
-        public PolyShapesCallback(IDrawer drawer)
+        public PolyShapesCallback(IDraw draw)
         {
-            _drawer = drawer;
+            _draw = draw;
             Count = 0;
         }
 
@@ -53,7 +53,7 @@ namespace Testbed.TestCases
             {
                 var color = Box2DSharp.Common.Color.FromArgb(0.95f, 0.95f, 0.6f);
                 var center = body.GetWorldCenter();
-                _drawer.DrawPoint(center, 5.0f, color);
+                _draw.DrawPoint(center, 5.0f, color);
                 ++Count;
             }
 
@@ -252,7 +252,7 @@ namespace Testbed.TestCases
             DrawString("Press 'a' to (de)activate some bodies");
             DrawString("Press 'd' to destroy a body");
 
-            var callback = new PolyShapesCallback(Drawer) {Circle = {Radius = 2.0f}};
+            var callback = new PolyShapesCallback(Draw) {Circle = {Radius = 2.0f}};
             callback.Circle.Position.Set(0.0f, 1.1f);
             callback.Circle.ComputeAABB(out var aabb, callback.Transform, 0);
             callback.Transform.SetIdentity();
@@ -260,7 +260,7 @@ namespace Testbed.TestCases
             World.QueryAABB(callback, aabb);
 
             var color = Color.FromArgb(102, 178, 204);
-            Drawer.DrawCircle(callback.Circle.Position, callback.Circle.Radius, color);
+            Draw.DrawCircle(callback.Circle.Position, callback.Circle.Radius, color);
         }
     }
 }

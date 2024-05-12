@@ -21,9 +21,9 @@ namespace Box2DSharp.Testbed.Unity
 
         public FixedUpdate FixedUpdate;
 
-        public UnityDrawer UnityDrawer;
+        public UnityDraw unityDraw;
 
-        public DebugDrawer DebugDrawer;
+        public DebugDraw DebugDraw;
 
         public UnityTestSettings Settings;
 
@@ -75,9 +75,9 @@ namespace Box2DSharp.Testbed.Unity
             UnityInput = new UnityInput();
             Global.Input = UnityInput;
 
-            UnityDrawer = UnityDrawer.GetDrawer();
-            DebugDrawer = new DebugDrawer {Drawer = UnityDrawer};
-            Global.DebugDrawer = DebugDrawer;
+            unityDraw = UnityDraw.GetDraw();
+            DebugDraw = new DebugDraw { Draw = unityDraw };
+            Global.DebugDraw = DebugDraw;
 
             GUIController = new GUIController(this);
 
@@ -192,9 +192,9 @@ namespace Box2DSharp.Testbed.Unity
             if (Test != null)
             {
                 Test.Input = Global.Input;
-                Test.Drawer = Global.DebugDrawer;
+                Test.Draw = Global.DebugDraw;
                 Test.TestSettings = Global.Settings;
-                Test.World.Drawer = Global.DebugDrawer;
+                Test.World.Draw = Global.DebugDraw;
             }
         }
 
@@ -306,7 +306,7 @@ namespace Box2DSharp.Testbed.Unity
             }
             else if (key.tabKey.wasPressedThisFrame)
             {
-                DebugDrawer.ShowUI = !DebugDrawer.ShowUI;
+                DebugDraw.ShowUI = !DebugDraw.ShowUI;
             }
             else if (key.escapeKey.wasPressedThisFrame)
             {

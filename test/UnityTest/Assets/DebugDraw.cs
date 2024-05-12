@@ -13,9 +13,9 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Box2DSharp.Testbed.Unity
 {
-    public class DebugDrawer : IDebugDrawer
+    public class DebugDraw : IDebugDraw
     {
-        public UnityDrawer Drawer;
+        public UnityDraw Draw;
 
         /// <inheritdoc />
         public DrawFlag Flags { get; set; }
@@ -39,7 +39,7 @@ namespace Box2DSharp.Testbed.Unity
                 }
             }
 
-            Drawer.PostLines(list, color.ToUnityColor());
+            Draw.PostLines(list, color.ToUnityColor());
         }
 
         /// <inheritdoc />
@@ -59,7 +59,7 @@ namespace Box2DSharp.Testbed.Unity
                 }
             }
 
-            Drawer.PostLines(list, color.ToUnityColor());
+            Draw.PostLines(list, color.ToUnityColor());
         }
 
         /// <inheritdoc />
@@ -80,7 +80,7 @@ namespace Box2DSharp.Testbed.Unity
                     ));
             }
 
-            Drawer.PostLines(lines, color.ToUnityColor());
+            Draw.PostLines(lines, color.ToUnityColor());
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace Box2DSharp.Testbed.Unity
                     ));
             }
 
-            Drawer.PostLines(lines, color.ToUnityColor());
+            Draw.PostLines(lines, color.ToUnityColor());
             var p = center + radius * axis;
             DrawSegment(center, p, color);
         }
@@ -109,7 +109,7 @@ namespace Box2DSharp.Testbed.Unity
         /// <inheritdoc />
         public void DrawSegment(in Vector2 p1, in Vector2 p2, in Color color)
         {
-            Drawer.PostLines(
+            Draw.PostLines(
                 new List<(Vector3, Vector3)> {(p1.ToUnityVector2(), p2.ToUnityVector2())},
                 color.ToUnityColor());
         }
@@ -122,12 +122,12 @@ namespace Box2DSharp.Testbed.Unity
             var p1 = xf.Position;
             var p2 = p1 + axisScale * xf.Rotation.GetXAxis();
 
-            Drawer.PostLines(
+            Draw.PostLines(
                 new List<(Vector3, Vector3)> {(p1.ToUnityVector2(), p2.ToUnityVector2())},
                 UnityEngine.Color.red);
 
             p2 = p1 + axisScale * xf.Rotation.GetYAxis();
-            Drawer.PostLines(
+            Draw.PostLines(
                 new List<(Vector3 begin, Vector3 end)> {(p1.ToUnityVector2(), p2.ToUnityVector2())},
                 UnityEngine.Color.green);
         }
@@ -135,7 +135,7 @@ namespace Box2DSharp.Testbed.Unity
         /// <inheritdoc />
         public void DrawPoint(in Vector2 p, float size, in Color color)
         {
-            Drawer.PostPoint((p.ToUnityVector3(), size / 100, color.ToUnityColor()));
+            Draw.PostPoint((p.ToUnityVector3(), size / 100, color.ToUnityColor()));
         }
 
         /// <inheritdoc />

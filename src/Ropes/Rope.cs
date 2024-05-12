@@ -741,7 +741,7 @@ namespace Box2DSharp.Ropes
             }
         }
 
-        public void Draw(IDrawer draw)
+        public void Draw(IDraw draw)
         {
             var c = Color.FromArgb(0.4f, 0.5f, 0.7f);
 

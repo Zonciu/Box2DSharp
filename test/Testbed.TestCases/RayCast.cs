@@ -250,14 +250,14 @@ namespace Testbed.TestCases
 
                 if (callback.Hit)
                 {
-                    Drawer.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
-                    Drawer.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
+                    Draw.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
+                    Draw.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
                     var head = callback.Point + 0.5f * callback.Normal;
-                    Drawer.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
+                    Draw.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
                 }
                 else
                 {
-                    Drawer.DrawSegment(point1, point2, Color.FromArgb(102, 204, 204));
+                    Draw.DrawSegment(point1, point2, Color.FromArgb(102, 204, 204));
                 }
 
                 break;
@@ -270,14 +270,14 @@ namespace Testbed.TestCases
 
                 if (callback.Hit)
                 {
-                    Drawer.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
-                    Drawer.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
+                    Draw.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
+                    Draw.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
                     var head = callback.Point + 0.5f * callback.Normal;
-                    Drawer.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
+                    Draw.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
                 }
                 else
                 {
-                    Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
+                    Draw.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
                 }
 
                 break;
@@ -287,16 +287,16 @@ namespace Testbed.TestCases
             {
                 var callback = new RayCastMultipleCallback();
                 World.RayCast(callback, point1, point2);
-                Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
+                Draw.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
 
                 for (var i = 0; i < callback.Count; ++i)
                 {
                     var p = callback.Points[i];
                     var n = callback.Normals[i];
-                    Drawer.DrawPoint(p, 5.0f, Color.FromArgb(102, 230, 102));
-                    Drawer.DrawSegment(point1, p, Color.FromArgb(204, 204, 204));
+                    Draw.DrawPoint(p, 5.0f, Color.FromArgb(102, 230, 102));
+                    Draw.DrawSegment(point1, p, Color.FromArgb(204, 204, 204));
                     var head = p + 0.5f * n;
-                    Drawer.DrawSegment(p, head, Color.FromArgb(230, 230, 102));
+                    Draw.DrawSegment(p, head, Color.FromArgb(230, 230, 102));
                 }
 
                 break;

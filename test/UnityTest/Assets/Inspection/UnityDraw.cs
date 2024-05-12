@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 namespace Box2DSharp.Testbed.Unity.Inspection
 {
     [ExecuteInEditMode]
-    public class UnityDrawer : MonoBehaviour
+    public class UnityDraw : MonoBehaviour
     {
         private const string SceneCameraName = "SceneCamera";
 
@@ -23,12 +23,12 @@ namespace Box2DSharp.Testbed.Unity.Inspection
 
         private StringBuilder _stringBuilder = new StringBuilder();
         
-        public static UnityDrawer GetDrawer()
+        public static UnityDraw GetDraw()
         {
-            var drawLines = FindObjectOfType<UnityDrawer>();
+            var drawLines = FindObjectOfType<UnityDraw>();
             if (drawLines == default)
             {
-                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<UnityDrawer>();
+                drawLines = GameObject.FindWithTag(MainCameraTag).AddComponent<UnityDraw>();
             }
 
             return drawLines;

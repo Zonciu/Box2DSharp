@@ -68,7 +68,7 @@ namespace Testbed.TestCases
                 vertices[i] = MathUtils.Mul(transformA, _shapeA.Vertices[i]);
             }
 
-            Drawer.DrawPolygon(vertices, _shapeA.Count, Color.FromArgb(230, 230, 230));
+            Draw.DrawPolygon(vertices, _shapeA.Count, Color.FromArgb(230, 230, 230));
 
             sweepB.GetTransform(out var transformB, 0.0f);
 
@@ -79,7 +79,7 @@ namespace Testbed.TestCases
                 vertices[i] = MathUtils.Mul(transformB, _shapeB.Vertices[i]);
             }
 
-            Drawer.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(127, 230, 127));
+            Draw.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(127, 230, 127));
 
             sweepB.GetTransform(out transformB, output.Time);
 
@@ -88,7 +88,7 @@ namespace Testbed.TestCases
                 vertices[i] = MathUtils.Mul(transformB, _shapeB.Vertices[i]);
             }
 
-            Drawer.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(127, 178, 230));
+            Draw.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(127, 178, 230));
 
             sweepB.GetTransform(out transformB, 1.0f);
 
@@ -97,7 +97,7 @@ namespace Testbed.TestCases
                 vertices[i] = MathUtils.Mul(transformB, _shapeB.Vertices[i]);
             }
 
-            Drawer.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(230, 127, 127));
+            Draw.DrawPolygon(vertices, _shapeB.Count, Color.FromArgb(230, 127, 127));
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Testbed.Abstractions
 
         public int StepCount;
 
-        public IDebugDrawer Drawer;
+        public IDebugDraw Draw;
 
         public IInput Input;
 
@@ -157,13 +157,13 @@ namespace Testbed.Abstractions
         public void DrawString(string text)
         {
             //_stringBuilder.AppendLine(text);
-            Drawer.DrawString(5, _textLine, text);
+            Draw.DrawString(5, _textLine, text);
             _textLine += _textIncrement;
         }
 
         public void DrawTitle(string title)
         {
-            Drawer.DrawString(5, 5, title);
+            Draw.DrawString(5, 5, title);
             _textLine = 26;
         }
 
@@ -261,7 +261,7 @@ namespace Testbed.Abstractions
                 flags |= DrawFlag.DrawContactPoint;
             }
 
-            Drawer.Flags = flags;
+            Draw.Flags = flags;
             World.DebugDraw();
             if (TestSettings.DrawContactPoints)
             {
@@ -273,25 +273,25 @@ namespace Testbed.Abstractions
                     if (point.State == PointState.AddState)
                     {
                         // Add
-                        Drawer.DrawPoint(point.Position, 10f, Color.FromArgb(77, 242, 77));
+                        Draw.DrawPoint(point.Position, 10f, Color.FromArgb(77, 242, 77));
                     }
                     else if (point.State == PointState.PersistState)
                     {
                         // Persist
-                        Drawer.DrawPoint(point.Position, 5f, Color.FromArgb(77, 77, 242));
+                        Draw.DrawPoint(point.Position, 5f, Color.FromArgb(77, 77, 242));
                     }
 
                     if (TestSettings.DrawContactNormals)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + AxisScale * point.Normal;
-                        Drawer.DrawSegment(p1, p2, Color.FromArgb(230, 230, 230));
+                        Draw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 230));
                     }
                     else if (TestSettings.DrawContactImpulse)
                     {
                         var p1 = point.Position;
                         var p2 = p1 + ImpulseScale * point.NormalImpulse * point.Normal;
-                        Global.DebugDrawer.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
+                        Global.DebugDraw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
                     }
 
                     if (TestSettings.DrawFrictionImpulse)
@@ -299,15 +299,15 @@ namespace Testbed.Abstractions
                         var tangent = MathUtils.Cross(point.Normal, 1.0f);
                         var p1 = point.Position;
                         var p2 = p1 + ImpulseScale * point.TangentImpulse * tangent;
-                        Drawer.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
+                        Draw.DrawSegment(p1, p2, Color.FromArgb(230, 230, 77));
                     }
                 }
             }
 
             if (BombSpawning)
             {
-                Drawer.DrawPoint(BombSpawnPoint, 4.0f, Color.Blue);
-                Drawer.DrawSegment(MouseWorld, BombSpawnPoint, Color.FromArgb(203, 203, 203));
+                Draw.DrawPoint(BombSpawnPoint, 4.0f, Color.Blue);
+                Draw.DrawSegment(MouseWorld, BombSpawnPoint, Color.FromArgb(203, 203, 203));
             }
         }
 

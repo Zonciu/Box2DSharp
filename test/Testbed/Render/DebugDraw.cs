@@ -9,7 +9,7 @@ using Vector4 = System.Numerics.Vector4;
 
 namespace Testbed.Render
 {
-    public class DebugDrawer : IDebugDrawer
+    public class DebugDraw : IDebugDraw
     {
         /// <inheritdoc />
         public DrawFlag Flags { get; set; }

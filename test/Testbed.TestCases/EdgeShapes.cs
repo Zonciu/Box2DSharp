@@ -185,14 +185,14 @@ namespace Testbed.TestCases
 
             if (callback.Fixture != null)
             {
-                Drawer.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
-                Drawer.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
+                Draw.DrawPoint(callback.Point, 5.0f, Color.FromArgb(102, 230, 102));
+                Draw.DrawSegment(point1, callback.Point, Color.FromArgb(204, 204, 204));
                 var head = callback.Point + 0.5f * callback.Normal;
-                Drawer.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
+                Draw.DrawSegment(callback.Point, head, Color.FromArgb(230, 230, 102));
             }
             else
             {
-                Drawer.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
+                Draw.DrawSegment(point1, point2, Color.FromArgb(204, 204, 204));
             }
 
             if (advanceRay)

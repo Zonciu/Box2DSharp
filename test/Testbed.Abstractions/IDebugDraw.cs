@@ -4,7 +4,7 @@ using Box2DSharp.Common;
 
 namespace Testbed.Abstractions
 {
-    public interface IDebugDrawer : IDrawer
+    public interface IDebugDraw : IDraw
     {
         void DrawAABB(AABB aabb, Color color);
 

@@ -7,7 +7,7 @@ namespace Testbed.Abstractions
 {
     public static class Global
     {
-        public static IDebugDrawer DebugDrawer { get; set; }
+        public static IDebugDraw DebugDraw { get; set; }
 
         public static readonly Camera Camera = new Camera();
 
