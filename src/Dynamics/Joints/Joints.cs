@@ -306,8 +306,8 @@ namespace Box2DSharp.Dynamics.Joints
             Body bodyA,
             Body bodyB)
         {
-            var IA = bodyA.Inertia;
-            var IB = bodyB.Inertia;
+            var IA = bodyA.GetInertia();
+            var IB = bodyB.GetInertia();
             float I;
             if (IA > 0.0f && IB > 0.0f)
             {

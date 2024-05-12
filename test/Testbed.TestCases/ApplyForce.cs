@@ -97,7 +97,7 @@ namespace Testbed.TestCases
                 _body.CreateFixture(sd2);
 
                 var gravity = 10.0f;
-                var I = _body.Inertia;
+                var I = _body.GetInertia();
                 var mass = _body.Mass;
 
                 // Compute an effective radius that can be used to
@@ -137,7 +137,7 @@ namespace Testbed.TestCases
                     body.CreateFixture(fd);
 
                     var gravity = 10.0f;
-                    var I = body.Inertia;
+                    var I = body.GetInertia();
                     var mass = body.Mass;
 
                     // For a circle: I = 0.5 * m * r * r ==> r = sqrt(2 * I / m)
