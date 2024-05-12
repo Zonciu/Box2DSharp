@@ -131,7 +131,6 @@ namespace Testbed.Abstractions
                 PreStep();
                 World.Step(1 / TestSettings.Hertz, TestSettings.VelocityIterations, TestSettings.PositionIterations);
                 PostStep();
-                ++StepCount;
             }
         }
 

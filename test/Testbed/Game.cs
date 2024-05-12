@@ -172,6 +172,7 @@ namespace Testbed
             Util.CheckGLError("End of frame");
             SwapBuffers();
             base.OnRenderFrame(e);
+            Test.StepCount++;
         }
 
         private void UpdateText()
