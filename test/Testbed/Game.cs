@@ -161,7 +161,6 @@ namespace Testbed
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             UpdateText();
             UpdateUI();
-            Test.Render();
             if (DebugDraw.ShowUI)
             {
                 DebugDraw.DrawString(5, Global.Camera.Height - 60, $"steps: {Test.StepCount}");
@@ -169,14 +168,14 @@ namespace Testbed
                 DebugDraw.DrawString(5, Global.Camera.Height - 20, $"{GetFps(_frameTime / 10000f)} fps");
             }
 
-            DebugDraw.Flush();
+            Test.Render();
 
+            DebugDraw.Flush();
             _controller.Render();
 
             Util.CheckGLError("End of frame");
             SwapBuffers();
             base.OnRenderFrame(e);
-            Test.StepCount++;
         }
 
         private void UpdateText()

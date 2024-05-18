@@ -44,6 +44,8 @@ namespace Testbed.Abstractions
 
         public IInput Input;
 
+        public float TimeStep;
+
         protected TestBase()
         {
             Regex.Replace(GetType().Name, @"(\B[A-Z])", " $1");
@@ -106,32 +108,30 @@ namespace Testbed.Abstractions
 
         public void Step()
         {
+            TimeStep = TestSettings.Hertz > 0.0f ? 1.0f / TestSettings.Hertz : 0f;
+
             if (TestSettings.Pause)
             {
                 if (TestSettings.SingleStep)
                 {
                     TestSettings.SingleStep = false;
-                    WorldStep();
+                }
+                else
+                {
+                    TimeStep = 0;
                 }
             }
-            else
-            {
-                WorldStep();
-            }
 
-            void WorldStep()
-            {
-                World.AllowSleep = TestSettings.EnableSleep;
-                World.WarmStarting = TestSettings.EnableWarmStarting;
-                World.ContinuousPhysics = TestSettings.EnableContinuous;
-                World.SubStepping = TestSettings.EnableSubStepping;
+            World.AllowSleep = TestSettings.EnableSleep;
+            World.WarmStarting = TestSettings.EnableWarmStarting;
+            World.ContinuousPhysics = TestSettings.EnableContinuous;
+            World.SubStepping = TestSettings.EnableSubStepping;
 
-                PointsCount = 0;
+            PointsCount = 0;
 
-                PreStep();
-                World.Step(1 / TestSettings.Hertz, TestSettings.VelocityIterations, TestSettings.PositionIterations);
-                PostStep();
-            }
+            PreStep();
+            World.Step(TimeStep, TestSettings.VelocityIterations, TestSettings.PositionIterations);
+            PostStep();
         }
 
         #endregion
@@ -231,6 +231,10 @@ namespace Testbed.Abstractions
 
             OnRender();
             DrawWorld();
+            if (TimeStep > 0)
+            {
+                ++StepCount;
+            }
         }
 
         private void DrawWorld()
@@ -536,7 +540,7 @@ namespace Testbed.Abstractions
             Bomb = World.CreateBody(bd);
             Bomb.SetLinearVelocity(velocity);
 
-            var circle = new CircleShape {Radius = 0.3f};
+            var circle = new CircleShape { Radius = 0.3f };
 
             var fd = new FixtureDef
             {
