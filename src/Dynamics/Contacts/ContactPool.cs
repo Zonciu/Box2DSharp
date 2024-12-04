@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -23,7 +22,7 @@ namespace Box2DSharp.Dynamics.Contacts
         public ContactPool(int capacity = 256)
         {
             _capacity = capacity;
-            _objects = ArrayPool<T>.Shared.Rent(_capacity);
+            _objects = new T[_capacity];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,21 +51,14 @@ namespace Box2DSharp.Dynamics.Contacts
             { }
 
             item.Reset();
-            if (_total < _capacity)
+            if (_total >= _capacity)
             {
-                _objects[_total] = item;
-                ++_total;
-            }
-            else
-            {
-                var old = _objects;
                 _capacity *= 2;
-                _objects = ArrayPool<T>.Shared.Rent(_capacity);
-                Array.Copy(old, _objects, _total);
-                ArrayPool<T>.Shared.Return(old, true);
-                _objects[_total] = item;
-                ++_total;
+                Array.Resize(ref _objects, _capacity);
             }
+
+            _objects[_total] = item;
+            ++_total;
 
             Interlocked.Exchange(ref _lock, Unlocked);
         }
