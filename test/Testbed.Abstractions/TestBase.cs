@@ -56,6 +56,9 @@ namespace Testbed.Abstractions
             DumpLogger.Instance = new InternalDumpLogger();
         }
 
+        public virtual void OnInitialize()
+        { }
+
         #region Step
 
         public virtual void BeginContact(Contact contact)
