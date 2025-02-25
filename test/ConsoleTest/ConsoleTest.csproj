@@ -3,9 +3,8 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>12</LangVersion>
-        <RootNamespace>NETCoreTest</RootNamespace>
-        <TargetFrameworks>net8.0;</TargetFrameworks>
+        <LangVersion>13</LangVersion>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

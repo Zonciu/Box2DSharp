@@ -1,14 +1,16 @@
-﻿using Box2DSharp.Dynamics;
-using Box2DSharp.Dynamics.Contacts;
+﻿using System.Runtime.CompilerServices;
 
-namespace Box2DSharp.Common
+namespace Box2DSharp
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class EnumExtensions
     {
-        public static bool IsSet(this BodyFlags self, BodyFlags flag) => (self & flag) == flag;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsSet(this ContactSimFlags self, ContactSimFlags flag) => (self & flag) == flag;
 
-        public static bool IsSet(this DrawFlag self, DrawFlag flag) => (self & flag) == flag;
-
-        public static bool IsSet(this Contact.ContactFlag self, Contact.ContactFlag flag) => (self & flag) == flag;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsSet(this ContactFlags self, ContactFlags flag) => (self & flag) == flag;
     }
 }

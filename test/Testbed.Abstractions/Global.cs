@@ -7,30 +7,30 @@ namespace Testbed.Abstractions
 {
     public static class Global
     {
-        public static IDebugDraw DebugDraw { get; set; }
+        public static IDraw Draw { get; set; }
 
         public static readonly Camera Camera = new Camera();
 
-        public static TestSettings Settings { get; set; }
+        public static Settings Settings { get; set; }
 
         public static IInput Input { get; set; }
 
-        public static List<(string Category, string Name, Type TestType)> Tests { get; private set; }
+        public static List<(string Category, string Name, Type SampleType)> Samples { get; private set; }
 
-        public static void SetupTestCases(List<Type> testTypes)
+        public static void SetupSamples(List<Type> testTypes)
         {
-            var testBaseType = typeof(TestBase);
-            Tests = testTypes
-                   .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract)
-                   .Select(
-                        e =>
-                        {
-                            var testCase = e.GetCustomAttribute<TestCaseAttribute>() ?? throw new NullReferenceException(e.Name);
-                            return (testCase.Category, testCase.Name, e);
-                        })
-                   .OrderBy(e => e.Category)
-                   .ThenBy(e => e.Name)
-                   .ToList();
+            var testBaseType = typeof(SampleBase);
+            Samples = testTypes
+                     .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract)
+                     .Select(
+                          e =>
+                          {
+                              var sample = e.GetCustomAttribute<SampleAttribute>() ?? throw new NullReferenceException(e.Name);
+                              return (sample.Category, sample.Name, e);
+                          })
+                     .OrderBy(e => e.Category)
+                     .ThenBy(e => e.Name)
+                     .ToList();
         }
     }
 }

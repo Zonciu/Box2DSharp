@@ -22,9 +22,9 @@ namespace Testbed.Gui
 
         public int Program { get; private set; }
 
-        private readonly Dictionary<string, int> _uniformToLocation = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> _uniformToLocation = new();
 
-        private bool _initialized = false;
+        private bool _initialized;
 
         public Shader(string name, string vertexShader, string fragmentShader)
         {
@@ -68,7 +68,6 @@ namespace Testbed.Gui
                     Size = size,
                     Type = type
                 };
-                ;
             }
 
             return uniforms;

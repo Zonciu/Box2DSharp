@@ -8,7 +8,7 @@ namespace Testbed
 {
     public static class TestSettingHelper
     {
-        public static void Save(TestSettings settings)
+        public static void Save(Settings settings)
         {
             var json = JsonConvert.SerializeObject(
                 settings,
@@ -20,17 +20,17 @@ namespace Testbed
             File.WriteAllText("settings.ini", json);
         }
 
-        public static TestSettings Load()
+        public static Settings Load()
         {
             try
             {
                 var json = File.ReadAllText("settings.ini");
-                return JsonConvert.DeserializeObject<TestSettings>(json);
+                return JsonConvert.DeserializeObject<Settings>(json) ?? new();
             }
             catch (Exception)
             {
                 // ignored error, retuen default setting
-                return new TestSettings();
+                return new Settings();
             }
         }
     }

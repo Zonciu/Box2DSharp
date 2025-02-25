@@ -157,6 +157,7 @@ namespace Testbed
             KeyMap[KeyCodes.Y] = Keys.Y;
             KeyMap[KeyCodes.Z] = Keys.Z;
 
+            KeyMap[KeyCodes.Space] = Keys.Space;
             KeyMap[KeyCodes.Comma] = Keys.Comma;
             KeyMap[KeyCodes.Period] = Keys.Period;
             KeyMap[KeyCodes.LeftControl] = Keys.LeftControl;

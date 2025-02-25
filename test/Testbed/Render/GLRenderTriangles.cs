@@ -6,9 +6,29 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed.Render
 {
-    public class GLRenderTriangles
+    public class GLRenderTriangles : IDisposable
     {
-        public void Create()
+        private const int MaxVertices = 3 * 2048;
+
+        private readonly Vector2[] _vertices = new Vector2[MaxVertices];
+
+        private readonly Color4[] _colors = new Color4[MaxVertices];
+
+        private int _count;
+
+        private int _vaoId;
+
+        private readonly int[] _vboIds = new int[2];
+
+        private int _programId;
+
+        private int _projectionUniform;
+
+        private int _vertexAttribute;
+
+        private int _colorAttribute;
+
+        public GLRenderTriangles()
         {
             const string VertexShaderSource =
                 @"#version 330
@@ -31,7 +51,7 @@ namespace Testbed.Render
             	color = f_color;
             }";
 
-            _programId = RenderHelper.CreateShaderProgram(VertexShaderSource, FragmentShaderSource);
+            _programId = RenderHelper.CreateProgramFromStrings(VertexShaderSource, FragmentShaderSource);
             _projectionUniform = GL.GetUniformLocation(_programId, "projectionMatrix");
             _vertexAttribute = 0;
             _colorAttribute = 1;
@@ -62,7 +82,7 @@ namespace Testbed.Render
             _count = 0;
         }
 
-        public void Destroy()
+        public void Dispose()
         {
             if (_vaoId != 0)
             {
@@ -125,25 +145,5 @@ namespace Testbed.Render
 
             _count = 0;
         }
-
-        private const int MaxVertices = 3 * 512;
-
-        private readonly Vector2[] _vertices = new Vector2[MaxVertices];
-
-        private readonly Color4[] _colors = new Color4[MaxVertices];
-
-        private int _count;
-
-        private int _vaoId;
-
-        private readonly int[] _vboIds = new int[2];
-
-        private int _programId;
-
-        private int _projectionUniform;
-
-        private int _vertexAttribute;
-
-        private int _colorAttribute;
     }
 }

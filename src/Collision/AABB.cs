@@ -1,231 +1,247 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using Box2DSharp.Collision.Collider;
-using Box2DSharp.Common;
 
-namespace Box2DSharp.Collision
+namespace Box2DSharp
 {
     /// <summary>
-    ///     An axis aligned bounding box.
+    /// Axis-aligned bounding box (16 bytes)
+    /// 轴对齐包围框
     /// </summary>
     public struct AABB
     {
-        /// <summary>
-        ///     the lower vertex
-        /// </summary>
-        public Vector2 LowerBound;
+        public Vec2 LowerBound;
+
+        public Vec2 UpperBound;
 
         /// <summary>
-        ///     the upper vertex
+        /// 
         /// </summary>
-        public Vector2 UpperBound;
-
-        public AABB(in Vector2 lowerBound, in Vector2 upperBound)
+        /// <param name="lowerBound"></param>
+        /// <param name="upperBound"></param>
+        public AABB(Vec2 lowerBound, Vec2 upperBound)
         {
             LowerBound = lowerBound;
             UpperBound = upperBound;
         }
 
-        /// <summary>
-        ///     Verify that the bounds are sorted.
-        /// </summary>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Pure]
-        public bool IsValid()
+        public AABB(float lowerX, float lowerY, float upperX, float upperY)
         {
-            var d = UpperBound - LowerBound;
-            var valid = d.X >= 0.0f && d.Y >= 0.0f;
-            valid = valid && LowerBound.IsValid() && UpperBound.IsValid();
-            return valid;
+            LowerBound = new(lowerX, lowerY);
+            UpperBound = new(upperX, upperY);
         }
 
-        /// <summary>
-        ///     Get the center of the AABB.
-        /// </summary>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Pure]
-        public Vector2 GetCenter()
+        public override string ToString()
         {
-            return 0.5f * (LowerBound + UpperBound);
+            return $"({LowerBound},{UpperBound})";
         }
 
-        /// <summary>
-        ///     Get the extents of the AABB (half-widths).
-        /// </summary>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Pure]
-        public Vector2 GetExtents()
+        public static implicit operator AABB((Vec2 lowerBound, Vec2 upperBound) tuple)
         {
-            return 0.5f * (UpperBound - LowerBound);
-        }
-
-        /// <summary>
-        ///     Get the perimeter length
-        /// </summary>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Pure]
-        public float GetPerimeter()
-        {
-            var wx = UpperBound.X - LowerBound.X;
-            var wy = UpperBound.Y - LowerBound.Y;
-            return wx + wx + wy + wy;
-        }
-
-        public bool RayCast(out RayCastOutput output, in RayCastInput input)
-        {
-            output = default;
-            var tmin = -Settings.MaxFloat;
-            var tmax = Settings.MaxFloat;
-
-            var p = input.P1;
-            var d = input.P2 - input.P1;
-            var absD = Vector2.Abs(d);
-
-            var normal = new Vector2();
-
+            return new AABB
             {
-                if (absD.X < Settings.Epsilon)
+                LowerBound = tuple.lowerBound,
+                UpperBound = tuple.upperBound
+            };
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool IsValid
+        {
+            get
+            {
+                var d = B2Math.Sub(UpperBound, LowerBound);
+                var valid = d is { X: >= 0.0f, Y: >= 0.0f };
+                valid = valid && B2Math.Vec2_IsValid(LowerBound) && B2Math.Vec2_IsValid(UpperBound);
+                return valid;
+            }
+        }
+
+        /// <summary>
+        /// From Real-time Collision Detection, p179.
+        /// 射线检测
+        /// </summary>
+        /// <param name="p1"></param>
+        /// <param name="p2"></param>
+        /// <returns></returns>
+        public CastOutput RayCast(Vec2 p1, Vec2 p2)
+        {
+            // Radius not handled
+            CastOutput output = new();
+
+            var tmin = -float.MaxValue;
+            var tmax = float.MaxValue;
+
+            Vec2 p = p1;
+            Vec2 d = B2Math.Sub(p2, p1);
+            Vec2 absD = B2Math.Abs(d);
+
+            Vec2 normal = Vec2.Zero;
+
+            // x-coordinate
+            if (absD.X < float.Epsilon)
+            {
+                // parallel
+                if (p.X < LowerBound.X || UpperBound.X < p.X)
                 {
-                    // Parallel.
-                    if (p.X < LowerBound.X || UpperBound.X < p.X)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    var invD = 1.0f / d.X;
-                    var t1 = (LowerBound.X - p.X) * invD;
-                    var t2 = (UpperBound.X - p.X) * invD;
-
-                    // Sign of the normal vector.
-                    var s = -1.0f;
-
-                    if (t1 > t2)
-                    {
-                        MathUtils.Swap(ref t1, ref t2);
-                        s = 1.0f;
-                    }
-
-                    // Push the min up
-                    if (t1 > tmin)
-                    {
-                        normal.SetZero();
-                        normal.X = s;
-                        tmin = t1;
-                    }
-
-                    // Pull the max down
-                    tmax = Math.Min(tmax, t2);
-
-                    if (tmin > tmax)
-                    {
-                        return false;
-                    }
+                    return output;
                 }
             }
+            else
             {
-                if (absD.Y < Settings.Epsilon)
+                float inv_d = 1.0f / d.X;
+                float t1 = (LowerBound.X - p.X) * inv_d;
+                float t2 = (UpperBound.X - p.X) * inv_d;
+
+                // Sign of the normal vector.
+                float s = -1.0f;
+
+                if (t1 > t2)
                 {
-                    // Parallel.
-                    if (p.Y < LowerBound.Y || UpperBound.Y < p.Y)
-                    {
-                        return false;
-                    }
+                    (t1, t2) = (t2, t1);
+                    s = 1.0f;
                 }
-                else
+
+                // Push the min up
+                if (t1 > tmin)
                 {
-                    var invD = 1.0f / d.Y;
-                    var t1 = (LowerBound.Y - p.Y) * invD;
-                    var t2 = (UpperBound.Y - p.Y) * invD;
+                    normal.Y = 0.0f;
+                    normal.X = s;
+                    tmin = t1;
+                }
 
-                    // Sign of the normal vector.
-                    var s = -1.0f;
+                // Pull the max down
+                tmax = Math.Min(tmax, t2);
 
-                    if (t1 > t2)
-                    {
-                        MathUtils.Swap(ref t1, ref t2);
-                        s = 1.0f;
-                    }
+                if (tmin > tmax)
+                {
+                    return output;
+                }
+            }
 
-                    // Push the min up
-                    if (t1 > tmin)
-                    {
-                        normal.SetZero();
-                        normal.Y = s;
-                        tmin = t1;
-                    }
+            // y-coordinate
+            if (absD.Y < float.Epsilon)
+            {
+                // parallel
+                if (p.Y < LowerBound.Y || UpperBound.Y < p.Y)
+                {
+                    return output;
+                }
+            }
+            else
+            {
+                float inv_d = 1.0f / d.Y;
+                float t1 = (LowerBound.Y - p.Y) * inv_d;
+                float t2 = (UpperBound.Y - p.Y) * inv_d;
 
-                    // Pull the max down
-                    tmax = Math.Min(tmax, t2);
+                // Sign of the normal vector.
+                float s = -1.0f;
 
-                    if (tmin > tmax)
-                    {
-                        return false;
-                    }
+                if (t1 > t2)
+                {
+                    (t1, t2) = (t2, t1);
+                    s = 1.0f;
+                }
+
+                // Push the min up
+                if (t1 > tmin)
+                {
+                    normal.X = 0.0f;
+                    normal.Y = s;
+                    tmin = t1;
+                }
+
+                // Pull the max down
+                tmax = Math.Min(tmax, t2);
+
+                if (tmin > tmax)
+                {
+                    return output;
                 }
             }
 
             // Does the ray start inside the box?
             // Does the ray intersect beyond the max fraction?
-            if (tmin < 0.0f || input.MaxFraction < tmin)
+            if (tmin is < 0.0f or > 1.0f)
+            {
+                return output;
+            }
+
+            // Intersection.
+            output.Fraction = tmin;
+            output.Normal = normal;
+            output.Point = B2Math.Lerp(p1, p2, tmin);
+            output.Hit = true;
+            return output;
+        }
+
+        /// <summary>
+        /// Get the perimeter length
+        /// 获取周长
+        /// </summary>
+        /// <returns></returns>
+        public float Perimeter => 2.0f * (UpperBound.X - LowerBound.X + UpperBound.Y - LowerBound.Y);
+
+        /// <summary>
+        /// Enlarge a to contain b
+        /// 扩大本包围框到可以包含b
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns>true if the AABB grew</returns>
+        public static bool EnlargeAABB(ref AABB a, ref AABB b)
+        {
+            var changed = false;
+            if (b.LowerBound.X < a.LowerBound.X)
+            {
+                a.LowerBound.X = b.LowerBound.X;
+                changed = true;
+            }
+
+            if (b.LowerBound.Y < a.LowerBound.Y)
+            {
+                a.LowerBound.Y = b.LowerBound.Y;
+                changed = true;
+            }
+
+            if (a.UpperBound.X < b.UpperBound.X)
+            {
+                a.UpperBound.X = b.UpperBound.X;
+                changed = true;
+            }
+
+            if (a.UpperBound.Y < b.UpperBound.Y)
+            {
+                a.UpperBound.Y = b.UpperBound.Y;
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        /// <summary>
+        /// Do a and b overlap
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool Overlaps(in AABB a, in AABB b)
+        {
+            if (b.LowerBound.X - a.UpperBound.X > 0.0f || b.LowerBound.Y - a.UpperBound.Y > 0.0f || a.LowerBound.X - b.UpperBound.X > 0 || a.LowerBound.Y - b.UpperBound.Y > 0)
             {
                 return false;
             }
 
-            // Intersection.
-            output = new RayCastOutput {Fraction = tmin, Normal = normal};
-
             return true;
         }
 
-        public static void Combine(in AABB left, in AABB right, out AABB aabb)
+        public static bool Contains(in AABB a, in AABB b)
         {
-            aabb = new AABB(
-                Vector2.Min(left.LowerBound, right.LowerBound),
-                Vector2.Max(left.UpperBound, right.UpperBound));
-        }
-
-        /// <summary>
-        ///     Combine an AABB into this one.
-        /// </summary>
-        /// <param name="aabb"></param>
-        public void Combine(in AABB aabb)
-        {
-            LowerBound = Vector2.Min(LowerBound, aabb.LowerBound);
-            UpperBound = Vector2.Max(UpperBound, aabb.UpperBound);
-        }
-
-        /// <summary>
-        ///     Combine two AABBs into this one.
-        /// </summary>
-        /// <param name="aabb1"></param>
-        /// <param name="aabb2"></param>
-        public void Combine(in AABB aabb1, in AABB aabb2)
-        {
-            LowerBound = Vector2.Min(aabb1.LowerBound, aabb2.LowerBound);
-            UpperBound = Vector2.Max(aabb1.UpperBound, aabb2.UpperBound);
-        }
-
-        /// <summary>
-        ///     Does this aabb contain the provided AABB.
-        /// </summary>
-        /// <param name="aabb">the provided AABB</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [Pure]
-        public bool Contains(in AABB aabb)
-        {
-            return LowerBound.X <= aabb.LowerBound.X
-                && LowerBound.Y <= aabb.LowerBound.Y
-                && aabb.UpperBound.X <= UpperBound.X
-                && aabb.UpperBound.Y <= UpperBound.Y;
+            return a.LowerBound.X <= b.LowerBound.X
+                && a.LowerBound.Y <= b.LowerBound.Y
+                && b.UpperBound.X <= a.UpperBound.X
+                && b.UpperBound.Y <= a.UpperBound.Y;
         }
     }
 }

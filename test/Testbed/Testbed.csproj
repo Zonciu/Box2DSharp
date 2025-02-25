@@ -2,19 +2,37 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFrameworks>net8.0;</TargetFrameworks>
         <LangVersion>12</LangVersion>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Testbed.TestCases\Testbed.TestCases.csproj" />
+      <ProjectReference Include="..\Testbed.Samples\Testbed.Samples.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ImGui.NET" Version="1.90.5.1" />
+      <PackageReference Include="ImGui.NET" Version="1.91.0.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="OpenTK" Version="4.8.2" />
-      <PackageReference Include="System.Drawing.Common" Version="8.0.4" />
+      <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Render\data\*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

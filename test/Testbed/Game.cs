@@ -3,98 +3,89 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using Box2DSharp;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Testbed.Abstractions;
 using Testbed.Gui;
 using Testbed.Render;
-using Testbed.TestCases;
-using TKKeyModifiers = OpenTK.Windowing.GraphicsLibraryFramework.KeyModifiers;
+using Testbed.Samples.Stacking;
+using MouseMoveEventArgs = OpenTK.Windowing.Common.MouseMoveEventArgs;
 using TKMouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Testbed
 {
     public class Game : GameWindow
     {
-        private ImGuiController _controller;
+        private ImGuiController _controller = null!;
 
-        private long _frameTime;
+        public SampleBase Sample { get; private set; } = null!;
 
-        private long _lastUpdateTime;
-
-        private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
-
-        public TestBase Test { get; private set; }
-
-        public readonly DebugDraw DebugDraw;
+        public readonly GLDraw Draw;
 
         public readonly Input Input;
 
         private bool _stopped;
 
-        private string _environment;
+        private readonly Stopwatch _frameCounter = Stopwatch.StartNew();
 
         /// <inheritdoc />
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _environment = System.Environment.Version.ToString();
             Input = new Input(this);
             Global.Input = Input;
 
-            DebugDraw = new DebugDraw();
-            Global.DebugDraw = DebugDraw;
+            Draw = new GLDraw();
+            Global.Draw = Draw;
         }
 
         public override void Dispose()
         {
             _stopped = true;
             TestSettingHelper.Save(Global.Settings);
-            Test?.Dispose();
-            Test = null;
-            DebugDraw.Destroy();
+            Sample.Dispose();
+            Sample = null!;
+            Draw.Dispose();
             _controller.Dispose();
-            _controller = null;
-            _stopwatch.Stop();
+            _controller = null!;
             base.Dispose();
         }
 
         /// <inheritdoc />
         protected override void OnLoad()
         {
-            Title = $"Box2DSharp Testbed - Runtime Version: {_environment}";
-            var testBaseType = typeof(TestBase);
-            var testTypes = typeof(HelloWorld).Assembly.GetTypes()
-                                              .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract && e.GetCustomAttribute<TestCaseAttribute>() != null)
-                                              .ToHashSet();
+            var testBaseType = typeof(SampleBase);
+            var testTypes = typeof(SingleBox).Assembly.GetTypes()
+                                             .Where(e => testBaseType.IsAssignableFrom(e) && !e.IsAbstract && e.GetCustomAttribute<SampleAttribute>() != null)
+                                             .ToHashSet();
             var inheritedTest = this.GetType()
                                     .Assembly.GetTypes()
                                     .Where(
                                          e => testBaseType.IsAssignableFrom(e)
                                            && e.GetCustomAttribute<TestInheritAttribute>() != null
-                                           && e.GetCustomAttribute<TestCaseAttribute>() != null)
+                                           && e.GetCustomAttribute<SampleAttribute>() != null)
                                     .ToList();
             foreach (var type in inheritedTest)
             {
-                testTypes.Remove(type.BaseType);
+                testTypes.Remove(type.BaseType!);
             }
 
             var typeList = new List<Type>(testTypes.Count + inheritedTest.Count);
             typeList.AddRange(testTypes);
             typeList.AddRange(inheritedTest);
-            Global.SetupTestCases(typeList);
+            Global.SetupSamples(typeList);
 
             GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
             _controller = new ImGuiController(Size.X, Size.Y);
-            DebugDraw.Create();
 
-            _currentTestIndex = Math.Clamp(_currentTestIndex, 0, Global.Tests.Count - 1);
-            _testSelected = _currentTestIndex;
-            LoadTest(_testSelected);
+            _selectedSampleIndex = Math.Clamp(_runningSampleIndex, 0, Global.Samples.Count - 1);
+            LoadSample();
             base.OnLoad();
         }
 
@@ -118,34 +109,21 @@ namespace Testbed
                 Close();
             }
 
-            CheckTestChange();
-            Test.Step();
-            var now = _stopwatch.ElapsedTicks;
-            _frameTime = now - _lastUpdateTime;
-            _lastUpdateTime = now;
+            if (Global.Settings.Restart)
+            {
+                LoadSample();
+                Global.Settings.Restart = false;
+            }
+
+            if (_runningSampleIndex != _selectedSampleIndex)
+            {
+                LoadSample();
+            }
+
+            Sample.PreStep();
+            Sample.Step();
+            Sample.PostStep();
             base.OnUpdateFrame(e);
-        }
-
-        static float _avgDuration = 0;
-
-        const float Alpha = 1f / 100f; // 采样数设置为100
-
-        static int _frameCount = 0;
-
-        private int GetFps(float deltaTime) // ms
-        {
-            ++_frameCount;
-
-            if (1 == _frameCount)
-            {
-                _avgDuration = deltaTime;
-            }
-            else
-            {
-                _avgDuration = _avgDuration * (1 - Alpha) + deltaTime * Alpha;
-            }
-
-            return (int)(1f / _avgDuration * 1000);
         }
 
         #region Render
@@ -159,18 +137,16 @@ namespace Testbed
 
             _controller.Update(this, (float)e.Time);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            UpdateText();
+            Draw.DrawBackground();
             UpdateUI();
-            if (DebugDraw.ShowUI)
-            {
-                DebugDraw.DrawString(5, Global.Camera.Height - 60, $"steps: {Test.StepCount}");
-                DebugDraw.DrawString(5, Global.Camera.Height - 40, $"{_frameTime / 10000f:.#} ms");
-                DebugDraw.DrawString(5, Global.Camera.Height - 20, $"{GetFps(_frameTime / 10000f)} fps");
-            }
 
-            Test.Render();
+            Sample.Render();
 
-            DebugDraw.Flush();
+            var frameTime = (float)_frameCounter.ElapsedTicks / TimeSpan.TicksPerMillisecond;
+            _frameCounter.Restart();
+            Draw.DrawString(5, Global.Camera.Height - 20, $"{frameTime:00.0} ms - steps: {Sample.StepCount}");
+
+            Draw.Flush();
             _controller.Render();
 
             Util.CheckGLError("End of frame");
@@ -178,59 +154,66 @@ namespace Testbed
             base.OnRenderFrame(e);
         }
 
-        private void UpdateText()
-        {
-            if (DebugDraw.ShowUI)
-            {
-                ImGui.SetNextWindowPos(new System.Numerics.Vector2(0.0f, 0.0f));
-                ImGui.SetNextWindowSize(new System.Numerics.Vector2(Global.Camera.Width, Global.Camera.Height));
-                ImGui.SetNextWindowBgAlpha(0);
-                ImGui.Begin("Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar);
-                ImGui.End();
-                var (category, name, _) = Global.Tests[_currentTestIndex];
-                Test?.DrawTitle($"{category} : {name}");
-            }
-        }
-
         public void UpdateUI()
         {
+            var maxWorkers = Environment.ProcessorCount;
             const int MenuWidth = 180;
-            if (DebugDraw.ShowUI)
+            if (Draw.ShowUI)
             {
-                ImGui.SetNextWindowPos(new System.Numerics.Vector2((float)Global.Camera.Width - MenuWidth - 10, 10));
-                ImGui.SetNextWindowSize(new System.Numerics.Vector2(MenuWidth, (float)Global.Camera.Height - 20));
+                // Draw title
+                {
+                    ImGui.SetNextWindowPos(new Vector2(0.0f, 0.0f));
+                    ImGui.SetNextWindowSize(new Vector2(Global.Camera.Width, Global.Camera.Height));
+                    ImGui.SetNextWindowBgAlpha(0);
+                    ImGui.Begin("Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar);
+                    ImGui.End();
+                    var (category, name, _) = Global.Samples[_runningSampleIndex];
+                    Sample.DrawTitle($"{category} : {name}");
+                }
 
-                ImGui.Begin("Tools", ref DebugDraw.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
+                ImGui.SetNextWindowPos(new Vector2((float)Global.Camera.Width - MenuWidth - 10, 10));
+                ImGui.SetNextWindowSize(new Vector2(MenuWidth, (float)Global.Camera.Height - 20));
+
+                ImGui.Begin("Tools", ref Draw.ShowUI, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
 
                 if (ImGui.BeginTabBar("ControlTabs", ImGuiTabBarFlags.None))
                 {
                     if (ImGui.BeginTabItem("Controls"))
                     {
-                        ImGui.SliderInt("Vel Iters", ref Global.Settings.VelocityIterations, 0, 50);
-                        ImGui.SliderInt("Pos Iters", ref Global.Settings.PositionIterations, 0, 50);
+                        ImGui.PushItemWidth(100.0f);
+                        ImGui.SliderInt("Sub-steps", ref Global.Settings.SubStepCount, 1, 50);
                         ImGui.SliderFloat("Hertz", ref Global.Settings.Hertz, 5.0f, 120.0f, "%.0f hz");
+
+                        if (ImGui.SliderInt("Workers", ref Global.Settings.WorkerCount, 1, maxWorkers))
+                        {
+                            Global.Settings.WorkerCount = Math.Clamp(Global.Settings.WorkerCount, 1, maxWorkers);
+                            RestartSample();
+                        }
+
+                        ImGui.PopItemWidth();
 
                         ImGui.Separator();
 
                         ImGui.Checkbox("Sleep", ref Global.Settings.EnableSleep);
                         ImGui.Checkbox("Warm Starting", ref Global.Settings.EnableWarmStarting);
-                        ImGui.Checkbox("Time of Impact", ref Global.Settings.EnableContinuous);
-                        ImGui.Checkbox("Sub-Stepping", ref Global.Settings.EnableSubStepping);
+                        ImGui.Checkbox("Continuous", ref Global.Settings.EnableContinuous);
 
                         ImGui.Separator();
 
                         ImGui.Checkbox("Shapes", ref Global.Settings.DrawShapes);
                         ImGui.Checkbox("Joints", ref Global.Settings.DrawJoints);
+                        ImGui.Checkbox("Joint Extras", ref Global.Settings.DrawJointExtras);
                         ImGui.Checkbox("AABBs", ref Global.Settings.DrawAABBs);
                         ImGui.Checkbox("Contact Points", ref Global.Settings.DrawContactPoints);
                         ImGui.Checkbox("Contact Normals", ref Global.Settings.DrawContactNormals);
-                        ImGui.Checkbox("Contact Impulses", ref Global.Settings.DrawContactImpulse);
-                        ImGui.Checkbox("Friction Impulses", ref Global.Settings.DrawFrictionImpulse);
-                        ImGui.Checkbox("Center of Masses", ref Global.Settings.DrawCOMs);
-                        ImGui.Checkbox("Statistics", ref Global.Settings.DrawStats);
+                        ImGui.Checkbox("Contact Impulses", ref Global.Settings.DrawContactImpulses);
+                        ImGui.Checkbox("Friction Impulses", ref Global.Settings.DrawFrictionImpulses);
+                        ImGui.Checkbox("Center of Masses", ref Global.Settings.DrawMass);
+                        ImGui.Checkbox("Graph Colors", ref Global.Settings.DrawGraphColors);
+                        ImGui.Checkbox("Counters", ref Global.Settings.DrawCounters);
                         ImGui.Checkbox("Profile", ref Global.Settings.DrawProfile);
 
-                        var buttonSz = new System.Numerics.Vector2(-1, 0);
+                        var buttonSz = new Vector2(-1, 0);
                         if (ImGui.Button("Pause (P)", buttonSz))
                         {
                             Global.Settings.Pause = !Global.Settings.Pause;
@@ -241,9 +224,14 @@ namespace Testbed
                             Global.Settings.SingleStep = !Global.Settings.SingleStep;
                         }
 
+                        if (ImGui.Button("Reset Profile", buttonSz))
+                        {
+                            Sample.ResetProfile();
+                        }
+
                         if (ImGui.Button("Restart (R)", buttonSz))
                         {
-                            RestartTest();
+                            RestartSample();
                         }
 
                         if (ImGui.Button("Quit", buttonSz))
@@ -262,28 +250,28 @@ namespace Testbed
                     if (ImGui.BeginTabItem("Tests"))
                     {
                         var categoryIndex = 0;
-                        var category = Global.Tests[categoryIndex].Category;
+                        var category = Global.Samples[categoryIndex].Category;
                         var i = 0;
-                        while (i < Global.Tests.Count)
+                        while (i < Global.Samples.Count)
                         {
-                            var categorySelected = string.CompareOrdinal(category, Global.Tests[_currentTestIndex].Category) == 0;
+                            var categorySelected = string.CompareOrdinal(category, Global.Samples[_runningSampleIndex].Category) == 0;
                             var nodeSelectionFlags = categorySelected ? ImGuiTreeNodeFlags.Selected : 0;
                             var nodeOpen = ImGui.TreeNodeEx(category, NodeFlags | nodeSelectionFlags);
 
                             if (nodeOpen)
                             {
-                                while (i < Global.Tests.Count && string.CompareOrdinal(category, Global.Tests[i].Category) == 0)
+                                while (i < Global.Samples.Count && string.CompareOrdinal(category, Global.Samples[i].Category) == 0)
                                 {
                                     ImGuiTreeNodeFlags selectionFlags = 0;
-                                    if (_currentTestIndex == i)
+                                    if (_runningSampleIndex == i)
                                     {
                                         selectionFlags = ImGuiTreeNodeFlags.Selected;
                                     }
 
-                                    ImGui.TreeNodeEx((IntPtr)i, leafNodeFlags | selectionFlags, Global.Tests[i].Name);
+                                    ImGui.TreeNodeEx((IntPtr)i, leafNodeFlags | selectionFlags, Global.Samples[i].Name);
                                     if (ImGui.IsItemClicked())
                                     {
-                                        SetTest(i);
+                                        SetSample(i);
                                     }
 
                                     ++i;
@@ -293,16 +281,15 @@ namespace Testbed
                             }
                             else
                             {
-                                while (i < Global.Tests.Count && string.CompareOrdinal(category, Global.Tests[i].Category) == 0)
+                                while (i < Global.Samples.Count && string.CompareOrdinal(category, Global.Samples[i].Category) == 0)
                                 {
                                     ++i;
                                 }
                             }
 
-                            if (i < Global.Tests.Count)
+                            if (i < Global.Samples.Count)
                             {
-                                category = Global.Tests[i].Category;
-                                categoryIndex = i;
+                                category = Global.Samples[i].Category;
                             }
                         }
 
@@ -313,6 +300,7 @@ namespace Testbed
                 }
 
                 ImGui.End();
+                Sample.UpdateUI();
             }
         }
 
@@ -328,7 +316,7 @@ namespace Testbed
             case Keys.Left:
                 if (e.Control)
                 {
-                    Test.ShiftOrigin(new System.Numerics.Vector2(2.0f, 0.0f));
+                    Sample.ShiftOrigin(new(2.0f, 0.0f));
                 }
                 else
                 {
@@ -339,8 +327,7 @@ namespace Testbed
             case Keys.Right:
                 if (e.Control)
                 {
-                    var newOrigin = new System.Numerics.Vector2(-2.0f, 0.0f);
-                    Test.ShiftOrigin(newOrigin);
+                    Sample.ShiftOrigin(new(-2.0f, 0.0f));
                 }
                 else
                 {
@@ -351,8 +338,7 @@ namespace Testbed
             case Keys.Up:
                 if (e.Control)
                 {
-                    var newOrigin = new System.Numerics.Vector2(0.0f, -2.0f);
-                    Test.ShiftOrigin(newOrigin);
+                    Sample.ShiftOrigin(new(0.0f, -2.0f));
                 }
                 else
                 {
@@ -363,8 +349,7 @@ namespace Testbed
             case Keys.Down:
                 if (e.Control)
                 {
-                    var newOrigin = new System.Numerics.Vector2(0.0f, 2.0f);
-                    Test.ShiftOrigin(newOrigin);
+                    Sample.ShiftOrigin(new(0.0f, 2.0f));
                 }
                 else
                 {
@@ -378,19 +363,15 @@ namespace Testbed
                 break;
             case Keys.Z:
                 // Zoom out
-                Global.Camera.Zoom = Math.Min(1.1f * Global.Camera.Zoom, 20.0f);
+                Global.Camera.Zoom = Math.Min(1.005f * Global.Camera.Zoom, 100.0f);
                 break;
             case Keys.X:
                 // Zoom in
-                Global.Camera.Zoom = Math.Max(0.9f * Global.Camera.Zoom, 0.02f);
+                Global.Camera.Zoom = Math.Max(0.995f * Global.Camera.Zoom, 0.5f);
                 break;
             case Keys.R:
                 // Reset test
-                RestartTest();
-                break;
-            case Keys.Space:
-                // Launch a bomb.
-                Test?.LaunchBomb();
+                RestartSample();
                 break;
             case Keys.O:
                 Global.Settings.SingleStep = true;
@@ -402,29 +383,29 @@ namespace Testbed
 
             case Keys.LeftBracket:
                 // Switch to previous test
-                --_testSelected;
-                if (_testSelected < 0)
+                --_selectedSampleIndex;
+                if (_selectedSampleIndex < 0)
                 {
-                    _testSelected = Global.Tests.Count - 1;
+                    _selectedSampleIndex = Global.Samples.Count - 1;
                 }
 
                 break;
 
             case Keys.RightBracket:
                 // Switch to next test
-                ++_testSelected;
-                if (_testSelected == Global.Tests.Count)
+                ++_selectedSampleIndex;
+                if (_selectedSampleIndex == Global.Samples.Count)
                 {
-                    _testSelected = 0;
+                    _selectedSampleIndex = 0;
                 }
 
                 break;
 
             case Keys.Tab:
-                DebugDraw.ShowUI = !DebugDraw.ShowUI;
+                Draw.ShowUI = !Draw.ShowUI;
                 break;
             default:
-                Test?.OnKeyDown(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
+                Sample?.OnKeyDown(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
                 break;
             }
 
@@ -434,7 +415,7 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
-            Test.OnKeyUp(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
+            Sample.OnKeyUp(new KeyInputEventArgs(Input.GetKeyCode(e.Key), Input.GetKeyModifiers(e.Modifiers), e.IsRepeat));
             base.OnKeyUp(e);
         }
 
@@ -445,18 +426,16 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
+            if (ImGui.GetIO().WantCaptureMouse)
+            {
+                return;
+            }
+
+            var ps = new Vec2(MousePosition.X, MousePosition.Y);
+            _mouseWorldPosition = Global.Camera.ConvertScreenToWorld(ps);
             if (e.Button == TKMouseButton.Left)
             {
-                var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
-
-                if (e.Modifiers == TKKeyModifiers.Shift)
-                {
-                    Test.ShiftMouseDown(pw);
-                }
-                else
-                {
-                    Test.MouseDown(pw);
-                }
+                Sample?.MouseDown(_mouseWorldPosition, e.Convert());
             }
 
             base.OnMouseDown(e);
@@ -465,28 +444,44 @@ namespace Testbed
         /// <inheritdoc />
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
+            if (ImGui.GetIO().WantCaptureMouse)
+            {
+                return;
+            }
+
             if (e.Button == TKMouseButton.Left)
             {
-                var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
-                Test.MouseUp(pw);
+                var pw = Global.Camera.ConvertScreenToWorld(new(MousePosition.X, MousePosition.Y));
+                Sample?.MouseUp(pw, e.Convert());
             }
 
             base.OnMouseUp(e);
         }
 
+        private Vec2 _mouseWorldPosition;
+
         /// <inheritdoc />
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
+            if (ImGui.GetIO().WantCaptureMouse)
+            {
+                return;
+            }
+
+            var ps = new Vec2(MousePosition.X, MousePosition.Y);
+            var pw = Global.Camera.ConvertScreenToWorld(ps);
+            Sample?.MouseMove(pw, new(e.Position.ToVector2(), e.Delta.ToVector2()));
             if (IsMouseButtonDown(TKMouseButton.Left))
             {
-                var pw = Global.Camera.ConvertScreenToWorld(new System.Numerics.Vector2(MousePosition.X, MousePosition.Y));
-                Test.MouseMove(pw);
+                Sample?.MouseMove(pw, new(e.Position.ToVector2(), e.Delta.ToVector2()));
             }
 
             if (IsMouseButtonDown(TKMouseButton.Right))
             {
-                Global.Camera.Center.X -= e.DeltaX * 0.05f * Global.Camera.Zoom;
-                Global.Camera.Center.Y += e.DeltaY * 0.05f * Global.Camera.Zoom;
+                var diff = pw - _mouseWorldPosition;
+                Global.Camera.Center.X -= diff.X;
+                Global.Camera.Center.Y -= diff.Y;
+                _mouseWorldPosition = Global.Camera.ConvertScreenToWorld(ps);
             }
 
             base.OnMouseMove(e);
@@ -496,58 +491,58 @@ namespace Testbed
 
         #region Test Control
 
-        public void RestartTest()
+        public void RestartSample()
         {
-            LoadTest(_currentTestIndex);
+            Global.Settings.Restart = true;
         }
 
-        private int _testSelected;
+        private int _selectedSampleIndex;
 
-        private static int _currentTestIndex
+        private static int _runningSampleIndex
         {
-            get => Global.Settings.TestIndex;
-            set => Global.Settings.TestIndex = value;
+            get => Global.Settings.SampleIndex;
+            set => Global.Settings.SampleIndex = value;
         }
 
-        private void SetTest(int index)
+        private void SetSample(int index)
         {
-            _testSelected = index;
+            _selectedSampleIndex = index;
         }
 
-        private void CheckTestChange()
+        private void LoadSample()
         {
-            if (_currentTestIndex != _testSelected)
-            {
-                _currentTestIndex = _testSelected;
-                LoadTest(_testSelected);
-            }
-        }
-
-        private void LoadTest(int index)
-        {
-            Test?.Dispose();
-            Test = (TestBase)Activator.CreateInstance(Global.Tests[index].TestType);
-            if (Test != null)
-            {
-                Test.Input = Global.Input;
-                Test.Draw = Global.DebugDraw;
-                Test.TestSettings = Global.Settings;
-                Test.World.Draw = Global.DebugDraw;
-                Test.OnInitialize();
-            }
+            var sample = Sample;
+            Sample = null!;
+            sample?.Dispose();
+            sample = (SampleBase)Activator.CreateInstance(Global.Samples[_selectedSampleIndex].SampleType, Global.Settings)!;
+            _runningSampleIndex = _selectedSampleIndex;
+            sample.Input = Global.Input;
+            sample.Draw = Global.Draw;
+            sample.OnInitialized();
+            Sample = sample;
         }
 
         #endregion
 
         #region View Control
 
+        /// <summary>
+        /// IMGUI面板滚动
+        /// </summary>
         public Vector2 Scroll;
 
         /// <inheritdoc />
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            Scroll = MouseState.ScrollDelta;
-            ScrollCallback(Scroll.X, Scroll.Y);
+            var scroll = MouseState.ScrollDelta.ToVector2();
+            if (ImGui.GetIO().WantCaptureMouse)
+            {
+                Scroll = scroll;
+            }
+            else
+            {
+                ScrollCallback(scroll.X, scroll.Y);
+            }
         }
 
         /// <inheritdoc />

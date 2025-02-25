@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Testbed.Render
@@ -52,7 +53,7 @@ namespace Testbed.Render
         }
 
         // 
-        public static int CreateShaderProgram(string vs, string fs)
+        public static int CreateProgramFromStrings(string vs, string fs)
         {
             var vsId = CreateShaderFromString(vs, ShaderType.VertexShader);
             var fsId = CreateShaderFromString(fs, ShaderType.FragmentShader);
@@ -71,6 +72,13 @@ namespace Testbed.Render
             Debug.Assert(status != (int)All.False);
 
             return programId;
+        }
+
+        public static int CreateProgramFromFiles(string vertexPath, string fragmentPath)
+        {
+            var vs = File.ReadAllText(vertexPath);
+            var fs = File.ReadAllText(fragmentPath);
+            return CreateProgramFromStrings(vs, fs);
         }
     }
 }

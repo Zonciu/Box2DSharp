@@ -2,65 +2,34 @@
 
 namespace Testbed.Abstractions
 {
+    // todo add camera and Draw and remove globals
     [DataContract]
-    public class TestSettings
+    public class Settings
     {
-        public TestSettings()
-        {
-            Reset();
-        }
+        [DataMember]
+        public int SampleIndex;
 
-        public void Reset()
-        {
-            TestIndex = 0;
-            WindowWidth = 1600;
-            WindowHeight = 900;
-            Hertz = 60.0f;
-            VelocityIterations = 8;
-            PositionIterations = 3;
-            DrawShapes = true;
-            DrawJoints = true;
-            DrawAABBs = false;
-            DrawContactPoints = false;
-            DrawContactNormals = false;
-            DrawContactImpulse = false;
-            DrawFrictionImpulse = false;
-            DrawCOMs = false;
-            DrawStats = false;
-            DrawProfile = false;
-            EnableWarmStarting = true;
-            EnableContinuous = true;
-            EnableSubStepping = false;
-            EnableSleep = true;
-            Pause = false;
-            SingleStep = false;
-            DrawStats = false;
-            DrawProfile = false;
-        }
+        public int WindowWidth = 1920;
+
+        public int WindowHeight = 1080;
+
+        public float Hertz = 60.0f;
+
+        public int SubStepCount = 4;
+
+        public int WorkerCount = 1;
 
         [DataMember]
-        public int TestIndex;
+        public bool UseCameraBounds;
 
         [DataMember]
-        public int WindowWidth;
+        public bool DrawShapes = true;
 
         [DataMember]
-        public int WindowHeight;
+        public bool DrawJoints = true;
 
         [DataMember]
-        public float Hertz;
-
-        [DataMember]
-        public int VelocityIterations;
-
-        [DataMember]
-        public int PositionIterations;
-
-        [DataMember]
-        public bool DrawShapes;
-
-        [DataMember]
-        public bool DrawJoints;
+        public bool DrawJointExtras;
 
         [DataMember]
         public bool DrawAABBs;
@@ -72,34 +41,36 @@ namespace Testbed.Abstractions
         public bool DrawContactNormals;
 
         [DataMember]
-        public bool DrawContactImpulse;
+        public bool DrawContactImpulses;
 
         [DataMember]
-        public bool DrawFrictionImpulse;
+        public bool DrawFrictionImpulses;
 
         [DataMember]
-        public bool DrawCOMs;
+        public bool DrawMass;
 
         [DataMember]
-        public bool DrawStats;
+        public bool DrawGraphColors;
+
+        [DataMember]
+        public bool DrawCounters;
 
         [DataMember]
         public bool DrawProfile;
 
         [DataMember]
-        public bool EnableWarmStarting;
+        public bool EnableWarmStarting = true;
 
         [DataMember]
-        public bool EnableContinuous;
+        public bool EnableContinuous = true;
 
         [DataMember]
-        public bool EnableSubStepping;
-
-        [DataMember]
-        public bool EnableSleep;
+        public bool EnableSleep = true;
 
         public bool Pause;
 
         public bool SingleStep;
+
+        public bool Restart;
     }
 }

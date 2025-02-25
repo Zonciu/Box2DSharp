@@ -5,6 +5,8 @@ namespace Testbed.Abstractions
     [Flags]
     public enum KeyModifiers
     {
+        None = 0,
+
         /// <summary>if one or more Shift keys were held down.</summary>
         Shift = 1 << 0,
 

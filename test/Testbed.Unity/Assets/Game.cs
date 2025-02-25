@@ -182,7 +182,6 @@ namespace Box2DSharp.Testbed.Unity
                 Test.Draw = Global.DebugDraw;
                 Test.TestSettings = Global.Settings;
                 Test.World.Draw = Global.DebugDraw;
-                Test.OnInitialize();
             }
         }
 
